@@ -38,7 +38,7 @@ const LOBS: LobConfig[] = [
     tagline: 'Financial security for your family',
     description: 'Term plans starting ₹490/month.',
     icon: 'life',
-    active: false,
+    active: true,
     route: '/life',
   },
 ];
