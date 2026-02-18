@@ -9,7 +9,7 @@
    - Edit policy (add/remove add-ons, update nominee)
    ═══════════════════════════════════════════════════════ */
 
-import { MotorConversationStep, MotorJourneyState } from './types';
+import { MotorConversationStep, MotorJourneyState, MotorClaim } from './types';
 
 const NETWORK_GARAGES = [
   { id: 'gomechanic', name: 'GoMechanic - Sector 29, Gurgaon', distance: '2.3 km' },
@@ -44,17 +44,32 @@ function hasActiveRequests(state: MotorJourneyState): boolean {
   return state.dashboardSubmittedClaims.length > 0 || state.dashboardSubmittedEdits.length > 0;
 }
 
-/* ── Incident type display labels ── */
-const INCIDENT_LABELS: Record<string, string> = {
-  collision: 'Collision / Accident',
-  theft: 'Theft / Break-in',
-  natural_calamity: 'Natural Calamity',
-  fire: 'Fire',
-  hit_and_run: 'Hit & Run',
-  injury: 'Injury to Person',
-  property_damage: 'Property Damage',
-  other: 'Other',
+/* ── Claim type display labels ── */
+const CLAIM_TYPE_LABELS: Record<string, string> = {
+  own_damage_accident: 'Accident',
+  own_damage_theft: 'Stolen Vehicle',
+  own_damage_accessories: 'Accessories Stolen',
+  third_party: 'Third Party Damage',
 };
+
+/* ── Vehicle location display labels ── */
+const VEHICLE_LOCATION_LABELS: Record<string, string> = {
+  home_office: 'Home / Office',
+  garage_dealership: 'Garage / Dealership',
+  accident_site: 'Accident site',
+  police_station: 'Police station',
+};
+
+/* ── Driver relationship options ── */
+const DRIVER_RELATIONS = [
+  { id: 'spouse', label: 'Spouse' },
+  { id: 'child', label: 'Child' },
+  { id: 'parent', label: 'Parent' },
+  { id: 'sibling', label: 'Sibling' },
+  { id: 'friend', label: 'Friend' },
+  { id: 'appointed_driver', label: 'Appointed Driver' },
+  { id: 'other', label: 'Other' },
+];
 
 /* ── All dashboard conversation steps ── */
 const motorDashboardSteps: MotorConversationStep[] = [
@@ -134,7 +149,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
         items.push({
           id: `claim_${i}`,
           label: `Claim ${c.id}`,
-          description: `${c.type === 'own_damage' ? 'Own Damage' : 'Third Party'} · ${c.description} · ${c.status} · ${timeLabel}`,
+          description: `${CLAIM_TYPE_LABELS[c.type] || c.type} · ${c.status} · ${timeLabel}`,
           icon: 'document',
         });
       });
@@ -175,25 +190,29 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getScript: (state) => {
       const claim = state.dashboardSubmittedClaims[0];
       if (!claim) return { botMessages: ['No claim found.'], options: [{ id: 'back', label: 'Back' }] };
-      const garage = NETWORK_GARAGES.find(g => g.id === claim.garage)?.name || claim.garage;
-      const incidentLabel = INCIDENT_LABELS[claim.incidentType] || claim.incidentType;
-      const typeLabel = claim.type === 'own_damage' ? 'Own Damage' : 'Third Party';
-      const injuryText = claim.injury === true ? 'Yes' : 'No';
-      const policeText = claim.policeReport ? `Yes (${claim.firNumber || 'Pending'})` : 'No';
-      const isTheft = claim.incidentType === 'theft';
+
+      const typeLabel = CLAIM_TYPE_LABELS[claim.type] || claim.type;
+      const isTheft = claim.type === 'own_damage_theft';
+      const isTP = claim.type === 'third_party';
+      const injuryText = claim.seriousInjuries ? 'Yes — High priority' : 'No';
+      const driverText = claim.wasDriverOwner ? 'Owner' : `${claim.driverName || 'Other'} (${claim.driverRelation || ''})`;
+      const locationText = VEHICLE_LOCATION_LABELS[claim.vehicleLocation] || claim.vehicleLocation || 'N/A';
+      const safeText = claim.safeToDriver === true ? 'Yes' : claim.safeToDriver === false ? 'No' : 'N/A';
+      const towingText = claim.needsTowing ? 'Yes — Arranged' : 'No';
 
       let timeline = '';
       if (isTheft) {
         timeline = '1. Claim registered — Done\n2. Police verification — In progress\n3. Investigation — Pending\n4. Settlement — Pending';
-      } else if (claim.type === 'own_damage') {
-        timeline = '1. Claim registered — Done\n2. Surveyor inspection — In progress\n3. Repair authorization — Pending\n4. Vehicle repaired — Pending\n5. Claim settled — Pending';
-      } else {
+      } else if (isTP) {
         timeline = '1. Claim registered — Done\n2. Third-party verification — In progress\n3. Liability assessment — Pending\n4. Settlement processed — Pending';
+      } else {
+        timeline = '1. Claim registered — Done\n2. Surveyor inspection — In progress\n3. Repair authorization — Pending\n4. Vehicle repaired — Pending\n5. Claim settled — Pending';
       }
 
       return {
         botMessages: [
-          `Claim ${claim.id} — ${typeLabel}\n\nIncident: ${incidentLabel}\nLocation: ${claim.location}\nDate: ${claim.date}\nDescription: ${claim.description}\nInjuries: ${injuryText}\nPolice Report: ${policeText}\nGarage: ${garage}\nEstimated Amount: ₹${Number(claim.amount).toLocaleString()}`,
+          `Claim ${claim.id} — ${typeLabel}`,
+          `Date: ${claim.date}\nSerious injuries: ${injuryText}\nWho was driving: ${driverText}\nDescription: ${claim.description}\nVehicle location: ${locationText}\nSafe to drive: ${safeText}\nTowing: ${towingText}`,
           `Status timeline:\n\n${timeline}\n\nCurrent status: ${claim.status}\nExpected resolution: ${isTheft ? '7-10' : '3-5'} working days`,
         ],
         options: [
@@ -229,7 +248,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getNextStep: (response) => response === 'track' ? 'db.track_overview' : 'db.actions',
   },
 
-  /* ═════ RAISE A CLAIM — Full FNOL Flow ═════ */
+  /* ═════ RAISE A CLAIM — FNOL Flow (PDF model) ═════ */
 
   /* Step 1: Intro */
   {
@@ -238,315 +257,259 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'none',
     getScript: () => ({
       botMessages: [
-        `We will help you file a claim. This involves a few questions about the incident so we can process it quickly.`,
-        `It should take about 2-3 minutes.`,
+        `We will help you file a claim. Just a few quick questions about the incident.`,
+        `This should take about 2 minutes.`,
       ],
     }),
     processResponse: () => ({}),
     getNextStep: () => 'db.claim_type',
   },
 
-  /* Step 2: Claim type — OD or TP */
+  /* Step 2: What happened? */
   {
     id: 'db.claim_type',
     module: 'claims',
     widgetType: 'selection_cards',
-    getScript: () => ({
-      botMessages: [`What type of claim is this?`],
-      subText: `This helps us route your claim to the right team.`,
-      options: [
-        { id: 'own_damage', label: 'Own Damage', icon: 'car', description: 'Your vehicle was damaged' },
-        { id: 'third_party', label: 'Third Party', icon: 'shield', description: 'Damage caused to someone else' },
-      ],
-    }),
-    processResponse: (response) => ({ dashboardClaimType: response as 'own_damage' | 'third_party' }),
-    getNextStep: () => 'db.claim_incident_type',
-  },
-
-  /* Step 3: What kind of incident */
-  {
-    id: 'db.claim_incident_type',
-    module: 'claims',
-    widgetType: 'selection_cards',
     getScript: (state) => {
-      const isOD = state.dashboardClaimType === 'own_damage';
-      const options = isOD
-        ? [
-            { id: 'collision', label: 'Collision / Accident', description: 'Hit another vehicle, object, or barrier' },
-            { id: 'theft', label: 'Theft / Break-in', description: 'Vehicle stolen or parts missing' },
-            { id: 'natural_calamity', label: 'Natural Calamity', description: 'Flood, storm, earthquake, hail' },
-            { id: 'fire', label: 'Fire', description: 'Vehicle caught fire or was vandalized' },
-            { id: 'hit_and_run', label: 'Hit & Run', description: 'Other vehicle hit and fled' },
-            { id: 'other', label: 'Something Else', description: 'Other type of damage' },
-          ]
-        : [
-            { id: 'collision', label: 'Collision / Accident', description: 'You hit another vehicle or property' },
-            { id: 'injury', label: 'Injury to Person', description: 'A person was injured in the incident' },
-            { id: 'property_damage', label: 'Property Damage', description: 'Damaged someone else\'s property' },
-            { id: 'other', label: 'Something Else', description: 'Other type of third-party claim' },
-          ];
+      const v = state.vehicleType === 'bike' ? 'bike' : 'car';
       return {
-        botMessages: [`What kind of incident was it?`],
-        options,
+        botMessages: [`What happened?`],
+        options: [
+          { id: 'own_damage_accident', label: `My ${v} was in an accident`, icon: 'car', description: 'Collision, hit & run, natural calamity, fire' },
+          { id: 'own_damage_theft', label: `My ${v} was stolen`, icon: 'document', description: 'Vehicle theft or break-in' },
+          { id: 'own_damage_accessories', label: `My ${v} accessories were stolen`, icon: 'document', description: 'Parts or accessories stolen' },
+          { id: 'third_party', label: 'I caused damage to someone else', icon: 'shield', description: 'Property or injury to a third party' },
+        ],
       };
     },
-    processResponse: (response) => ({ dashboardClaimIncidentType: response }),
-    getNextStep: () => 'db.claim_where',
+    processResponse: (response) => ({ dashboardClaimType: response }),
+    getNextStep: () => 'db.claim_injuries',
   },
 
-  /* Step 4: Where did it happen */
+  /* Step 3: Deaths or serious injuries? (Q1 from PDF) */
   {
-    id: 'db.claim_where',
+    id: 'db.claim_injuries',
     module: 'claims',
-    widgetType: 'text_input',
+    widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: [`Where did the incident happen?`],
-      subText: `An approximate location helps our team coordinate with nearby garages and surveyors.`,
-      placeholder: 'e.g., MG Road near Cyber City, Gurgaon',
-      inputType: 'text' as const,
+      botMessages: [`Did the incident result in any deaths or serious injuries?`],
+      subText: `If yes, your claim will be immediately escalated for urgent assistance.`,
+      options: [
+        { id: 'yes', label: 'Yes', description: 'Someone was seriously hurt or killed' },
+        { id: 'no', label: 'No', description: 'No deaths or serious injuries' },
+      ],
     }),
-    processResponse: (response) => ({ dashboardClaimLocation: response }),
+    processResponse: (response) => ({ dashboardClaimSeriousInjuries: response === 'yes' }),
     getNextStep: () => 'db.claim_when',
   },
 
-  /* Step 5: When did it happen */
+  /* Step 4: When did it happen? (Q2 from PDF — Yesterday / Today chips) */
   {
     id: 'db.claim_when',
     module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: () => {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      const fmt = (d: Date) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      return {
+        botMessages: [`When did it happen?`],
+        options: [
+          { id: `today|${fmt(today)}`, label: 'Today', description: fmt(today) },
+          { id: `yesterday|${fmt(yesterday)}`, label: 'Yesterday', description: fmt(yesterday) },
+          { id: 'other', label: 'Earlier date', description: 'Pick a specific date' },
+        ],
+      };
+    },
+    processResponse: (response) => {
+      if (response === 'other') return {};
+      const [, dateStr] = (response as string).split('|');
+      return { dashboardClaimDate: dateStr };
+    },
+    getNextStep: (response) => response === 'other' ? 'db.claim_when_custom' : 'db.claim_driver',
+  },
+
+  /* Step 4a: Custom date (conditional) */
+  {
+    id: 'db.claim_when_custom',
+    module: 'claims',
     widgetType: 'text_input',
     getScript: () => ({
-      botMessages: [`When did this happen?`],
-      subText: `Include the date and approximate time if you remember.`,
-      placeholder: 'e.g., 15 Feb 2026, around 3:30 PM',
+      botMessages: [`Please enter the date of the incident.`],
+      placeholder: 'e.g., 10 Jan 2026',
       inputType: 'text' as const,
     }),
     processResponse: (response) => ({ dashboardClaimDate: response }),
+    getNextStep: () => 'db.claim_driver',
+  },
+
+  /* Step 5: Who was driving? (Q3 from PDF) */
+  {
+    id: 'db.claim_driver',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: (state) => {
+      const ownerName = state.ownerName || state.userName || 'You (owner)';
+      return {
+        botMessages: [`Who was driving when it happened?`],
+        subText: `You can file a claim even if someone else was driving.`,
+        options: [
+          { id: 'owner', label: `Myself — ${ownerName}`, description: 'Policy holder was driving' },
+          { id: 'other', label: 'Someone else', description: 'Another person was driving' },
+        ],
+      };
+    },
+    processResponse: (response) => ({ dashboardClaimWasDriverOwner: response === 'owner' }),
+    getNextStep: (response) => response === 'other' ? 'db.claim_driver_name' : 'db.claim_how',
+  },
+
+  /* Step 5a: Driver's name (conditional) */
+  {
+    id: 'db.claim_driver_name',
+    module: 'claims',
+    widgetType: 'text_input',
+    getScript: () => ({
+      botMessages: [`What is the name of the person who was driving?`],
+      placeholder: 'e.g., Rajesh Kumar',
+      inputType: 'text' as const,
+    }),
+    processResponse: (response) => ({ dashboardClaimDriverName: response }),
+    getNextStep: () => 'db.claim_driver_relation',
+  },
+
+  /* Step 5b: Driver's relation (conditional) */
+  {
+    id: 'db.claim_driver_relation',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: (state) => ({
+      botMessages: [`How is ${state.dashboardClaimDriverName || 'this person'} related to you?`],
+      options: DRIVER_RELATIONS,
+    }),
+    processResponse: (response) => ({ dashboardClaimDriverRelation: response }),
     getNextStep: () => 'db.claim_how',
   },
 
-  /* Step 6: Description — what happened */
+  /* Step 6: How did it happen? (Q4 from PDF) */
   {
     id: 'db.claim_how',
     module: 'claims',
     widgetType: 'text_input',
     getScript: (state) => {
-      const incidentLabel = INCIDENT_LABELS[state.dashboardClaimIncidentType] || 'the incident';
+      const isTheft = state.dashboardClaimType === 'own_damage_theft' || state.dashboardClaimType === 'own_damage_accessories';
       return {
-        botMessages: [`Please describe how the ${incidentLabel.toLowerCase()} happened.`],
-        subText: `Include as much detail as you can — this helps our team assess your claim faster.`,
-        placeholder: 'e.g., Was turning left at traffic signal when a bike hit the rear bumper',
+        botMessages: [`How did it happen?`],
+        subText: isTheft
+          ? `Describe what was stolen and any circumstances you noticed. Include as much detail as you can.`
+          : `Describe the accident and which parts of your vehicle were damaged. Include as much detail as you can — this helps speed up your claim.`,
+        placeholder: isTheft
+          ? 'e.g., Vehicle was parked outside my office overnight. Found it missing in the morning.'
+          : 'e.g., Was turning left at the traffic signal when another vehicle hit the front bumper.',
         inputType: 'text' as const,
       };
     },
     processResponse: (response) => ({ dashboardClaimDescription: response }),
-    getNextStep: () => 'db.claim_injury',
+    getNextStep: () => 'db.claim_vehicle_loc',
   },
 
-  /* Step 7: Was anyone injured? */
+  /* Step 7: Where is your vehicle now? (Q5 from PDF) */
   {
-    id: 'db.claim_injury',
-    module: 'claims',
-    widgetType: 'selection_cards',
-    getScript: () => ({
-      botMessages: [`Was anyone injured in the incident?`],
-      subText: `If injuries were reported, your claim will be marked as high priority.`,
-      options: [
-        { id: 'yes', label: 'Yes', description: 'Someone was hurt' },
-        { id: 'no', label: 'No', description: 'No injuries' },
-      ],
-    }),
-    processResponse: (response) => ({ dashboardClaimInjury: response === 'yes' }),
-    getNextStep: () => 'db.claim_driver',
-  },
-
-  /* Step 8: Were you driving? */
-  {
-    id: 'db.claim_driver',
-    module: 'claims',
-    widgetType: 'selection_cards',
-    getScript: () => ({
-      botMessages: [`Who was driving the vehicle at the time?`],
-      options: [
-        { id: 'owner', label: 'I was driving (owner)', description: 'Policy holder was behind the wheel' },
-        { id: 'other', label: 'Someone else was driving', description: 'Another authorized person' },
-      ],
-    }),
-    processResponse: (response) => ({ dashboardClaimWasDriverOwner: response === 'owner' }),
-    getNextStep: () => 'db.claim_other_vehicle',
-  },
-
-  /* Step 9: Was another vehicle involved? */
-  {
-    id: 'db.claim_other_vehicle',
-    module: 'claims',
-    widgetType: 'selection_cards',
-    getScript: () => ({
-      botMessages: [`Was another vehicle involved in the incident?`],
-      options: [
-        { id: 'yes', label: 'Yes', description: 'Another vehicle was part of the incident' },
-        { id: 'no', label: 'No', description: 'Single vehicle incident' },
-      ],
-    }),
-    processResponse: (response) => ({ dashboardClaimOtherVehicle: response === 'yes' }),
-    getNextStep: (response) => response === 'yes' ? 'db.claim_other_driver_info' : 'db.claim_police',
-  },
-
-  /* Step 9a: Other driver / vehicle details (conditional) */
-  {
-    id: 'db.claim_other_driver_info',
-    module: 'claims',
-    widgetType: 'text_input',
-    getScript: () => ({
-      botMessages: [`Please share any details about the other vehicle or driver.`],
-      subText: `Registration number, contact info, or anything you noted.`,
-      placeholder: 'e.g., White Hyundai i20, DL 4C XX 1234',
-      inputType: 'text' as const,
-    }),
-    processResponse: (response) => ({ dashboardClaimOtherDriverInfo: response }),
-    getNextStep: () => 'db.claim_police',
-  },
-
-  /* Step 10: Police report filed? */
-  {
-    id: 'db.claim_police',
+    id: 'db.claim_vehicle_loc',
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: (state) => {
-      const needsFir = state.dashboardClaimIncidentType === 'theft' || state.dashboardClaimInjury;
-      return {
-        botMessages: needsFir
-          ? [`A police report is typically required for this type of incident. Have you filed one?`]
-          : [`Was a police report or FIR filed for this incident?`],
-        options: [
-          { id: 'yes', label: 'Yes, FIR filed' },
-          { id: 'no', label: 'No, not yet' },
-        ],
-      };
-    },
-    processResponse: (response) => ({ dashboardClaimPoliceReport: response === 'yes' }),
-    getNextStep: (response) => response === 'yes' ? 'db.claim_fir_number' : 'db.claim_photos',
-  },
-
-  /* Step 10a: FIR number (conditional) */
-  {
-    id: 'db.claim_fir_number',
-    module: 'claims',
-    widgetType: 'text_input',
-    getScript: () => ({
-      botMessages: [`Please enter the FIR number.`],
-      placeholder: 'e.g., FIR-2026/0234',
-      inputType: 'text' as const,
-    }),
-    processResponse: (response) => ({ dashboardClaimFirNumber: response }),
-    getNextStep: () => 'db.claim_photos',
-  },
-
-  /* Step 11: Photos / evidence */
-  {
-    id: 'db.claim_photos',
-    module: 'claims',
-    widgetType: 'selection_cards',
-    getScript: () => ({
-      botMessages: [
-        `Do you have photos of the damage?`,
-      ],
-      subText: `Clear photos speed up claim processing significantly.`,
-      options: [
-        { id: 'yes', label: 'Yes, I have photos', description: 'Upload now or share later' },
-        { id: 'later', label: 'I\'ll share later', description: 'Our team will follow up' },
-        { id: 'no', label: 'No photos available' },
-      ],
-    }),
-    processResponse: (response) => ({ dashboardClaimPhotos: response === 'yes' }),
-    getNextStep: (response) => {
-      if (response === 'yes') return 'db.claim_photos_ack';
-      return 'db.claim_garage';
-    },
-  },
-
-  /* Step 11a: Photo upload acknowledgement */
-  {
-    id: 'db.claim_photos_ack',
-    module: 'claims',
-    widgetType: 'none',
-    getScript: () => ({
-      botMessages: [
-        `Our claims team will reach out via WhatsApp or email so you can share the photos.`,
-        `Having them ready will help expedite your claim.`,
-      ],
-    }),
-    processResponse: () => ({}),
-    getNextStep: () => 'db.claim_garage',
-  },
-
-  /* Step 12: Garage selection */
-  {
-    id: 'db.claim_garage',
-    module: 'claims',
-    widgetType: 'selection_cards',
-    getScript: (state) => {
-      const isTheft = state.dashboardClaimIncidentType === 'theft';
+      const v = state.vehicleType === 'bike' ? 'bike' : 'car';
+      const isTheft = state.dashboardClaimType === 'own_damage_theft';
       if (isTheft) {
         return {
-          botMessages: [`Since this is a theft claim, we will handle this directly. Let us move to the cost estimate.`],
-          options: [{ id: 'skip', label: 'Continue' }],
+          botMessages: [`Where was your ${v} when it was stolen?`],
+          options: [
+            { id: 'home_office', label: 'Home / Office', description: 'Parked at a familiar place' },
+            { id: 'public_place', label: 'Public place', description: 'Market, mall, street, etc.' },
+            { id: 'police_station', label: 'FIR already filed', description: 'Police report submitted' },
+            { id: 'other', label: 'Other location', description: '' },
+          ],
         };
       }
       return {
-        botMessages: [
-          `Where would you like to get your vehicle repaired?`,
-        ],
-        subText: `Network garages offer cashless claims — no upfront payment from you.`,
+        botMessages: [`Where is your ${v} right now?`],
+        subText: `This helps us arrange towing or a surveyor visit if needed.`,
         options: [
-          ...NETWORK_GARAGES.map(g => ({ id: g.id, label: g.name, description: g.distance })),
-          { id: 'other_garage', label: 'I have a preferred garage', description: 'Non-network garage' },
+          { id: 'home_office', label: 'Home / Office', description: 'Drove it back or towed it home' },
+          { id: 'garage_dealership', label: 'Garage / Dealership', description: 'Already at a repair shop' },
+          { id: 'accident_site', label: 'Still at accident site', description: 'Vehicle has not been moved' },
+          { id: 'police_station', label: 'Police station', description: 'Vehicle is with the police' },
         ],
       };
     },
-    processResponse: (response) => ({ dashboardClaimGarage: response }),
-    getNextStep: () => 'db.claim_amount',
+    processResponse: (response) => ({ dashboardClaimVehicleLocation: response }),
+    getNextStep: (response, state) => {
+      if (state.dashboardClaimType === 'own_damage_theft') return 'db.claim_review';
+      return 'db.claim_safe_to_drive';
+    },
   },
 
-  /* Step 13: Estimated amount */
+  /* Step 8: Is the vehicle safe to drive? (Q6 from PDF) */
   {
-    id: 'db.claim_amount',
+    id: 'db.claim_safe_to_drive',
     module: 'claims',
-    widgetType: 'number_input',
+    widgetType: 'selection_cards',
     getScript: (state) => {
-      const isTheft = state.dashboardClaimIncidentType === 'theft';
+      const v = state.vehicleType === 'bike' ? 'bike' : 'car';
       return {
-        botMessages: [
-          isTheft
-            ? 'What is the estimated value of the stolen vehicle / parts?'
-            : 'What is the estimated repair cost? (An approximate figure is fine — our surveyor will assess the exact amount.)',
+        botMessages: [`Is your ${v} safe to drive?`],
+        subText: `Select "No" if you notice any of these: flat or damaged tyres, deployed airbags, engine will not start, fluid leakage, flood damage, or any other safety concern.`,
+        options: [
+          { id: 'yes', label: 'Yes, it is drivable', description: 'Minor damage, can be driven' },
+          { id: 'no', label: 'No, it is not safe', description: 'Vehicle should not be driven' },
         ],
-        placeholder: 'Enter amount in ₹',
-        inputType: 'number' as const,
       };
     },
-    processResponse: (response) => ({ dashboardClaimAmount: String(response) }),
+    processResponse: (response) => ({ dashboardClaimSafeToDriver: response === 'yes' }),
+    getNextStep: (response, state) => {
+      const atAccidentSite = state.dashboardClaimVehicleLocation === 'accident_site';
+      if (response === 'no' || atAccidentSite) return 'db.claim_towing';
+      return 'db.claim_review';
+    },
+  },
+
+  /* Step 9: Towing help? (Q7 from PDF — conditional) */
+  {
+    id: 'db.claim_towing',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: [`Do you need help with towing?`],
+      subText: `Our towing team will contact you within 15 minutes of your claim being filed.`,
+      options: [
+        { id: 'yes', label: 'Yes, I need towing', description: 'Our team will call you shortly' },
+        { id: 'no', label: 'No, I will manage', description: 'I have arranged transport' },
+      ],
+    }),
+    processResponse: (response) => ({ dashboardClaimNeedsTowing: response === 'yes' }),
     getNextStep: () => 'db.claim_review',
   },
 
-  /* Step 14: Review summary */
+  /* Step 10: Review & confirm */
   {
     id: 'db.claim_review',
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: (state) => {
-      const typeLabel = state.dashboardClaimType === 'own_damage' ? 'Own Damage' : 'Third Party';
-      const incidentLabel = INCIDENT_LABELS[state.dashboardClaimIncidentType] || state.dashboardClaimIncidentType;
-      const garage = NETWORK_GARAGES.find(g => g.id === state.dashboardClaimGarage)?.name || state.dashboardClaimGarage || 'N/A';
-      const injuryText = state.dashboardClaimInjury === true ? 'Yes' : state.dashboardClaimInjury === false ? 'No' : 'Not specified';
-      const driverText = state.dashboardClaimWasDriverOwner === true ? 'Owner' : state.dashboardClaimWasDriverOwner === false ? 'Other person' : 'Not specified';
-      const policeText = state.dashboardClaimPoliceReport === true ? `Yes (${state.dashboardClaimFirNumber || 'FIR number pending'})` : 'No';
-      const otherVehicleText = state.dashboardClaimOtherVehicle === true ? `Yes — ${state.dashboardClaimOtherDriverInfo || 'Details pending'}` : 'No';
-      const photosText = state.dashboardClaimPhotos === true ? 'Will be shared' : 'Not available';
+      const typeLabel = CLAIM_TYPE_LABELS[state.dashboardClaimType] || state.dashboardClaimType;
+      const driverText = state.dashboardClaimWasDriverOwner
+        ? (state.ownerName || 'Owner')
+        : `${state.dashboardClaimDriverName || 'Someone else'} (${state.dashboardClaimDriverRelation || 'other'})`;
+      const injuryText = state.dashboardClaimSeriousInjuries ? 'Yes — High priority' : 'No';
+      const locationText = VEHICLE_LOCATION_LABELS[state.dashboardClaimVehicleLocation] || state.dashboardClaimVehicleLocation || 'N/A';
+      const safeText = state.dashboardClaimSafeToDriver === true ? 'Yes' : state.dashboardClaimSafeToDriver === false ? 'No' : 'N/A';
+      const towingText = state.dashboardClaimNeedsTowing === true ? 'Yes — Team will call shortly' : state.dashboardClaimNeedsTowing === false ? 'No' : 'N/A';
 
       return {
         botMessages: [
           `Here is a summary of your claim.`,
-          `Claim Type: ${typeLabel}\nIncident: ${incidentLabel}\nLocation: ${state.dashboardClaimLocation}\nDate: ${state.dashboardClaimDate}\nDescription: ${state.dashboardClaimDescription}\nInjuries: ${injuryText}\nDriver: ${driverText}\nOther Vehicle: ${otherVehicleText}\nPolice Report: ${policeText}\nPhotos: ${photosText}\nGarage: ${garage}\nEstimated Cost: Rs. ${Number(state.dashboardClaimAmount).toLocaleString()}`,
+          `Type: ${typeLabel}\nDate: ${state.dashboardClaimDate}\nSerious injuries: ${injuryText}\nWho was driving: ${driverText}\nDescription: ${state.dashboardClaimDescription}\nVehicle location: ${locationText}\nSafe to drive: ${safeText}\nTowing needed: ${towingText}`,
           `Does everything look correct?`,
         ],
         options: [
@@ -559,34 +522,36 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getNextStep: (response) => response === 'confirm' ? 'db.claim_submitted' : 'db.actions',
   },
 
-  /* Step 15: Submission confirmation */
+  /* Step 11: Submission confirmation */
   {
     id: 'db.claim_submitted',
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: (state) => {
       const claimId = `MCL-${Math.floor(100000 + Math.random() * 900000)}`;
-      const isOD = state.dashboardClaimType === 'own_damage';
-      const isTheft = state.dashboardClaimIncidentType === 'theft';
-      const hasInjury = state.dashboardClaimInjury === true;
+      const isTheft = state.dashboardClaimType === 'own_damage_theft';
+      const isTP = state.dashboardClaimType === 'third_party';
+      const hasSerious = state.dashboardClaimSeriousInjuries === true;
+      const needsTowing = state.dashboardClaimNeedsTowing === true;
 
       let nextSteps = '';
       if (isTheft) {
         nextSteps = '1. Claim registered — Done\n2. Police verification — In progress\n3. Investigation & assessment — Pending\n4. Settlement — Pending';
-      } else if (isOD) {
-        nextSteps = '1. Claim registered — Done\n2. Surveyor inspection — Scheduled within 24h\n3. Repair authorization — Pending\n4. Vehicle repaired — Pending\n5. Claim settled — Pending';
-      } else {
+      } else if (isTP) {
         nextSteps = '1. Claim registered — Done\n2. Third-party verification — In progress\n3. Liability assessment — Pending\n4. Settlement processed — Pending';
+      } else {
+        nextSteps = '1. Claim registered — Done\n2. Surveyor inspection — Scheduled within 24h\n3. Repair authorization — Pending\n4. Vehicle repaired — Pending\n5. Claim settled — Pending';
       }
 
-      const urgencyNote = hasInjury
-        ? '\n\nSince injuries were reported, your claim has been marked as high priority.'
-        : '';
+      const notes: string[] = [];
+      if (hasSerious) notes.push(`Your claim has been marked as high priority due to reported injuries.`);
+      if (needsTowing) notes.push(`Our towing team will call you within 15 minutes.`);
 
       return {
         botMessages: [
           `Claim submitted successfully.`,
-          `Claim ID: ${claimId}\nExpected resolution: ${isTheft ? '7-10' : '3-5'} working days${urgencyNote}`,
+          `Claim ID: ${claimId}\nExpected resolution: ${isTheft ? '7-10' : '3-5'} working days`,
+          ...notes,
           `What happens next:\n\n${nextSteps}`,
           `We will keep you updated via SMS and email at every step.`,
         ],
@@ -598,51 +563,44 @@ const motorDashboardSteps: MotorConversationStep[] = [
     },
     processResponse: (_response, state) => {
       const claimId = `MCL-${Math.floor(100000 + Math.random() * 900000)}`;
-      const isOD = state.dashboardClaimType === 'own_damage';
-      const isTheft = state.dashboardClaimIncidentType === 'theft';
-      const hasInjury = state.dashboardClaimInjury === true;
+      const isTheft = state.dashboardClaimType === 'own_damage_theft';
+      const hasSerious = state.dashboardClaimSeriousInjuries === true;
+      const needsTowing = state.dashboardClaimNeedsTowing === true;
 
-      let status = isOD ? 'Surveyor inspection scheduled' : 'Under review';
+      let status = 'Surveyor inspection scheduled';
       if (isTheft) status = 'Police verification in progress';
-      if (hasInjury) status = 'High priority — Under review';
+      if (hasSerious) status = 'High priority — Under review';
+      if (needsTowing) status = 'Towing arranged — Under review';
 
       return {
         dashboardSubmittedClaims: [
           ...state.dashboardSubmittedClaims,
           {
             id: claimId,
-            type: (state.dashboardClaimType || 'own_damage') as 'own_damage' | 'third_party',
-            incidentType: state.dashboardClaimIncidentType,
-            location: state.dashboardClaimLocation,
+            type: (state.dashboardClaimType || 'own_damage_accident') as MotorClaim['type'],
             date: state.dashboardClaimDate,
-            description: state.dashboardClaimDescription,
-            injury: state.dashboardClaimInjury,
-            policeReport: state.dashboardClaimPoliceReport,
-            firNumber: state.dashboardClaimFirNumber,
-            otherVehicle: state.dashboardClaimOtherVehicle,
-            otherDriverInfo: state.dashboardClaimOtherDriverInfo,
+            seriousInjuries: state.dashboardClaimSeriousInjuries,
             wasDriverOwner: state.dashboardClaimWasDriverOwner,
-            photos: state.dashboardClaimPhotos,
-            garage: state.dashboardClaimGarage,
-            amount: state.dashboardClaimAmount,
+            driverName: state.dashboardClaimDriverName,
+            driverRelation: state.dashboardClaimDriverRelation,
+            description: state.dashboardClaimDescription,
+            vehicleLocation: state.dashboardClaimVehicleLocation,
+            safeToDriver: state.dashboardClaimSafeToDriver,
+            needsTowing: state.dashboardClaimNeedsTowing,
             status,
             submittedAt: Date.now(),
           },
         ],
-        dashboardClaimType: '' as 'own_damage' | 'third_party' | '',
-        dashboardClaimIncidentType: '',
-        dashboardClaimLocation: '',
+        dashboardClaimType: '' as const,
+        dashboardClaimSeriousInjuries: null,
         dashboardClaimDate: '',
-        dashboardClaimDescription: '',
-        dashboardClaimInjury: null,
-        dashboardClaimPoliceReport: null,
-        dashboardClaimFirNumber: '',
-        dashboardClaimOtherVehicle: null,
-        dashboardClaimOtherDriverInfo: '',
         dashboardClaimWasDriverOwner: null,
-        dashboardClaimPhotos: null,
-        dashboardClaimGarage: '',
-        dashboardClaimAmount: '',
+        dashboardClaimDriverName: '',
+        dashboardClaimDriverRelation: '',
+        dashboardClaimDescription: '',
+        dashboardClaimVehicleLocation: '',
+        dashboardClaimSafeToDriver: null,
+        dashboardClaimNeedsTowing: null,
       };
     },
     getNextStep: (response) => response === 'track' ? 'db.track_overview' : 'db.actions',

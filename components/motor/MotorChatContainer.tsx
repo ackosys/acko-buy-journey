@@ -468,7 +468,7 @@ export default function MotorChatContainer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)] max-h-[45vh] overflow-y-auto"
           >
             <div className="max-w-lg mx-auto px-5 py-5 pb-8">
               {renderWidget()}
@@ -543,7 +543,7 @@ export default function MotorChatContainer() {
               className={`fixed inset-x-0 z-50 bg-[#1E0F46] border-t border-white/10 shadow-2xl px-5 py-6 max-w-lg mx-auto ${
                 isLargeEditWidget()
                   ? 'bottom-0 top-16 rounded-t-2xl overflow-y-auto pb-10'
-                  : 'bottom-0 rounded-t-2xl pb-10'
+                  : 'bottom-0 rounded-t-2xl pb-10 max-h-[45vh] overflow-y-auto'
               }`}
             >
               <div className="flex items-center justify-between mb-4">

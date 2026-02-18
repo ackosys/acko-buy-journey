@@ -95,20 +95,16 @@ export interface ExpiredPolicyData {
 /* ── Dashboard: Claim Data (FNOL) ── */
 export interface MotorClaim {
   id: string;
-  type: 'own_damage' | 'third_party';
-  incidentType: string;
-  location: string;
+  type: 'own_damage_accident' | 'own_damage_theft' | 'own_damage_accessories' | 'third_party';
   date: string;
-  description: string;
-  injury: boolean | null;
-  policeReport: boolean | null;
-  firNumber: string;
-  otherVehicle: boolean | null;
-  otherDriverInfo: string;
+  seriousInjuries: boolean | null;
   wasDriverOwner: boolean | null;
-  photos: boolean | null;
-  garage: string;
-  amount: string;
+  driverName: string;
+  driverRelation: string;
+  description: string;
+  vehicleLocation: string;
+  safeToDriver: boolean | null;
+  needsTowing: boolean | null;
   status: string;
   submittedAt: number;
 }
@@ -191,20 +187,16 @@ export interface MotorJourneyState extends BaseJourneyState {
 
   /* ── Dashboard: Claims (FNOL) ── */
   dashboardSubmittedClaims: MotorClaim[];
-  dashboardClaimType: 'own_damage' | 'third_party' | '';
-  dashboardClaimIncidentType: string;
-  dashboardClaimLocation: string;
+  dashboardClaimType: 'own_damage_accident' | 'own_damage_theft' | 'own_damage_accessories' | 'third_party' | '';
+  dashboardClaimSeriousInjuries: boolean | null;
   dashboardClaimDate: string;
-  dashboardClaimDescription: string;
-  dashboardClaimInjury: boolean | null;
-  dashboardClaimPoliceReport: boolean | null;
-  dashboardClaimFirNumber: string;
-  dashboardClaimOtherVehicle: boolean | null;
-  dashboardClaimOtherDriverInfo: string;
   dashboardClaimWasDriverOwner: boolean | null;
-  dashboardClaimPhotos: boolean | null;
-  dashboardClaimGarage: string;
-  dashboardClaimAmount: string;
+  dashboardClaimDriverName: string;
+  dashboardClaimDriverRelation: string;
+  dashboardClaimDescription: string;
+  dashboardClaimVehicleLocation: string;
+  dashboardClaimSafeToDriver: boolean | null;
+  dashboardClaimNeedsTowing: boolean | null;
 
   /* ── Dashboard: Edits ── */
   dashboardSubmittedEdits: MotorEditRequest[];
@@ -316,19 +308,15 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   /* Dashboard */
   dashboardSubmittedClaims: [],
   dashboardClaimType: '',
-  dashboardClaimIncidentType: '',
-  dashboardClaimLocation: '',
+  dashboardClaimSeriousInjuries: null,
   dashboardClaimDate: '',
-  dashboardClaimDescription: '',
-  dashboardClaimInjury: null,
-  dashboardClaimPoliceReport: null,
-  dashboardClaimFirNumber: '',
-  dashboardClaimOtherVehicle: null,
-  dashboardClaimOtherDriverInfo: '',
   dashboardClaimWasDriverOwner: null,
-  dashboardClaimPhotos: null,
-  dashboardClaimGarage: '',
-  dashboardClaimAmount: '',
+  dashboardClaimDriverName: '',
+  dashboardClaimDriverRelation: '',
+  dashboardClaimDescription: '',
+  dashboardClaimVehicleLocation: '',
+  dashboardClaimSafeToDriver: null,
+  dashboardClaimNeedsTowing: null,
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
 };

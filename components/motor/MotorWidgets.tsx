@@ -1188,7 +1188,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
+                className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl"
               >
                 <div className="p-5">
                   <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
@@ -1862,7 +1862,7 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
                 <h3 className="text-[18px] font-bold text-white mb-1">Select {showVariantModal.addon.name} variant</h3>
                 <p className="text-[12px] text-white/50 mb-4">{showVariantModal.addon.description}</p>
@@ -2022,7 +2022,7 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
                 <h3 className="text-[18px] font-bold text-white mb-1">Select Personal Accident coverage amount</h3>
                 <p className="text-[12px] text-white/50 mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
