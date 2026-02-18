@@ -255,18 +255,150 @@ const manualEntrySelectYear: MotorConversationStep = {
   id: 'manual_entry.select_year',
   module: 'manual_entry',
   widgetType: 'year_selector',
-  getScript: (state) => ({
-    botMessages: [
-      `When was your ${vLabel(state)} registered?`,
-    ],
-  }),
+  getScript: (state) => {
+    const isBrandNew = state.vehicleEntryType === 'brand_new';
+    return {
+      botMessages: [
+        isBrandNew
+          ? `What year is your ${vLabel(state)}?`
+          : `When was your ${vLabel(state)} registered?`,
+      ],
+    };
+  },
   processResponse: (response, state) => ({
     vehicleData: {
       ...state.vehicleData,
       registrationYear: parseInt(response),
     },
   }),
-  getNextStep: () => 'pre_quote.cng_check',
+  getNextStep: (_, state) => {
+    if (state.vehicleEntryType === 'brand_new') return 'brand_new.purchase_month';
+    return 'pre_quote.cng_check';
+  },
+};
+
+/* ═══════════════════════════════════════════════
+   MODULE: BRAND NEW VEHICLE — Purchase-specific flow
+   ═══════════════════════════════════════════════ */
+
+const brandNewPurchaseMonth: MotorConversationStep = {
+  id: 'brand_new.purchase_month',
+  module: 'manual_entry',
+  widgetType: 'selection_cards',
+  getScript: (state) => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    const now = new Date();
+    const currentMonthIdx = now.getMonth();
+    const recent = months.slice(Math.max(0, currentMonthIdx - 2), currentMonthIdx + 1).reverse();
+    return {
+      botMessages: [
+        `When did you purchase your ${state.vehicleData.make} ${state.vehicleData.model}?`,
+      ],
+      options: [
+        ...recent.map(m => ({ id: m.toLowerCase(), label: m + ` ${now.getFullYear()}` })),
+        { id: 'not_yet', label: 'Not yet delivered', description: 'Expecting delivery soon' },
+      ],
+    };
+  },
+  processResponse: (response) => ({ purchaseMonth: response }),
+  getNextStep: () => 'brand_new.invoice_value',
+};
+
+const brandNewInvoiceValue: MotorConversationStep = {
+  id: 'brand_new.invoice_value',
+  module: 'manual_entry',
+  widgetType: 'number_input',
+  getScript: (state) => ({
+    botMessages: [
+      `What is the ex-showroom price of your ${state.vehicleData.make} ${state.vehicleData.model}?\n\nThis helps us calculate the right Insured Declared Value (IDV) for your brand new ${vLabel(state)}.`,
+    ],
+    placeholder: 'e.g., 850000',
+    inputType: 'number' as const,
+  }),
+  processResponse: (response) => ({ invoiceValue: parseInt(response) || 0 }),
+  getNextStep: () => 'brand_new.dealer_city',
+};
+
+const brandNewDealerCity: MotorConversationStep = {
+  id: 'brand_new.dealer_city',
+  module: 'manual_entry',
+  widgetType: 'text_input',
+  getScript: (state) => ({
+    botMessages: [
+      `Which city is your ${vLabel(state)} registered in?`,
+    ],
+    placeholder: 'e.g., Mumbai, Delhi, Bangalore',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ dealerCity: response }),
+  getNextStep: () => 'brand_new.cng_check',
+};
+
+const brandNewCngCheck: MotorConversationStep = {
+  id: 'brand_new.cng_check',
+  module: 'manual_entry',
+  widgetType: 'selection_cards',
+  getScript: (state) => ({
+    botMessages: [
+      `Does your ${state.vehicleData.make} ${state.vehicleData.model} have an external CNG/LPG kit fitted?`,
+    ],
+    subText: 'Factory-fitted CNG is already covered. External kits need separate coverage.',
+    options: [
+      { id: 'yes', label: 'Yes, external kit', icon: 'check' },
+      { id: 'no', label: 'No', icon: 'forward' },
+    ],
+  }),
+  processResponse: (response, state) => ({
+    vehicleData: { ...state.vehicleData, hasCngKit: response === 'yes' },
+  }),
+  getNextStep: () => 'brand_new.summary',
+};
+
+const brandNewSummary: MotorConversationStep = {
+  id: 'brand_new.summary',
+  module: 'manual_entry',
+  widgetType: 'editable_summary',
+  getScript: (state) => {
+    const v = state.vehicleData;
+    const invoiceFormatted = state.invoiceValue
+      ? `₹${state.invoiceValue.toLocaleString()}`
+      : 'Not provided';
+    return {
+      botMessages: [
+        `Here's what we have for your brand new ${vLabel(state)}:\n\n` +
+        `${v.make} ${v.model} ${v.variant}\n` +
+        `Fuel: ${v.fuelType}\n` +
+        `Year: ${v.registrationYear || new Date().getFullYear()}\n` +
+        `Ex-showroom: ${invoiceFormatted}\n` +
+        `City: ${state.dealerCity || 'Not provided'}\n` +
+        `CNG Kit: ${v.hasCngKit ? 'Yes' : 'No'}\n` +
+        `\nSince this is a brand new ${vLabel(state)}, no previous policy or NCB applies. You'll get a fresh policy with full IDV coverage.`,
+      ],
+    };
+  },
+  processResponse: () => ({
+    preQuoteComplete: true,
+    policyStatus: null,
+    vehicleDataSource: 'manual_entry' as const,
+  }),
+  getNextStep: () => 'brand_new.view_prices',
+};
+
+const brandNewViewPrices: MotorConversationStep = {
+  id: 'brand_new.view_prices',
+  module: 'pre_quote',
+  widgetType: 'none',
+  getScript: (state) => {
+    const v = state.vehicleData;
+    return {
+      botMessages: [
+        `Calculating the best insurance plans for your brand new ${v.make} ${v.model}...`,
+      ],
+    };
+  },
+  processResponse: () => ({}),
+  getNextStep: () => 'quote.calculating',
 };
 
 /* ═══════════════════════════════════════════════
@@ -786,6 +918,12 @@ const MOTOR_STEPS: Record<string, MotorConversationStep> = {
   'manual_entry.select_fuel': manualEntrySelectFuel,
   'manual_entry.select_variant': manualEntrySelectVariant,
   'manual_entry.select_year': manualEntrySelectYear,
+  'brand_new.purchase_month': brandNewPurchaseMonth,
+  'brand_new.invoice_value': brandNewInvoiceValue,
+  'brand_new.dealer_city': brandNewDealerCity,
+  'brand_new.cng_check': brandNewCngCheck,
+  'brand_new.summary': brandNewSummary,
+  'brand_new.view_prices': brandNewViewPrices,
   'pre_quote.cng_check': preQuoteCngCheck,
   'pre_quote.commercial_check': preQuoteCommercialCheck,
   'pre_quote.commercial_rejection': preQuoteCommercialRejection,
