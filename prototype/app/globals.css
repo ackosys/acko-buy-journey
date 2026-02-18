@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Indic Script Fonts: Noto Sans Devanagari (Hindi) & Noto Sans Kannada ── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&family=Noto+Sans+Kannada:wght@300;400;500;600;700&display=swap');
+
+/* ── ACKO Font: Euclid Circular B ── */
+@font-face {
+  font-family: 'Euclid Circular B';
+  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Euclid Circular B';
+  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Euclid Circular B';
+  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Euclid Circular B';
+  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Euclid Circular B';
+  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Base Styles ── */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #0A0A0A;
+    background: #FFFFFF;
+    overflow-x: hidden;
+  }
+
+  button, a, input {
+    touch-action: manipulation;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  .counter, .price, .timer {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Custom Utilities ── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gradient-purple {
+    background: linear-gradient(135deg, #4E29BB 0%, #2E1773 50%, #18084A 100%);
+  }
+
+  .gradient-purple-light {
+    background: linear-gradient(135deg, #F8F7FD 0%, #ECEBFF 100%);
+  }
+
+  .gradient-celebration {
+    background: linear-gradient(135deg, #149A40 0%, #55B94D 50%, #85E37D 100%);
+  }
+
+  .text-gradient-purple {
+    background: linear-gradient(135deg, #4E29BB, #926FF3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .chat-bubble-bot {
+    border-radius: 4px 16px 16px 16px;
+  }
+
+  .chat-bubble-user {
+    border-radius: 16px 4px 16px 16px;
+  }
+
+  /* Dark purple chat background */
+  .chat-bg-dark {
+    background: linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%);
+  }
+
+  /* Frosted glass card on dark */
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Purple frosted widget area */
+  .widget-glass-dark {
+    background: rgba(30, 15, 70, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ── Typing animation ── */
+@keyframes typing {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+
+.animate-typing {
+  animation: typing 1.2s ease-in-out infinite;
+}
+
+/* ── Breathing Orb ── */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(99,77,234,0.3); }
+  50% { transform: scale(1.06); box-shadow: 0 0 40px rgba(99,77,234,0.5); }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* ── Pulse Ring ── */
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Hairline Borders ── */
+@media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .border-hairline {
+    border-width: 0.5px;
+  }
+}
