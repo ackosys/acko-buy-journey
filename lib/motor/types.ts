@@ -151,6 +151,11 @@ export interface MotorJourneyState extends BaseJourneyState {
   /* ── Existing Quote ── */
   hasExistingQuote: boolean;
 
+  /* ── Brand New Vehicle ── */
+  purchaseMonth: string;
+  invoiceValue: number;
+  dealerCity: string;
+
   /* ── Feedback ── */
   missingVehicleFeedback: string;
 
@@ -266,6 +271,9 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   ncbIncreased: false,
   preQuoteComplete: false,
   hasExistingQuote: false,
+  purchaseMonth: '',
+  invoiceValue: 0,
+  dealerCity: '',
   missingVehicleFeedback: '',
   
   /* Plan Selection */
