@@ -84,6 +84,15 @@ export interface LifeJourneyState extends BaseJourneyState {
   smokingStatus: SmokingStatus;
   annualIncome: number;
   
+  // Financial obligations (for coverage calculation)
+  outstandingLoans: number;      // Total outstanding loans (home + car + education + personal)
+  monthlyExpenses: number;       // Monthly household expenses
+  numberOfDependents: number;    // Spouse, children, parents
+  numberOfChildren: number;      // For education fund calculation
+  youngestChildAge: number;      // To estimate education timeline
+  existingLifeCover: number;     // Any existing term/life insurance
+  existingCorpusSavings: number; // EPF + PPF + MF + savings
+
   // Lifestyle Information
   alcoholConsumption: 'never' | 'occasional' | 'regular';
   occupation: string;
@@ -96,7 +105,8 @@ export interface LifeJourneyState extends BaseJourneyState {
   bmi: number;
   
   // Quote & Plan Selection
-  recommendedCoverage: number; // Based on HLV or needs-based calc
+  recommendedCoverage: number; // Based on HLV/needs-based calc
+  coverageBreakdown: CoverageBreakdown | null;
   selectedCoverage: number;
   selectedTerm: number;
   quote: LifeQuote | null;
@@ -119,6 +129,18 @@ export interface LifeJourneyState extends BaseJourneyState {
     mentionsInvestment?: boolean;
     mayNotNeedTerm?: boolean;
   };
+}
+
+// Transparent breakdown of how coverage was calculated
+export interface CoverageBreakdown {
+  incomeReplacement: number;   // Annual income × remaining working years (inflation-adjusted)
+  loanCoverage: number;        // Outstanding loans
+  childEducationFund: number;  // ₹25-50L per child (Indian higher education + marriage)
+  emergencyBuffer: number;     // 6 months expenses
+  totalNeed: number;           // Sum of above
+  existingCover: number;       // Existing insurance + corpus
+  recommendedCover: number;    // totalNeed - existingCover (capped at ₹100 Cr)
+  multiplierUsed: number;      // Effective multiplier for display
 }
 
 // Initial state
@@ -147,6 +169,15 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
   smokingStatus: 'never',
   annualIncome: 0,
   
+  // Financial obligations
+  outstandingLoans: 0,
+  monthlyExpenses: 0,
+  numberOfDependents: 0,
+  numberOfChildren: 0,
+  youngestChildAge: 0,
+  existingLifeCover: 0,
+  existingCorpusSavings: 0,
+  
   alcoholConsumption: 'never',
   occupation: '',
   occupationRisk: 'low',
@@ -158,8 +189,9 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
   bmi: 0,
   
   recommendedCoverage: 0,
+  coverageBreakdown: null,
   selectedCoverage: 0,
-  selectedTerm: 30,
+  selectedTerm: 0,
   quote: null,
   
   selectedRiders: [],
