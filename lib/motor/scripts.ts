@@ -4,8 +4,12 @@ import { getMotorDashboardStep } from './dashboardScripts';
 /* ═══════════════════════════════════════════════════════════════════
    ACKO Motor Insurance — Conversational Scripts
    ─────────────────────────────────────────────────────────────────
-   Flow: Vehicle Type → Reg Number (or Brand New fork) →
-         Progressive Loading → Pre-Quote → Quote
+   PRINCIPLES (aligned with Health LOB):
+   1. Every question explains WHY we are asking — build trust
+   2. Conversational acknowledgments between key steps
+   3. No emojis in bot messages — only in option labels
+   4. Short, single-purpose messages (one thought per message)
+   5. Personalized responses using accumulated user context
    ═══════════════════════════════════════════════════════════════════ */
 
 function vLabel(state: MotorJourneyState): string {
@@ -26,7 +30,8 @@ const vehicleTypeSelect: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: () => ({
     botMessages: [
-      "Welcome to ACKO Motor Insurance! 🚗\n\nLet's get your vehicle insured — quick, simple, and affordable.\n\nWhat would you like to insure?",
+      `Hi there, welcome to ACKO.`,
+      `What would you like to insure today?`,
     ],
     options: [
       { id: 'car', label: 'Car', description: 'Hatchback, Sedan, SUV, etc.', icon: 'car' },
@@ -49,8 +54,10 @@ const registrationHasNumber: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Great choice! Let's find the best insurance for your ${vLabel(state)}.\n\nDo you have your vehicle registration number?`,
+      `Great, ${vLabel(state)} insurance it is.`,
+      `Do you have your vehicle registration number?`,
     ],
+    subText: `This helps us fetch your ${vLabel(state)} details automatically and save you time.`,
     options: [
       { id: 'yes', label: 'Yes, I have it', description: 'Enter your registration number', icon: 'document' },
       { id: 'no', label: 'No, brand new vehicle', description: `Just bought a new ${vLabel(state)}`, icon: 'star' },
@@ -73,8 +80,9 @@ const registrationEnterNumber: MotorConversationStep = {
   widgetType: 'vehicle_reg_input',
   getScript: (state) => ({
     botMessages: [
-      `Please enter your ${vLabel(state)}'s registration number`,
+      `Please enter your ${vLabel(state)}'s registration number.`,
     ],
+    subText: `We will use this to fetch your vehicle and policy details from the government database.`,
     placeholder: 'e.g. MH 04 EQ 4392',
     inputType: 'text',
   }),
@@ -139,7 +147,8 @@ const vehicleFetchFound: MotorConversationStep = {
   widgetType: 'vehicle_details_card',
   getScript: (state) => ({
     botMessages: [
-      `We found your ${vLabel(state)}!`,
+      `We found your ${vLabel(state)}.`,
+      `Please confirm these details are correct.`,
     ],
   }),
   processResponse: () => ({}),
@@ -156,7 +165,8 @@ const manualEntryCongratulations: MotorConversationStep = {
   widgetType: 'none',
   getScript: (state) => ({
     botMessages: [
-      `Getting a brand new ${vLabel(state)} from the dealership?\n\nSave up to ₹40,000 on your new ${vLabel(state)}'s on-road price. Let's insure it with ACKO!`,
+      `A brand new ${vLabel(state)} — that's exciting!`,
+      `You can save up to Rs. 40,000 on your new ${vLabel(state)}'s on-road price by insuring with ACKO.`,
     ],
   }),
   processResponse: () => ({}),
@@ -169,7 +179,8 @@ const manualEntryStart: MotorConversationStep = {
   widgetType: 'none',
   getScript: (state) => ({
     botMessages: [
-      `I'm having trouble fetching your ${vLabel(state)} details automatically.\n\nNo worries! I can help you enter them manually. This will just take a minute.`,
+      `We could not fetch your ${vLabel(state)} details automatically.`,
+      `No worries — I will help you enter them manually. This should only take a minute.`,
     ],
   }),
   processResponse: () => ({}),
@@ -182,8 +193,9 @@ const manualEntrySelectBrand: MotorConversationStep = {
   widgetType: 'brand_selector',
   getScript: (state) => ({
     botMessages: [
-      `What brand is your ${vLabel(state)}?`,
+      `Which brand is your ${vLabel(state)}?`,
     ],
+    subText: `We need your ${vLabel(state)} details to calculate the right premium.`,
   }),
   processResponse: (response) => ({
     vehicleData: {
@@ -221,8 +233,9 @@ const manualEntrySelectFuel: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `What fuel type does your ${state.vehicleData.model} use?`,
+      `What fuel type does your ${state.vehicleData.model} run on?`,
     ],
+    subText: `Fuel type affects your premium calculation.`,
     options: [
       { id: 'petrol', label: 'Petrol', icon: 'fuel' },
       { id: 'diesel', label: 'Diesel', icon: 'fuel' },
@@ -310,8 +323,10 @@ const brandNewPopularCars: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
+      `Let us start with the basics.`,
       `Which ${vLabel(state)} are you planning to buy?`,
     ],
+    subText: `Select from popular models or search for yours.`,
     options: [
       ...POPULAR_CARS.map(c => ({ ...c, icon: 'car' })),
       { id: 'other', label: 'Other — Select make & model', icon: 'search' },
@@ -370,8 +385,10 @@ const brandNewDeliveryDate: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `When will your ${state.vehicleData.make} ${state.vehicleData.model} be delivered?`,
+      `Got it, personal use.`,
+      `When do you expect your ${state.vehicleData.make} ${state.vehicleData.model} to be delivered?`,
     ],
+    subText: `This helps us time your policy start date correctly.`,
     options: [
       { id: 'today_tomorrow', label: 'Today or tomorrow', icon: 'check' },
       { id: 'next_1_week', label: 'In the next 1 week', icon: 'clock' },
@@ -390,9 +407,10 @@ const brandNewMobilePincode: MotorConversationStep = {
   widgetType: 'text_input',
   getScript: () => ({
     botMessages: [
-      `Just a few more details.\n\nWhat is your mobile number?`,
+      `Thanks. Just a couple more details before we get your quotes.`,
+      `What is your mobile number?`,
     ],
-    subText: 'We will share quote and policy details.',
+    subText: `We will share your quote and policy documents on this number.`,
     placeholder: 'e.g., 9876543210',
     inputType: 'tel' as const,
   }),
@@ -406,7 +424,10 @@ const brandNewPincode: MotorConversationStep = {
   module: 'manual_entry',
   widgetType: 'text_input',
   getScript: () => ({
-    botMessages: ['What is your current address pincode?'],
+    botMessages: [
+      `And your current address pincode?`,
+    ],
+    subText: `Your pincode determines the Regional Transport Office (RTO) for your vehicle.`,
     placeholder: 'e.g., 560099',
     inputType: 'text' as const,
   }),
@@ -421,10 +442,13 @@ const brandNewSummary: MotorConversationStep = {
   widgetType: 'editable_summary',
   getScript: (state) => {
     const v = state.vehicleData;
+    const fuelLabel = v.fuelType ? v.fuelType.charAt(0).toUpperCase() + v.fuelType.slice(1) : '';
     return {
       botMessages: [
-        `${v.make} ${v.model}\n${v.variant} • ${v.fuelType ? v.fuelType.charAt(0).toUpperCase() + v.fuelType.slice(1) : ''}\n\nLet me find the best plans for your brand new ${vLabel(state)}.`,
+        `Here is a summary of your ${vLabel(state)} details.`,
+        `${v.make} ${v.model} ${v.variant} — ${fuelLabel}`,
       ],
+      subText: `Please review and confirm to see your insurance options.`,
     };
   },
   processResponse: () => ({
@@ -442,7 +466,7 @@ const brandNewViewPrices: MotorConversationStep = {
   widgetType: 'none',
   getScript: (state) => ({
     botMessages: [
-      `Calculating the best insurance plans for your brand new ${state.vehicleData.make} ${state.vehicleData.model}...`,
+      `Fetching the best plans for your ${state.vehicleData.make} ${state.vehicleData.model}...`,
     ],
   }),
   processResponse: () => ({}),
@@ -460,7 +484,7 @@ const ownerDetailsIntro: MotorConversationStep = {
   widgetType: 'none',
   getScript: () => ({
     botMessages: [
-      `Just a few more details to complete your policy.`,
+      `Almost there. We need a few details about the vehicle owner to issue the policy.`,
     ],
   }),
   processResponse: () => ({}),
@@ -472,7 +496,10 @@ const ownerDetailsName: MotorConversationStep = {
   module: 'owner_details',
   widgetType: 'text_input',
   getScript: () => ({
-    botMessages: [`Enter vehicle owner's full name`],
+    botMessages: [
+      `What is the vehicle owner's full name?`,
+    ],
+    subText: `This should match the name on your RC (Registration Certificate).`,
     placeholder: 'e.g., Bharath Kumar',
     inputType: 'text' as const,
   }),
@@ -485,7 +512,10 @@ const ownerDetailsEmail: MotorConversationStep = {
   module: 'owner_details',
   widgetType: 'text_input',
   getScript: () => ({
-    botMessages: ['What is your email address?'],
+    botMessages: [
+      `And your email address?`,
+    ],
+    subText: `We will send your policy document and updates to this email.`,
     placeholder: 'e.g., name@email.com',
     inputType: 'text' as const,
   }),
@@ -501,8 +531,10 @@ const ownerDetailsEngineNumber: MotorConversationStep = {
   module: 'owner_details',
   widgetType: 'text_input',
   getScript: () => ({
-    botMessages: [`What is your car's engine number?`],
-    subText: `You can get this from your car dealer.`,
+    botMessages: [
+      `What is your car's engine number?`,
+    ],
+    subText: `You can get this from your car dealer or the vehicle invoice.`,
     placeholder: 'e.g., 32IUYRQEWJHEJH',
     inputType: 'text' as const,
   }),
@@ -515,8 +547,10 @@ const ownerDetailsChassisNumber: MotorConversationStep = {
   module: 'owner_details',
   widgetType: 'text_input',
   getScript: () => ({
-    botMessages: ['And the chassis number?'],
-    subText: `You can get your car's engine & chassis number from your car dealer.`,
+    botMessages: [
+      `And the chassis number?`,
+    ],
+    subText: `Both the engine and chassis numbers are available on your vehicle invoice from the dealer.`,
     placeholder: 'e.g., QU983ER3FG63',
     inputType: 'text' as const,
   }),
@@ -529,7 +563,10 @@ const ownerDetailsGst: MotorConversationStep = {
   module: 'owner_details',
   widgetType: 'selection_cards',
   getScript: () => ({
-    botMessages: ['Do you have a GST number? (Optional)'],
+    botMessages: [
+      `Do you have a GST number?`,
+    ],
+    subText: `This is optional. If you are GST-registered, you can claim input tax credit on the premium.`,
     options: [
       { id: 'skip', label: 'Skip — No GST number' },
       { id: 'enter', label: 'Yes, I have one' },
@@ -557,8 +594,10 @@ const ownerDetailsLoanCheck: MotorConversationStep = {
   module: 'owner_details',
   widgetType: 'selection_cards',
   getScript: () => ({
-    botMessages: ['Have you taken a car loan?'],
-    subText: 'We need this information to help you better during claims.',
+    botMessages: [
+      `Have you taken a car loan for this vehicle?`,
+    ],
+    subText: `If yes, your lender will be added as a beneficiary on the policy. This is required by most banks and NBFCs.`,
     options: [
       { id: 'no', label: 'No', icon: 'forward' },
       { id: 'yes', label: 'Yes', icon: 'document' },
@@ -591,9 +630,10 @@ const preQuoteCngCheck: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Just one quick question to ensure you get the right coverage.\n\nDoes your ${vLabel(state)} have an external CNG kit?`,
+      `One quick question before we build your quote.`,
+      `Does your ${vLabel(state)} have an external CNG kit fitted?`,
     ],
-    subText: `Any external CNG kit needs to be included in your insurance coverage.`,
+    subText: `An external CNG kit needs to be covered separately in your insurance.`,
     options: [
       { id: 'yes', label: 'Yes', icon: 'check' },
       { id: 'no', label: 'No', icon: 'forward' },
@@ -618,9 +658,9 @@ const preQuoteCommercialCheck: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Is this a commercial vehicle?`,
+      `Is your ${vLabel(state)} used for personal or commercial purposes?`,
     ],
-    subText: 'Vehicle used as a taxi, to deliver goods, etc.',
+    subText: `Commercial vehicles (taxis, delivery, etc.) have different insurance requirements.`,
     options: [
       { id: 'no', label: 'No, personal use', icon: 'user' },
       { id: 'yes', label: 'Yes, commercial', icon: 'building' },
@@ -644,9 +684,10 @@ const preQuoteCommercialRejection: MotorConversationStep = {
   id: 'pre_quote.commercial_rejection',
   module: 'pre_quote',
   widgetType: 'rejection_screen',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `Unfortunately, we are unable to cover commercial vehicles at this time.\n\nWe are working hard to expand our coverage and will let you know when we're ready.`,
+      `We are currently unable to cover commercial vehicles.`,
+      `We are working to expand our coverage and will notify you when this changes.`,
     ],
   }),
   processResponse: () => ({}),
@@ -661,8 +702,9 @@ const preQuotePolicyStatus: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Has your ${vLabel(state)} insurance policy expired?`,
+      `What is the current status of your ${vLabel(state)} insurance?`,
     ],
+    subText: `This determines which plans and No Claim Bonus discounts are available to you.`,
     options: [
       { id: 'no', label: 'No, it\'s still active', icon: 'shield' },
       { id: 'yes', label: 'Yes, it has expired', icon: 'clock' },
@@ -687,11 +729,14 @@ const preQuoteClaimHistory: MotorConversationStep = {
   getScript: (state) => {
     const insurer = state.previousPolicy.insurer || 'your insurer';
     const expiry = state.previousPolicy.expiryDate || '';
-    const expiryMsg = expiry ? `\n\nCurrent policy: Your ${insurer} policy expiring ${expiry}` : '';
+    const msgs: string[] = [`Good, your policy is still active.`];
+    if (expiry) {
+      msgs.push(`Your ${insurer} policy expires on ${expiry}.`);
+    }
+    msgs.push(`Have you made any claims in your current policy?`);
     return {
-      botMessages: [
-        `Have you made a claim in your current policy?${expiryMsg}`,
-      ],
+      botMessages: msgs,
+      subText: `Your claim history affects the No Claim Bonus discount on your new policy.`,
       options: [
         { id: 'no', label: 'No', description: 'No claims made', icon: 'check' },
         { id: 'yes', label: 'Yes', description: 'I made a claim', icon: 'document' },
@@ -708,11 +753,11 @@ const preQuoteNcbSelection: MotorConversationStep = {
   id: 'pre_quote.ncb_selection',
   module: 'pre_quote',
   widgetType: 'ncb_selector',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `Select your previous policy No Claim Bonus (NCB).\n\nNo Claim Bonus is a reward for good driving and not making any claims. You can check your NCB in your previous policy.`,
+      `What is your current No Claim Bonus (NCB) percentage?`,
     ],
-    subText: 'In case of incorrect NCB details, the discount amount will be adjusted during claims.',
+    subText: `NCB is a discount you earn for each claim-free year. You can find this on your existing policy document. Incorrect NCB details may be adjusted during claims.`,
   }),
   processResponse: (response, state) => {
     const ncb = parseInt(response) as 0 | 20 | 25 | 35 | 45 | 50;
@@ -738,7 +783,8 @@ const preQuoteNcbReward: MotorConversationStep = {
   widgetType: 'ncb_reward',
   getScript: (state) => ({
     botMessages: [
-      `Here's your reward for staying claim-free!\n\nWe've applied a ${state.newNcbPercentage}% discount to your new plan since your NCB has increased.`,
+      `Great news — your NCB has increased.`,
+      `We have applied a ${state.newNcbPercentage}% discount on your new premium as a reward for staying claim-free.`,
     ],
   }),
   processResponse: () => ({}),
@@ -751,10 +797,12 @@ const preQuoteExpiredPolicyType: MotorConversationStep = {
   id: 'pre_quote.expired_policy_type',
   module: 'pre_quote',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `What was your previous policy type?`,
+      `Understood, your policy has expired.`,
+      `What type of policy did you have before?`,
     ],
+    subText: `This helps us determine your renewal options and any applicable discounts.`,
     options: [
       { id: 'comprehensive', label: 'Comprehensive', description: 'Covers own damage + third party', icon: 'shield' },
       { id: 'third_party', label: 'Third Party', description: 'Only covers damage to others', icon: 'shield_search' },
@@ -771,10 +819,11 @@ const preQuoteExpiryWindow: MotorConversationStep = {
   id: 'pre_quote.expiry_window',
   module: 'pre_quote',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `Tell us approximately when it expired`,
+      `Approximately when did your policy expire?`,
     ],
+    subText: `If your policy expired more than 90 days ago, a vehicle inspection may be required.`,
     options: [
       { id: 'within_10_days', label: 'Within last 10 days', icon: 'clock' },
       { id: '10_to_90_days', label: '10–90 days ago', icon: 'clock' },
@@ -796,10 +845,11 @@ const preQuoteExpiredClaimHistory: MotorConversationStep = {
   id: 'pre_quote.expired_claim_history',
   module: 'pre_quote',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `Have you made a claim in your previous policy?`,
+      `Did you make any claims during your previous policy period?`,
     ],
+    subText: `Your claim history determines your No Claim Bonus eligibility.`,
     options: [
       { id: 'no', label: 'No', icon: 'check' },
       { id: 'yes', label: 'Yes', icon: 'document' },
@@ -815,10 +865,11 @@ const preQuoteExpiredInsurer: MotorConversationStep = {
   id: 'pre_quote.expired_insurer',
   module: 'pre_quote',
   widgetType: 'insurer_selector',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `Who was your previous insurer? (Optional)\n\nThis helps us process your policy faster.`,
+      `Who was your previous insurer?`,
     ],
+    subText: `This is optional, but helps us process your policy transfer faster.`,
     placeholder: 'Select or skip',
   }),
   processResponse: (response, state) => ({
@@ -834,11 +885,10 @@ const preQuoteSummary: MotorConversationStep = {
   module: 'pre_quote',
   widgetType: 'editable_summary',
   getScript: (state) => {
-    const v = state.vehicleData;
-    const reg = state.registrationNumber || 'New Vehicle';
     return {
       botMessages: [
-        `Perfect! Here's a summary of your ${vLabel(state)} details.\n\nPlease review and confirm to see your insurance options.`,
+        `Here is a summary of your ${vLabel(state)} details.`,
+        `Please review and confirm to see your insurance options.`,
       ],
     };
   },
@@ -856,7 +906,7 @@ const preQuoteViewPrices: MotorConversationStep = {
     const v = state.vehicleData;
     return {
       botMessages: [
-        `Great! Calculating the best insurance plans for your ${v.make} ${v.model}...`,
+        `Fetching the best insurance plans for your ${v.make} ${v.model}...`,
       ],
     };
   },
@@ -872,9 +922,9 @@ const quoteCalculating: MotorConversationStep = {
   id: 'quote.calculating',
   module: 'quote',
   widgetType: 'plan_calculator',
-  getScript: (state) => ({
+  getScript: () => ({
     botMessages: [
-      `Hold on, fetching your personalized quotes...`,
+      `Fetching your personalized quotes...`,
     ],
   }),
   processResponse: (response) => ({
@@ -893,10 +943,9 @@ const quotePlansReady: MotorConversationStep = {
   widgetType: 'none',
   getScript: (state) => {
     const v = state.vehicleData;
-    const vType = state.vehicleType === 'bike' ? 'bike' : 'car';
     return {
       botMessages: [
-        `Perfect! I've found the best plans for your ${v.make} ${v.model}.\n\nLet me show you your options 👇`,
+        `We found the best plans for your ${v.make} ${v.model}.`,
       ],
     };
   },
@@ -908,18 +957,12 @@ const quotePlanSelection: MotorConversationStep = {
   id: 'quote.plan_selection',
   module: 'quote',
   widgetType: 'plan_selector',
-  getScript: (state) => {
-    const v = state.vehicleData;
-    const isBrandNew = state.vehicleEntryType === 'brand_new';
-    const age = v.registrationYear ? new Date().getFullYear() - v.registrationYear : 0;
-    const carLabel = isBrandNew
-      ? `your brand new ${v.make} ${v.model}`
-      : `your ${age}-year-old ${v.make} ${v.model}`;
+  getScript: () => {
     return {
       botMessages: [
-        `Select your plan\n\nAll plans include 1 year Own Damage and 3 years Third-party coverage.`,
+        `Choose a plan that fits your needs.`,
       ],
-      subText: 'Up next: Explore 14+ add-ons to enhance your coverage',
+      subText: `All plans include 1 year Own Damage and 3 years Third-party coverage. You can add more protection with add-ons in the next step.`,
     };
   },
   processResponse: (response, state) => ({
@@ -941,7 +984,8 @@ const quotePlanSelected: MotorConversationStep = {
     const planName = state.selectedPlan?.name || 'plan';
     return {
       botMessages: [
-        `Great choice! You've selected the ${planName}.\n\nNow let's customize it with add-ons that make sense for you.`,
+        `${planName} — good choice.`,
+        `Now let us customise it with add-ons that suit your needs.`,
       ],
     };
   },
@@ -962,8 +1006,9 @@ const addonsOutOfPocket: MotorConversationStep = {
   widgetType: 'out_of_pocket_addons',
   getScript: () => ({
     botMessages: [
-      `Let's add some protection to reduce your out-of-pocket expenses.`,
+      `These add-ons reduce what you pay out of pocket during a claim.`,
     ],
+    subText: `Select the ones that matter to you. You can add multiple.`,
   }),
   processResponse: (response) => ({
     selectedAddOns: response.addons || [],
@@ -996,13 +1041,14 @@ const addonsComplete: MotorConversationStep = {
     if (totalAddons > 0) {
       return {
         botMessages: [
-          `Perfect! You've selected ${totalAddons} add-on${totalAddons > 1 ? 's' : ''}.`,
+          `You have selected ${totalAddons} add-on${totalAddons > 1 ? 's' : ''}.`,
+          `Let us put together your final premium.`,
         ],
       };
     }
     return {
       botMessages: [
-        `No worries! Your base plan provides great coverage.`,
+        `No add-ons selected — your base plan already provides solid coverage.`,
       ],
     };
   },
@@ -1034,7 +1080,8 @@ const paymentProcess: MotorConversationStep = {
     const grandTotal = basePremium + addonPremium;
     return {
       botMessages: [
-        `Initiating secure payment for ₹${Math.round(grandTotal).toLocaleString()}...\n\n✓ Payment successful!`,
+        `Processing your payment of Rs. ${Math.round(grandTotal).toLocaleString()}...`,
+        `Payment successful.`,
       ],
     };
   },
@@ -1050,7 +1097,8 @@ const paymentSuccess: MotorConversationStep = {
     const vehicleName = `${state.vehicleData.make} ${state.vehicleData.model}`;
     return {
       botMessages: [
-        `Congratulations! Your ${vehicleName} is now insured with ACKO.\n\nYour policy is active and you're fully protected on the road.`,
+        `Congratulations! Your ${vehicleName} is now insured with ACKO.`,
+        `Your policy is active and you are fully covered on the road.`,
       ],
     };
   },

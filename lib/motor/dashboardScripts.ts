@@ -67,7 +67,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getScript: (state) => {
       return {
         botMessages: [
-          `Welcome back${state.userName ? ', ' + state.userName : ''}! 🚗`,
+          `Welcome back${state.userName ? ', ' + state.userName : ''}.`,
+          `Here is your policy overview.`,
           buildMotorPolicySummary(state),
         ],
       };
@@ -237,8 +238,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'none',
     getScript: () => ({
       botMessages: [
-        `I'll help you file a claim. We'll need a few details about the incident so we can process it quickly.`,
-        `This should take about 2-3 minutes.`,
+        `We will help you file a claim. This involves a few questions about the incident so we can process it quickly.`,
+        `It should take about 2-3 minutes.`,
       ],
     }),
     processResponse: () => ({}),
@@ -251,7 +252,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: ['What type of claim are you filing?'],
+      botMessages: [`What type of claim is this?`],
+      subText: `This helps us route your claim to the right team.`,
       options: [
         { id: 'own_damage', label: 'Own Damage', icon: 'car', description: 'Your vehicle was damaged' },
         { id: 'third_party', label: 'Third Party', icon: 'shield', description: 'Damage caused to someone else' },
@@ -284,7 +286,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
             { id: 'other', label: 'Something Else', description: 'Other type of third-party claim' },
           ];
       return {
-        botMessages: ['What kind of incident was it?'],
+        botMessages: [`What kind of incident was it?`],
         options,
       };
     },
@@ -298,7 +300,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'text_input',
     getScript: () => ({
-      botMessages: ['Where did the incident happen?'],
+      botMessages: [`Where did the incident happen?`],
+      subText: `An approximate location helps our team coordinate with nearby garages and surveyors.`,
       placeholder: 'e.g., MG Road near Cyber City, Gurgaon',
       inputType: 'text' as const,
     }),
@@ -312,7 +315,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'text_input',
     getScript: () => ({
-      botMessages: ['When did this happen?'],
+      botMessages: [`When did this happen?`],
+      subText: `Include the date and approximate time if you remember.`,
       placeholder: 'e.g., 15 Feb 2026, around 3:30 PM',
       inputType: 'text' as const,
     }),
@@ -328,7 +332,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getScript: (state) => {
       const incidentLabel = INCIDENT_LABELS[state.dashboardClaimIncidentType] || 'the incident';
       return {
-        botMessages: [`Please describe how ${incidentLabel} happened. Include as much detail as you can.`],
+        botMessages: [`Please describe how the ${incidentLabel.toLowerCase()} happened.`],
+        subText: `Include as much detail as you can — this helps our team assess your claim faster.`,
         placeholder: 'e.g., Was turning left at traffic signal when a bike hit the rear bumper',
         inputType: 'text' as const,
       };
@@ -343,7 +348,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: ['Was anyone injured in the incident?'],
+      botMessages: [`Was anyone injured in the incident?`],
+      subText: `If injuries were reported, your claim will be marked as high priority.`,
       options: [
         { id: 'yes', label: 'Yes', description: 'Someone was hurt' },
         { id: 'no', label: 'No', description: 'No injuries' },
@@ -359,7 +365,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: ['Who was driving the vehicle at the time of the incident?'],
+      botMessages: [`Who was driving the vehicle at the time?`],
       options: [
         { id: 'owner', label: 'I was driving (owner)', description: 'Policy holder was behind the wheel' },
         { id: 'other', label: 'Someone else was driving', description: 'Another authorized person' },
@@ -375,7 +381,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: ['Was another vehicle involved?'],
+      botMessages: [`Was another vehicle involved in the incident?`],
       options: [
         { id: 'yes', label: 'Yes', description: 'Another vehicle was part of the incident' },
         { id: 'no', label: 'No', description: 'Single vehicle incident' },
@@ -391,7 +397,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'text_input',
     getScript: () => ({
-      botMessages: ['Please share any details about the other vehicle or driver — registration number, contact info, or anything you noted.'],
+      botMessages: [`Please share any details about the other vehicle or driver.`],
+      subText: `Registration number, contact info, or anything you noted.`,
       placeholder: 'e.g., White Hyundai i20, DL 4C XX 1234',
       inputType: 'text' as const,
     }),
@@ -406,11 +413,10 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'selection_cards',
     getScript: (state) => {
       const needsFir = state.dashboardClaimIncidentType === 'theft' || state.dashboardClaimInjury;
-      const msg = needsFir
-        ? 'A police report is typically required for this type of incident. Have you filed one?'
-        : 'Was a police report / FIR filed for this incident?';
       return {
-        botMessages: [msg],
+        botMessages: needsFir
+          ? [`A police report is typically required for this type of incident. Have you filed one?`]
+          : [`Was a police report or FIR filed for this incident?`],
         options: [
           { id: 'yes', label: 'Yes, FIR filed' },
           { id: 'no', label: 'No, not yet' },
@@ -427,7 +433,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'claims',
     widgetType: 'text_input',
     getScript: () => ({
-      botMessages: ['Please enter the FIR number:'],
+      botMessages: [`Please enter the FIR number.`],
       placeholder: 'e.g., FIR-2026/0234',
       inputType: 'text' as const,
     }),
@@ -442,8 +448,9 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'selection_cards',
     getScript: () => ({
       botMessages: [
-        'Do you have photos of the damage? Clear photos speed up claim processing significantly.',
+        `Do you have photos of the damage?`,
       ],
+      subText: `Clear photos speed up claim processing significantly.`,
       options: [
         { id: 'yes', label: 'Yes, I have photos', description: 'Upload now or share later' },
         { id: 'later', label: 'I\'ll share later', description: 'Our team will follow up' },
@@ -464,7 +471,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'none',
     getScript: () => ({
       botMessages: [
-        'Our claims team will reach out via WhatsApp or email so you can share the photos. Having them ready will help expedite your claim.',
+        `Our claims team will reach out via WhatsApp or email so you can share the photos.`,
+        `Having them ready will help expedite your claim.`,
       ],
     }),
     processResponse: () => ({}),
@@ -480,14 +488,15 @@ const motorDashboardSteps: MotorConversationStep[] = [
       const isTheft = state.dashboardClaimIncidentType === 'theft';
       if (isTheft) {
         return {
-          botMessages: ['Since this is a theft claim, we\'ll handle this directly. Let\'s move to the cost estimate.'],
+          botMessages: [`Since this is a theft claim, we will handle this directly. Let us move to the cost estimate.`],
           options: [{ id: 'skip', label: 'Continue' }],
         };
       }
       return {
         botMessages: [
-          'Where would you like to get your vehicle repaired? Here are some network garages near you:',
+          `Where would you like to get your vehicle repaired?`,
         ],
+        subText: `Network garages offer cashless claims — no upfront payment from you.`,
         options: [
           ...NETWORK_GARAGES.map(g => ({ id: g.id, label: g.name, description: g.distance })),
           { id: 'other_garage', label: 'I have a preferred garage', description: 'Non-network garage' },
@@ -536,8 +545,9 @@ const motorDashboardSteps: MotorConversationStep[] = [
 
       return {
         botMessages: [
-          `Here's a summary of your claim:\n\nClaim Type: ${typeLabel}\nIncident: ${incidentLabel}\nLocation: ${state.dashboardClaimLocation}\nDate & Time: ${state.dashboardClaimDate}\nDescription: ${state.dashboardClaimDescription}\nInjuries: ${injuryText}\nDriver: ${driverText}\nOther Vehicle: ${otherVehicleText}\nPolice Report: ${policeText}\nPhotos: ${photosText}\nGarage: ${garage}\nEstimated Cost: ₹${Number(state.dashboardClaimAmount).toLocaleString()}`,
-          'Does everything look correct?',
+          `Here is a summary of your claim.`,
+          `Claim Type: ${typeLabel}\nIncident: ${incidentLabel}\nLocation: ${state.dashboardClaimLocation}\nDate: ${state.dashboardClaimDate}\nDescription: ${state.dashboardClaimDescription}\nInjuries: ${injuryText}\nDriver: ${driverText}\nOther Vehicle: ${otherVehicleText}\nPolice Report: ${policeText}\nPhotos: ${photosText}\nGarage: ${garage}\nEstimated Cost: Rs. ${Number(state.dashboardClaimAmount).toLocaleString()}`,
+          `Does everything look correct?`,
         ],
         options: [
           { id: 'confirm', label: 'Submit Claim', icon: 'document' },
@@ -575,8 +585,10 @@ const motorDashboardSteps: MotorConversationStep[] = [
 
       return {
         botMessages: [
-          `Claim submitted successfully!\n\nClaim ID: ${claimId}\nExpected resolution: ${isTheft ? '7-10' : '3-5'} working days${urgencyNote}`,
-          `What happens next:\n\n${nextSteps}\n\nWe will keep you updated via SMS and email at every step.`,
+          `Claim submitted successfully.`,
+          `Claim ID: ${claimId}\nExpected resolution: ${isTheft ? '7-10' : '3-5'} working days${urgencyNote}`,
+          `What happens next:\n\n${nextSteps}`,
+          `We will keep you updated via SMS and email at every step.`,
         ],
         options: [
           { id: 'track', label: 'Track This Claim', icon: 'clock' },
@@ -861,8 +873,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'selection_cards',
     getScript: () => ({
       botMessages: [
-        '✅ Download started! Your document will be saved to your device.',
-        'Need anything else?',
+        `Download started. Your document will be saved to your device.`,
+        `Need anything else?`,
       ],
       options: [
         { id: 'more', label: 'Download More Documents' },
@@ -957,8 +969,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
       else if (editType === 'update_address') summary = 'Update registered address';
       return {
         botMessages: [
-          '✅ Your request has been submitted successfully!',
-          `Our team will review and update your policy within 2-3 working days. You'll receive a confirmation via email and SMS.`,
+          `Your request has been submitted successfully.`,
+          `Our team will review and update your policy within 2-3 working days. You will receive a confirmation via email and SMS.`,
         ],
         options: [
           { id: 'track', label: 'Track This Request', icon: 'clock' },
