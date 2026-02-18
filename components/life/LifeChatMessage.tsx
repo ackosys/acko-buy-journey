@@ -3,19 +3,28 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-/* ── Heart Avatar — Red heart in white circle ── */
-function HeartAvatar() {
+/* ── Umbrella Avatar — Life Insurance identity ── */
+function UmbrellaAvatar() {
   return (
     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-lg shadow-purple-900/20 flex-shrink-0">
-      <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="#EF4444" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+      <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M12 2C6.477 2 2 6.477 2 12h4a6 6 0 0 1 12 0h4c0-5.523-4.477-10-10-10Z"
+          fill="#7C3AED"
+        />
+        <path
+          d="M12 12v8c0 1.105-.895 2-2 2s-2-.895-2-2"
+          stroke="#7C3AED"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <line x1="12" y1="2" x2="12" y2="4" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" />
       </svg>
     </div>
   );
 }
 
-/** Compatible with both Health (lib/types) and Life (core/types) ChatMessage */
-interface ChatMessageProps {
+interface LifeChatMessageProps {
   message: {
     id: string;
     type: 'bot' | 'user' | 'system';
@@ -27,7 +36,7 @@ interface ChatMessageProps {
   onEdit?: (stepId: string) => void;
 }
 
-export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
+export default function LifeChatMessage({ message, onEdit }: LifeChatMessageProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   if (message.type === 'system') {
@@ -76,7 +85,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
     );
   }
 
-  // Bot message — glass card on dark with heart avatar
+  // Bot message — glass card on dark with umbrella avatar
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -84,12 +93,10 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       transition={{ duration: 0.3, ease: [0.215, 0.61, 0.355, 1] }}
       className="flex gap-3 mb-4"
     >
-      {/* Heart Avatar */}
       <div className="flex-shrink-0 mt-0.5">
-        <HeartAvatar />
+        <UmbrellaAvatar />
       </div>
 
-      {/* Message — frosted glass on dark */}
       <div className="max-w-[85%]">
         <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot border border-white/10">
           {message.content.split('\n\n').map((paragraph, i) => (
@@ -103,8 +110,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
   );
 }
 
-/* ── Typing Indicator ── */
-export function TypingIndicator() {
+/* ── Typing Indicator with Umbrella ── */
+export function LifeTypingIndicator() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -113,7 +120,7 @@ export function TypingIndicator() {
       className="flex gap-3 mb-4"
     >
       <div className="flex-shrink-0">
-        <HeartAvatar />
+        <UmbrellaAvatar />
       </div>
       <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5 border border-white/10">
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '0ms' }} />
