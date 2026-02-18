@@ -1067,6 +1067,8 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
 export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void }) {
   const availablePlans = useMotorStore((s) => s.availablePlans) || [];
   const idv = useMotorStore((s) => s.idv);
+  const vehicleEntryType = useMotorStore((s) => s.vehicleEntryType);
+  const isBrandNew = vehicleEntryType === 'brand_new';
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showGarageTier, setShowGarageTier] = useState(false);
@@ -1113,22 +1115,35 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
         </p>
       </div>
 
+      {/* Zero Depreciation Plan — shown first for brand new, second otherwise */}
+      {isBrandNew && zeroDepLowest && (
+        <PlanCard
+          plan={zeroDepLowest}
+          title="Zero Depreciation Plan (Bumper to Bumper)"
+          badge="Recommended for your car"
+          price={formatPrice(zeroDepLowest.totalPrice)}
+          description="Covers damage to your car and damage caused by your car to others and their property. Covers full cost of car parts if they are replaced during repairs."
+          onSelect={() => handlePlanClick(zeroDepLowest)}
+          recommended
+        />
+      )}
+
       {/* Comprehensive Plan */}
       {comprehensiveLowest && (
         <PlanCard
           plan={comprehensiveLowest}
-          title="Comprehensive Plans"
-          subtitle="2 options starting from"
-          badge="Recommended for your car"
+          title={isBrandNew ? 'Comprehensive' : 'Comprehensive Plans'}
+          subtitle={isBrandNew ? undefined : '2 options starting from'}
+          badge={isBrandNew ? undefined : 'Recommended for your car'}
           price={formatPrice(comprehensiveLowest.totalPrice)}
-          strikePrice={comprehensiveLowest.totalPrice + 1000}
-          description="This plan includes fire, theft, accident, and third party liability cover."
+          strikePrice={isBrandNew ? undefined : comprehensiveLowest.totalPrice + 1000}
+          description="Covers damage to your car and damage caused by your car to others and their property."
           onSelect={() => handlePlanClick(comprehensiveLowest)}
         />
       )}
 
-      {/* Zero Depreciation Plan */}
-      {zeroDepLowest && (
+      {/* Zero Depreciation Plan — shown second for existing cars */}
+      {!isBrandNew && zeroDepLowest && (
         <PlanCard
           plan={zeroDepLowest}
           title="Zero Depreciation Plans"
@@ -1141,8 +1156,8 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
         />
       )}
 
-      {/* Third Party Plan */}
-      {thirdPartyPlan && (
+      {/* Third Party Plan — only for existing cars, not brand new */}
+      {!isBrandNew && thirdPartyPlan && (
         <PlanCard
           plan={thirdPartyPlan}
           title="Third-party Plan"
