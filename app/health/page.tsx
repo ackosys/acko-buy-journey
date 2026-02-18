@@ -11,11 +11,9 @@ import { ExpertPanel, AIChatPanel } from '../../components/Panels';
 import PostPaymentJourney from '../../components/PostPaymentJourney';
 import Dashboard from '../../components/Dashboard';
 import AckoLogo from '../../components/AckoLogo';
-import LanguageSelector from '../../components/LanguageSelector';
-import PrototypeIntro from '../../components/PrototypeIntro';
 import { useT } from '../../lib/translations';
 
-type Screen = 'intro' | 'language' | 'entry' | 'landing' | 'chat' | 'post_payment' | 'dashboard';
+type Screen = 'entry' | 'landing' | 'chat' | 'post_payment' | 'dashboard';
 
 /* ═══════════════════════════════════════════════════════
    Welcome Overlay — 3s auto-dismiss transition on top of entry
@@ -81,7 +79,7 @@ export default function HealthJourney() {
   const { updateState, resetJourney } = useJourneyStore();
   const paymentComplete = useJourneyStore(s => s.paymentComplete);
   const isExistingUser = useJourneyStore(s => s.isExistingAckoUser);
-  const [screen, setScreen] = useState<Screen>('intro');
+  const [screen, setScreen] = useState<Screen>('entry');
   const [showWelcome, setShowWelcome] = useState(true);
   const [hydrated, setHydrated] = useState(false);
 
@@ -145,12 +143,6 @@ export default function HealthJourney() {
       <AIChatPanel />
 
       <AnimatePresence mode="wait">
-        {screen === 'intro' && (
-          <PrototypeIntro key="intro" onDone={() => setScreen('language')} />
-        )}
-        {screen === 'language' && (
-          <LanguageSelector key="language" onSelect={() => setScreen('entry')} />
-        )}
         {screen === 'entry' && (
           <EntryScreen key="entry" onSelect={handleEntrySelect} onJumpToPostPayment={handleJumpToPostPayment} onJumpToDashboard={handleJumpToDashboard} onJumpToCall={handleJumpToCall} onJumpToPostCallScenarios={handleJumpToPostCallScenarios} />
         )}

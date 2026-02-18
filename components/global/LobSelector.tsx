@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { LobConfig } from '../../lib/core/types';
 
@@ -52,207 +51,89 @@ const BENEFIT_LABELS: Record<string, string> = {
   life: 'Secure your family\'s future',
 };
 
-const LOB_GRADIENTS: Record<string, { from: string; via: string; to: string; accent: string }> = {
-  health: {
-    from: 'from-rose-500/30',
-    via: 'via-pink-500/20',
-    to: 'to-purple-500/10',
-    accent: '#EF4444',
-  },
-  car: {
-    from: 'from-blue-500/30',
-    via: 'via-cyan-500/20',
-    to: 'to-purple-500/10',
-    accent: '#3B82F6',
-  },
-  bike: {
-    from: 'from-indigo-500/30',
-    via: 'via-blue-500/20',
-    to: 'to-purple-500/10',
-    accent: '#6366F1',
-  },
-  life: {
-    from: 'from-violet-500/30',
-    via: 'via-purple-500/20',
-    to: 'to-pink-500/10',
-    accent: '#8B5CF6',
-  },
-};
-
 export default function LobSelector({ lobs, onSelect }: LobSelectorProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll carousel
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % lobs.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [lobs.length]);
-
-  // Scroll to active card
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const cardWidth = scrollRef.current.scrollWidth / lobs.length;
-    scrollRef.current.scrollTo({
-      left: activeIndex * cardWidth,
-      behavior: 'smooth',
-    });
-  }, [activeIndex, lobs.length]);
-
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
-    const scrollLeft = scrollRef.current.scrollLeft;
-    const cardWidth = scrollRef.current.scrollWidth / lobs.length;
-    const newIndex = Math.round(scrollLeft / cardWidth);
-    if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
-    }
-  };
-
   return (
-    <div className="relative">
-      {/* Carousel Container */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-6 px-6"
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        {lobs.map((lob, i) => {
-          const gradient = LOB_GRADIENTS[lob.id] || LOB_GRADIENTS.health;
-          const isActive = i === activeIndex;
-          
-          return (
-            <motion.button
-              key={lob.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ 
-                opacity: 1, 
-                scale: isActive ? 1 : 0.95,
-              }}
-              transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
-              onClick={() => lob.active && onSelect(lob)}
-              disabled={!lob.active}
-              className={`relative min-w-[85%] snap-center rounded-3xl overflow-hidden border transition-all duration-300 ${
-                lob.active
-                  ? 'cursor-pointer active:scale-[0.98]'
-                  : 'opacity-60 cursor-not-allowed'
-              } ${isActive ? 'border-white/30 shadow-2xl shadow-purple-900/30' : 'border-white/10'}`}
-              style={{
-                height: '320px',
-              }}
-            >
-              {/* Gradient Background */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} ${gradient.via} ${gradient.to}`} />
-              
-              {/* Decorative Orb */}
-              <div
-                className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl opacity-40"
-                style={{ background: gradient.accent }}
-              />
-              
-              {/* Content */}
-              <div className="relative h-full flex flex-col justify-between p-6">
-                {/* Top Section */}
-                <div>
-                  {/* Icon */}
-                  <motion.div
-                    animate={{ scale: isActive ? 1.1 : 1 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                    className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
-                      lob.active
-                        ? 'bg-white/20 backdrop-blur-sm text-white'
-                        : 'bg-white/10 text-white/40'
-                    }`}
-                  >
-                    <LobIcon icon={lob.icon} className="w-8 h-8" />
-                  </motion.div>
+    <div className="grid grid-cols-2 gap-3">
+      {lobs.map((lob, i) => {
+        const isLarge = lob.id === 'health';
+        const isWide = lob.id === 'life';
+        const cardSize = isLarge
+          ? 'col-span-2 row-span-2'
+          : isWide
+            ? 'col-span-2 row-span-1'
+            : 'col-span-1 row-span-1';
 
-                  {/* Title */}
-                  <motion.h3
-                    animate={{ y: isActive ? 0 : 5 }}
-                    className={`text-2xl font-bold mb-2 ${lob.active ? 'text-white' : 'text-white/60'}`}
-                  >
-                    {lob.label}
-                  </motion.h3>
-
-                  {/* Tagline */}
-                  <p className={`text-sm mb-3 ${lob.active ? 'text-white/70' : 'text-white/40'}`}>
-                    {BENEFIT_LABELS[lob.id] || lob.tagline}
-                  </p>
+        return (
+          <motion.button
+            key={lob.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 + i * 0.08, type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={() => lob.active && onSelect(lob)}
+            disabled={!lob.active}
+            className={`${cardSize} relative rounded-2xl overflow-hidden transition-all duration-200 group text-left ${
+              lob.active
+                ? 'bg-white/10 backdrop-blur-sm border border-white/15 hover:bg-white/20 hover:border-white/30 cursor-pointer active:scale-[0.98]'
+                : 'bg-white/5 border border-white/10 opacity-60 cursor-not-allowed'
+            }`}
+            style={{
+              minHeight: isLarge ? '260px' : isWide ? '120px' : '140px',
+            }}
+          >
+            {/* Content */}
+            <div className={`h-full flex ${
+              isWide ? 'flex-row items-center gap-4 p-4' : 'flex-col justify-between p-5'
+            }`}>
+              {/* Top / Left */}
+              <div className={isWide ? 'flex-1' : ''}>
+                {/* Icon */}
+                <div className={`${
+                  isLarge ? 'w-14 h-14 mb-4' : 'w-12 h-12 mb-3'
+                } rounded-full bg-white/15 flex items-center justify-center text-white group-hover:bg-white/25 transition-colors`}>
+                  <LobIcon icon={lob.icon} className={isLarge ? 'w-7 h-7' : 'w-6 h-6'} />
                 </div>
 
-                {/* Bottom Section */}
-                <div>
-                  {/* Description */}
-                  {lob.active && (
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: isActive ? 1 : 0.6, y: isActive ? 0 : 5 }}
-                      className="text-xs text-white/80 mb-4 font-medium"
-                    >
-                      {lob.description}
-                    </motion.p>
-                  )}
+                {/* Title */}
+                <h3 className={`${
+                  isLarge ? 'text-xl' : 'text-lg'
+                } font-bold text-white leading-tight`}>
+                  {lob.label}
+                </h3>
 
-                  {/* CTA Arrow */}
-                  {lob.active && (
-                    <motion.div
-                      animate={{ x: isActive ? 0 : -5, opacity: isActive ? 1 : 0.5 }}
-                      className="flex items-center gap-2"
-                    >
-                      <span className="text-sm font-semibold text-white">Explore</span>
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </motion.div>
-                  )}
-
-                  {!lob.active && (
-                    <span className="text-xs font-medium text-purple-400/80 bg-purple-600/20 px-3 py-1 rounded-full inline-block">
-                      Coming Soon
-                    </span>
-                  )}
-                </div>
+                {/* Tagline */}
+                <p className={`${
+                  isLarge ? 'text-sm mt-1.5' : 'text-xs mt-1'
+                } text-purple-200`}>
+                  {BENEFIT_LABELS[lob.id] || lob.tagline}
+                </p>
               </div>
 
-              {/* Shine Effect */}
-              {isActive && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                  initial={{ x: '-100%' }}
-                  animate={{ x: '200%' }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 3,
-                    ease: 'easeInOut',
-                  }}
-                />
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
+              {/* Bottom / Right */}
+              <div className={isWide ? 'shrink-0' : 'mt-auto pt-3'}>
+                {lob.active && (
+                  <p className={`${isLarge ? 'text-xs' : 'text-[11px]'} text-purple-200/70 mb-2`}>
+                    {lob.description}
+                  </p>
+                )}
+                {!lob.active && (
+                  <span className="text-[11px] font-medium text-purple-200/80 bg-white/10 px-2.5 py-1 rounded-full inline-block">
+                    Coming Soon
+                  </span>
+                )}
+              </div>
+            </div>
 
-      {/* Dots Indicator */}
-      <div className="flex items-center justify-center gap-2 mt-6">
-        {lobs.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveIndex(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === activeIndex ? 'w-8 bg-purple-400' : 'w-1.5 bg-white/20'
-            }`}
-          />
-        ))}
-      </div>
+            {/* Chevron */}
+            {lob.active && (
+              <div className="absolute top-5 right-4">
+                <svg className="w-5 h-5 text-white/50 group-hover:text-white/80 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            )}
+          </motion.button>
+        );
+      })}
     </div>
   );
 }

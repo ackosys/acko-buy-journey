@@ -9,12 +9,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
+import LifeEntryScreen from '../../components/life/LifeEntryScreen';
 import LifeLandingPage from '../../components/life/LifeLandingPage';
 import LifeHeader from '../../components/life/LifeHeader';
 import { LifeExpertPanel, LifeAIChatPanel } from '../../components/life/LifePanels';
 import AckoLogo from '../../components/AckoLogo';
 
-type Screen = 'landing' | 'chat';
+type Screen = 'entry' | 'landing' | 'chat';
 
 /* ═══════════════════════════════════════════════
    Splash Screen — Auto-dismiss on entry
@@ -95,7 +96,7 @@ function LifeSplashScreen({ onDone }: { onDone: () => void }) {
 export default function LifeJourneyPage() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete } = store;
-  const [screen, setScreen] = useState<Screen>('landing');
+  const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
@@ -134,8 +135,18 @@ export default function LifeJourneyPage() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {/* Landing Page — hidden while splash is showing */}
-        {screen === 'landing' && !showSplash && (
+        {/* Entry Screen — stepper journey overview */}
+        {screen === 'entry' && !showSplash && (
+          <LifeEntryScreen
+            key="entry"
+            onBuyJourney={() => setScreen('landing')}
+            onJumpToEkyc={() => setScreen('landing')}
+            onJumpToVerification={() => setScreen('landing')}
+          />
+        )}
+
+        {/* Landing Page */}
+        {screen === 'landing' && (
           <LifeLandingPage key="landing" onGetStarted={handleGetStarted} />
         )}
 
