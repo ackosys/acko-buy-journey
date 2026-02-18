@@ -1,0 +1,424 @@
+'use client';
+
+/**
+ * Life Insurance Chat Container — Full conversational engine for Life journey.
+ * Mirrors Health ChatContainer patterns: edit flow, inline/bottom-sheet split,
+ * typing indicator, auto-advance, scrolling.
+ */
+
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useLifeJourneyStore } from '../../lib/life/store';
+import { getLifeStep } from '../../lib/life/scripts';
+import LifeChatMessage, { LifeTypingIndicator } from './LifeChatMessage';
+import {
+  LifeSelectionCards,
+  LifeNumberInput,
+  LifeTextInput,
+  LifeDatePicker,
+  LifeRiderToggle,
+  LifePremiumSummary,
+  LifeReviewSummary,
+  LifePostPaymentTimeline,
+  LifeCelebration,
+} from './LifeChatWidgets';
+import type { LifeJourneyState } from '../../lib/life/types';
+
+export default function LifeChatContainer() {
+  const {
+    currentStepId,
+    conversationHistory,
+    isTyping,
+    resolvedPersona,
+    addMessage,
+    updateState,
+    updateUserMessage,
+    trimAndUpdateFromStep,
+  } = useLifeJourneyStore();
+
+  const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const processedRef = useRef<Set<string>>(new Set());
+  const [showWidget, setShowWidget] = useState(false);
+  const [editModal, setEditModal] = useState<{ stepId: string; visible: boolean }>({ stepId: '', visible: false });
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+
+  // Scroll to bottom on new content
+  useEffect(() => {
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }, 100);
+  }, [conversationHistory, isTyping, showWidget]);
+
+  // Process current step — bot messages + auto-advance for 'none' widgets
+  useEffect(() => {
+    const step = getLifeStep(currentStepId);
+    if (!step) return;
+
+    const currentState = useLifeJourneyStore.getState() as LifeJourneyState;
+
+    // Skip if condition not met
+    if (step.condition && !step.condition(currentState)) {
+      const nextStepId = step.getNextStep(null, currentState) ?? currentStepId;
+      const nextStep = getLifeStep(nextStepId);
+      updateState({
+        currentStepId: nextStepId,
+        currentModule: (nextStep?.module ?? currentState.currentModule) as LifeJourneyState['currentModule'],
+      });
+      return;
+    }
+
+    const key = `${currentStepId}-${currentState.conversationHistory.length}-${currentState.name}-${currentState.age}`;
+    if (processedRef.current.has(key)) return;
+    processedRef.current.add(key);
+
+    const script = step.getScript(resolvedPersona, currentState);
+
+    const addBotMessage = async () => {
+      setShowWidget(false);
+      updateState({ isTyping: true });
+
+      const mergedContent = script.botMessages.join('\n\n');
+      const delay = 400 + Math.min(mergedContent.length * 8, 1800);
+      await new Promise(r => setTimeout(r, delay));
+
+      addMessage({
+        type: 'bot',
+        content: mergedContent,
+        stepId: currentStepId,
+        module: step.module,
+      });
+      updateState({ isTyping: false });
+
+      // Auto-advance for 'none' widget types (educational / transition steps)
+      if (step.widgetType === 'none') {
+        await new Promise(r => setTimeout(r, 400));
+        const freshState = useLifeJourneyStore.getState() as LifeJourneyState;
+        const nextStepId = step.getNextStep(null, freshState) ?? currentStepId;
+        const nextStep = getLifeStep(nextStepId);
+        updateState({
+          currentStepId: nextStepId,
+          currentModule: (nextStep?.module ?? freshState.currentModule) as LifeJourneyState['currentModule'],
+        });
+        return;
+      }
+
+      setShowWidget(true);
+    };
+
+    addBotMessage();
+  }, [currentStepId]);
+
+  // Handle edit request
+  const handleEditRequest = (stepId: string) => {
+    setEditModal({ stepId, visible: true });
+  };
+
+  const confirmEdit = () => {
+    const { stepId } = editModal;
+    setEditModal({ stepId: '', visible: false });
+    setEditingStepId(stepId);
+  };
+
+  // Handle edit response
+  const handleEditResponse = useCallback((response: any) => {
+    if (!editingStepId) return;
+    const step = getLifeStep(editingStepId);
+    if (!step) return;
+
+    const currentState = useLifeJourneyStore.getState() as LifeJourneyState;
+    const script = step.getScript(resolvedPersona, currentState);
+
+    let userLabel = String(response);
+    if (Array.isArray(response)) {
+      userLabel = response.map(r => {
+        const opt = script.options?.find(o => o.id === r);
+        return opt ? opt.label : r;
+      }).join(', ');
+    } else if (script.options) {
+      const opt = script.options.find(o => o.id === response);
+      if (opt) userLabel = opt.label;
+    }
+
+    trimAndUpdateFromStep(editingStepId, userLabel);
+
+    const stateUpdate = step.processResponse(response, currentState);
+    const mergedState = { ...currentState, ...stateUpdate } as LifeJourneyState;
+    updateState(stateUpdate);
+
+    setEditingStepId(null);
+    setShowWidget(false);
+    processedRef.current.clear();
+
+    const nextStepId = step.getNextStep(response, mergedState) ?? currentStepId;
+    const nextStep = getLifeStep(nextStepId);
+    setTimeout(() => {
+      updateState({
+        currentStepId: nextStepId,
+        currentModule: (nextStep?.module ?? mergedState.currentModule) as LifeJourneyState['currentModule'],
+      });
+    }, 300);
+  }, [editingStepId, resolvedPersona]);
+
+  // Handle response from user widget interaction
+  const handleResponse = useCallback((response: any) => {
+    const step = getLifeStep(currentStepId);
+    if (!step) return;
+
+    const currentState = useLifeJourneyStore.getState() as LifeJourneyState;
+    const script = step.getScript(resolvedPersona, currentState);
+
+    let userLabel = String(response);
+    if (Array.isArray(response)) {
+      userLabel = response.map(r => {
+        const opt = script.options?.find(o => o.id === r);
+        return opt ? opt.label : r;
+      }).join(', ');
+    } else if (script.options) {
+      const opt = script.options.find(o => o.id === response);
+      if (opt) userLabel = opt.label;
+    }
+
+    // Friendly labels for special widget types
+    if (step.widgetType === 'date_picker') {
+      userLabel = `DOB: ${response}`;
+    } else if (step.widgetType === 'premium_summary') {
+      userLabel = 'Reviewed quote, continuing';
+    }
+
+    addMessage({
+      type: 'user',
+      content: userLabel,
+      stepId: currentStepId,
+      module: step.module,
+      editable: true,
+    });
+
+    // Handle LOB navigation from explore step
+    if (currentStepId === 'life_explore_other_lobs') {
+      setShowWidget(false);
+      const routes: Record<string, string> = { health: '/health', motor: '/motor', home: '/' };
+      const route = routes[response];
+      if (route) {
+        setTimeout(() => router.push(route), 400);
+        return;
+      }
+    }
+
+    const stateUpdate = step.processResponse(response, useLifeJourneyStore.getState() as LifeJourneyState);
+    const mergedState = { ...useLifeJourneyStore.getState(), ...stateUpdate } as LifeJourneyState;
+    updateState(stateUpdate);
+
+    setShowWidget(false);
+    const nextStepId = step.getNextStep(response, mergedState) ?? currentStepId;
+    const nextStep = getLifeStep(nextStepId);
+    setTimeout(() => {
+      updateState({
+        currentStepId: nextStepId,
+        currentModule: (nextStep?.module ?? mergedState.currentModule) as LifeJourneyState['currentModule'],
+      });
+    }, 300);
+  }, [currentStepId, resolvedPersona, router]);
+
+  // Determine if widget is large (renders inline in chat) or small (bottom sheet)
+  const isLargeWidget = () => {
+    const step = getLifeStep(currentStepId);
+    if (!step) return false;
+    return ['premium_summary', 'review_summary', 'post_payment_timeline', 'celebration'].includes(step.widgetType);
+  };
+
+  // Render edit widget
+  const renderEditWidget = () => {
+    if (!editingStepId) return null;
+    const step = getLifeStep(editingStepId);
+    if (!step) return null;
+
+    const currentState = useLifeJourneyStore.getState() as LifeJourneyState;
+    const script = step.getScript(resolvedPersona, currentState);
+
+    switch (step.widgetType) {
+      case 'selection_cards':
+      case 'yes_no':
+        return <LifeSelectionCards options={script.options || []} onSelect={handleEditResponse} />;
+      case 'number_input':
+        return <LifeNumberInput placeholder={script.placeholder || ''} subText={script.subText} inputType={script.inputType} min={script.min} max={script.max} onSubmit={handleEditResponse} />;
+      case 'text_input':
+        return <LifeTextInput placeholder={script.placeholder || ''} inputType={script.inputType} onSubmit={handleEditResponse} />;
+      case 'date_picker':
+        return <LifeDatePicker placeholder={script.placeholder} onSubmit={handleEditResponse} />;
+      case 'rider_toggle':
+        return <LifeRiderToggle options={script.options || []} onSelect={handleEditResponse} />;
+      default:
+        return null;
+    }
+  };
+
+  // Render widget based on step's widgetType
+  const renderWidget = () => {
+    const step = getLifeStep(currentStepId);
+    if (!step || !showWidget) return null;
+
+    const currentState = useLifeJourneyStore.getState() as LifeJourneyState;
+    const script = step.getScript(resolvedPersona, currentState);
+
+    switch (step.widgetType) {
+      case 'selection_cards':
+        return <LifeSelectionCards options={script.options || []} onSelect={handleResponse} />;
+      case 'yes_no':
+        return <LifeSelectionCards options={script.options || []} onSelect={handleResponse} />;
+      case 'number_input':
+        return <LifeNumberInput placeholder={script.placeholder || ''} subText={script.subText} inputType={script.inputType} min={script.min} max={script.max} onSubmit={handleResponse} />;
+      case 'text_input':
+        return <LifeTextInput placeholder={script.placeholder || ''} inputType={script.inputType} onSubmit={handleResponse} />;
+      case 'date_picker':
+        return <LifeDatePicker placeholder={script.placeholder} onSubmit={handleResponse} />;
+      case 'rider_toggle':
+        return <LifeRiderToggle options={script.options || []} onSelect={handleResponse} />;
+      case 'premium_summary':
+        return <LifePremiumSummary onContinue={() => handleResponse('continue')} />;
+      case 'celebration':
+        return <LifeCelebration />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 chat-bg-dark">
+      {/* Scrollable chat messages */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="max-w-lg mx-auto">
+          <AnimatePresence initial={false}>
+            {conversationHistory.map((msg) => (
+              <LifeChatMessage key={msg.id} message={msg} onEdit={handleEditRequest} />
+            ))}
+          </AnimatePresence>
+
+          {isTyping && (
+            <div className="mb-4">
+              <LifeTypingIndicator />
+            </div>
+          )}
+
+          {/* Large widgets render inline in the chat */}
+          <AnimatePresence>
+            {showWidget && isLargeWidget() && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="mt-2 mb-4 ml-11"
+              >
+                {renderWidget()}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="h-4" />
+        </div>
+      </div>
+
+      {/* Sticky bottom widget for input-type widgets */}
+      <AnimatePresence>
+        {showWidget && !isLargeWidget() && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+          >
+            <div className="max-w-lg mx-auto px-5 py-5 pb-8">
+              {renderWidget()}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Confirmation Modal */}
+      <AnimatePresence>
+        {editModal.visible && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-50"
+              onClick={() => setEditModal({ stepId: '', visible: false })}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto bg-[#2A1463] border border-white/15 rounded-2xl shadow-2xl z-50 p-6"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </div>
+                <h3 className="text-heading-sm text-white mb-2">Edit this answer?</h3>
+                <p className="text-body-sm text-white/50 mb-6">
+                  The conversation will continue from this point with your updated answer.
+                  Subsequent questions may change based on your new response.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setEditModal({ stepId: '', visible: false })}
+                    className="flex-1 py-2.5 border border-white/20 text-white/70 rounded-xl text-label-md font-medium hover:bg-white/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmEdit}
+                    className="flex-1 py-2.5 bg-white text-[#1C0B47] rounded-xl text-label-md font-medium hover:bg-white/90 transition-colors"
+                  >
+                    Edit answer
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Widget Bottom Sheet */}
+      <AnimatePresence>
+        {editingStepId && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-50"
+              onClick={() => setEditingStepId(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 60 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-[#1E0F46] border-t border-white/10 shadow-2xl px-5 py-6 max-w-lg mx-auto rounded-t-2xl pb-10"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-label-md font-semibold text-white/80">Update your answer</h4>
+                <button onClick={() => setEditingStepId(null)} className="text-white/40 hover:text-white/70 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {renderEditWidget()}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
