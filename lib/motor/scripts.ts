@@ -156,11 +156,11 @@ const manualEntryCongratulations: MotorConversationStep = {
   widgetType: 'none',
   getScript: (state) => ({
     botMessages: [
-      `Congratulations on your new ${vLabel(state)}! 🎉\n\nNo worries about the registration — I'll help you get insured right away.\n\nLet me gather some details about your vehicle.`,
+      `Getting a brand new ${vLabel(state)} from the dealership?\n\nSave up to ₹40,000 on your new ${vLabel(state)}'s on-road price. Let's insure it with ACKO!`,
     ],
   }),
   processResponse: () => ({}),
-  getNextStep: () => 'manual_entry.select_brand',
+  getNextStep: () => 'brand_new.popular_cars',
 };
 
 const manualEntryStart: MotorConversationStep = {
@@ -242,13 +242,22 @@ const manualEntrySelectVariant: MotorConversationStep = {
   widgetType: 'variant_selector',
   getScript: (state) => ({
     botMessages: [
-      `Which ${state.vehicleData.model} variant do you drive?`,
+      state.vehicleEntryType === 'brand_new'
+        ? `Select your ${state.vehicleData.model} variant`
+        : `Which ${state.vehicleData.model} variant do you drive?`,
     ],
   }),
   processResponse: (response, state) => ({
-    vehicleData: { ...state.vehicleData, variant: response },
+    vehicleData: {
+      ...state.vehicleData,
+      variant: response,
+      ...(state.vehicleEntryType === 'brand_new' ? { registrationYear: new Date().getFullYear() } : {}),
+    },
   }),
-  getNextStep: () => 'manual_entry.select_year',
+  getNextStep: (_, state) => {
+    if (state.vehicleEntryType === 'brand_new') return 'brand_new.commercial_check';
+    return 'manual_entry.select_year';
+  },
 };
 
 const manualEntrySelectYear: MotorConversationStep = {
@@ -278,102 +287,143 @@ const manualEntrySelectYear: MotorConversationStep = {
 };
 
 /* ═══════════════════════════════════════════════
-   MODULE: BRAND NEW VEHICLE — Purchase-specific flow
+   MODULE: BRAND NEW VEHICLE — Purchase flow
+   (matches ACKO new car buy journey design)
    ═══════════════════════════════════════════════ */
 
-const brandNewPurchaseMonth: MotorConversationStep = {
-  id: 'brand_new.purchase_month',
+const POPULAR_CARS = [
+  { id: 'tata_nexon', label: 'TATA Nexon', description: '2020-2023' },
+  { id: 'tata_punch', label: 'TATA Punch' },
+  { id: 'mahindra_xuv700', label: 'Mahindra XUV 700' },
+  { id: 'honda_city', label: 'Honda City' },
+  { id: 'kia_carens', label: 'Kia Carens' },
+  { id: 'hyundai_creta', label: 'Hyundai Creta' },
+  { id: 'kia_seltos', label: 'Kia Seltos' },
+  { id: 'tata_tiago', label: 'Tata Tiago' },
+  { id: 'maruti_swift', label: 'Maruti Swift' },
+];
+
+/* Step 1: Popular car suggestions */
+const brandNewPopularCars: MotorConversationStep = {
+  id: 'brand_new.popular_cars',
   module: 'manual_entry',
   widgetType: 'selection_cards',
-  getScript: (state) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
-    const now = new Date();
-    const currentMonthIdx = now.getMonth();
-    const recent = months.slice(Math.max(0, currentMonthIdx - 2), currentMonthIdx + 1).reverse();
+  getScript: (state) => ({
+    botMessages: [
+      `Which ${vLabel(state)} are you planning to buy?`,
+    ],
+    options: [
+      ...POPULAR_CARS.map(c => ({ ...c, icon: 'car' })),
+      { id: 'other', label: 'Other — Select make & model', icon: 'search' },
+    ],
+  }),
+  processResponse: (response) => {
+    if (response === 'other') return {};
+    const car = POPULAR_CARS.find(c => c.id === response);
+    if (!car) return {};
+    const [make, ...modelParts] = car.label.split(' ');
     return {
-      botMessages: [
-        `When did you purchase your ${state.vehicleData.make} ${state.vehicleData.model}?`,
-      ],
-      options: [
-        ...recent.map(m => ({ id: m.toLowerCase(), label: m + ` ${now.getFullYear()}` })),
-        { id: 'not_yet', label: 'Not yet delivered', description: 'Expecting delivery soon' },
-      ],
+      vehicleData: {
+        make: make,
+        model: modelParts.join(' '),
+        variant: '',
+        fuelType: '' as const,
+        registrationYear: new Date().getFullYear(),
+        registrationMonth: '',
+        hasCngKit: null,
+        isCommercialVehicle: null,
+      },
     };
   },
-  processResponse: (response) => ({ purchaseMonth: response }),
-  getNextStep: () => 'brand_new.invoice_value',
+  getNextStep: (response) => {
+    if (response === 'other') return 'manual_entry.select_brand';
+    return 'manual_entry.select_fuel';
+  },
 };
 
-const brandNewInvoiceValue: MotorConversationStep = {
-  id: 'brand_new.invoice_value',
-  module: 'manual_entry',
-  widgetType: 'number_input',
-  getScript: (state) => ({
-    botMessages: [
-      `What is the ex-showroom price of your ${state.vehicleData.make} ${state.vehicleData.model}?\n\nThis helps us calculate the right Insured Declared Value (IDV) for your brand new ${vLabel(state)}.`,
-    ],
-    placeholder: 'e.g., 850000',
-    inputType: 'number' as const,
-  }),
-  processResponse: (response) => ({ invoiceValue: parseInt(response) || 0 }),
-  getNextStep: () => 'brand_new.dealer_city',
-};
-
-const brandNewDealerCity: MotorConversationStep = {
-  id: 'brand_new.dealer_city',
-  module: 'manual_entry',
-  widgetType: 'text_input',
-  getScript: (state) => ({
-    botMessages: [
-      `Which city is your ${vLabel(state)} registered in?`,
-    ],
-    placeholder: 'e.g., Mumbai, Delhi, Bangalore',
-    inputType: 'text' as const,
-  }),
-  processResponse: (response) => ({ dealerCity: response }),
-  getNextStep: () => 'brand_new.cng_check',
-};
-
-const brandNewCngCheck: MotorConversationStep = {
-  id: 'brand_new.cng_check',
+/* Step 2: Commercial vehicle check */
+const brandNewCommercialCheck: MotorConversationStep = {
+  id: 'brand_new.commercial_check',
   module: 'manual_entry',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
-    botMessages: [
-      `Does your ${state.vehicleData.make} ${state.vehicleData.model} have an external CNG/LPG kit fitted?`,
-    ],
-    subText: 'Factory-fitted CNG is already covered. External kits need separate coverage.',
+  getScript: () => ({
+    botMessages: ['Is this a commercial vehicle?'],
+    subText: 'Vehicle used as a taxi, to deliver goods, etc.',
     options: [
-      { id: 'yes', label: 'Yes, external kit', icon: 'check' },
-      { id: 'no', label: 'No', icon: 'forward' },
+      { id: 'no', label: 'No, personal use', icon: 'user' },
+      { id: 'yes', label: 'Yes, commercial', icon: 'building' },
     ],
   }),
   processResponse: (response, state) => ({
-    vehicleData: { ...state.vehicleData, hasCngKit: response === 'yes' },
+    vehicleData: { ...state.vehicleData, isCommercialVehicle: response === 'yes' },
   }),
+  getNextStep: (response) => {
+    if (response === 'yes') return 'pre_quote.commercial_rejection';
+    return 'brand_new.delivery_date';
+  },
+};
+
+/* Step 3: Delivery date */
+const brandNewDeliveryDate: MotorConversationStep = {
+  id: 'brand_new.delivery_date',
+  module: 'manual_entry',
+  widgetType: 'selection_cards',
+  getScript: (state) => ({
+    botMessages: [
+      `When will your ${state.vehicleData.make} ${state.vehicleData.model} be delivered?`,
+    ],
+    options: [
+      { id: 'today_tomorrow', label: 'Today or tomorrow', icon: 'check' },
+      { id: 'next_1_week', label: 'In the next 1 week', icon: 'clock' },
+      { id: 'next_2_weeks', label: 'In the next 2 weeks', icon: 'clock' },
+      { id: 'not_sure', label: 'I am not sure yet', icon: 'help' },
+    ],
+  }),
+  processResponse: (response) => ({ deliveryWindow: response }),
+  getNextStep: () => 'brand_new.mobile_pincode',
+};
+
+/* Step 4: Mobile number */
+const brandNewMobilePincode: MotorConversationStep = {
+  id: 'brand_new.mobile_pincode',
+  module: 'manual_entry',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: [
+      `Just a few more details.\n\nWhat is your mobile number?`,
+    ],
+    subText: 'We will share quote and policy details.',
+    placeholder: 'e.g., 9876543210',
+    inputType: 'tel' as const,
+  }),
+  processResponse: (response) => ({ ownerMobile: response, phone: response }),
+  getNextStep: () => 'brand_new.pincode',
+};
+
+/* Step 5: Pincode */
+const brandNewPincode: MotorConversationStep = {
+  id: 'brand_new.pincode',
+  module: 'manual_entry',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: ['What is your current address pincode?'],
+    placeholder: 'e.g., 560099',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ pincode: response }),
   getNextStep: () => 'brand_new.summary',
 };
 
+/* Step 6: Summary + View plans */
 const brandNewSummary: MotorConversationStep = {
   id: 'brand_new.summary',
   module: 'manual_entry',
   widgetType: 'editable_summary',
   getScript: (state) => {
     const v = state.vehicleData;
-    const invoiceFormatted = state.invoiceValue
-      ? `₹${state.invoiceValue.toLocaleString()}`
-      : 'Not provided';
     return {
       botMessages: [
-        `Here's what we have for your brand new ${vLabel(state)}:\n\n` +
-        `${v.make} ${v.model} ${v.variant}\n` +
-        `Fuel: ${v.fuelType}\n` +
-        `Year: ${v.registrationYear || new Date().getFullYear()}\n` +
-        `Ex-showroom: ${invoiceFormatted}\n` +
-        `City: ${state.dealerCity || 'Not provided'}\n` +
-        `CNG Kit: ${v.hasCngKit ? 'Yes' : 'No'}\n` +
-        `\nSince this is a brand new ${vLabel(state)}, no previous policy or NCB applies. You'll get a fresh policy with full IDV coverage.`,
+        `${v.make} ${v.model}\n${v.variant} • ${v.fuelType ? v.fuelType.charAt(0).toUpperCase() + v.fuelType.slice(1) : ''}\n\nLet me find the best plans for your brand new ${vLabel(state)}.`,
       ],
     };
   },
@@ -385,20 +435,150 @@ const brandNewSummary: MotorConversationStep = {
   getNextStep: () => 'brand_new.view_prices',
 };
 
+/* Step 7: Calculating plans */
 const brandNewViewPrices: MotorConversationStep = {
   id: 'brand_new.view_prices',
   module: 'pre_quote',
   widgetType: 'none',
-  getScript: (state) => {
-    const v = state.vehicleData;
-    return {
-      botMessages: [
-        `Calculating the best insurance plans for your brand new ${v.make} ${v.model}...`,
-      ],
-    };
-  },
+  getScript: (state) => ({
+    botMessages: [
+      `Calculating the best insurance plans for your brand new ${state.vehicleData.make} ${state.vehicleData.model}...`,
+    ],
+  }),
   processResponse: () => ({}),
   getNextStep: () => 'quote.calculating',
+};
+
+/* ═══════════════════════════════════════════════
+   MODULE: OWNER DETAILS — Post-addon, pre-payment
+   (Brand new car specific — engine/chassis, loan)
+   ═══════════════════════════════════════════════ */
+
+const ownerDetailsIntro: MotorConversationStep = {
+  id: 'owner_details.intro',
+  module: 'owner_details',
+  widgetType: 'none',
+  getScript: () => ({
+    botMessages: [
+      `Just a few more details to complete your policy.`,
+    ],
+  }),
+  processResponse: () => ({}),
+  getNextStep: () => 'owner_details.name',
+};
+
+const ownerDetailsName: MotorConversationStep = {
+  id: 'owner_details.name',
+  module: 'owner_details',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: [`Enter vehicle owner's full name`],
+    placeholder: 'e.g., Bharath Kumar',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ ownerName: response, userName: response }),
+  getNextStep: () => 'owner_details.email',
+};
+
+const ownerDetailsEmail: MotorConversationStep = {
+  id: 'owner_details.email',
+  module: 'owner_details',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: ['What is your email address?'],
+    placeholder: 'e.g., name@email.com',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ ownerEmail: response }),
+  getNextStep: (_, state) => {
+    if (state.vehicleEntryType === 'brand_new') return 'owner_details.engine_number';
+    return 'owner_details.loan_check';
+  },
+};
+
+const ownerDetailsEngineNumber: MotorConversationStep = {
+  id: 'owner_details.engine_number',
+  module: 'owner_details',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: [`What is your car's engine number?`],
+    subText: `You can get this from your car dealer.`,
+    placeholder: 'e.g., 32IUYRQEWJHEJH',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ engineNumber: response }),
+  getNextStep: () => 'owner_details.chassis_number',
+};
+
+const ownerDetailsChassisNumber: MotorConversationStep = {
+  id: 'owner_details.chassis_number',
+  module: 'owner_details',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: ['And the chassis number?'],
+    subText: `You can get your car's engine & chassis number from your car dealer.`,
+    placeholder: 'e.g., QU983ER3FG63',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ chassisNumber: response }),
+  getNextStep: () => 'owner_details.gst',
+};
+
+const ownerDetailsGst: MotorConversationStep = {
+  id: 'owner_details.gst',
+  module: 'owner_details',
+  widgetType: 'selection_cards',
+  getScript: () => ({
+    botMessages: ['Do you have a GST number? (Optional)'],
+    options: [
+      { id: 'skip', label: 'Skip — No GST number' },
+      { id: 'enter', label: 'Yes, I have one' },
+    ],
+  }),
+  processResponse: () => ({}),
+  getNextStep: (response) => response === 'enter' ? 'owner_details.gst_input' : 'owner_details.loan_check',
+};
+
+const ownerDetailsGstInput: MotorConversationStep = {
+  id: 'owner_details.gst_input',
+  module: 'owner_details',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: ['Enter your GST number'],
+    placeholder: 'e.g., 22AAAAA0000A1Z5',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ gstNumber: response }),
+  getNextStep: () => 'owner_details.loan_check',
+};
+
+const ownerDetailsLoanCheck: MotorConversationStep = {
+  id: 'owner_details.loan_check',
+  module: 'owner_details',
+  widgetType: 'selection_cards',
+  getScript: () => ({
+    botMessages: ['Have you taken a car loan?'],
+    subText: 'We need this information to help you better during claims.',
+    options: [
+      { id: 'no', label: 'No', icon: 'forward' },
+      { id: 'yes', label: 'Yes', icon: 'document' },
+    ],
+  }),
+  processResponse: (response) => ({ hasCarLoan: response === 'yes' }),
+  getNextStep: (response) => response === 'yes' ? 'owner_details.loan_provider' : 'review.premium_breakdown',
+};
+
+const ownerDetailsLoanProvider: MotorConversationStep = {
+  id: 'owner_details.loan_provider',
+  module: 'owner_details',
+  widgetType: 'text_input',
+  getScript: () => ({
+    botMessages: ['Enter your loan provider name'],
+    placeholder: 'e.g., HDFC Bank, SBI, ICICI',
+    inputType: 'text' as const,
+  }),
+  processResponse: (response) => ({ loanProvider: response }),
+  getNextStep: () => 'review.premium_breakdown',
 };
 
 /* ═══════════════════════════════════════════════
@@ -730,11 +910,16 @@ const quotePlanSelection: MotorConversationStep = {
   widgetType: 'plan_selector',
   getScript: (state) => {
     const v = state.vehicleData;
-    const age = v.registrationYear ? new Date().getFullYear() - v.registrationYear : 3;
+    const isBrandNew = state.vehicleEntryType === 'brand_new';
+    const age = v.registrationYear ? new Date().getFullYear() - v.registrationYear : 0;
+    const carLabel = isBrandNew
+      ? `your brand new ${v.make} ${v.model}`
+      : `your ${age}-year-old ${v.make} ${v.model}`;
     return {
       botMessages: [
-        `Select a plan for your ${age}-year-old ${v.make} ${v.model}`,
+        `Select your plan\n\nAll plans include 1 year Own Damage and 3 years Third-party coverage.`,
       ],
+      subText: 'Up next: Explore 14+ add-ons to enhance your coverage',
     };
   },
   processResponse: (response, state) => ({
@@ -811,18 +996,21 @@ const addonsComplete: MotorConversationStep = {
     if (totalAddons > 0) {
       return {
         botMessages: [
-          `Perfect! You've selected ${totalAddons} add-on${totalAddons > 1 ? 's' : ''}.\n\nLet me show you the final premium breakdown.`,
+          `Perfect! You've selected ${totalAddons} add-on${totalAddons > 1 ? 's' : ''}.`,
         ],
       };
     }
     return {
       botMessages: [
-        `No worries! Your base plan provides great coverage.\n\nLet me show you the final premium breakdown.`,
+        `No worries! Your base plan provides great coverage.`,
       ],
     };
   },
   processResponse: () => ({}),
-  getNextStep: () => 'review.premium_breakdown',
+  getNextStep: (_, state) => {
+    if (state.vehicleEntryType === 'brand_new') return 'owner_details.intro';
+    return 'review.premium_breakdown';
+  },
 };
 
 const reviewPremiumBreakdown: MotorConversationStep = {
@@ -918,12 +1106,22 @@ const MOTOR_STEPS: Record<string, MotorConversationStep> = {
   'manual_entry.select_fuel': manualEntrySelectFuel,
   'manual_entry.select_variant': manualEntrySelectVariant,
   'manual_entry.select_year': manualEntrySelectYear,
-  'brand_new.purchase_month': brandNewPurchaseMonth,
-  'brand_new.invoice_value': brandNewInvoiceValue,
-  'brand_new.dealer_city': brandNewDealerCity,
-  'brand_new.cng_check': brandNewCngCheck,
+  'brand_new.popular_cars': brandNewPopularCars,
+  'brand_new.commercial_check': brandNewCommercialCheck,
+  'brand_new.delivery_date': brandNewDeliveryDate,
+  'brand_new.mobile_pincode': brandNewMobilePincode,
+  'brand_new.pincode': brandNewPincode,
   'brand_new.summary': brandNewSummary,
   'brand_new.view_prices': brandNewViewPrices,
+  'owner_details.intro': ownerDetailsIntro,
+  'owner_details.name': ownerDetailsName,
+  'owner_details.email': ownerDetailsEmail,
+  'owner_details.engine_number': ownerDetailsEngineNumber,
+  'owner_details.chassis_number': ownerDetailsChassisNumber,
+  'owner_details.gst': ownerDetailsGst,
+  'owner_details.gst_input': ownerDetailsGstInput,
+  'owner_details.loan_check': ownerDetailsLoanCheck,
+  'owner_details.loan_provider': ownerDetailsLoanProvider,
   'pre_quote.cng_check': preQuoteCngCheck,
   'pre_quote.commercial_check': preQuoteCommercialCheck,
   'pre_quote.commercial_rejection': preQuoteCommercialRejection,

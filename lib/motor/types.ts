@@ -16,6 +16,8 @@ export type ExpiryWindow = 'within_10_days' | '10_to_90_days' | 'over_90_days';
 
 export type NcbPercentage = 0 | 20 | 25 | 35 | 45 | 50;
 
+export type DeliveryWindow = 'today_tomorrow' | 'next_1_week' | 'next_2_weeks' | 'not_sure';
+
 export type MotorModule =
   | 'entry'
   | 'vehicle_type'
@@ -25,6 +27,7 @@ export type MotorModule =
   | 'pre_quote'
   | 'quote'
   | 'addons'
+  | 'owner_details'
   | 'review'
   | 'payment'
   | 'completion'
@@ -152,9 +155,16 @@ export interface MotorJourneyState extends BaseJourneyState {
   hasExistingQuote: boolean;
 
   /* ── Brand New Vehicle ── */
-  purchaseMonth: string;
-  invoiceValue: number;
-  dealerCity: string;
+  deliveryWindow: DeliveryWindow | '';
+  pincode: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerMobile: string;
+  engineNumber: string;
+  chassisNumber: string;
+  gstNumber: string;
+  hasCarLoan: boolean | null;
+  loanProvider: string;
 
   /* ── Feedback ── */
   missingVehicleFeedback: string;
@@ -271,9 +281,16 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   ncbIncreased: false,
   preQuoteComplete: false,
   hasExistingQuote: false,
-  purchaseMonth: '',
-  invoiceValue: 0,
-  dealerCity: '',
+  deliveryWindow: '',
+  pincode: '',
+  ownerName: '',
+  ownerEmail: '',
+  ownerMobile: '',
+  engineNumber: '',
+  chassisNumber: '',
+  gstNumber: '',
+  hasCarLoan: null,
+  loanProvider: '',
   missingVehicleFeedback: '',
   
   /* Plan Selection */
