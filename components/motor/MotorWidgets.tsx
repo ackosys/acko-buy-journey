@@ -188,6 +188,58 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
 }
 
 /* ═══════════════════════════════════════════════
+   Generic Text / Number Input
+   ═══════════════════════════════════════════════ */
+
+export function MotorTextInput({
+  placeholder,
+  inputType = 'text',
+  onSubmit,
+}: {
+  placeholder?: string;
+  inputType?: 'text' | 'number' | 'tel';
+  onSubmit: (value: string) => void;
+}) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSubmit = () => {
+    if (!value.trim()) {
+      setError('Please enter a value');
+      return;
+    }
+    onSubmit(value.trim());
+  };
+
+  return (
+    <div className="max-w-sm">
+      <input
+        ref={inputRef}
+        type={inputType}
+        value={value}
+        onChange={(e) => { setValue(e.target.value); setError(''); }}
+        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+        placeholder={placeholder || 'Type here...'}
+        className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-[16px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors"
+        autoComplete="off"
+      />
+      {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
+      <button
+        onClick={handleSubmit}
+        className="mt-3 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+      >
+        Continue
+      </button>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
    Progressive Loader — Finding your vehicle
    ═══════════════════════════════════════════════ */
 

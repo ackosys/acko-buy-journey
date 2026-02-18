@@ -25,6 +25,7 @@ import {
   PlanSelector,
   OutOfPocketAddons,
   ProtectEveryoneAddons,
+  MotorTextInput,
 } from './MotorWidgets';
 import { PremiumBreakdown, DashboardCTA } from './MotorFinalWidgets';
 
@@ -248,6 +249,10 @@ export default function MotorChatContainer() {
         return <MotorSelectionCards options={script.options || []} onSelect={handleEditResponse} />;
       case 'vehicle_reg_input':
         return <VehicleRegInput placeholder={script.placeholder} onSubmit={handleEditResponse} />;
+      case 'text_input':
+        return <MotorTextInput placeholder={script.placeholder} inputType={script.inputType as 'text' | 'number' | 'tel' || 'text'} onSubmit={handleEditResponse} />;
+      case 'number_input':
+        return <MotorTextInput placeholder={script.placeholder} inputType="number" onSubmit={handleEditResponse} />;
       case 'brand_selector':
         return <BrandSelector onSelect={handleEditResponse} />;
       case 'model_selector':
@@ -360,6 +365,10 @@ export default function MotorChatContainer() {
         return <MotorSelectionCards options={script.options || []} onSelect={handleResponse} />;
       case 'vehicle_reg_input':
         return <VehicleRegInput placeholder={script.placeholder} onSubmit={handleResponse} />;
+      case 'text_input':
+        return <MotorTextInput placeholder={script.placeholder} inputType={script.inputType as 'text' | 'number' | 'tel' || 'text'} onSubmit={handleResponse} />;
+      case 'number_input':
+        return <MotorTextInput placeholder={script.placeholder} inputType="number" onSubmit={handleResponse} />;
       case 'progressive_loader':
         return <ProgressiveLoader onComplete={handleResponse} />;
       case 'vehicle_details_card':

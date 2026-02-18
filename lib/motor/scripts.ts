@@ -281,7 +281,7 @@ const manualEntrySelectYear: MotorConversationStep = {
     },
   }),
   getNextStep: (_, state) => {
-    if (state.vehicleEntryType === 'brand_new') return 'brand_new.purchase_month';
+    if (state.vehicleEntryType === 'brand_new') return 'brand_new.commercial_check';
     return 'pre_quote.cng_check';
   },
 };
