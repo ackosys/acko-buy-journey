@@ -1018,7 +1018,6 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showGarageTier, setShowGarageTier] = useState(false);
-  const [selectedGarageTier, setSelectedGarageTier] = useState<'network' | 'all'>('all');
 
   // Group plans by type
   const comprehensivePlans = availablePlans.filter((p: any) => p.type === 'comprehensive');
@@ -1032,116 +1031,21 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
 
   const handlePlanClick = (plan: any) => {
     if (plan.type === 'comprehensive') {
-      // Only Comprehensive has garage tiers
       setSelectedPlan(plan);
       setShowGarageTier(true);
     } else {
-      // Zero dep and third party: no garage selection
       onSelect({ planType: plan.type, garageTier: null, plan });
     }
   };
 
-  const handleGarageTierSelect = () => {
+  const handleGarageTierSelect = (tier: 'network' | 'all') => {
     if (!selectedPlan) return;
     const finalPlan = availablePlans.find((p: any) => 
-      p.type === selectedPlan.type && p.garageTier === selectedGarageTier
+      p.type === selectedPlan.type && p.garageTier === tier
     );
-    onSelect({ planType: selectedPlan.type, garageTier: selectedGarageTier, plan: finalPlan });
+    setShowGarageTier(false);
+    onSelect({ planType: selectedPlan.type, garageTier: tier, plan: finalPlan });
   };
-
-  if (showGarageTier && selectedPlan) {
-    const networkPlan = availablePlans.find((p: any) => p.type === selectedPlan.type && p.garageTier === 'network');
-    const allPlan = availablePlans.find((p: any) => p.type === selectedPlan.type && p.garageTier === 'all');
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="max-w-sm"
-      >
-        <div className="mb-4">
-          <button
-            onClick={() => setShowGarageTier(false)}
-            className="flex items-center gap-1 text-[13px] text-purple-300 hover:text-white transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to plans
-          </button>
-        </div>
-
-        <h3 className="text-[16px] font-semibold text-white mb-1">{selectedPlan.name}</h3>
-        <p className="text-[13px] text-white/50 mb-4">Choose your garage network</p>
-
-        <div className="space-y-3 mb-4">
-          {/* Network garages */}
-          <motion.button
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            onClick={() => setSelectedGarageTier('network')}
-            className={`
-              w-full text-left p-4 rounded-xl border transition-all duration-200
-              ${selectedGarageTier === 'network'
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/10'
-              }
-            `}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <h4 className="text-[14px] font-semibold text-white mb-0.5">Network Garages</h4>
-                <p className="text-[12px] text-white/50">Repairs at 5,400+ ACKO network garages</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[16px] font-bold text-white">{formatPrice(networkPlan?.totalPrice || 0)}</p>
-                <p className="text-[11px] text-white/40">+ 18% GST</p>
-              </div>
-            </div>
-            <p className="text-[11px] text-purple-300">₹{((networkPlan?.totalPrice || 0) - (allPlan?.totalPrice || 0)).toLocaleString('en-IN')} cheaper</p>
-          </motion.button>
-
-          {/* All garages */}
-          <motion.button
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            onClick={() => setSelectedGarageTier('all')}
-            className={`
-              w-full text-left p-4 rounded-xl border transition-all duration-200
-              ${selectedGarageTier === 'all'
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/10'
-              }
-            `}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <h4 className="text-[14px] font-semibold text-white mb-0.5">All Garages</h4>
-                <p className="text-[12px] text-white/50">Get repairs at any garage you prefer</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[16px] font-bold text-white">{formatPrice(allPlan?.totalPrice || 0)}</p>
-                <p className="text-[11px] text-white/40">+ 18% GST</p>
-              </div>
-            </div>
-            {allPlan?.recommended && (
-              <span className="text-[10px] bg-purple-500/30 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/30">
-                Recommended
-              </span>
-            )}
-          </motion.button>
-        </div>
-
-        <button
-          onClick={handleGarageTierSelect}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
-        >
-          Continue with {selectedGarageTier === 'network' ? 'Network' : 'All'} Garages
-        </button>
-      </motion.div>
-    );
-  }
 
   return (
     <motion.div
@@ -1196,6 +1100,104 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
           onSelect={() => handlePlanClick(thirdPartyPlan)}
         />
       )}
+
+      {/* Garage Tier Bottom Sheet for Comprehensive */}
+      <AnimatePresence>
+        {showGarageTier && selectedPlan && (() => {
+          const networkPlan = availablePlans.find((p: any) => p.type === selectedPlan.type && p.garageTier === 'network');
+          const allPlan = availablePlans.find((p: any) => p.type === selectedPlan.type && p.garageTier === 'all');
+          const savings = (allPlan?.totalPrice || 0) - (networkPlan?.totalPrice || 0);
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowGarageTier(false)}
+            >
+              <motion.div
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
+              >
+                <div className="p-5">
+                  <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+                  <h3 className="text-[18px] font-bold text-white mb-1">Choose your garage network</h3>
+                  <p className="text-[12px] text-white/50 mb-5">Comprehensive plan lets you pick where your car gets repaired</p>
+
+                  <div className="space-y-3">
+                    {/* Network Garages */}
+                    <button
+                      onClick={() => handleGarageTierSelect('network')}
+                      className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 rounded-xl text-left transition-all group"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h4 className="text-[14px] font-semibold text-white group-hover:text-purple-200 transition-colors">Network Garages</h4>
+                            <p className="text-[11px] text-white/50">Cashless repairs at 5,400+ ACKO partner garages</p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <p className="text-[16px] font-bold text-white">{formatPrice(networkPlan?.totalPrice || 0)}</p>
+                          <p className="text-[10px] text-white/40">+ 18% GST</p>
+                        </div>
+                      </div>
+                      {savings > 0 && (
+                        <span className="text-[10px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full border border-green-400/20">
+                          Save ₹{savings.toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* All Garages */}
+                    <button
+                      onClick={() => handleGarageTierSelect('all')}
+                      className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 rounded-xl text-left transition-all group"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.384 3.168 1.03-5.995L2.073 7.533l6.02-.874L11.42 1.5l3.326 5.159 6.02.874-4.993 4.81 1.03 5.995z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h4 className="text-[14px] font-semibold text-white group-hover:text-purple-200 transition-colors">All Garages</h4>
+                            <p className="text-[11px] text-white/50">Get repairs at any garage of your choice</p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <p className="text-[16px] font-bold text-white">{formatPrice(allPlan?.totalPrice || 0)}</p>
+                          <p className="text-[10px] text-white/40">+ 18% GST</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/20">
+                        Recommended
+                      </span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setShowGarageTier(false)}
+                    className="w-full mt-4 py-3 text-[14px] text-white/50 hover:text-white/70 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -1221,6 +1223,7 @@ function PlanCard({
   onSelect: () => void;
   recommended?: boolean;
 }) {
+  const isComprehensive = plan?.type === 'comprehensive';
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'covered' | 'not_covered' | 'upgrades'>('covered');
   const [showGarageExplorer, setShowGarageExplorer] = useState(false);
@@ -1303,7 +1306,7 @@ function PlanCard({
               onClick={onSelect}
               className="w-full py-2.5 bg-white/10 border border-white/20 rounded-xl text-[13px] font-semibold text-white hover:bg-white/15 transition-colors"
             >
-              Explore plan
+              {isComprehensive ? 'Explore plan' : 'Select this plan'}
             </button>
           )}
         </div>
