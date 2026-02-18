@@ -188,6 +188,58 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
 }
 
 /* ═══════════════════════════════════════════════
+   Generic Text / Number Input
+   ═══════════════════════════════════════════════ */
+
+export function MotorTextInput({
+  placeholder,
+  inputType = 'text',
+  onSubmit,
+}: {
+  placeholder?: string;
+  inputType?: 'text' | 'number' | 'tel';
+  onSubmit: (value: string) => void;
+}) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSubmit = () => {
+    if (!value.trim()) {
+      setError('Please enter a value');
+      return;
+    }
+    onSubmit(value.trim());
+  };
+
+  return (
+    <div className="max-w-sm">
+      <input
+        ref={inputRef}
+        type={inputType}
+        value={value}
+        onChange={(e) => { setValue(e.target.value); setError(''); }}
+        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+        placeholder={placeholder || 'Type here...'}
+        className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-[16px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors"
+        autoComplete="off"
+      />
+      {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
+      <button
+        onClick={handleSubmit}
+        className="mt-3 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+      >
+        Continue
+      </button>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
    Progressive Loader — Finding your vehicle
    ═══════════════════════════════════════════════ */
 
@@ -1015,6 +1067,8 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
 export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void }) {
   const availablePlans = useMotorStore((s) => s.availablePlans) || [];
   const idv = useMotorStore((s) => s.idv);
+  const vehicleEntryType = useMotorStore((s) => s.vehicleEntryType);
+  const isBrandNew = vehicleEntryType === 'brand_new';
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showGarageTier, setShowGarageTier] = useState(false);
@@ -1061,22 +1115,35 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
         </p>
       </div>
 
+      {/* Zero Depreciation Plan — shown first for brand new, second otherwise */}
+      {isBrandNew && zeroDepLowest && (
+        <PlanCard
+          plan={zeroDepLowest}
+          title="Zero Depreciation Plan (Bumper to Bumper)"
+          badge="Recommended for your car"
+          price={formatPrice(zeroDepLowest.totalPrice)}
+          description="Covers damage to your car and damage caused by your car to others and their property. Covers full cost of car parts if they are replaced during repairs."
+          onSelect={() => handlePlanClick(zeroDepLowest)}
+          recommended
+        />
+      )}
+
       {/* Comprehensive Plan */}
       {comprehensiveLowest && (
         <PlanCard
           plan={comprehensiveLowest}
-          title="Comprehensive Plans"
-          subtitle="2 options starting from"
-          badge="Recommended for your car"
+          title={isBrandNew ? 'Comprehensive' : 'Comprehensive Plans'}
+          subtitle={isBrandNew ? undefined : '2 options starting from'}
+          badge={isBrandNew ? undefined : 'Recommended for your car'}
           price={formatPrice(comprehensiveLowest.totalPrice)}
-          strikePrice={comprehensiveLowest.totalPrice + 1000}
-          description="This plan includes fire, theft, accident, and third party liability cover."
+          strikePrice={isBrandNew ? undefined : comprehensiveLowest.totalPrice + 1000}
+          description="Covers damage to your car and damage caused by your car to others and their property."
           onSelect={() => handlePlanClick(comprehensiveLowest)}
         />
       )}
 
-      {/* Zero Depreciation Plan */}
-      {zeroDepLowest && (
+      {/* Zero Depreciation Plan — shown second for existing cars */}
+      {!isBrandNew && zeroDepLowest && (
         <PlanCard
           plan={zeroDepLowest}
           title="Zero Depreciation Plans"
@@ -1089,8 +1156,8 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
         />
       )}
 
-      {/* Third Party Plan */}
-      {thirdPartyPlan && (
+      {/* Third Party Plan — only for existing cars, not brand new */}
+      {!isBrandNew && thirdPartyPlan && (
         <PlanCard
           plan={thirdPartyPlan}
           title="Third-party Plan"
@@ -1121,7 +1188,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
+                className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl"
               >
                 <div className="p-5">
                   <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
@@ -1795,7 +1862,7 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
                 <h3 className="text-[18px] font-bold text-white mb-1">Select {showVariantModal.addon.name} variant</h3>
                 <p className="text-[12px] text-white/50 mb-4">{showVariantModal.addon.description}</p>
@@ -1955,7 +2022,7 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
                 <h3 className="text-[18px] font-bold text-white mb-1">Select Personal Accident coverage amount</h3>
                 <p className="text-[12px] text-white/50 mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>

@@ -16,6 +16,8 @@ export type ExpiryWindow = 'within_10_days' | '10_to_90_days' | 'over_90_days';
 
 export type NcbPercentage = 0 | 20 | 25 | 35 | 45 | 50;
 
+export type DeliveryWindow = 'today_tomorrow' | 'next_1_week' | 'next_2_weeks' | 'not_sure';
+
 export type MotorModule =
   | 'entry'
   | 'vehicle_type'
@@ -25,6 +27,7 @@ export type MotorModule =
   | 'pre_quote'
   | 'quote'
   | 'addons'
+  | 'owner_details'
   | 'review'
   | 'payment'
   | 'completion'
@@ -92,20 +95,16 @@ export interface ExpiredPolicyData {
 /* ── Dashboard: Claim Data (FNOL) ── */
 export interface MotorClaim {
   id: string;
-  type: 'own_damage' | 'third_party';
-  incidentType: string;
-  location: string;
+  type: 'own_damage_accident' | 'own_damage_theft' | 'own_damage_accessories' | 'third_party';
   date: string;
-  description: string;
-  injury: boolean | null;
-  policeReport: boolean | null;
-  firNumber: string;
-  otherVehicle: boolean | null;
-  otherDriverInfo: string;
+  seriousInjuries: boolean | null;
   wasDriverOwner: boolean | null;
-  photos: boolean | null;
-  garage: string;
-  amount: string;
+  driverName: string;
+  driverRelation: string;
+  description: string;
+  vehicleLocation: string;
+  safeToDriver: boolean | null;
+  needsTowing: boolean | null;
   status: string;
   submittedAt: number;
 }
@@ -152,9 +151,16 @@ export interface MotorJourneyState extends BaseJourneyState {
   hasExistingQuote: boolean;
 
   /* ── Brand New Vehicle ── */
-  purchaseMonth: string;
-  invoiceValue: number;
-  dealerCity: string;
+  deliveryWindow: DeliveryWindow | '';
+  pincode: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerMobile: string;
+  engineNumber: string;
+  chassisNumber: string;
+  gstNumber: string;
+  hasCarLoan: boolean | null;
+  loanProvider: string;
 
   /* ── Feedback ── */
   missingVehicleFeedback: string;
@@ -181,20 +187,16 @@ export interface MotorJourneyState extends BaseJourneyState {
 
   /* ── Dashboard: Claims (FNOL) ── */
   dashboardSubmittedClaims: MotorClaim[];
-  dashboardClaimType: 'own_damage' | 'third_party' | '';
-  dashboardClaimIncidentType: string;
-  dashboardClaimLocation: string;
+  dashboardClaimType: 'own_damage_accident' | 'own_damage_theft' | 'own_damage_accessories' | 'third_party' | '';
+  dashboardClaimSeriousInjuries: boolean | null;
   dashboardClaimDate: string;
-  dashboardClaimDescription: string;
-  dashboardClaimInjury: boolean | null;
-  dashboardClaimPoliceReport: boolean | null;
-  dashboardClaimFirNumber: string;
-  dashboardClaimOtherVehicle: boolean | null;
-  dashboardClaimOtherDriverInfo: string;
   dashboardClaimWasDriverOwner: boolean | null;
-  dashboardClaimPhotos: boolean | null;
-  dashboardClaimGarage: string;
-  dashboardClaimAmount: string;
+  dashboardClaimDriverName: string;
+  dashboardClaimDriverRelation: string;
+  dashboardClaimDescription: string;
+  dashboardClaimVehicleLocation: string;
+  dashboardClaimSafeToDriver: boolean | null;
+  dashboardClaimNeedsTowing: boolean | null;
 
   /* ── Dashboard: Edits ── */
   dashboardSubmittedEdits: MotorEditRequest[];
@@ -271,9 +273,16 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   ncbIncreased: false,
   preQuoteComplete: false,
   hasExistingQuote: false,
-  purchaseMonth: '',
-  invoiceValue: 0,
-  dealerCity: '',
+  deliveryWindow: '',
+  pincode: '',
+  ownerName: '',
+  ownerEmail: '',
+  ownerMobile: '',
+  engineNumber: '',
+  chassisNumber: '',
+  gstNumber: '',
+  hasCarLoan: null,
+  loanProvider: '',
   missingVehicleFeedback: '',
   
   /* Plan Selection */
@@ -299,19 +308,15 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   /* Dashboard */
   dashboardSubmittedClaims: [],
   dashboardClaimType: '',
-  dashboardClaimIncidentType: '',
-  dashboardClaimLocation: '',
+  dashboardClaimSeriousInjuries: null,
   dashboardClaimDate: '',
-  dashboardClaimDescription: '',
-  dashboardClaimInjury: null,
-  dashboardClaimPoliceReport: null,
-  dashboardClaimFirNumber: '',
-  dashboardClaimOtherVehicle: null,
-  dashboardClaimOtherDriverInfo: '',
   dashboardClaimWasDriverOwner: null,
-  dashboardClaimPhotos: null,
-  dashboardClaimGarage: '',
-  dashboardClaimAmount: '',
+  dashboardClaimDriverName: '',
+  dashboardClaimDriverRelation: '',
+  dashboardClaimDescription: '',
+  dashboardClaimVehicleLocation: '',
+  dashboardClaimSafeToDriver: null,
+  dashboardClaimNeedsTowing: null,
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
 };
