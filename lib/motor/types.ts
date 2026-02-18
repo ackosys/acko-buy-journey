@@ -89,13 +89,22 @@ export interface ExpiredPolicyData {
   ncbAtRisk: boolean;
 }
 
-/* ── Dashboard: Claim Data ── */
+/* ── Dashboard: Claim Data (FNOL) ── */
 export interface MotorClaim {
   id: string;
   type: 'own_damage' | 'third_party';
-  garage: string;
+  incidentType: string;
+  location: string;
   date: string;
   description: string;
+  injury: boolean | null;
+  policeReport: boolean | null;
+  firNumber: string;
+  otherVehicle: boolean | null;
+  otherDriverInfo: string;
+  wasDriverOwner: boolean | null;
+  photos: boolean | null;
+  garage: string;
   amount: string;
   status: string;
   submittedAt: number;
@@ -165,12 +174,21 @@ export interface MotorJourneyState extends BaseJourneyState {
   gst: number;
   totalPremium: number;
 
-  /* ── Dashboard: Claims ── */
+  /* ── Dashboard: Claims (FNOL) ── */
   dashboardSubmittedClaims: MotorClaim[];
   dashboardClaimType: 'own_damage' | 'third_party' | '';
-  dashboardClaimGarage: string;
+  dashboardClaimIncidentType: string;
+  dashboardClaimLocation: string;
   dashboardClaimDate: string;
   dashboardClaimDescription: string;
+  dashboardClaimInjury: boolean | null;
+  dashboardClaimPoliceReport: boolean | null;
+  dashboardClaimFirNumber: string;
+  dashboardClaimOtherVehicle: boolean | null;
+  dashboardClaimOtherDriverInfo: string;
+  dashboardClaimWasDriverOwner: boolean | null;
+  dashboardClaimPhotos: boolean | null;
+  dashboardClaimGarage: string;
   dashboardClaimAmount: string;
 
   /* ── Dashboard: Edits ── */
@@ -273,9 +291,18 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   /* Dashboard */
   dashboardSubmittedClaims: [],
   dashboardClaimType: '',
-  dashboardClaimGarage: '',
+  dashboardClaimIncidentType: '',
+  dashboardClaimLocation: '',
   dashboardClaimDate: '',
   dashboardClaimDescription: '',
+  dashboardClaimInjury: null,
+  dashboardClaimPoliceReport: null,
+  dashboardClaimFirNumber: '',
+  dashboardClaimOtherVehicle: null,
+  dashboardClaimOtherDriverInfo: '',
+  dashboardClaimWasDriverOwner: null,
+  dashboardClaimPhotos: null,
+  dashboardClaimGarage: '',
   dashboardClaimAmount: '',
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
