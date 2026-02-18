@@ -25,15 +25,97 @@ function calculateAge(dateOfBirth: string): number {
   return age;
 }
 
-// Helper to calculate recommended coverage (HLV method)
-function calculateRecommendedCoverage(state: LifeJourneyState): number {
-  const { annualIncome, age, resolvedPersona } = state;
-  if (!annualIncome || annualIncome === 0) return 0;
+// Indian inflation rate for future value calculations
+const INDIA_INFLATION_RATE = 0.06; // 6% avg CPI inflation
+const INDIA_EDUCATION_INFLATION = 0.10; // ~10% education cost inflation
+const INDIA_RETIREMENT_AGE = 60;
+const PER_CHILD_EDUCATION_FUND = 2500000; // ₹25L base for higher education per child
+const PER_CHILD_MARRIAGE_FUND = 1500000; // ₹15L base for marriage expenses per child
+
+// Calculate recommended policy term based on age (cover till 60, min 10 years, max 40)
+function calculatePolicyTerm(age: number): number {
+  const tillRetirement = INDIA_RETIREMENT_AGE - age;
+  return Math.min(Math.max(tillRetirement, 10), 40);
+}
+
+// Needs-based coverage calculation with Indian context
+function calculateRecommendedCoverage(state: LifeJourneyState): {
+  recommended: number;
+  breakdown: import('./types').CoverageBreakdown;
+} {
+  const {
+    annualIncome, age,
+    outstandingLoans, monthlyExpenses,
+    numberOfChildren, youngestChildAge,
+    existingLifeCover, existingCorpusSavings,
+  } = state;
+  if (!annualIncome || annualIncome === 0) return {
+    recommended: 0,
+    breakdown: { incomeReplacement: 0, loanCoverage: 0, childEducationFund: 0, emergencyBuffer: 0, totalNeed: 0, existingCover: 0, recommendedCover: 0, multiplierUsed: 0 },
+  };
   
-  const multiplier = LIFE_PERSONA_CONFIG[resolvedPersona]?.recommendedCoverageMultiplier || 10;
-  const workingYearsRemaining = Math.max(60 - age, 10); // Assume retirement at 60, min 10 years
-  
-  return Math.round(annualIncome * multiplier);
+  const workingYearsLeft = Math.max(INDIA_RETIREMENT_AGE - age, 10);
+
+  // 1. Income replacement — present value of future income (discounted by inflation)
+  //    Using simplified formula: income × years × inflation factor
+  //    In India, financial planners recommend 10-15x annual income as a rule of thumb.
+  //    We use a more precise approach: PV of income stream with 6% inflation, 8% discount rate
+  const realDiscountRate = 0.02; // ~8% return - 6% inflation
+  let incomeReplacement = 0;
+  for (let y = 1; y <= workingYearsLeft; y++) {
+    incomeReplacement += annualIncome / Math.pow(1 + realDiscountRate, y);
+  }
+  incomeReplacement = Math.round(incomeReplacement);
+
+  // 2. Loan coverage — pay off all outstanding loans immediately
+  const loanCoverage = outstandingLoans || 0;
+
+  // 3. Children's education + marriage fund (inflation-adjusted to future value)
+  let childEducationFund = 0;
+  if (numberOfChildren > 0) {
+    for (let c = 0; c < numberOfChildren; c++) {
+      const childAge = youngestChildAge + c * 2; // approximate age spread
+      const yearsToCollege = Math.max(18 - childAge, 0);
+      const yearsToMarriage = Math.max(25 - childAge, 0);
+
+      // Future value of education cost (10% education inflation in India)
+      const futureEduCost = PER_CHILD_EDUCATION_FUND * Math.pow(1 + INDIA_EDUCATION_INFLATION, yearsToCollege);
+      // Future value of marriage cost (6% general inflation)
+      const futureMarriageCost = PER_CHILD_MARRIAGE_FUND * Math.pow(1 + INDIA_INFLATION_RATE, yearsToMarriage);
+
+      childEducationFund += Math.round(futureEduCost + futureMarriageCost);
+    }
+  }
+
+  // 4. Emergency buffer — 6 months of household expenses
+  const emergencyBuffer = (monthlyExpenses || Math.round(annualIncome * 0.5 / 12)) * 6;
+
+  // 5. Total need
+  const totalNeed = incomeReplacement + loanCoverage + childEducationFund + emergencyBuffer;
+
+  // 6. Subtract existing cover
+  const existingCover = (existingLifeCover || 0) + (existingCorpusSavings || 0);
+
+  // 7. Final recommended cover (min ₹25L, max ₹100 Cr, rounded to nearest ₹5L)
+  let recommendedCover = Math.max(totalNeed - existingCover, 2500000);
+  recommendedCover = Math.min(recommendedCover, 10000000000); // ₹100 Cr cap
+  recommendedCover = Math.round(recommendedCover / 500000) * 500000; // Round to nearest ₹5L
+
+  const multiplierUsed = annualIncome > 0 ? Math.round((recommendedCover / annualIncome) * 10) / 10 : 0;
+
+  return {
+    recommended: recommendedCover,
+    breakdown: {
+      incomeReplacement,
+      loanCoverage,
+      childEducationFund,
+      emergencyBuffer,
+      totalNeed,
+      existingCover,
+      recommendedCover,
+      multiplierUsed,
+    },
+  };
 }
 
 /* ═══════════════════════════════════════════════
@@ -463,19 +545,14 @@ const lifeBasicIncome: ConversationStep<LifeJourneyState> = {
   },
   processResponse: (response, state) => {
     const income = parseInt(String(response)) || 0;
-    const recommendedCoverage = calculateRecommendedCoverage({
-      ...state,
-      annualIncome: income,
-    });
-    return { annualIncome: income, recommendedCoverage };
+    return { annualIncome: income };
   },
   getNextStep: (response, state) => {
-    // Check if user response indicates Growth Seeker concerns
     const responseStr = String(response).toLowerCase();
     if (responseStr.includes('return') || responseStr.includes('ulip') || responseStr.includes('investment')) {
-      return 'life_growth_seeker_education'; // Insert education step
+      return 'life_growth_seeker_education';
     }
-    return 'life_basic_summary';
+    return 'life_financial_dependents';
   },
 };
 
@@ -510,10 +587,162 @@ const lifeGrowthSeekerEducation: ConversationStep<LifeJourneyState> = {
   processResponse: (_response, _state) => ({}),
   getNextStep: (response, _state) => {
     if (response === 'no') {
-      return 'life_growth_seeker_education'; // Loop back for more questions
+      return 'life_growth_seeker_education';
     }
-    return 'life_basic_summary';
+    return 'life_financial_dependents';
   },
+};
+
+/* ── Financial obligations collection (for accurate coverage calc) ── */
+
+const lifeFinancialDependents: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial_dependents',
+  module: 'basic_info',
+  widgetType: 'selection_cards',
+  getScript: (persona, state) => ({
+    botMessages: [
+      `How many people depend on your income, ${userName(state)}?`,
+      `Include spouse, children, parents, or anyone who relies on you financially.`,
+    ],
+    options: [
+      { id: '1', label: '1 dependent', description: 'e.g., Spouse' },
+      { id: '2', label: '2 dependents', description: 'e.g., Spouse + 1 parent' },
+      { id: '3', label: '3 dependents', description: 'e.g., Spouse + 1 child + 1 parent' },
+      { id: '4+', label: '4 or more', description: 'Larger family' },
+    ],
+  }),
+  processResponse: (response, _state) => {
+    const count = response === '4+' ? 4 : parseInt(response) || 1;
+    return { numberOfDependents: count };
+  },
+  getNextStep: (_response, _state) => 'life_financial_children',
+};
+
+const lifeFinancialChildren: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial_children',
+  module: 'basic_info',
+  widgetType: 'selection_cards',
+  getScript: (persona, state) => ({
+    botMessages: [
+      `Do you have children?`,
+      `Their education and future needs are a big part of coverage planning in India.`,
+      `Average cost for higher education today: ₹15-30L (and rising ~10% yearly).`,
+    ],
+    options: [
+      { id: '0', label: 'No children' },
+      { id: '1', label: '1 child' },
+      { id: '2', label: '2 children' },
+      { id: '3+', label: '3 or more' },
+    ],
+  }),
+  processResponse: (response, _state) => {
+    const count = response === '3+' ? 3 : parseInt(response) || 0;
+    return { numberOfChildren: count };
+  },
+  getNextStep: (response, _state) => {
+    if (response !== '0') return 'life_financial_youngest_child';
+    return 'life_financial_loans';
+  },
+};
+
+const lifeFinancialYoungestChild: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial_youngest_child',
+  module: 'basic_info',
+  widgetType: 'number_input',
+  getScript: (persona, state) => ({
+    botMessages: [
+      `What's your youngest child's age?`,
+      `This helps us estimate when education costs will arise.`,
+    ],
+    placeholder: 'Age in years',
+    inputType: 'number',
+    min: 0,
+    max: 25,
+  }),
+  processResponse: (response, _state) => ({
+    youngestChildAge: parseInt(String(response)) || 0,
+  }),
+  getNextStep: (_response, _state) => 'life_financial_loans',
+};
+
+const lifeFinancialLoans: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial_loans',
+  module: 'basic_info',
+  widgetType: 'selection_cards',
+  getScript: (persona, state) => ({
+    botMessages: [
+      `Do you have any outstanding loans?`,
+      `Home loan, car loan, education loan, personal loan — include all.`,
+      `Your term cover should at minimum clear these obligations.`,
+    ],
+    options: [
+      { id: '0', label: 'No loans' },
+      { id: 'small', label: 'Under ₹25 lakh', description: 'Car/personal/education loan' },
+      { id: 'medium', label: '₹25L – ₹75L', description: 'Home loan or multiple loans' },
+      { id: 'large', label: '₹75L – ₹1.5 Cr', description: 'Large home loan' },
+      { id: 'very_large', label: 'Above ₹1.5 Cr', description: 'Multiple properties or large EMIs' },
+    ],
+  }),
+  processResponse: (response, _state) => {
+    const loanMap: Record<string, number> = {
+      '0': 0,
+      'small': 1500000,
+      'medium': 5000000,
+      'large': 11000000,
+      'very_large': 20000000,
+    };
+    return { outstandingLoans: loanMap[response] || 0 };
+  },
+  getNextStep: (_response, _state) => 'life_financial_monthly_expenses',
+};
+
+const lifeFinancialMonthlyExpenses: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial_monthly_expenses',
+  module: 'basic_info',
+  widgetType: 'selection_cards',
+  getScript: (persona, state) => ({
+    botMessages: [
+      `What are your monthly household expenses?`,
+      `Include rent/EMI, groceries, utilities, school fees, etc.`,
+      `This helps us add an emergency buffer to your coverage.`,
+    ],
+    options: [
+      { id: '30000', label: '₹20K – ₹40K/month' },
+      { id: '60000', label: '₹40K – ₹80K/month' },
+      { id: '100000', label: '₹80K – ₹1.2L/month' },
+      { id: '150000', label: '₹1.2L – ₹2L/month' },
+      { id: '250000', label: 'Above ₹2L/month' },
+    ],
+  }),
+  processResponse: (response, _state) => ({
+    monthlyExpenses: parseInt(response) || 50000,
+  }),
+  getNextStep: (_response, _state) => 'life_financial_existing_cover',
+};
+
+const lifeFinancialExistingCover: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial_existing_cover',
+  module: 'basic_info',
+  widgetType: 'selection_cards',
+  getScript: (persona, state) => ({
+    botMessages: [
+      `Do you have any existing life insurance or significant savings?`,
+      `This includes term plans, employer group cover, EPF, PPF, or mutual fund corpus.`,
+      `We'll subtract this from your coverage need — no point over-insuring.`,
+    ],
+    options: [
+      { id: '0', label: 'None / negligible' },
+      { id: '2500000', label: 'Under ₹25L', description: 'Small savings or employer cover' },
+      { id: '5000000', label: '₹25L – ₹75L', description: 'EPF + some savings' },
+      { id: '10000000', label: '₹75L – ₹1.5 Cr', description: 'Significant corpus' },
+      { id: '20000000', label: 'Above ₹1.5 Cr', description: 'Large corpus / existing term plan' },
+    ],
+  }),
+  processResponse: (response, _state) => {
+    const total = parseInt(response) || 0;
+    return { existingLifeCover: Math.round(total * 0.4), existingCorpusSavings: Math.round(total * 0.6) };
+  },
+  getNextStep: (_response, _state) => 'life_basic_summary',
 };
 
 const lifeBasicSummary: ConversationStep<LifeJourneyState> = {
@@ -521,52 +750,74 @@ const lifeBasicSummary: ConversationStep<LifeJourneyState> = {
   module: 'basic_info',
   widgetType: 'none',
   getScript: (persona, state) => {
-    const personaConfig = LIFE_PERSONA_CONFIG[persona as LifePersonaType];
+    const { recommended, breakdown } = calculateRecommendedCoverage(state);
+    const policyTerm = calculatePolicyTerm(state.age);
+    const incomeInL = (state.annualIncome / 100000).toFixed(1);
+
+    const formatAmt = (n: number) => {
+      if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+      if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+      return `₹${n.toLocaleString('en-IN')}`;
+    };
+
     const messages: string[] = [
-      `Perfect! I've got your basic information.`,
+      `Great, ${userName(state)}! I've calculated your recommended coverage.`,
+      ``,
+      `📊 Coverage breakdown:`,
     ];
-    
-    // Calculate coverage using ethical method: Annual income × multiplier + loans + goals - assets
-    const baseCoverage = state.annualIncome * (personaConfig.recommendedCoverageMultiplier || 10);
-    const recommendedCoverage = Math.max(baseCoverage, 10000000); // Min ₹1Cr
-    
-    // Persona-specific coverage recommendation messaging (ETHICAL: explain why, allow adjustment)
-    if (persona === 'protector') {
+
+    // Show transparent breakdown
+    messages.push(`• Income replacement (${INDIA_RETIREMENT_AGE - state.age} working years): ${formatAmt(breakdown.incomeReplacement)}`);
+
+    if (breakdown.loanCoverage > 0) {
+      messages.push(`• Outstanding loans: ${formatAmt(breakdown.loanCoverage)}`);
+    }
+    if (breakdown.childEducationFund > 0) {
+      messages.push(`• Children's education + future needs: ${formatAmt(breakdown.childEducationFund)}`);
+      messages.push(`  (Adjusted for ~10% education inflation in India)`);
+    }
+    messages.push(`• Emergency buffer (6 months expenses): ${formatAmt(breakdown.emergencyBuffer)}`);
+    messages.push(``, `Total need: ${formatAmt(breakdown.totalNeed)}`);
+
+    if (breakdown.existingCover > 0) {
+      messages.push(`Minus existing cover/savings: ${formatAmt(breakdown.existingCover)}`);
+    }
+
+    messages.push(
+      ``,
+      `✅ Recommended coverage: ${formatAmt(recommended)}`,
+      `📅 Policy term: ${policyTerm} years (covers you till age ${state.age + policyTerm})`,
+      ``,
+      `That's roughly ${breakdown.multiplierUsed}x your annual income — aligned with what Indian financial planners recommend (10-15x).`,
+    );
+
+    if (persona === 'growth_seeker') {
       messages.push(
-        `Based on your age (${state.age}) and income (₹${(state.annualIncome / 100000).toFixed(1)}L), I recommend a coverage of ₹${(recommendedCoverage / 10000000).toFixed(1)}Cr.`,
         ``,
-        `Why this number?`,
-        `• Your annual income × ${personaConfig.recommendedCoverageMultiplier} = ₹${(baseCoverage / 10000000).toFixed(1)}Cr`,
-        `• This ensures your family maintains their lifestyle for ${personaConfig.recommendedCoverageMultiplier} years`,
-        ``,
-        `You can adjust this later — we'll show you how.`,
-        `Now let's understand your lifestyle to calculate accurate premiums.`
+        `💡 At this coverage, your premium will be a small fraction of income — leaving most of it free for investments.`
       );
-    } else if (persona === 'growth_seeker') {
+    } else if (persona === 'passive_aware') {
       messages.push(
-        `Based on your income (₹${(state.annualIncome / 100000).toFixed(1)}L), I recommend a coverage of ₹${(recommendedCoverage / 10000000).toFixed(1)}Cr.`,
         ``,
-        `Why this number?`,
-        `• Income replacement: ₹${(baseCoverage / 10000000).toFixed(1)}Cr`,
-        `• Premium: ~₹${(recommendedCoverage * 0.001 / 1000).toFixed(0)}K/year`,
-        `• Leaves ₹${((state.annualIncome - recommendedCoverage * 0.001) / 1000).toFixed(0)}K/year for investments`,
-        ``,
-        `You can adjust coverage — we'll show you the impact.`,
-        `Now let's calculate your exact premium.`
-      );
-    } else { // passive_aware
-      messages.push(
-        `Based on your profile, I recommend a coverage of ₹${(recommendedCoverage / 10000000).toFixed(1)}Cr.`,
-        ``,
-        `Don't worry — you can adjust this anytime.`,
-        `We'll explain everything clearly.`,
-        `Now let's understand your lifestyle to get you an accurate quote.`
+        `You can always adjust this later with ACKO Flexi. No need to overthink.`
       );
     }
-    
+
+    messages.push(``, `Now let's understand your lifestyle to finalize your premium.`);
+
     return { botMessages: messages };
   },
-  processResponse: (_response, _state) => ({ currentModule: 'lifestyle' }),
+  processResponse: (_response, state) => {
+    const { recommended, breakdown } = calculateRecommendedCoverage(state);
+    const policyTerm = calculatePolicyTerm(state.age);
+    return {
+      currentModule: 'lifestyle' as LifeModule,
+      recommendedCoverage: recommended,
+      selectedCoverage: recommended,
+      coverageBreakdown: breakdown,
+      selectedTerm: policyTerm,
+    };
+  },
   getNextStep: (_response, _state) => 'life_lifestyle_alcohol',
 };
 
@@ -658,32 +909,67 @@ const lifeLifestyleSummary: ConversationStep<LifeJourneyState> = {
    MODULE: QUOTE — Coverage & Premium Calculation
    ═══════════════════════════════════════════════ */
 
-// Helper to calculate base premium (simplified)
-function calculateBasePremium(state: LifeJourneyState): number {
-  const { age, gender, smokingStatus, annualIncome, occupationRisk } = state;
-  const baseCoverage = state.recommendedCoverage || 10000000; // ₹1Cr
-  
-  // Base rate per ₹1L coverage (simplified)
-  let ratePerLakh = 200; // Base rate
-  
-  // Age factor
-  if (age < 30) ratePerLakh *= 0.8;
-  else if (age < 40) ratePerLakh *= 1.0;
-  else if (age < 50) ratePerLakh *= 1.5;
-  else ratePerLakh *= 2.5;
-  
-  // Gender factor (women typically pay less)
-  if (gender === 'female') ratePerLakh *= 0.9;
-  
-  // Smoking factor
-  if (smokingStatus === 'current') ratePerLakh *= 1.5;
-  
-  // Occupation risk factor
-  if (occupationRisk === 'high') ratePerLakh *= 1.3;
-  else if (occupationRisk === 'medium') ratePerLakh *= 1.1;
-  
-  const premium = (baseCoverage / 100000) * ratePerLakh;
-  return Math.round(premium);
+/**
+ * Premium calculation based on Indian term insurance market rates (2024-25).
+ * Reference: ACKO Life, HDFC Life, ICICI Pru, Max Life rate cards.
+ *
+ * Base rates per ₹1L sum assured per year (non-smoker male):
+ *   Age 20-24: ₹4-5     Age 25-29: ₹5-7     Age 30-34: ₹7-10
+ *   Age 35-39: ₹11-16   Age 40-44: ₹18-28   Age 45-49: ₹32-50
+ *   Age 50-54: ₹55-85   Age 55-59: ₹95-150  Age 60-65: ₹160-250
+ *
+ * Loadings: Smoker +70-80%, Female discount -15-20%, High-risk occupation +25-30%
+ * GST: 18% on premium (mandatory in India)
+ */
+function calculateBasePremium(state: LifeJourneyState): {
+  basePremium: number;
+  gst: number;
+  totalPremium: number;
+} {
+  const { age, gender, smokingStatus, occupationRisk } = state;
+  const sumAssured = state.recommendedCoverage || state.selectedCoverage || 10000000;
+  const policyTerm = state.selectedTerm || calculatePolicyTerm(age);
+
+  // Base rate per ₹1L sum assured (non-smoker male, low-risk occupation)
+  let ratePerLakh: number;
+  if (age <= 24) ratePerLakh = 4.5;
+  else if (age <= 29) ratePerLakh = 6;
+  else if (age <= 34) ratePerLakh = 9;
+  else if (age <= 39) ratePerLakh = 14;
+  else if (age <= 44) ratePerLakh = 23;
+  else if (age <= 49) ratePerLakh = 40;
+  else if (age <= 54) ratePerLakh = 70;
+  else if (age <= 59) ratePerLakh = 120;
+  else ratePerLakh = 200;
+
+  // Longer policy terms cost slightly more per year
+  if (policyTerm > 30) ratePerLakh *= 1.08;
+  else if (policyTerm > 20) ratePerLakh *= 1.0;
+  else if (policyTerm > 10) ratePerLakh *= 0.95;
+  else ratePerLakh *= 0.88;
+
+  // Female discount: women live longer on average, ~15-20% lower premium
+  if (gender === 'female') ratePerLakh *= 0.82;
+
+  // Smoker/tobacco loading: +75% (Indian market standard)
+  if (smokingStatus === 'current') ratePerLakh *= 1.75;
+  else if (smokingStatus === 'past') ratePerLakh *= 1.25;
+
+  // Occupation risk loading
+  if (occupationRisk === 'high') ratePerLakh *= 1.30;
+  else if (occupationRisk === 'medium') ratePerLakh *= 1.12;
+
+  // Volume discount for higher sum assured (common in India)
+  const sumAssuredInCr = sumAssured / 10000000;
+  if (sumAssuredInCr >= 5) ratePerLakh *= 0.85;
+  else if (sumAssuredInCr >= 2) ratePerLakh *= 0.90;
+  else if (sumAssuredInCr >= 1) ratePerLakh *= 0.95;
+
+  const basePremium = Math.round((sumAssured / 100000) * ratePerLakh);
+  const gst = Math.round(basePremium * 0.18); // 18% GST
+  const totalPremium = basePremium + gst;
+
+  return { basePremium, gst, totalPremium };
 }
 
 const lifeQuoteDisplay: ConversationStep<LifeJourneyState> = {
@@ -691,73 +977,79 @@ const lifeQuoteDisplay: ConversationStep<LifeJourneyState> = {
   module: 'quote',
   widgetType: 'premium_summary',
   getScript: (persona, state) => {
-    const personaConfig = LIFE_PERSONA_CONFIG[persona as LifePersonaType];
-    const basePremium = calculateBasePremium(state);
-    const quote = {
-      sumAssured: state.recommendedCoverage || 10000000,
-      policyTerm: 30,
-      premiumFrequency: 'yearly' as const,
-      basePremium,
-      riders: [],
-      totalPremium: basePremium,
-      monthlyPremium: Math.round(basePremium / 12),
-      yearlyPremium: basePremium,
+    const sumAssured = state.selectedCoverage || state.recommendedCoverage || 10000000;
+    const policyTerm = state.selectedTerm || calculatePolicyTerm(state.age);
+    const premium = calculateBasePremium({ ...state, recommendedCoverage: sumAssured, selectedTerm: policyTerm });
+
+    const formatAmt = (n: number) => {
+      if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+      if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+      if (n >= 1000) return `₹${(n / 1000).toFixed(1)}K`;
+      return `₹${n.toLocaleString('en-IN')}`;
     };
-    
+
+    const dailyCost = Math.round(premium.totalPremium / 365);
+    const monthlyCost = Math.round(premium.totalPremium / 12);
+
     const messages: string[] = [
-      `Here's your personalized quote, ${userName(state)}!`,
+      `Here's your personalized quote, ${userName(state)}! 🎯`,
+      ``,
+      `Coverage: ${formatAmt(sumAssured)}`,
+      `Policy term: ${policyTerm} years (till age ${state.age + policyTerm})`,
+      ``,
+      `💰 Premium breakdown:`,
+      `• Base premium: ${formatAmt(premium.basePremium)}/year`,
+      `• GST (18%): ${formatAmt(premium.gst)}/year`,
+      `• Total: ${formatAmt(premium.totalPremium)}/year`,
+      ``,
+      `That's just ${formatAmt(monthlyCost)}/month or ₹${dailyCost}/day.`,
     ];
     
-    // Persona-specific quote messaging
     if (persona === 'protector') {
       messages.push(
-        `You're getting ₹${(quote.sumAssured / 10000000).toFixed(1)}Cr coverage for ₹${(quote.yearlyPremium / 1000).toFixed(0)}K/year.`,
+        ``,
         `Every rupee goes toward protecting your family — no mixing, no compromise.`,
-        `Simple, transparent, reliable protection.`
+        `Pure protection at the best price.`
       );
     } else if (persona === 'growth_seeker') {
-      const remainingForInvestment = state.annualIncome - quote.yearlyPremium;
+      const remainingForInvestment = state.annualIncome - premium.totalPremium;
+      const futureValueAt12 = Math.round(remainingForInvestment * ((Math.pow(1.12, policyTerm) - 1) / 0.12));
       messages.push(
-        `You're getting ₹${(quote.sumAssured / 10000000).toFixed(1)}Cr coverage for just ₹${(quote.yearlyPremium / 1000).toFixed(0)}K/year.`,
         ``,
-        `Here's the opportunity cost breakdown:`,
+        `📈 Here's the smart money split:`,
+        `• ${formatAmt(premium.totalPremium)}/year → Term insurance (${formatAmt(sumAssured)} protection)`,
+        `• ${formatAmt(remainingForInvestment)}/year → Invest separately`,
         ``,
-        `If you have ₹${(state.annualIncome / 1000).toFixed(0)}K/year:`,
-        `• ₹${(quote.yearlyPremium / 1000).toFixed(0)}K → Term insurance (₹${(quote.sumAssured / 10000000).toFixed(1)}Cr coverage)`,
-        `• ₹${(remainingForInvestment / 1000).toFixed(0)}K → Invest separately (mutual funds, stocks, etc.)`,
+        `If you invest ${formatAmt(remainingForInvestment)}/year at 12% CAGR (equity MF avg):`,
+        `In ${policyTerm} years → corpus of ${formatAmt(futureValueAt12)}`,
         ``,
-        `This gives you:`,
-        `• Maximum protection (₹${(quote.sumAssured / 10000000).toFixed(1)}Cr)`,
-        `• Better growth potential (₹${(remainingForInvestment / 1000).toFixed(0)}K invested separately)`,
-        `• More flexibility (can adjust investments anytime)`,
-        ``,
-        `Separate protection from investment — you get better coverage AND better returns.`
+        `You get: Maximum cover + wealth creation. Separately.`
       );
-    } else { // passive_aware
+    } else {
       messages.push(
-        `Based on your profile, here's your quote:`,
-        `Coverage: ₹${(quote.sumAssured / 10000000).toFixed(1)}Cr`,
-        `Premium: ₹${(quote.monthlyPremium / 1000).toFixed(0)}K/month (₹${(quote.yearlyPremium / 1000).toFixed(0)}K/year)`,
-        `Simple, straightforward, no hidden costs.`
+        ``,
+        `Simple, straightforward — no hidden charges.`,
+        `The 18% GST is standard across all term plans in India.`
       );
     }
     
     return { botMessages: messages };
   },
   processResponse: (response, state) => {
-    // Store quote in state
-    const basePremium = calculateBasePremium(state);
+    const sumAssured = state.selectedCoverage || state.recommendedCoverage || 10000000;
+    const policyTerm = state.selectedTerm || calculatePolicyTerm(state.age);
+    const premium = calculateBasePremium({ ...state, recommendedCoverage: sumAssured, selectedTerm: policyTerm });
     const quote = {
-      sumAssured: state.recommendedCoverage || 10000000,
-      policyTerm: 30,
+      sumAssured,
+      policyTerm,
       premiumFrequency: 'yearly' as const,
-      basePremium,
+      basePremium: premium.basePremium,
       riders: [],
-      totalPremium: basePremium,
-      monthlyPremium: Math.round(basePremium / 12),
-      yearlyPremium: basePremium,
+      totalPremium: premium.totalPremium,
+      monthlyPremium: Math.round(premium.totalPremium / 12),
+      yearlyPremium: premium.totalPremium,
     };
-    return { quote, selectedCoverage: quote.sumAssured, selectedTerm: quote.policyTerm };
+    return { quote, selectedCoverage: sumAssured, selectedTerm: policyTerm };
   },
   getNextStep: (_response, _state) => 'life_addons_intro',
 };
@@ -893,13 +1185,24 @@ const lifeReview: ConversationStep<LifeJourneyState> = {
   module: 'review',
   widgetType: 'none',
   getScript: (persona, state) => {
+    const formatAmt = (n: number) => {
+      if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+      if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+      if (n >= 1000) return `₹${(n / 1000).toFixed(1)}K`;
+      return `₹${n.toLocaleString('en-IN')}`;
+    };
+
+    const yearlyPremium = state.quote?.yearlyPremium || 0;
+    const monthlyPremium = state.quote?.monthlyPremium || 0;
+
     const messages: string[] = [
-      `Perfect! Here's a summary of your life insurance plan:`,
+      `Here's a summary of your life insurance plan:`,
       ``,
-      `• Coverage: ₹${(state.selectedCoverage / 10000000).toFixed(1)}Cr`,
-      `• Term: ${state.selectedTerm} years`,
+      `• Coverage: ${formatAmt(state.selectedCoverage)}`,
+      `• Term: ${state.selectedTerm} years (till age ${state.age + state.selectedTerm})`,
       `• Riders: ${state.selectedRiders.length} selected`,
-      `• Premium: ₹${(state.quote?.yearlyPremium || 0) / 1000}K/year (₹${(state.quote?.monthlyPremium || 0) / 1000}K/month)`,
+      `• Premium: ${formatAmt(yearlyPremium)}/year (${formatAmt(monthlyPremium)}/month)`,
+      `  (includes 18% GST)`,
       ``,
       `Before you proceed, let me explain what happens after payment:`,
     ];
@@ -1092,7 +1395,15 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   lifeBasicPincode,
   lifeBasicSmoking,
   lifeBasicIncome,
-  lifeGrowthSeekerEducation, // Dynamic education step for Growth Seekers
+  lifeGrowthSeekerEducation,
+  
+  // Financial obligations (for accurate coverage calculation)
+  lifeFinancialDependents,
+  lifeFinancialChildren,
+  lifeFinancialYoungestChild,
+  lifeFinancialLoans,
+  lifeFinancialMonthlyExpenses,
+  lifeFinancialExistingCover,
   lifeBasicSummary,
   
   // Lifestyle information

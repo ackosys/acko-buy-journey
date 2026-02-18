@@ -2,32 +2,105 @@
 
 /**
  * Life Insurance Journey — Page orchestrator.
- * Flows: landing → language → chat (with optional expert/AI panels)
- * Mirrors Health journey page patterns.
+ * Flows: splash → landing → chat (with optional expert/AI panels)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
-import LanguageSelector from '../../components/LanguageSelector';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
 import LifeLandingPage from '../../components/life/LifeLandingPage';
 import LifeHeader from '../../components/life/LifeHeader';
 import { LifeExpertPanel, LifeAIChatPanel } from '../../components/life/LifePanels';
 import AckoLogo from '../../components/AckoLogo';
 
-type Screen = 'landing' | 'language' | 'chat';
+type Screen = 'landing' | 'chat';
+
+/* ═══════════════════════════════════════════════
+   Splash Screen — Auto-dismiss on entry
+   ═══════════════════════════════════════════════ */
+function LifeSplashScreen({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onDone, 2500);
+    return () => clearTimeout(timer);
+  }, [onDone]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #3a1d8e 30%, #6C4DE8 60%, #9b7bf7 100%)' }}
+      onClick={onDone}
+    >
+      {/* Animated particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 80 }}
+            animate={{ opacity: [0, 0.6, 0.6, 0], y: [80, -400] }}
+            transition={{ duration: 2.5 + Math.random() * 1.5, repeat: Infinity, delay: Math.random() * 1.5, ease: 'easeOut' }}
+            className="absolute rounded-full"
+            style={{
+              left: `${10 + Math.random() * 80}%`,
+              bottom: 0,
+              width: 4 + Math.random() * 6,
+              height: 4 + Math.random() * 6,
+              background: ['#A78BFA', '#C4B5FD', '#7C3AED', '#DDD6FE', '#EDE9FE'][Math.floor(Math.random() * 5)],
+            }}
+          />
+        ))}
+      </div>
+
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        className="relative z-10 text-center px-6"
+      >
+        <AckoLogo variant="white" className="h-10 mx-auto mb-6" />
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Life Insurance
+        </h1>
+        <p className="text-lg text-purple-200 mb-4">
+          Simple, transparent, no pressure
+        </p>
+        <div className="flex items-center justify-center gap-3 mb-6">
+          {/* Umbrella icon */}
+          <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
+            <svg className="w-10 h-10 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <path d="M12 2C6.477 2 2 6.477 2 12h4a6 6 0 0 1 12 0h4c0-5.523-4.477-10-10-10Z" fill="currentColor" opacity="0.3" stroke="none" />
+              <path d="M12 2C6.477 2 2 6.477 2 12h4a6 6 0 0 1 12 0h4c0-5.523-4.477-10-10-10Z" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 12v8c0 1.105-.895 2-2 2s-2-.895-2-2" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="12" y1="2" x2="12" y2="4" strokeLinecap="round" />
+            </svg>
+          </motion.div>
+        </div>
+        <div className="w-48 h-1 bg-white/20 rounded-full mx-auto overflow-hidden">
+          <motion.div
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 2.5, ease: 'linear' }}
+            className="h-full bg-white/60 rounded-full"
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function LifeJourneyPage() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete } = store;
   const [screen, setScreen] = useState<Screen>('landing');
   const [hydrated, setHydrated] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     setHydrated(true);
-    // Reset journey on mount
     store.updateState({
       currentStepId: 'life_intro',
       conversationHistory: [],
@@ -37,22 +110,11 @@ export default function LifeJourneyPage() {
     });
   }, []);
 
-  const handleGetStarted = () => {
-    setShowWelcome(true);
-    setTimeout(() => {
-      setShowWelcome(false);
-      setScreen('chat');
-      store.updateState({ currentStepId: 'life_intro' });
-    }, 2500);
-  };
+  const dismissSplash = useCallback(() => setShowSplash(false), []);
 
-  const handleLanguageSelect = () => {
-    setShowWelcome(true);
-    setTimeout(() => {
-      setShowWelcome(false);
-      setScreen('chat');
-      store.updateState({ currentStepId: 'life_intro' });
-    }, 2500);
+  const handleGetStarted = () => {
+    setScreen('chat');
+    store.updateState({ currentStepId: 'life_intro' });
   };
 
   if (!hydrated) {
@@ -64,121 +126,57 @@ export default function LifeJourneyPage() {
   }
 
   return (
-    <AnimatePresence mode="wait">
-      {/* Landing Page */}
-      {screen === 'landing' && !showWelcome && (
-        <LifeLandingPage key="landing" onGetStarted={handleGetStarted} />
-      )}
+    <>
+      <AnimatePresence>
+        {showSplash && (
+          <LifeSplashScreen key="splash" onDone={dismissSplash} />
+        )}
+      </AnimatePresence>
 
-      {/* Language Selection */}
-      {screen === 'language' && !showWelcome && (
-        <LanguageSelector key="lang" onSelect={handleLanguageSelect} />
-      )}
+      <AnimatePresence mode="wait">
+        {/* Landing Page — hidden while splash is showing */}
+        {screen === 'landing' && !showSplash && (
+          <LifeLandingPage key="landing" onGetStarted={handleGetStarted} />
+        )}
 
-      {/* Welcome Overlay */}
-      {showWelcome && (
-        <motion.div
-          key="welcome"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #2A1463 50%, #1C0B47 100%)' }}
-        >
-          <div className="text-center px-8">
-            {/* Animated shield */}
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-400/30 to-purple-600/30 border border-purple-400/20 flex items-center justify-center"
-            >
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              >
-                <svg className="w-10 h-10 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-              </motion.div>
-            </motion.div>
+        {/* Main Chat Journey */}
+        {screen === 'chat' && (
+          <motion.div
+            key="chat"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen flex flex-col"
+            style={{ background: 'linear-gradient(180deg, #1a0a3e 0%, #2A1463 40%, #1C0B47 100%)' }}
+          >
+            <LifeHeader />
 
-            <motion.h2
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-heading-lg font-bold text-white mb-2"
-            >
-              Let&apos;s find your right coverage
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="text-body-md text-purple-300/70"
-            >
-              Simple, transparent, no pressure.
-            </motion.p>
+            <div className="flex-1 flex relative overflow-hidden">
+              <div className="flex-1 flex flex-col">
+                <LifeChatContainer />
+              </div>
 
-            {/* Progress bar */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-              className="mt-8 w-48 mx-auto h-1 bg-white/10 rounded-full overflow-hidden"
-            >
-              <motion.div
-                initial={{ width: '0%' }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 2, ease: 'easeInOut' }}
-                className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
-              />
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Main Chat Journey */}
-      {screen === 'chat' && !showWelcome && (
-        <motion.div
-          key="chat"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="min-h-screen flex flex-col"
-          style={{ background: 'linear-gradient(180deg, #1a0a3e 0%, #2A1463 40%, #1C0B47 100%)' }}
-        >
-          {/* Header with progress */}
-          <LifeHeader />
-
-          {/* Main Chat Container */}
-          <div className="flex-1 flex relative overflow-hidden">
-            <div className="flex-1 flex flex-col">
-              <LifeChatContainer />
+              <AnimatePresence>
+                {showExpertPanel && <LifeExpertPanel key="expert" />}
+                {showAIChat && <LifeAIChatPanel key="ai" />}
+              </AnimatePresence>
             </div>
 
-            {/* Expert & AI Panels */}
-            <AnimatePresence>
-              {showExpertPanel && <LifeExpertPanel key="expert" />}
-              {showAIChat && <LifeAIChatPanel key="ai" />}
-            </AnimatePresence>
-          </div>
-
-          {/* Footer — shows when journey is complete */}
-          {journeyComplete && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-6 text-center border-t border-white/10"
-            >
-              <AckoLogo variant="white" className="h-5 mx-auto mb-2 opacity-40" />
-              <p className="text-[11px] text-white/30">
-                ACKO Life Insurance Ltd. | IRDAI Reg. No. 157
-              </p>
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
+            {journeyComplete && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 text-center border-t border-white/10"
+              >
+                <AckoLogo variant="white" className="h-5 mx-auto mb-2 opacity-40" />
+                <p className="text-[11px] text-white/30">
+                  ACKO Life Insurance Ltd. | IRDAI Reg. No. 157
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
