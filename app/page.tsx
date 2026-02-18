@@ -14,15 +14,6 @@ import { LobConfig } from '../lib/core/types';
 /* ── LOB Configuration ── */
 const LOBS: LobConfig[] = [
   {
-    id: 'health',
-    label: 'Health Insurance',
-    tagline: 'Cover for hospitalisation, surgeries & more',
-    description: 'Plans from ₹436/month. 14,000+ cashless hospitals.',
-    icon: 'health',
-    active: true,
-    route: '/health',
-  },
-  {
     id: 'car',
     label: 'Car Insurance',
     tagline: 'Comprehensive cover for your car',
@@ -39,6 +30,15 @@ const LOBS: LobConfig[] = [
     icon: 'bike',
     active: true,
     route: '/motor',
+  },
+  {
+    id: 'health',
+    label: 'Health Insurance',
+    tagline: 'Cover for hospitalisation, surgeries & more',
+    description: 'Plans from ₹436/month. 14,000+ cashless hospitals.',
+    icon: 'health',
+    active: true,
+    route: '/health',
   },
   {
     id: 'life',

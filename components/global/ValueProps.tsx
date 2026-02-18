@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 
 const PROPS = [
   {
+    icon: 'award',
+    title: "India's #1*",
+    description: 'India\'s #1* insurance app.',
+  },
+  {
     icon: 'digital',
     title: '100% Digital',
     description: 'Buy, claim, and manage — all online.',
-  },
-  {
-    icon: 'price',
-    title: 'Honest Pricing',
-    description: 'No middlemen. No hidden charges.',
   },
   {
     icon: 'claim',
@@ -19,9 +19,9 @@ const PROPS = [
     description: '95% cashless claims approved in 1 hour.',
   },
   {
-    icon: 'support',
-    title: 'Human Support',
-    description: 'Talk to real experts anytime.',
+    icon: 'price',
+    title: 'Honest Pricing',
+    description: 'No middlemen. No hidden charges.',
   },
 ];
 
@@ -46,10 +46,10 @@ function PropIcon({ icon }: { icon: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
         </svg>
       );
-    case 'support':
+    case 'award':
       return (
         <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-4.5A3.375 3.375 0 0012.75 11h-1.5A3.375 3.375 0 007.5 14.25v4.5m6-6V6.75m0 0a2.25 2.25 0 10-4.5 0m4.5 0a2.25 2.25 0 11-4.5 0" />
         </svg>
       );
     default:
