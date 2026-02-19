@@ -505,15 +505,94 @@ export function LifeRiderToggle({
 }
 
 /* ═══════════════════════════════════════════════════════
-   Rider Selection — Complex rider selection with constraints
+   Custom Dropdown — Styled selection for riders
    ═══════════════════════════════════════════════════════ */
 
-export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
+function LifeCustomDropdown({
+  options,
+  value,
+  onChange,
+  placeholder = 'Select sum assured'
+}: {
+  options: { label: string; value: number }[];
+  value: number;
+  onChange: (val: number) => void;
+  placeholder?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`
+          w-full flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200
+          ${isOpen ? 'border-purple-500 ring-1 ring-purple-500/30 bg-white' : 'border-gray-200 bg-white hover:border-gray-300'}
+        `}
+      >
+        <span className={`text-body-sm font-medium ${selectedOption ? 'text-gray-900' : 'text-gray-400'}`}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg 
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24" 
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -5, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -5, height: 0 }}
+            className="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
+          >
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`
+                  w-full text-left px-4 py-3 text-body-sm font-medium transition-colors hover:bg-purple-50 flex items-center justify-between
+                  ${value === opt.value ? 'text-purple-700 bg-purple-50/50' : 'text-gray-700'}
+                `}
+              >
+                {opt.label}
+                {value === opt.value && (
+                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {isOpen && (
+        <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Accidental Rider Widget — Death & Disability
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeAccidentalRiderWidget({ onContinue }: { onContinue: () => void }) {
   const state = useLifeJourneyStore.getState() as LifeJourneyState;
   const { quote, selectedRiders } = state;
   const basePremium = quote?.basePremium || 0;
-  const baseSumAssured = quote?.sumAssured || 0;
-
+  
   // Accidental Rider Constraint: Max 30% of base premium
   const accidentalLimit = basePremium * 0.3;
 
@@ -521,25 +600,19 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
   const RATES = {
     accidental_death: 50,
     accidental_disability: 75,
-    critical_illness: 100,
   };
 
-  // State for selected Sum Assured (0 means not selected)
   const [accDeathSA, setAccDeathSA] = useState(0);
   const [accDisabilitySA, setAccDisabilitySA] = useState(0);
-  const [critIllnessSA, setCritIllnessSA] = useState(0);
 
-  // Initialize from state if revisiting
+  // Initialize
   useEffect(() => {
     if (selectedRiders) {
       const ad = selectedRiders.find(r => r.id === 'accidental_death');
       if (ad) setAccDeathSA(ad.sumAssured || 0);
       
-      const dis = selectedRiders.find(r => r.id === 'accidental_disability'); // Fixed ID
+      const dis = selectedRiders.find(r => r.id === 'accidental_disability');
       if (dis) setAccDisabilitySA(dis.sumAssured || 0);
-
-      const ci = selectedRiders.find(r => r.id === 'critical_illness');
-      if (ci) setCritIllnessSA(ci.sumAssured || 0);
     }
   }, []);
 
@@ -547,14 +620,16 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
   const accDeathPremium = (accDeathSA / 100000) * RATES.accidental_death;
   const accDisabilityPremium = (accDisabilitySA / 100000) * RATES.accidental_disability;
   const accTotalPremium = accDeathPremium + accDisabilityPremium;
-  
-  const critIllnessPremium = (critIllnessSA / 100000) * RATES.critical_illness;
 
-  const isAccidentalLimitBreached = accTotalPremium > accidentalLimit;
+  const isLimitBreached = accTotalPremium > accidentalLimit;
 
-  // Generate options for dropdowns
-  const getOptions = (maxLimit: number) => {
-    const opts = [
+  // Generate filtered options
+  const getOptions = (rate: number, currentPremium: number) => {
+    // Remaining limit available for THIS rider
+    const remainingLimit = accidentalLimit - (accTotalPremium - currentPremium);
+    const maxSA = (remainingLimit / rate) * 100000;
+
+    const allOpts = [
       { label: 'Select sum assured', value: 0 },
       { label: '₹5 Lakh', value: 500000 },
       { label: '₹10 Lakh', value: 1000000 },
@@ -562,14 +637,18 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
       { label: '₹50 Lakh', value: 5000000 },
       { label: '₹1 Crore', value: 10000000 },
     ];
-    return opts.filter(o => o.value === 0 || o.value <= maxLimit);
+    
+    // Filter out options that exceed the limit
+    // Note: We always allow 0 (unselect) and current selection
+    return allOpts.filter(o => o.value === 0 || o.value <= maxSA || o.value === (currentPremium / rate) * 100000);
   };
 
   const handleContinue = () => {
-    if (isAccidentalLimitBreached) return;
-
-    const newRiders: LifeRider[] = [];
+    // Filter existing non-accidental riders to preserve them (like critical illness if already selected in a weird flow, though usually this is first)
+    const otherRiders = (state.selectedRiders || []).filter(r => r.id === 'critical_illness');
     
+    const newRiders: LifeRider[] = [...otherRiders];
+
     if (accDeathSA > 0) {
       newRiders.push({
         id: 'accidental_death',
@@ -584,7 +663,7 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
 
     if (accDisabilitySA > 0) {
       newRiders.push({
-        id: 'accidental_disability', // Fixed ID to match updated type
+        id: 'accidental_disability',
         name: 'Accidental Disability Cover',
         description: 'Coverage for permanent disability',
         sumAssured: accDisabilitySA,
@@ -594,24 +673,10 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
       });
     }
 
-    if (critIllnessSA > 0) {
-      newRiders.push({
-        id: 'critical_illness',
-        name: 'Critical Illness Benefit',
-        description: 'Coverage for critical illnesses',
-        sumAssured: critIllnessSA,
-        premium: critIllnessPremium,
-        premiumImpact: RATES.critical_illness,
-        selected: true
-      });
-    }
-
-    // Update store
-    // Calculate new total premium
-    const totalRiderPremium = accTotalPremium + critIllnessPremium;
+    // Update total premium in quote
+    const totalRiderPremium = newRiders.reduce((sum, r) => sum + (r.premium || 0), 0);
     const newTotalPremium = basePremium + totalRiderPremium;
-    
-    // Update quote object if it exists
+
     const currentQuote = state.quote;
     const updatedQuote = currentQuote ? {
       ...currentQuote,
@@ -628,124 +693,78 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
     onContinue();
   };
 
-  const RiderCard = ({ 
-    title, 
-    desc, 
-    icon, 
-    value, 
-    onChange, 
-    maxLimit,
-    error 
-  }: { 
-    title: string; 
-    desc: React.ReactNode; 
-    icon: string; 
-    value: number; 
-    onChange: (val: number) => void;
-    maxLimit: number;
-    error?: boolean;
-  }) => (
-    <div className={`bg-white rounded-2xl p-4 border transition-colors ${error ? 'border-red-300 bg-red-50/50' : 'border-gray-100'}`}>
-      <div className="flex gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-          <span className="text-2xl">{icon}</span>
-        </div>
-        <div>
-          <h4 className="font-bold text-gray-900 text-body-lg">{title}</h4>
-          <div className="text-caption text-gray-500 mt-1 space-y-1">
-            {desc}
-          </div>
-        </div>
-      </div>
-      
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full p-3 bg-white border border-gray-200 rounded-xl text-body-sm font-medium text-gray-900 appearance-none focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-        >
-          {getOptions(maxLimit).map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md w-full"
     >
-      {/* Header */}
-      <div className="mb-6">
-        <h3 className="text-heading-sm font-bold text-white mb-1">A smart way to increase your coverage</h3>
-        <p className="text-white/60 text-body-sm">Select riders to enhance your plan</p>
-      </div>
-
       <div className="space-y-4">
-        {/* Accidental Death */}
-        <RiderCard
-          title="Accidental death cover"
-          icon="🛡️"
-          desc={
-            <>
-              <div className="flex items-start gap-2">
+        {/* Accidental Death Card */}
+        <div className="bg-white rounded-2xl p-4 border border-gray-100">
+          <div className="flex gap-4 mb-4">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">🛡️</span>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900 text-body-lg">Accidental death cover</h4>
+              <div className="flex items-start gap-2 mt-1">
                 <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                <span>Pays selected sum assured in addition to base cover</span>
+                <p className="text-caption text-gray-500">Pays selected sum assured in addition to base cover</p>
               </div>
-            </>
-          }
-          value={accDeathSA}
-          onChange={setAccDeathSA}
-          maxLimit={baseSumAssured} // Can match base SA generally
-        />
+            </div>
+          </div>
+          <LifeCustomDropdown 
+            options={getOptions(RATES.accidental_death, accDeathPremium)}
+            value={accDeathSA}
+            onChange={setAccDeathSA}
+          />
+        </div>
 
-        {/* Accidental Disability */}
-        <RiderCard
-          title="Accidental disability cover"
-          icon="♿"
-          desc={
-            <>
-              <div className="flex items-start gap-2">
-                <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                <span>Get sum assured if permanently disabled due to accident</span>
+        {/* Accidental Disability Card */}
+        <div className="bg-white rounded-2xl p-4 border border-gray-100">
+          <div className="flex gap-4 mb-4">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">♿</span>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900 text-body-lg">Accidental disability cover</h4>
+              <div className="space-y-1 mt-1">
+                <div className="flex items-start gap-2">
+                  <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <p className="text-caption text-gray-500">Get sum assured if permanently disabled due to accident</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <p className="text-caption text-gray-500">No premiums to pay for remaining policy term</p>
+                </div>
               </div>
-              <div className="flex items-start gap-2">
-                <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                <span>No premiums to pay for remaining policy term</span>
-              </div>
-            </>
-          }
-          value={accDisabilitySA}
-          onChange={setAccDisabilitySA}
-          maxLimit={baseSumAssured}
-        />
+            </div>
+          </div>
+          <LifeCustomDropdown 
+            options={getOptions(RATES.accidental_disability, accDisabilityPremium)}
+            value={accDisabilitySA}
+            onChange={setAccDisabilitySA}
+          />
+        </div>
 
-        {/* Accidental Limit Bar */}
+        {/* Limit Bar */}
         <div className="bg-white/10 rounded-xl p-4 border border-white/10">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-1.5">
               <span className="text-caption text-white/80">Additional covers limit</span>
               <div className="group relative">
                 <svg className="w-3.5 h-3.5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-[10px] rounded hidden group-hover:block">
-                  Accidental rider premiums cannot exceed 30% of base premium.
-                </div>
               </div>
             </div>
-            <span className={`text-caption font-semibold ${isAccidentalLimitBreached ? 'text-red-300' : 'text-white'}`}>
+            <span className={`text-caption font-semibold ${isLimitBreached ? 'text-red-300' : 'text-white'}`}>
               ₹{accTotalPremium.toLocaleString()}/yr
             </span>
           </div>
           
           <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
             <motion.div 
-              className={`h-full rounded-full ${isAccidentalLimitBreached ? 'bg-red-500' : 'bg-green-500'}`}
+              className={`h-full rounded-full ${isLimitBreached ? 'bg-red-500' : 'bg-green-500'}`}
               initial={{ width: 0 }}
               animate={{ width: `${Math.min((accTotalPremium / accidentalLimit) * 100, 100)}%` }}
             />
@@ -754,38 +773,130 @@ export function LifeRiderSelection({ onContinue }: { onContinue: () => void }) {
              <span className="text-[10px] text-white/40">₹0</span>
              <span className="text-[10px] text-white/40">Max: ₹{Math.round(accidentalLimit).toLocaleString()}</span>
           </div>
-          {isAccidentalLimitBreached && (
-             <p className="text-[11px] text-red-300 mt-1">Limit exceeded. Reduce accidental coverage.</p>
-          )}
         </div>
 
-        {/* Critical Illness */}
-        <RiderCard
-          title="Critical illness cover"
-          icon="🏥"
-          desc={
-            <>
-               <div className="flex items-start gap-2">
-                <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                <span>Lump sum payout for 21 critical illnesses</span>
-              </div>
-            </>
-          }
-          value={critIllnessSA}
-          onChange={setCritIllnessSA}
-          maxLimit={baseSumAssured} // Rule: cannot go over base sum insured
-        />
-        <p className="text-center text-caption text-white/40">Critical illness cover cannot exceed base sum assured.</p>
-
-        {/* Continue Button */}
         <button
           onClick={handleContinue}
-          disabled={isAccidentalLimitBreached}
+          disabled={isLimitBreached}
           className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 disabled:opacity-50 disabled:grayscale"
         >
           Continue
         </button>
       </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Critical Illness Rider Widget
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeCriticalIllnessWidget({ onContinue }: { onContinue: () => void }) {
+  const state = useLifeJourneyStore.getState() as LifeJourneyState;
+  const { quote, selectedRiders } = state;
+  const basePremium = quote?.basePremium || 0;
+  const baseSumAssured = quote?.sumAssured || 0;
+
+  const RATE_CI = 100; // Rate per 1L
+
+  const [ciSA, setCiSA] = useState(0);
+
+  useEffect(() => {
+    if (selectedRiders) {
+      const ci = selectedRiders.find(r => r.id === 'critical_illness');
+      if (ci) setCiSA(ci.sumAssured || 0);
+    }
+  }, []);
+
+  const ciPremium = (ciSA / 100000) * RATE_CI;
+
+  // Filter options: cannot exceed base sum assured
+  const getOptions = () => {
+    const allOpts = [
+      { label: 'Select sum assured', value: 0 },
+      { label: '₹5 Lakh', value: 500000 },
+      { label: '₹10 Lakh', value: 1000000 },
+      { label: '₹25 Lakh', value: 2500000 },
+      { label: '₹50 Lakh', value: 5000000 },
+      { label: '₹1 Crore', value: 10000000 },
+    ];
+    return allOpts.filter(o => o.value === 0 || o.value <= baseSumAssured);
+  };
+
+  const handleContinue = () => {
+    // Preserve accidental riders
+    const otherRiders = (state.selectedRiders || []).filter(r => r.id !== 'critical_illness');
+    const newRiders = [...otherRiders];
+
+    if (ciSA > 0) {
+      newRiders.push({
+        id: 'critical_illness',
+        name: 'Critical Illness Benefit',
+        description: 'Coverage for critical illnesses',
+        sumAssured: ciSA,
+        premium: ciPremium,
+        premiumImpact: RATE_CI,
+        selected: true
+      });
+    }
+
+    // Recalculate total premium
+    const totalRiderPremium = newRiders.reduce((sum, r) => sum + (r.premium || 0), 0);
+    const newTotalPremium = basePremium + totalRiderPremium;
+
+    const currentQuote = state.quote;
+    const updatedQuote = currentQuote ? {
+      ...currentQuote,
+      riders: newRiders,
+      totalPremium: newTotalPremium,
+      yearlyPremium: newTotalPremium,
+      monthlyPremium: Math.round(newTotalPremium / 12),
+    } : null;
+
+    useLifeJourneyStore.setState({ 
+      selectedRiders: newRiders,
+      ...(updatedQuote && { quote: updatedQuote })
+    });
+    onContinue();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md w-full"
+    >
+      <div className="bg-white rounded-2xl p-4 border border-gray-100 mb-4">
+        <div className="flex gap-4 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl">🏥</span>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-900 text-body-lg">Critical illness cover</h4>
+            <div className="flex items-start gap-2 mt-1">
+              <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              <p className="text-caption text-gray-500">Lump sum payout for 21 critical illnesses</p>
+            </div>
+          </div>
+        </div>
+        
+        <LifeCustomDropdown 
+          options={getOptions()}
+          value={ciSA}
+          onChange={setCiSA}
+        />
+      </div>
+
+      <p className="text-center text-caption text-white/40 mb-4">
+        Critical illness cover cannot exceed base sum assured.
+      </p>
+
+      <button
+        onClick={handleContinue}
+        className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30"
+      >
+        Continue
+      </button>
     </motion.div>
   );
 }

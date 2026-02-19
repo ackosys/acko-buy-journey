@@ -19,7 +19,8 @@ import {
   LifeTextInput,
   LifeDatePicker,
   LifeRiderToggle,
-  LifeRiderSelection,
+  LifeAccidentalRiderWidget,
+  LifeCriticalIllnessWidget,
   LifeCoverageCard,
   LifePremiumSummary,
   LifeReviewSummary,
@@ -196,8 +197,8 @@ export default function LifeChatContainer() {
       userLabel = `DOB: ${response}`;
     } else if (step.widgetType === 'premium_summary') {
       userLabel = 'Reviewed quote, continuing';
-    } else if (step.widgetType === 'rider_selection') {
-      userLabel = 'Selected additional covers';
+    } else if (step.widgetType === 'accidental_rider' || step.widgetType === 'critical_illness_rider') {
+      userLabel = 'Updated riders';
     } else if (step.widgetType === 'coverage_input') {
       userLabel = 'Selected coverage & term';
     } else if (step.widgetType === 'payment_screen') {
@@ -248,7 +249,7 @@ export default function LifeChatContainer() {
   const isLargeWidget = () => {
     const step = getLifeStep(currentStepId);
     if (!step) return false;
-    return ['rider_selection', 'coverage_card', 'premium_summary', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
+    return ['accidental_rider', 'critical_illness_rider', 'coverage_card', 'premium_summary', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
   };
 
   // Render edit widget
@@ -274,8 +275,10 @@ export default function LifeChatContainer() {
         return <LifeDatePicker placeholder={script.placeholder} onSubmit={handleEditResponse} />;
       case 'rider_toggle':
         return <LifeRiderToggle options={script.options || []} onSelect={handleEditResponse} />;
-      case 'rider_selection':
-        return <LifeRiderSelection onContinue={() => handleEditResponse('updated riders')} />;
+      case 'accidental_rider':
+        return <LifeAccidentalRiderWidget onContinue={() => handleEditResponse('updated riders')} />;
+      case 'critical_illness_rider':
+        return <LifeCriticalIllnessWidget onContinue={() => handleEditResponse('updated riders')} />;
       default:
         return null;
     }
@@ -304,8 +307,10 @@ export default function LifeChatContainer() {
         return <LifeDatePicker placeholder={script.placeholder} onSubmit={handleResponse} />;
       case 'rider_toggle':
         return <LifeRiderToggle options={script.options || []} onSelect={handleResponse} />;
-      case 'rider_selection':
-        return <LifeRiderSelection onContinue={() => handleResponse('continue')} />;
+      case 'accidental_rider':
+        return <LifeAccidentalRiderWidget onContinue={() => handleResponse('continue')} />;
+      case 'critical_illness_rider':
+        return <LifeCriticalIllnessWidget onContinue={() => handleResponse('continue')} />;
       case 'coverage_card':
         return <LifeCoverageCard coverageAmount={script.coverageAmount || ''} policyTerm={script.policyTerm || ''} coversTillAge={script.coversTillAge || 0} breakdownItems={script.breakdownItems} onContinue={() => handleResponse('continue')} />;
       case 'premium_summary':

@@ -1247,10 +1247,28 @@ const lifeQuoteDisplay: ConversationStep<LifeJourneyState> = {
 const lifeAddonsIntro: ConversationStep<LifeJourneyState> = {
   id: 'life_addons_intro',
   module: 'addons',
-  widgetType: 'rider_selection',
+  widgetType: 'accidental_rider',
   getScript: (persona, state) => {
     const messages: string[] = [
       `Now, let's look at some additional covers to enhance your protection.`,
+      `First, Accidental Covers. You can add Death and Disability protection.`,
+      `Note: The total premium for these cannot exceed 30% of your base premium.`,
+    ];
+    
+    return { botMessages: messages };
+  },
+  processResponse: (_response, _state) => ({}),
+  getNextStep: (_response, _state) => 'life_addons_critical_illness',
+};
+
+const lifeAddonsCriticalIllness: ConversationStep<LifeJourneyState> = {
+  id: 'life_addons_critical_illness',
+  module: 'addons',
+  widgetType: 'critical_illness_rider',
+  getScript: (persona, state) => {
+    const messages: string[] = [
+      `Next, Critical Illness Cover.`,
+      `This provides a lump sum for 21 critical illnesses. Coverage cannot exceed your base sum assured.`,
     ];
     
     return { botMessages: messages };
@@ -1459,6 +1477,7 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   // Shared: quote and add-ons
   lifeQuoteDisplay,
   lifeAddonsIntro,
+  lifeAddonsCriticalIllness,
   
   // Shared: review and post-purchase
   lifeReview,

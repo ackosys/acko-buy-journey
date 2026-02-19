@@ -46,7 +46,8 @@ export type LifeWidgetType =
   | 'coverage_slider'         // Coverage amount selector
   | 'term_selector'           // Policy term selector
   | 'rider_toggle'            // Add-on riders with premium impact
-  | 'rider_selection'         // Complex rider selection with sum assured
+  | 'accidental_rider'        // Accidental death + disability with limit logic
+  | 'critical_illness_rider'  // Critical illness with base sum assured limit logic
   | 'premium_summary'         // Quote display with breakdown
   | 'coverage_input'          // Direct-quote: user enters coverage + term
   | 'payment_screen'          // Payment CTA
