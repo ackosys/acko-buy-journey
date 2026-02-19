@@ -26,6 +26,10 @@ const MOTOR_ICONS: Record<string, string> = {
   shield_search: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
   fuel: 'M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z',
   electric: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
+  upload: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5',
+  download: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3',
+  refresh: 'M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.016 4.656v4.992',
+  switch: 'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5',
 };
 
 function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: string }) {
@@ -2051,6 +2055,264 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
                   ))}
                 </div>
                 <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-white/50 hover:text-white/70 transition-colors">Cancel</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   Document Upload Widget — Claims FNOL
+   ═══════════════════════════════════════════════ */
+
+type DocSource = 'camera' | 'gallery' | 'pdf' | 'digilocker';
+
+interface DocUploadResult {
+  rcUploaded: boolean;
+  dlUploaded: boolean;
+  prevPolicyUploaded: boolean;
+}
+
+const DOC_SOURCE_OPTIONS: { id: DocSource; label: string; icon: string }[] = [
+  { id: 'camera', label: 'Click photos with camera', icon: '📷' },
+  { id: 'gallery', label: 'Upload both sides from gallery', icon: '🖼️' },
+  { id: 'pdf', label: 'Upload PDF / Zip file', icon: '📄' },
+  { id: 'digilocker', label: 'Fetch from Digilocker', icon: '🔒' },
+];
+
+export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocUploadResult) => void }) {
+  const state = useMotorStore() as MotorJourneyState;
+  const hasAutoRC = !!(state.registrationNumber && state.vehicleData?.make);
+
+  const [rcUploaded, setRcUploaded] = useState(hasAutoRC);
+  const [dlUploaded, setDlUploaded] = useState(false);
+  const [prevPolicyUploaded, setPrevPolicyUploaded] = useState(false);
+  const [sourceSheet, setSourceSheet] = useState<'rc' | 'dl' | 'prev' | null>(null);
+  const [uploadingFor, setUploadingFor] = useState<'rc' | 'dl' | 'prev' | null>(null);
+
+  const ownerName = state.ownerName || 'You';
+  const regNo = state.registrationNumber || 'your vehicle';
+  const chassisNo = state.chassisNumber || 'XXXXXXXXXXXX';
+
+  const handleSourceSelect = (_source: DocSource) => {
+    const target = sourceSheet;
+    setSourceSheet(null);
+    setUploadingFor(target);
+    setTimeout(() => {
+      if (target === 'rc') setRcUploaded(true);
+      if (target === 'dl') setDlUploaded(true);
+      if (target === 'prev') setPrevPolicyUploaded(true);
+      setUploadingFor(null);
+    }, 900);
+  };
+
+  const canProceed = rcUploaded && dlUploaded;
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-3 w-full max-w-sm"
+      >
+        <p className="text-[13px] font-semibold text-white/50 uppercase tracking-wide px-1 mb-1">Upload important documents</p>
+
+        {/* RC Card */}
+        <div className={`rounded-2xl border transition-all overflow-hidden ${rcUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${rcUploaded ? 'bg-green-500/20' : 'bg-white/10'}`}>
+                <svg className={`w-5 h-5 ${rcUploaded ? 'text-green-400' : 'text-white/60'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[14px] font-semibold text-white">Registration Certificate (RC)</p>
+                  {hasAutoRC && rcUploaded && !uploadingFor && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Auto-fetched ✓</span>
+                  )}
+                  {!hasAutoRC && rcUploaded && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
+                  )}
+                </div>
+                <p className="text-[12px] text-white/50">
+                  {hasAutoRC ? 'Fetched from Vahan portal' : `Upload RC for ${regNo}`}
+                </p>
+              </div>
+            </div>
+
+            {hasAutoRC && rcUploaded && (
+              <div className="bg-white/5 rounded-xl px-3 py-2.5 mb-3 space-y-1.5">
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-white/50">Registration holder</span>
+                  <span className="text-white font-medium">{ownerName}</span>
+                </div>
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-white/50">Vehicle number</span>
+                  <span className="text-white font-medium">{regNo}</span>
+                </div>
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-white/50">Chassis no.</span>
+                  <span className="text-white font-medium">{chassisNo}</span>
+                </div>
+              </div>
+            )}
+
+            {uploadingFor === 'rc' ? (
+              <div className="flex items-center gap-2 py-1">
+                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px] text-white/60">Uploading...</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setSourceSheet('rc')}
+                className="text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              >
+                {rcUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* DL Card */}
+        <div className={`rounded-2xl border transition-all overflow-hidden ${dlUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dlUploaded ? 'bg-green-500/20' : 'bg-white/10'}`}>
+                <svg className={`w-5 h-5 ${dlUploaded ? 'text-green-400' : 'text-white/60'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[14px] font-semibold text-white">Driving Licence (DL)</p>
+                  {dlUploaded && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
+                  )}
+                </div>
+                <p className="text-[12px] text-white/50">Upload DL for {ownerName}</p>
+              </div>
+            </div>
+
+            {uploadingFor === 'dl' ? (
+              <div className="flex items-center gap-2 py-1">
+                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px] text-white/60">Uploading...</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setSourceSheet('dl')}
+                className="text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              >
+                {dlUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Previous Year's Policy — optional */}
+        <div className={`rounded-2xl border transition-all overflow-hidden ${prevPolicyUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${prevPolicyUploaded ? 'bg-green-500/20' : 'bg-white/10'}`}>
+                <svg className={`w-5 h-5 ${prevPolicyUploaded ? 'text-green-400' : 'text-white/60'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[14px] font-semibold text-white">Previous Year&apos;s Policy</p>
+                  {prevPolicyUploaded && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
+                  )}
+                  <span className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full">Optional</span>
+                </div>
+                <p className="text-[12px] text-white/50">Helps speed up claim processing</p>
+              </div>
+            </div>
+
+            {uploadingFor === 'prev' ? (
+              <div className="flex items-center gap-2 mt-3">
+                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px] text-white/60">Uploading...</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setSourceSheet('prev')}
+                className="mt-3 text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              >
+                {prevPolicyUploaded ? 'Replace ↗' : '+ Add more'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Incorrect details link */}
+        <p className="text-[12px] text-center text-white/40 py-1">
+          Incorrect details?{' '}
+          <button className="text-purple-400 underline underline-offset-2">Update here</button>
+        </p>
+
+        {/* Proceed CTA */}
+        <button
+          onClick={() => canProceed && onContinue({ rcUploaded, dlUploaded, prevPolicyUploaded })}
+          disabled={!canProceed}
+          className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
+            canProceed
+              ? 'bg-white text-[#1C0B47] hover:bg-white/90 active:scale-[0.97]'
+              : 'bg-white/10 text-white/30 cursor-not-allowed'
+          }`}
+        >
+          {canProceed ? 'Proceed \u2192' : `Upload ${!rcUploaded ? 'RC' : 'DL'} to continue`}
+        </button>
+
+        <button className="w-full py-2 text-[13px] text-white/30 hover:text-white/50 transition-colors">
+          Save and continue later
+        </button>
+      </motion.div>
+
+      {/* Source selector bottom sheet */}
+      <AnimatePresence>
+        {sourceSheet && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 flex items-end"
+            onClick={() => setSourceSheet(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="w-full max-h-[45vh] flex flex-col"
+              style={{ background: '#1C1028', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.08)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex-shrink-0 pt-3 pb-2 px-5">
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+                <p className="text-[16px] font-semibold text-white mb-1">Select a source</p>
+                <p className="text-[12px] text-white/50">in PNG, JPEG, or PDF format (Max 10 MB)</p>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-2">
+                {DOC_SOURCE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleSourceSelect(opt.id)}
+                    className="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/8 hover:border-purple-400/30 rounded-xl transition-all text-left"
+                  >
+                    <span className="text-2xl">{opt.icon}</span>
+                    <span className="text-[14px] font-medium text-white">{opt.label}</span>
+                    <svg className="w-4 h-4 text-white/30 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </button>
+                ))}
               </div>
             </motion.div>
           </motion.div>

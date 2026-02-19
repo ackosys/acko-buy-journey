@@ -7,6 +7,7 @@ import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
 import MotorHeader from '../../components/motor/MotorHeader';
 import MotorChatContainer from '../../components/motor/MotorChatContainer';
 import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
+import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
 import AckoLogo from '../../components/AckoLogo';
 import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
 
@@ -232,6 +233,9 @@ export default function MotorJourney() {
 
   return (
     <>
+      <MotorExpertPanel />
+      <MotorAIChatPanel />
+
       <AnimatePresence>
         {showWelcome && screen === 'entry' && (
           <WelcomeOverlay key="welcome-overlay" onDone={dismissWelcome} />

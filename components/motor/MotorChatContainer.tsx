@@ -26,6 +26,7 @@ import {
   OutOfPocketAddons,
   ProtectEveryoneAddons,
   MotorTextInput,
+  DocumentUploadWidget,
 } from './MotorWidgets';
 import { PremiumBreakdown, DashboardCTA } from './MotorFinalWidgets';
 
@@ -160,11 +161,11 @@ export default function MotorChatContainer() {
       });
       updateState({ isTyping: false } as Partial<MotorJourneyState>);
 
-      // Auto-advance for 'none' widget types
       if (step.widgetType === 'none') {
         await new Promise(r => setTimeout(r, 400));
         const freshState = useMotorStore.getState() as MotorJourneyState;
         const nextStepId = step.getNextStep(null, freshState);
+        if (nextStepId === currentStepId) return;
         const nextStep = getMotorStep(nextStepId);
         updateState({
           currentStepId: nextStepId,
@@ -324,6 +325,13 @@ export default function MotorChatContainer() {
       userLabel = '';
     } else if (step.widgetType === 'dashboard_cta') {
       userLabel = response.choice === 'dashboard' ? 'Go to Dashboard' : 'Download Policy';
+    } else if (step.widgetType === 'document_upload') {
+      const docsUploaded = [
+        response?.rcUploaded && 'RC',
+        response?.dlUploaded && 'DL',
+        response?.prevPolicyUploaded && 'Previous Policy',
+      ].filter(Boolean).join(', ');
+      userLabel = `Documents uploaded: ${docsUploaded}`;
     }
 
     // Add user message (skip for loading states)
@@ -405,6 +413,8 @@ export default function MotorChatContainer() {
         return <MotorCelebration onContinue={() => handleResponse({})} />;
       case 'dashboard_cta':
         return <DashboardCTA onSelect={(choice) => handleResponse({ choice })} />;
+      case 'document_upload':
+        return <DocumentUploadWidget onContinue={(result) => handleResponse(result)} />;
       default:
         return null;
     }
@@ -420,7 +430,7 @@ export default function MotorChatContainer() {
       'ncb_selector', 'ncb_reward', 'insurer_selector',
       'editable_summary', 'rejection_screen', 'plan_calculator',
       'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons',
-      'premium_breakdown', 'motor_celebration', 'dashboard_cta',
+      'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
     ].includes(step.widgetType);
   };
 

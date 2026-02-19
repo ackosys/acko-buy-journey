@@ -161,6 +161,7 @@ export default function AuraMotorChatContainer() {
         await new Promise(r => setTimeout(r, 400));
         const freshState = useMotorStore.getState() as MotorJourneyState;
         const nextStepId = step.getNextStep(null, freshState);
+        if (nextStepId === currentStepId) return;
         const nextStep = getMotorStep(nextStepId);
         updateState({
           currentStepId: nextStepId,

@@ -54,13 +54,12 @@ const registrationHasNumber: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Great, ${vLabel(state)} insurance it is.`,
-      `Do you have your vehicle registration number?`,
+      `Happy to help! 😊`,
+      `Are you looking to renew insurance for your current ${vLabel(state)}, or insure a brand-new one?`,
     ],
-    subText: `This helps us fetch your ${vLabel(state)} details automatically and save you time.`,
     options: [
-      { id: 'yes', label: 'Yes, I have it', description: 'Enter your registration number', icon: 'document' },
-      { id: 'no', label: 'No, brand new vehicle', description: `Just bought a new ${vLabel(state)}`, icon: 'star' },
+      { id: 'yes', label: 'Renew / Switch insurance', description: `I already have a ${vLabel(state)}`, icon: 'document' },
+      { id: 'no', label: `Insure my new ${vLabel(state)}`, description: `Just got a brand-new ${vLabel(state)}`, icon: 'star' },
     ],
   }),
   processResponse: (response) => ({
@@ -1135,11 +1134,31 @@ const completionDashboard: MotorConversationStep = {
   }),
   processResponse: (response) => ({
     paymentComplete: true,
-    journeyComplete: response?.choice === 'download',
   }),
   getNextStep: (response) => {
     const choice = response?.choice || response;
     if (choice === 'dashboard') return 'db.welcome';
+    return 'completion.download_confirm';
+  },
+};
+
+const completionDownloadConfirm: MotorConversationStep = {
+  id: 'completion.download_confirm',
+  module: 'completion',
+  widgetType: 'selection_cards',
+  getScript: () => ({
+    botMessages: [
+      `Your policy document is being downloaded. You'll find it in your device's downloads folder.`,
+      `Would you like to do anything else?`,
+    ],
+    options: [
+      { id: 'dashboard', label: 'Go to Dashboard', icon: 'forward', description: 'View policy details & manage claims' },
+      { id: 'done', label: 'I\'m all set', icon: 'check' },
+    ],
+  }),
+  processResponse: () => ({}),
+  getNextStep: (response) => {
+    if (response === 'dashboard') return 'db.welcome';
     return 'completion.end';
   },
 };
@@ -1149,9 +1168,13 @@ const completionEnd: MotorConversationStep = {
   module: 'completion',
   widgetType: 'none',
   getScript: () => ({
-    botMessages: [],
+    botMessages: [
+      `You're all set! If you need anything, you can always come back to your dashboard. Drive safe!`,
+    ],
   }),
-  processResponse: () => ({}),
+  processResponse: () => ({
+    journeyComplete: true,
+  }),
   getNextStep: () => 'completion.end',
 };
 
@@ -1212,6 +1235,7 @@ const MOTOR_STEPS: Record<string, MotorConversationStep> = {
   'payment.process': paymentProcess,
   'payment.success': paymentSuccess,
   'completion.dashboard': completionDashboard,
+  'completion.download_confirm': completionDownloadConfirm,
   'completion.end': completionEnd,
 };
 
