@@ -3,6 +3,7 @@
 import { useMotorStore } from '../../../lib/motor/store';
 import { MotorJourneyState } from '../../../lib/motor/types';
 import AckoLogo from '../../AckoLogo';
+import Link from 'next/link';
 
 const MODULE_ORDER = ['vehicle_type', 'registration', 'vehicle_fetch', 'manual_entry', 'pre_quote', 'quote', 'customization', 'review', 'payment'];
 
@@ -15,7 +16,7 @@ export default function AuraMotorHeader() {
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--aura-bg)', borderBottom: '1px solid var(--aura-border)' }}>
       <div className="max-w-lg mx-auto px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <AckoLogo variant={isLight ? 'color' : 'white'} className="h-5" />
           {vehicleType && (
             <span
@@ -25,7 +26,7 @@ export default function AuraMotorHeader() {
               {vehicleType === 'bike' ? 'Bike' : 'Car'}
             </span>
           )}
-        </div>
+        </Link>
 
         <div className="flex items-center gap-2">
           {/* AI Help */}

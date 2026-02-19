@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
 import { VehicleType } from '../../lib/motor/types';
+import Link from 'next/link';
 
 interface MotorEntryScreenProps {
   onSelect: (vehicleType: VehicleType) => void;
@@ -33,7 +34,9 @@ export default function MotorEntryScreen({ onSelect }: MotorEntryScreenProps) {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-12 relative z-10">
-        <AckoLogo variant="white" className="h-8" />
+        <Link href="/">
+          <AckoLogo variant="white" className="h-8" />
+        </Link>
         <span className="text-[10px] bg-white/10 text-purple-200 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-white/10">
           Motor Insurance
         </span>

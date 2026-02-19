@@ -4,6 +4,7 @@ import { useLifeJourneyStore } from '../../lib/life/store';
 import AckoLogo from '../AckoLogo';
 import { useT } from '../../lib/translations';
 import type { LifeModule } from '../../lib/life/types';
+import Link from 'next/link';
 
 const LIFE_MODULE_ORDER: LifeModule[] = ['basic_info', 'lifestyle', 'quote', 'addons', 'review'];
 
@@ -17,7 +18,9 @@ export default function LifeHeader() {
     <header className="sticky top-0 z-30 bg-[#1C0B47] border-b border-white/10">
       <div className="max-w-lg mx-auto px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <AckoLogo variant="white" className="h-5" />
+          <Link href="/">
+            <AckoLogo variant="white" className="h-5" />
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">

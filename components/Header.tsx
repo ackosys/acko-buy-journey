@@ -3,6 +3,7 @@
 import { useJourneyStore } from '../lib/store';
 import AckoLogo from './AckoLogo';
 import { useT } from '../lib/translations';
+import Link from 'next/link';
 
 const MODULE_ORDER = ['entry', 'intent', 'family', 'coverage', 'health', 'customization', 'recommendation', 'review', 'payment', 'health_eval', 'completion'];
 
@@ -17,7 +18,9 @@ export default function Header() {
       <div className="max-w-lg mx-auto px-4 py-2.5 flex items-center justify-between">
         {/* ACKO Logo — white on dark */}
         <div className="flex items-center gap-2">
-          <AckoLogo variant="white" className="h-5" />
+          <Link href="/">
+            <AckoLogo variant="white" className="h-5" />
+          </Link>
         </div>
 
         {/* Circular action buttons */}
