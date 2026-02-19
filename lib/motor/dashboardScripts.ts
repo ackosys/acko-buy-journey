@@ -275,7 +275,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
       return {
         botMessages: [`What happened?`],
         options: [
-          { id: 'own_damage_accident', label: `My ${v} was in an accident`, icon: 'car', description: 'Collision, hit & run, natural calamity, fire' },
+          { id: 'own_damage_accident', label: `My ${v} was in an accident`, icon: v, description: 'Collision, hit & run, natural calamity, fire' },
           { id: 'own_damage_theft', label: `My ${v} was stolen`, icon: 'document', description: 'Vehicle theft or break-in' },
           { id: 'own_damage_accessories', label: `My ${v} accessories were stolen`, icon: 'document', description: 'Parts or accessories stolen' },
           { id: 'third_party', label: 'I caused damage to someone else', icon: 'shield', description: 'Property or injury to a third party' },
@@ -719,7 +719,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'dashboard',
     widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: [`No Claim Bonus (NCB) is a discount on your Own Damage premium for every claim-free year. It starts at 20% and goes up to 50% over 5 years.\n\nNCB Progression:\n• 1 year claim-free: 20%\n• 2 years: 25%\n• 3 years: 35%\n• 4 years: 45%\n• 5 years: 50%\n\nImportant: NCB is on the vehicle owner, not the vehicle. If you sell your car, you can transfer your NCB to a new vehicle.`],
+      botMessages: [`No Claim Bonus (NCB) is a discount on your Own Damage premium for every claim-free year. It starts at 20% and goes up to 50% over 5 years.\n\nNCB Progression:\n• 1 year claim-free: 20%\n• 2 years: 25%\n• 3 years: 35%\n• 4 years: 45%\n• 5 years: 50%\n\nImportant: NCB is on the vehicle owner, not the vehicle. If you sell your vehicle, you can transfer your NCB to a new one.`],
       options: [{ id: 'more', label: 'Ask Another Question' }, { id: 'custom', label: 'Ask Something Else', icon: 'chat_bubble' }, { id: 'back', label: 'Back to Dashboard', icon: 'switch' }],
     }),
     processResponse: () => ({}),
@@ -731,7 +731,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     module: 'dashboard',
     widgetType: 'selection_cards',
     getScript: () => ({
-      botMessages: [`Popular add-ons:\n\n• Zero Depreciation: Saves 30-50% on claim costs\n• Engine Protection: Covers water damage to engine (₹1,500-3,000)\n• Consumables Cover: Covers engine oil, nuts, bolts (₹500-1,000)\n• Personal Accident: ₹15L-50L coverage for owner-driver\n• Passenger Protection: Covers co-passengers\n\nRecommended: Zero Dep for new cars, Engine Protection for monsoon-prone areas.`],
+      botMessages: [`Popular add-ons:\n\n• Zero Depreciation: Saves 30-50% on claim costs\n• Engine Protection: Covers water damage to engine (₹1,500-3,000)\n• Consumables Cover: Covers engine oil, nuts, bolts (₹500-1,000)\n• Personal Accident: ₹15L-50L coverage for owner-driver\n• Passenger Protection: Covers co-passengers\n\nRecommended: Zero Dep for new vehicles, Engine Protection for monsoon-prone areas.`],
       options: [{ id: 'more', label: 'Ask Another Question' }, { id: 'custom', label: 'Ask Something Else', icon: 'chat_bubble' }, { id: 'back', label: 'Back to Dashboard', icon: 'switch' }],
     }),
     processResponse: () => ({}),
