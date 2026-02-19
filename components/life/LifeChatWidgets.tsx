@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Option, LifeRider, LifeJourneyState } from '../../lib/life/types';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import { calculateBasePremium } from '../../lib/life/scripts';
@@ -1256,23 +1256,268 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   e-KYC Screen — Aadhaar-based identity verification
+   e-KYC Screen — Full Aadhaar OTP verification flow
+   Stages: start → aadhaar → sending → otp → verifying → success
+   Edge cases: wrong OTP (max 3), OTP expiry, service down,
+               Aadhaar not linked to mobile, alternative KYC paths
    ═══════════════════════════════════════════════════════ */
 
+type EkycStage =
+  | 'start'
+  | 'aadhaar'
+  | 'sending'
+  | 'otp'
+  | 'verifying'
+  | 'success'
+  | 'error_wrong_otp'
+  | 'error_expired'
+  | 'error_locked'
+  | 'error_not_linked'
+  | 'error_service_down'
+  | 'alt_digilocker'
+  | 'alt_video_kyc'
+  | 'alt_upload';
+
+const MAX_OTP_ATTEMPTS = 3;
+const MAX_RESENDS = 2;
+const OTP_TIMER_SECONDS = 60;
+// In prototype mode, OTP "123456" succeeds. Any other 6-digit OTP simulates failure.
+const DEMO_OTP = '123456';
+
+function EkycOtpBoxes({
+  value,
+  onChange,
+  hasError,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  hasError: boolean;
+}) {
+  const refs = Array.from({ length: 6 }, () => useRef<HTMLInputElement>(null));
+
+  useEffect(() => {
+    refs[0].current?.focus();
+  }, []);
+
+  const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !value[i] && i > 0) {
+      refs[i - 1].current?.focus();
+    }
+  };
+
+  const handleChange = (i: number, raw: string) => {
+    const digit = raw.replace(/\D/g, '').slice(-1);
+    const arr = value.split('').concat(Array(6).fill('')).slice(0, 6);
+    arr[i] = digit;
+    const next = arr.join('');
+    onChange(next);
+    if (digit && i < 5) {
+      refs[i + 1].current?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    onChange(pasted.padEnd(6, '').slice(0, 6));
+    const focusIdx = Math.min(pasted.length, 5);
+    refs[focusIdx].current?.focus();
+  };
+
+  return (
+    <div className="flex gap-2 justify-center">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <input
+          key={i}
+          ref={refs[i]}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={value[i] || ''}
+          onChange={(e) => handleChange(i, e.target.value)}
+          onKeyDown={(e) => handleKey(i, e)}
+          onPaste={handlePaste}
+          className={`w-10 h-12 rounded-xl border text-center text-lg font-bold text-gray-900 focus:outline-none transition-colors
+            ${hasError
+              ? 'border-red-400 bg-red-50 text-red-700'
+              : value[i]
+                ? 'border-purple-400 bg-purple-50'
+                : 'border-gray-200 bg-white focus:border-purple-400 focus:ring-1 focus:ring-purple-400/30'
+            }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EkycTimer({
+  seconds,
+  onExpire,
+}: {
+  seconds: number;
+  onExpire: () => void;
+}) {
+  const [remaining, setRemaining] = useState(seconds);
+
+  useEffect(() => {
+    setRemaining(seconds);
+  }, [seconds]);
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      onExpire();
+      return;
+    }
+    const t = setTimeout(() => setRemaining((r) => r - 1), 1000);
+    return () => clearTimeout(t);
+  }, [remaining, onExpire]);
+
+  const pct = (remaining / seconds) * 100;
+
+  return (
+    <div className="flex items-center gap-2 justify-center">
+      <div className="relative w-8 h-8">
+        <svg className="w-8 h-8 -rotate-90" viewBox="0 0 32 32">
+          <circle cx="16" cy="16" r="13" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+          <circle
+            cx="16" cy="16" r="13" fill="none"
+            stroke={remaining <= 10 ? '#ef4444' : '#9333ea'}
+            strokeWidth="3"
+            strokeDasharray={`${2 * Math.PI * 13}`}
+            strokeDashoffset={`${2 * Math.PI * 13 * (1 - pct / 100)}`}
+            strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
+          />
+        </svg>
+        <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold ${remaining <= 10 ? 'text-red-500' : 'text-gray-700'}`}>
+          {remaining}
+        </span>
+      </div>
+      <span className="text-caption text-gray-500">
+        {remaining > 0 ? `OTP expires in ${remaining}s` : 'OTP expired'}
+      </span>
+    </div>
+  );
+}
+
 export function LifeEkycScreen({ onContinue }: { onContinue: () => void }) {
-  const [step, setStep] = useState<'start' | 'otp' | 'verifying' | 'done'>('start');
+  const [stage, setStage] = useState<EkycStage>('start');
+  const [aadhaar, setAadhaar] = useState('');
+  const [aadhaarError, setAadhaarError] = useState('');
   const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [resends, setResends] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
+  const [otpExpired, setOtpExpired] = useState(false);
 
-  const handleStart = () => setStep('otp');
+  const maskedAadhaar = aadhaar.length >= 8
+    ? `XXXX XXXX ${aadhaar.slice(8, 12)}`
+    : '——';
 
-  const handleVerify = () => {
-    if (otp.length < 4) return;
-    setStep('verifying');
+  const formatAadhaar = (raw: string) => {
+    const digits = raw.replace(/\D/g, '').slice(0, 12);
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+  };
+
+  const validateAadhaar = (val: string): string => {
+    const digits = val.replace(/\s/g, '');
+    if (digits.length < 12) return 'Please enter a valid 12-digit Aadhaar number';
+    if (/^0/.test(digits)) return 'Aadhaar number cannot start with 0';
+    if (/^1/.test(digits)) return 'Aadhaar number cannot start with 1';
+    return '';
+  };
+
+  const handleSendOtp = () => {
+    const err = validateAadhaar(aadhaar);
+    if (err) { setAadhaarError(err); return; }
+    setAadhaarError('');
+    setStage('sending');
     setTimeout(() => {
-      setStep('done');
-      setTimeout(() => onContinue(), 1200);
+      setOtp('');
+      setOtpError('');
+      setOtpExpired(false);
+      setTimerKey((k) => k + 1);
+      setStage('otp');
+    }, 1800);
+  };
+
+  const handleVerifyOtp = () => {
+    if (otp.replace(/\s/g, '').length < 6) {
+      setOtpError('Please enter the complete 6-digit OTP');
+      return;
+    }
+    setStage('verifying');
+    setTimeout(() => {
+      if (otp === DEMO_OTP) {
+        setStage('success');
+        setTimeout(() => onContinue(), 1800);
+      } else {
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= MAX_OTP_ATTEMPTS) {
+          setStage('error_locked');
+        } else {
+          setOtp('');
+          setOtpError(`Incorrect OTP. ${MAX_OTP_ATTEMPTS - newAttempts} attempt${MAX_OTP_ATTEMPTS - newAttempts > 1 ? 's' : ''} remaining.`);
+          setStage('otp');
+        }
+      }
     }, 2000);
   };
+
+  const handleResend = () => {
+    if (resends >= MAX_RESENDS) {
+      setStage('error_not_linked');
+      return;
+    }
+    setResends((r) => r + 1);
+    setOtp('');
+    setOtpError('');
+    setOtpExpired(false);
+    setStage('sending');
+    setTimeout(() => {
+      setTimerKey((k) => k + 1);
+      setStage('otp');
+    }, 1500);
+  };
+
+  const handleOtpExpired = useCallback(() => {
+    setOtpExpired(true);
+  }, []);
+
+  const altOptions = [
+    {
+      id: 'alt_digilocker',
+      icon: (
+        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
+        </svg>
+      ),
+      label: 'Verify via DigiLocker',
+      desc: 'Instant verification using your DigiLocker Aadhaar',
+    },
+    {
+      id: 'alt_video_kyc',
+      icon: (
+        <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+      ),
+      label: 'Video KYC with an agent',
+      desc: '5-min video call with our KYC team',
+    },
+    {
+      id: 'alt_upload',
+      icon: (
+        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+        </svg>
+      ),
+      label: 'Upload documents',
+      desc: 'PAN card + selfie — reviewed in 2 hours',
+    },
+  ];
 
   return (
     <motion.div
@@ -1281,84 +1526,501 @@ export function LifeEkycScreen({ onContinue }: { onContinue: () => void }) {
       className="max-w-md"
     >
       <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+
+        {/* ── Header ── */}
         <div className="px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="text-label-md font-bold text-gray-900">e-KYC Verification</h3>
-              <p className="text-caption text-gray-400">Aadhaar-based OTP verification</p>
+              <p className="text-caption text-gray-400 truncate">
+                {stage === 'start' && 'Aadhaar-based identity verification'}
+                {stage === 'aadhaar' && 'Step 1 of 2 — Enter Aadhaar'}
+                {stage === 'sending' && 'Sending OTP…'}
+                {stage === 'otp' && `Step 2 of 2 — Verify OTP${resends > 0 ? ` (resent ${resends}×)` : ''}`}
+                {stage === 'verifying' && 'Verifying with UIDAI…'}
+                {stage === 'success' && 'Identity verified ✓'}
+                {(stage === 'error_wrong_otp' || stage === 'error_expired' || stage === 'error_locked' || stage === 'error_not_linked' || stage === 'error_service_down') && 'Verification issue'}
+                {(stage === 'alt_digilocker' || stage === 'alt_video_kyc' || stage === 'alt_upload') && 'Alternative KYC'}
+              </p>
             </div>
+
+            {/* Step progress pills */}
+            {(stage === 'aadhaar' || stage === 'otp' || stage === 'verifying') && (
+              <div className="ml-auto flex gap-1 flex-shrink-0">
+                {[1, 2].map((s) => {
+                  const active = s === 1 ? stage === 'aadhaar' : stage === 'otp' || stage === 'verifying';
+                  const done = s === 1 && (stage === 'otp' || stage === 'verifying');
+                  return (
+                    <div
+                      key={s}
+                      className={`h-1.5 w-6 rounded-full transition-colors ${done ? 'bg-emerald-400' : active ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="px-5 py-5">
-          {step === 'start' && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                {['Enter your Aadhaar number', 'Receive OTP on linked mobile', 'Verify — takes under 2 minutes'].map((text, i) => (
-                  <div key={i} className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 text-[11px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</div>
-                    <span className="text-body-sm text-gray-600">{text}</span>
+        {/* ── Body ── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={stage}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+            className="px-5 py-5"
+          >
+
+            {/* START */}
+            {stage === 'start' && (
+              <div className="space-y-5">
+                <div className="space-y-3">
+                  {[
+                    { n: 1, text: 'Enter your 12-digit Aadhaar number' },
+                    { n: 2, text: 'OTP sent to your Aadhaar-linked mobile' },
+                    { n: 3, text: 'Verified instantly — takes under 2 minutes' },
+                  ].map(({ n, text }) => (
+                    <div key={n} className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 text-[11px] font-bold flex items-center justify-center flex-shrink-0">{n}</div>
+                      <span className="text-body-sm text-gray-700">{text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-start gap-2 bg-gray-50 rounded-xl px-3.5 py-3 border border-gray-100">
+                  <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">
+                    Your Aadhaar data is encrypted and transmitted securely to UIDAI. ACKO does not store your Aadhaar number.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setStage('aadhaar')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/20"
+                >
+                  Start e-KYC
+                </button>
+              </div>
+            )}
+
+            {/* AADHAAR INPUT */}
+            {stage === 'aadhaar' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-caption font-semibold text-gray-500 uppercase tracking-wide block mb-2">Aadhaar Number</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={aadhaar}
+                    onChange={(e) => {
+                      setAadhaar(formatAadhaar(e.target.value));
+                      setAadhaarError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
+                    placeholder="XXXX XXXX XXXX"
+                    maxLength={14}
+                    autoFocus
+                    className={`w-full px-4 py-3.5 rounded-xl border text-lg font-semibold tracking-[0.25em] text-gray-900 focus:outline-none transition-colors
+                      ${aadhaarError ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-purple-400 focus:ring-1 focus:ring-purple-400/30'}`}
+                  />
+                  <AnimatePresence>
+                    {aadhaarError && (
+                      <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-caption mt-1.5 flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                        {aadhaarError}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                  <p className="text-[11px] text-gray-400 mt-2">Make sure your mobile number is linked to this Aadhaar</p>
+                </div>
+
+                <button
+                  onClick={handleSendOtp}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform disabled:opacity-40"
+                  disabled={aadhaar.replace(/\s/g, '').length < 12}
+                >
+                  Send OTP
+                </button>
+
+                <button onClick={() => setStage('start')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 transition-colors py-1">
+                  ← Back
+                </button>
+              </div>
+            )}
+
+            {/* SENDING OTP */}
+            {stage === 'sending' && (
+              <div className="flex flex-col items-center py-6 gap-3">
+                <svg className="w-8 h-8 text-purple-500 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" />
+                </svg>
+                <p className="text-body-sm text-gray-600">Sending OTP to Aadhaar-linked mobile…</p>
+                <p className="text-caption text-gray-400">Powered by UIDAI</p>
+              </div>
+            )}
+
+            {/* OTP ENTRY */}
+            {stage === 'otp' && (
+              <div className="space-y-5">
+                <div className="text-center">
+                  <p className="text-body-sm text-gray-700 mb-0.5">OTP sent to your mobile linked with</p>
+                  <p className="text-label-md font-bold text-gray-900">{maskedAadhaar}</p>
+                </div>
+
+                <EkycOtpBoxes value={otp} onChange={setOtp} hasError={!!otpError} />
+
+                <AnimatePresence>
+                  {otpError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5"
+                    >
+                      <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                      <p className="text-caption text-red-700">{otpError}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {!otpExpired ? (
+                  <EkycTimer key={timerKey} seconds={OTP_TIMER_SECONDS} onExpire={handleOtpExpired} />
+                ) : (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-2">
+                    <p className="text-caption text-red-500 font-medium">OTP has expired</p>
+                    <button
+                      onClick={handleResend}
+                      className="text-purple-600 text-body-sm font-semibold hover:text-purple-800 transition-colors"
+                    >
+                      {resends >= MAX_RESENDS ? 'Mobile not linked? Try alternatives' : `Resend OTP (${MAX_RESENDS - resends} left)`}
+                    </button>
+                  </motion.div>
+                )}
+
+                <button
+                  onClick={handleVerifyOtp}
+                  disabled={otp.replace(/\s/g, '').length < 6 || otpExpired}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform disabled:opacity-40"
+                >
+                  Verify OTP
+                </button>
+
+                <div className="flex items-center justify-between text-caption">
+                  {!otpExpired && (
+                    <button
+                      onClick={handleResend}
+                      disabled={resends >= MAX_RESENDS}
+                      className="text-purple-500 hover:text-purple-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+                    >
+                      {resends >= MAX_RESENDS ? `Max resends reached` : `Resend OTP`}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setStage('aadhaar'); setOtp(''); setOtpError(''); }}
+                    className="text-gray-400 hover:text-gray-600 transition-colors ml-auto"
+                  >
+                    Wrong Aadhaar?
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3.5 py-2.5">
+                  <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                  </svg>
+                  <p className="text-[11px] text-amber-700">Demo: Enter <span className="font-bold">123456</span> to simulate successful verification</p>
+                </div>
+              </div>
+            )}
+
+            {/* VERIFYING */}
+            {stage === 'verifying' && (
+              <div className="flex flex-col items-center py-8 gap-4">
+                <div className="relative w-16 h-16">
+                  <svg className="w-16 h-16 text-purple-200 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40 22" strokeLinecap="round" />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
                   </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-label-md font-semibold text-gray-900">Verifying identity</p>
+                  <p className="text-caption text-gray-400 mt-1">Contacting UIDAI servers…</p>
+                </div>
+              </div>
+            )}
+
+            {/* SUCCESS */}
+            {stage === 'success' && (
+              <div className="flex flex-col items-center py-6 gap-3">
+                <motion.div
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center shadow-lg shadow-emerald-200">
+                    <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-center">
+                  <p className="text-label-lg font-bold text-gray-900">Identity Verified</p>
+                  <p className="text-caption text-gray-400 mt-1">e-KYC completed successfully</p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="w-full bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-center gap-3"
+                >
+                  <svg className="w-8 h-8 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-label-sm font-bold text-emerald-800">Aadhaar KYC Complete</p>
+                    <p className="text-caption text-emerald-600">Linked to {maskedAadhaar}</p>
+                  </div>
+                </motion.div>
+                <p className="text-caption text-gray-400">Proceeding to next step…</p>
+              </div>
+            )}
+
+            {/* ERROR: LOCKED (max attempts) */}
+            {stage === 'error_locked' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-2 gap-3">
+                  <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-label-md font-bold text-gray-900">OTP verification locked</p>
+                    <p className="text-caption text-gray-500 mt-1">Too many incorrect attempts. Try an alternative method below.</p>
+                  </div>
+                </div>
+                <p className="text-caption text-gray-500 font-semibold uppercase tracking-wide">Alternative KYC options</p>
+                {altOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setStage(opt.id as EkycStage)}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all text-left"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">{opt.icon}</div>
+                    <div>
+                      <p className="text-label-sm font-semibold text-gray-900">{opt.label}</p>
+                      <p className="text-caption text-gray-400">{opt.desc}</p>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-300 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                  </button>
+                ))}
+                <button onClick={() => { setAttempts(0); setStage('aadhaar'); setOtp(''); setOtpError(''); }} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">
+                  Try a different Aadhaar number
+                </button>
+              </div>
+            )}
+
+            {/* ERROR: MOBILE NOT LINKED */}
+            {stage === 'error_not_linked' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-2 gap-3">
+                  <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-label-md font-bold text-gray-900">Mobile not linked to Aadhaar?</p>
+                    <p className="text-caption text-gray-500 mt-1 leading-relaxed">
+                      OTP can only be sent to the mobile registered with Aadhaar. Choose an alternative to complete KYC.
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+                  <p className="text-caption text-blue-700 leading-relaxed">
+                    <span className="font-semibold">Link your mobile with Aadhaar:</span> Visit your nearest Aadhaar Seva Kendra or update online at <span className="font-medium">uidai.gov.in</span>
+                  </p>
+                </div>
+                <p className="text-caption text-gray-500 font-semibold uppercase tracking-wide">Complete KYC now via</p>
+                {altOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setStage(opt.id as EkycStage)}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all text-left"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">{opt.icon}</div>
+                    <div>
+                      <p className="text-label-sm font-semibold text-gray-900">{opt.label}</p>
+                      <p className="text-caption text-gray-400">{opt.desc}</p>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-300 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                  </button>
                 ))}
               </div>
-              <button
-                onClick={handleStart}
-                className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
-              >
-                Start e-KYC
-              </button>
-            </div>
-          )}
+            )}
 
-          {step === 'otp' && (
-            <div className="space-y-4">
-              <p className="text-body-sm text-gray-600">Enter the OTP sent to your Aadhaar-linked mobile number.</p>
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="Enter 6-digit OTP"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-center text-lg font-semibold tracking-[0.3em] text-gray-900 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/30"
-                autoFocus
-              />
-              <button
-                onClick={handleVerify}
-                disabled={otp.length < 4}
-                className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform disabled:opacity-40"
-              >
-                Verify
-              </button>
-            </div>
-          )}
-
-          {step === 'verifying' && (
-            <div className="flex flex-col items-center py-6">
-              <svg className="w-8 h-8 text-purple-500 animate-spin mb-3" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
-              <p className="text-body-sm text-gray-600">Verifying your identity...</p>
-            </div>
-          )}
-
-          {step === 'done' && (
-            <div className="flex flex-col items-center py-6">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300 }}>
-                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-3">
-                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
+            {/* ERROR: SERVICE DOWN */}
+            {stage === 'error_service_down' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-2 gap-3">
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-label-md font-bold text-gray-900">UIDAI service is unavailable</p>
+                    <p className="text-caption text-gray-500 mt-1">The Aadhaar verification service is temporarily down. Please try again in a few minutes.</p>
+                  </div>
                 </div>
-              </motion.div>
-              <p className="text-label-md font-semibold text-gray-900">Identity Verified</p>
-              <p className="text-caption text-gray-400 mt-1">e-KYC completed successfully</p>
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={() => { setOtp(''); setOtpError(''); setStage('aadhaar'); }}
+                  className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-md font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Try again
+                </button>
+                <button
+                  onClick={() => setStage('alt_upload')}
+                  className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 text-label-md font-medium active:scale-[0.97] transition-transform"
+                >
+                  Use document upload instead
+                </button>
+                <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3.5 py-3 border border-gray-100">
+                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                  <p className="text-caption text-gray-500">We'll notify you by SMS when the service is restored.</p>
+                </div>
+              </div>
+            )}
+
+            {/* ALTERNATIVE: DIGILOCKER */}
+            {stage === 'alt_digilocker' && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3.5">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
+                  </svg>
+                  <div>
+                    <p className="text-label-sm font-bold text-blue-900">DigiLocker KYC</p>
+                    <p className="text-caption text-blue-700 mt-0.5">You'll be redirected to DigiLocker to securely share your Aadhaar details. No OTP needed.</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {['Log in to your DigiLocker account', 'Authorise ACKO to access your Aadhaar', 'Verified instantly — no documents to upload'].map((s, i) => (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</div>
+                      <span className="text-body-sm text-gray-600">{s}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => { setStage('success'); setTimeout(() => onContinue(), 1800); }}
+                  className="w-full py-3.5 rounded-xl bg-blue-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Open DigiLocker →
+                </button>
+                <button onClick={() => setStage('error_locked')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back to options</button>
+              </div>
+            )}
+
+            {/* ALTERNATIVE: VIDEO KYC */}
+            {stage === 'alt_video_kyc' && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3.5">
+                  <svg className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                  <div>
+                    <p className="text-label-sm font-bold text-emerald-900">Video KYC</p>
+                    <p className="text-caption text-emerald-700 mt-0.5">A 5-minute video call with our KYC agent. Keep your PAN card and Aadhaar card ready.</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-body-sm text-gray-600">
+                  {['Available Mon–Sat, 9 AM to 6 PM', 'Camera and microphone required', 'Keep original PAN and Aadhaar handy'].map((s, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" /></svg>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => { setStage('success'); setTimeout(() => onContinue(), 1800); }}
+                  className="w-full py-3.5 rounded-xl bg-emerald-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Schedule Video KYC
+                </button>
+                <button onClick={() => setStage('error_locked')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back to options</button>
+              </div>
+            )}
+
+            {/* ALTERNATIVE: DOCUMENT UPLOAD */}
+            {stage === 'alt_upload' && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3.5">
+                  <svg className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                  <div>
+                    <p className="text-label-sm font-bold text-orange-900">Document Upload KYC</p>
+                    <p className="text-caption text-orange-700 mt-0.5">Upload clear photos of your PAN card and a selfie. Our team reviews in 2 hours.</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { label: 'PAN Card', desc: 'Front side, clear photo', icon: '🪪' },
+                    { label: 'Selfie', desc: 'Face clearly visible, bright light', icon: '🤳' },
+                  ].map((doc) => (
+                    <div key={doc.label} className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-dashed border-gray-300 bg-gray-50">
+                      <span className="text-xl">{doc.icon}</span>
+                      <div className="flex-1">
+                        <p className="text-label-sm font-semibold text-gray-800">{doc.label}</p>
+                        <p className="text-caption text-gray-400">{doc.desc}</p>
+                      </div>
+                      <span className="text-caption text-purple-600 font-medium">Upload</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => { setStage('success'); setTimeout(() => onContinue(), 1800); }}
+                  className="w-full py-3.5 rounded-xl bg-orange-500 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Upload & Submit
+                </button>
+                <button onClick={() => setStage(stage === 'error_service_down' ? 'error_service_down' : 'error_locked')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back</button>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
+
+        {/* ── Footer support bar ── */}
+        {!['verifying', 'sending', 'success'].includes(stage) && (
+          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+              KYC Help
+            </button>
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+              1800 266 5433
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -1426,10 +1426,8 @@ const lifeEkyc: ConversationStep<LifeJourneyState> = {
   widgetType: 'ekyc_screen',
   getScript: (_persona, state) => ({
     botMessages: [
-      `Payment successful! 🎉`,
-      ``,
-      `Next step: e-KYC verification.`,
-      `We'll verify your identity using Aadhaar-based OTP — it takes less than 2 minutes.`,
+      `Payment received — your coverage of ₹${((state.selectedCoverage || 10000000) / 10000000).toFixed(1)} Cr is reserved for you. 🎉`,
+      `Now let's complete your e-KYC. It's mandatory for policy issuance and takes under 2 minutes.\n\nYou'll need your **Aadhaar number** and access to the **mobile linked with Aadhaar**.`,
     ],
   }),
   processResponse: (_response, _state) => ({
