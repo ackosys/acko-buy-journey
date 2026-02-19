@@ -63,6 +63,16 @@ export type MotorWidgetType =
   | 'motor_celebration'
   | 'dashboard_cta'
   | 'document_upload'
+  /* ── Claims ── */
+  | 'safety_condition_picker'
+  | 'damage_photo_capture'
+  | 'self_inspection'
+  | 'surveyor_assigned'
+  | 'settlement_offer'
+  | 'garage_selector_claim'
+  | 'reimbursement_upload'
+  | 'claim_heartbeat'
+  | 'claim_closure'
   | 'none';
 
 export interface VehicleData {
@@ -122,6 +132,9 @@ export interface MotorEditRequest {
 }
 
 export interface MotorJourneyState extends BaseJourneyState {
+  /* ── Theme ── */
+  theme: 'dark' | 'light';
+
   /* ── Vehicle Type ── */
   vehicleType: VehicleType | null;
 
@@ -205,6 +218,18 @@ export interface MotorJourneyState extends BaseJourneyState {
   dashboardClaimRcUploaded: boolean;
   dashboardClaimDlUploaded: boolean;
   dashboardClaimPrevPolicyUploaded: boolean;
+  dashboardClaimDamagePhotosUploaded: boolean;
+  dashboardClaimFirUploaded: boolean;
+
+  /* ── Dashboard: Extended FNOL ── */
+  dashboardClaimDamagedParts: string[];
+  dashboardClaimSafetyConditions: string[];
+
+  /* ── Dashboard: Post-submission ── */
+  dashboardClaimInspectionType: 'self' | 'surveyor' | null;
+  dashboardClaimSettlementType: 'instant' | 'cashless' | 'reimbursement' | null;
+  dashboardClaimSelectedGarage: string;
+  dashboardClaimSettlementAmount: number;
 
   /* ── Dashboard: Edits ── */
   dashboardSubmittedEdits: MotorEditRequest[];
@@ -236,6 +261,7 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   phone: '',
   currentStepId: 'vehicle_type.select',
   currentModule: 'vehicle_type',
+  theme: 'dark',
   conversationHistory: [],
   isTyping: false,
   showExpertPanel: false,
@@ -328,6 +354,14 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   dashboardClaimRcUploaded: false,
   dashboardClaimDlUploaded: false,
   dashboardClaimPrevPolicyUploaded: false,
+  dashboardClaimDamagePhotosUploaded: false,
+  dashboardClaimFirUploaded: false,
+  dashboardClaimDamagedParts: [],
+  dashboardClaimSafetyConditions: [],
+  dashboardClaimInspectionType: null,
+  dashboardClaimSettlementType: null,
+  dashboardClaimSelectedGarage: '',
+  dashboardClaimSettlementAmount: 0,
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
 };

@@ -90,7 +90,7 @@ function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: 
         src={`/icons/${encodeURIComponent(file)}`}
         alt={icon}
         className={className}
-        style={{ filter: 'brightness(0) invert(1)', opacity: 0.85 }}
+        style={{ filter: 'var(--aura-icon-filter)', opacity: 'var(--aura-icon-opacity)' as any }}
       />
     );
   }
@@ -128,26 +128,26 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             className={`
               relative flex flex-col items-center text-center p-5 rounded-2xl border transition-all duration-200 active:scale-[0.96] min-h-[120px] justify-center
               ${selected === opt.id
-                ? 'border-[#A855F7] bg-[#2D2D35] shadow-lg shadow-black/20'
-                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35] hover:border-white/8'
+                ? 'border-[#A855F7] bg-[var(--aura-surface-2)] shadow-lg shadow-black/20'
+                : 'border-[var(--aura-border)] bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] hover:border-[var(--aura-border-strong)]'
               }
             `}
           >
             {opt.badge && (
-              <span className="absolute -top-2 -right-2 text-[11px] bg-pink-500 text-white px-2.5 py-0.5 rounded-full font-semibold shadow-sm">
+              <span className="absolute -top-2 -right-2 text-[11px] bg-pink-500 text-[var(--aura-text)] px-2.5 py-0.5 rounded-full font-semibold shadow-sm">
                 {opt.badge}
               </span>
             )}
-            <div className="mb-2 w-10 h-10 rounded-xl bg-[#2D2D35] flex items-center justify-center overflow-hidden">
+            <div className="mb-2 w-10 h-10 rounded-xl bg-[var(--aura-surface-2)] flex items-center justify-center overflow-hidden">
               {opt.logoUrl ? (
                 <img src={opt.logoUrl} alt={opt.label} className="w-7 h-7 object-contain" />
               ) : (
                 <MotorIcon icon={opt.icon!} className="w-6 h-6 text-[#C084FC]" />
               )}
             </div>
-            <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
+            <span className="text-[15px] font-medium text-[var(--aura-text)]">{opt.label}</span>
             {opt.description && (
-              <p className="text-[12px] text-[#64748B] mt-1">{opt.description}</p>
+              <p className="text-[12px] text-[var(--aura-text-subtle)] mt-1">{opt.description}</p>
             )}
           </motion.button>
         ))}
@@ -172,20 +172,20 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
                 relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
                 ${selected === opt.id
                   ? 'border-[#A855F7] bg-[#A855F7]/10 ring-1 ring-[#A855F7]/30'
-                  : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+                  : 'border-[var(--aura-border)] bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)]'
                 }
               `}
             >
-              <div className="w-10 h-10 rounded-lg bg-[#2D2D35] flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 rounded-lg bg-[var(--aura-surface-2)] flex items-center justify-center overflow-hidden">
                 <img src={opt.logoUrl!} alt={opt.label} className="w-7 h-7 object-contain" />
               </div>
-              <span className="text-[11px] font-medium text-white/80 text-center leading-tight">{opt.label}</span>
+              <span className="text-[11px] font-medium text-[var(--aura-text)] text-center leading-tight">{opt.label}</span>
               {opt.description && (
-                <span className="text-[9px] text-[#64748B] text-center leading-tight">{opt.description}</span>
+                <span className="text-[9px] text-[var(--aura-text-subtle)] text-center leading-tight">{opt.description}</span>
               )}
               {selected === opt.id && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#A855F7] flex items-center justify-center">
-                  <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <svg className="w-2.5 h-2.5 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </motion.div>
@@ -203,18 +203,18 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             className={`
               w-full mt-2 text-left px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === opt.id
-                ? 'border-[#A855F7] bg-[#2D2D35]'
-                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+                ? 'border-[#A855F7] bg-[var(--aura-surface-2)]'
+                : 'border-[var(--aura-border)] bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)]'
               }
             `}
           >
             <div className="flex items-center gap-3">
               {opt.icon && (
-                <div className="w-8 h-8 rounded-lg bg-[#2D2D35] flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[var(--aura-surface-2)] flex items-center justify-center flex-shrink-0">
                   <MotorIcon icon={opt.icon} className="w-4 h-4 text-[#C084FC]" />
                 </div>
               )}
-              <span className="text-[13px] font-medium text-white/80">{opt.label}</span>
+              <span className="text-[13px] font-medium text-[var(--aura-text)]">{opt.label}</span>
             </div>
           </motion.button>
         ))}
@@ -234,14 +234,14 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
           className={`
             text-left px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
             ${selected === opt.id
-              ? 'border-[#A855F7] bg-[#2D2D35] shadow-md shadow-black/20'
-              : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35] hover:border-white/8'
+              ? 'border-[#A855F7] bg-[var(--aura-surface-2)] shadow-md shadow-black/20'
+              : 'border-[var(--aura-border)] bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] hover:border-[var(--aura-border-strong)]'
             }
           `}
         >
           <div className="flex items-center gap-3">
             {(opt.logoUrl || opt.icon) && (
-              <div className="w-9 h-9 rounded-lg bg-[#2D2D35] flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-9 h-9 rounded-lg bg-[var(--aura-surface-2)] flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {opt.logoUrl ? (
                   <img src={opt.logoUrl} alt={opt.label} className="w-6 h-6 object-contain" />
                 ) : (
@@ -250,8 +250,8 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
               </div>
             )}
             <div className="flex-1">
-              <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
-              {opt.description && <p className="text-[12px] text-[#64748B] mt-0.5">{opt.description}</p>}
+              <span className="text-[15px] font-medium text-[var(--aura-text)]">{opt.label}</span>
+              {opt.description && <p className="text-[12px] text-[var(--aura-text-subtle)] mt-0.5">{opt.description}</p>}
             </div>
           </div>
         </motion.button>
@@ -301,7 +301,7 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
     <div className="max-w-sm">
       <div className="relative">
         <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-5 bg-blue-600 rounded-sm flex items-center justify-center">
-          <span className="text-white text-[8px] font-bold">IND</span>
+          <span className="text-[var(--aura-text)] text-[8px] font-bold">IND</span>
         </div>
         <input
           ref={inputRef}
@@ -310,7 +310,7 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
           onChange={handleChange}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder={placeholder || 'MH 04 EQ 4392'}
-          className="w-full pl-16 pr-4 py-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[18px] font-semibold text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] focus:bg-[#2D2D35] transition-colors tracking-wider uppercase"
+          className="w-full pl-16 pr-4 py-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[18px] font-semibold text-[var(--aura-text)] placeholder:text-[var(--aura-text-subtle)] focus:outline-none focus:border-[#A855F7] focus:bg-[var(--aura-surface-2)] transition-colors tracking-wider uppercase"
           maxLength={16}
           autoComplete="off"
         />
@@ -365,7 +365,7 @@ export function MotorTextInput({
         onChange={(e) => { setValue(e.target.value); setError(''); }}
         onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         placeholder={placeholder || 'Type here...'}
-        className="w-full px-4 py-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[16px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] focus:bg-[#2D2D35] transition-colors"
+        className="w-full px-4 py-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[16px] text-[var(--aura-text)] placeholder:text-[var(--aura-text-subtle)] focus:outline-none focus:border-[#A855F7] focus:bg-[var(--aura-surface-2)] transition-colors"
         autoComplete="off"
       />
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
@@ -427,14 +427,14 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
       className="max-w-sm"
     >
       {/* Vehicle reg plate */}
-      <div className="bg-[#1E1E22] border border-white/5 rounded-xl p-4 mb-4">
+      <div className="bg-[var(--aura-surface)] border border-[var(--aura-border)] rounded-xl p-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#A855F7]/15 flex items-center justify-center">
             <MotorIcon icon={vehicleType === 'bike' ? 'bike' : 'car'} className="w-5 h-5 text-[#C084FC]" />
           </div>
           <div>
-            <p className="text-[11px] text-[#64748B] uppercase tracking-wider">Registration</p>
-            <p className="text-[16px] font-bold text-white tracking-wider">{registrationNumber || 'N/A'}</p>
+            <p className="text-[11px] text-[var(--aura-text-subtle)] uppercase tracking-wider">Registration</p>
+            <p className="text-[16px] font-bold text-[var(--aura-text)] tracking-wider">{registrationNumber || 'N/A'}</p>
           </div>
         </div>
       </div>
@@ -468,9 +468,9 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
                 />
               </div>
             ) : (
-              <div className="w-5 h-5 rounded-full bg-[#1E1E22]/80 flex-shrink-0" />
+              <div className="w-5 h-5 rounded-full bg-[var(--aura-surface)] flex-shrink-0" />
             )}
-            <span className={`text-[13px] ${i < currentStage ? 'text-[#94A3B8]' : i === currentStage ? 'text-white' : 'text-[#64748B]'}`}>
+            <span className={`text-[13px] ${i < currentStage ? 'text-[var(--aura-text-muted)]' : i === currentStage ? 'text-[var(--aura-text)]' : 'text-[var(--aura-text-subtle)]'}`}>
               {stage.message}
             </span>
           </motion.div>
@@ -478,7 +478,7 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
       </div>
 
       {/* Progress bar */}
-      <div className="mt-4 h-1 bg-[#2D2D35] rounded-full overflow-hidden">
+      <div className="mt-4 h-1 bg-[var(--aura-surface-2)] rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-[#A855F7] to-[#C084FC] rounded-full"
           initial={{ width: '0%' }}
@@ -550,16 +550,16 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-sm"
     >
-      <div className="bg-[#1E1E22] border border-white/5 rounded-2xl overflow-hidden">
+      <div className="bg-[var(--aura-surface)] border border-[var(--aura-border)] rounded-2xl overflow-hidden">
         {/* Vehicle Header */}
-        <div className="bg-[#2D2D35] px-5 py-4 border-b border-white/5">
+        <div className="bg-[var(--aura-surface-2)] px-5 py-4 border-b border-[var(--aura-border)]">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl bg-[#1E1E22] flex items-center justify-center overflow-hidden p-1">
+            <div className="w-14 h-14 rounded-xl bg-[var(--aura-surface)] flex items-center justify-center overflow-hidden p-1">
               <img src={vehicleImg} alt={`${v.make} ${v.model}`} className="w-full h-full object-contain" />
             </div>
             <div>
-              <h3 className="text-[16px] font-bold text-white">{v.make} {v.model}</h3>
-              <p className="text-[12px] text-[#94A3B8]">{v.variant} · {v.fuelType} · {v.registrationYear}</p>
+              <h3 className="text-[16px] font-bold text-[var(--aura-text)]">{v.make} {v.model}</h3>
+              <p className="text-[12px] text-[var(--aura-text-muted)]">{v.variant} · {v.fuelType} · {v.registrationYear}</p>
             </div>
           </div>
         </div>
@@ -567,24 +567,24 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
         {/* Details Grid */}
         <div className="px-5 py-4 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-[12px] text-[#64748B]">Registration</span>
-            <span className="text-[13px] font-semibold text-white tracking-wider">{state.registrationNumber}</span>
+            <span className="text-[12px] text-[var(--aura-text-subtle)]">Registration</span>
+            <span className="text-[13px] font-semibold text-[var(--aura-text)] tracking-wider">{state.registrationNumber}</span>
           </div>
           {p.insurer && (
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-[#64748B]">Current Insurer</span>
-              <span className="text-[13px] font-medium text-white/80">{p.insurer}</span>
+              <span className="text-[12px] text-[var(--aura-text-subtle)]">Current Insurer</span>
+              <span className="text-[13px] font-medium text-[var(--aura-text)]">{p.insurer}</span>
             </div>
           )}
           {p.expiryDate && (
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-[#64748B]">Policy Expiry</span>
-              <span className="text-[13px] font-medium text-white/80">{p.expiryDate}</span>
+              <span className="text-[12px] text-[var(--aura-text-subtle)]">Policy Expiry</span>
+              <span className="text-[13px] font-medium text-[var(--aura-text)]">{p.expiryDate}</span>
             </div>
           )}
           {p.ncbPercentage > 0 && (
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-[#64748B]">NCB</span>
+              <span className="text-[12px] text-[var(--aura-text-subtle)]">NCB</span>
               <span className="text-[13px] font-medium text-green-400">{p.ncbPercentage}%</span>
             </div>
           )}
@@ -601,7 +601,7 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       </button>
 
       <button
-        className="mt-2 w-full py-2.5 text-[13px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
+        className="mt-2 w-full py-2.5 text-[13px] text-[var(--aura-text-muted)] hover:text-[var(--aura-text-muted)] transition-colors"
       >
         This is not my vehicle
       </button>
@@ -677,7 +677,7 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
   return (
     <div>
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aura-text-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input
@@ -685,7 +685,7 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={`Search ${vehicleType === 'bike' ? 'bike' : 'car'} brand`}
-          className="w-full pl-9 pr-4 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7]/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] text-[var(--aura-text)] placeholder:text-[var(--aura-text-subtle)] focus:outline-none focus:border-[#A855F7]/50 transition-colors"
           autoFocus
         />
       </div>
@@ -701,21 +701,21 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
               flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
               ${selected === brand
                 ? 'border-[#A855F7] bg-[#A855F7]/10 ring-1 ring-[#A855F7]/30'
-                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+                : 'border-[var(--aura-border)] bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)]'
               }
             `}
           >
-            <div className="w-10 h-10 rounded-lg bg-[#2D2D35] flex items-center justify-center overflow-hidden">
+            <div className="w-10 h-10 rounded-lg bg-[var(--aura-surface-2)] flex items-center justify-center overflow-hidden">
               {BRAND_LOGO_MAP[brand] ? (
                 <img src={BRAND_LOGO_MAP[brand]} alt={brand} className="w-7 h-7 object-contain" />
               ) : (
-                <span className="text-[11px] font-bold text-[#94A3B8]">{brand.slice(0, 2)}</span>
+                <span className="text-[11px] font-bold text-[var(--aura-text-muted)]">{brand.slice(0, 2)}</span>
               )}
             </div>
-            <span className="text-[11px] font-medium text-white/80 text-center leading-tight">{brand}</span>
+            <span className="text-[11px] font-medium text-[var(--aura-text)] text-center leading-tight">{brand}</span>
             {selected === brand && (
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#A855F7] flex items-center justify-center">
-                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                <svg className="w-2.5 h-2.5 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </motion.div>
@@ -773,7 +773,7 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
   return (
     <div>
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aura-text-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input
@@ -781,7 +781,7 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={`Search ${brand} model`}
-          className="w-full pl-9 pr-4 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7]/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] text-[var(--aura-text)] placeholder:text-[var(--aura-text-subtle)] focus:outline-none focus:border-[#A855F7]/50 transition-colors"
           autoFocus
         />
       </div>
@@ -797,16 +797,16 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
               w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.98]
               ${selected === model
                 ? 'border-[#A855F7] bg-[#A855F7]/8'
-                : 'border-transparent hover:bg-[#2D2D35]'
+                : 'border-transparent hover:bg-[var(--aura-surface-2)]'
               }
             `}
           >
-            <span className="text-[14px] font-medium text-white/90">{model}</span>
+            <span className="text-[14px] font-medium text-[var(--aura-text)]">{model}</span>
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-              ${selected === model ? 'border-[#A855F7] bg-[#A855F7]' : 'border-white/20'}
+              ${selected === model ? 'border-[#A855F7] bg-[#A855F7]' : 'border-[var(--aura-border-strong)]'}
             `}>
               {selected === model && (
-                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </motion.svg>
               )}
@@ -848,7 +848,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
 
   return (
     <div>
-      <div className="flex gap-1.5 mb-3 p-1 bg-[#1E1E22] rounded-xl">
+      <div className="flex gap-1.5 mb-3 p-1 bg-[var(--aura-surface)] rounded-xl">
         {fuelTypes.map(fuel => (
           <button
             key={fuel}
@@ -856,7 +856,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
             className={`flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all
               ${activeFuel === fuel
                 ? 'bg-white text-[#1C0B47] shadow-sm'
-                : 'text-[#64748B] hover:text-[#94A3B8]'
+                : 'text-[var(--aura-text-subtle)] hover:text-[var(--aura-text-muted)]'
               }
             `}
           >
@@ -865,7 +865,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
         ))}
       </div>
       {!selected && (
-        <p className="text-[11px] text-[#64748B] mb-2 px-1">Select your {state.vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
+        <p className="text-[11px] text-[var(--aura-text-subtle)] mb-2 px-1">Select your {state.vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
       )}
       <div className="space-y-1">
         {variants.map((variant, i) => (
@@ -879,12 +879,12 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
               w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
               ${selected === variant
                 ? 'bg-[#A855F7]/8 border border-[#A855F7]'
-                : 'border border-transparent hover:bg-[#2D2D35]'
+                : 'border border-transparent hover:bg-[var(--aura-surface-2)]'
               }
             `}
           >
-            <span className="text-[14px] font-medium text-white/90">{variant}</span>
-            <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <span className="text-[14px] font-medium text-[var(--aura-text)]">{variant}</span>
+            <svg className="w-4 h-4 text-[var(--aura-text-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </motion.button>
@@ -928,7 +928,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           <select
             value={selectedYear ?? ''}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="w-full px-3 py-2.5 bg-[#2D2D35] border border-[#A855F7]/30 rounded-xl text-[14px] text-white focus:outline-none focus:border-[#A855F7] cursor-pointer pr-8 appearance-none"
+            className="w-full px-3 py-2.5 bg-[var(--aura-surface-2)] border border-[#A855F7]/30 rounded-xl text-[14px] text-[var(--aura-text)] focus:outline-none focus:border-[#A855F7] cursor-pointer pr-8 appearance-none"
             style={{ colorScheme: 'dark' }}
           >
             <option value="" disabled>Year</option>
@@ -936,7 +936,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aura-text-muted)] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
@@ -944,7 +944,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           <select
             value={selectedMonth ?? ''}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="w-full px-3 py-2.5 bg-[#2D2D35] border border-[#A855F7]/30 rounded-xl text-[14px] text-white focus:outline-none focus:border-[#A855F7] cursor-pointer pr-8 appearance-none"
+            className="w-full px-3 py-2.5 bg-[var(--aura-surface-2)] border border-[#A855F7]/30 rounded-xl text-[14px] text-[var(--aura-text)] focus:outline-none focus:border-[#A855F7] cursor-pointer pr-8 appearance-none"
             style={{ colorScheme: 'dark' }}
           >
             <option value="" disabled>Month</option>
@@ -952,7 +952,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
-          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aura-text-muted)] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
@@ -970,7 +970,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
               py-2.5 rounded-lg text-center transition-all duration-200 active:scale-[0.95]
               ${selectedYear === year
                 ? 'bg-[#A855F7] text-white font-bold shadow-lg shadow-[#A855F7]/25'
-                : 'bg-[#1E1E22] text-[#94A3B8] hover:bg-[#2D2D35] border border-white/5'
+                : 'bg-[var(--aura-surface)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'
               }
             `}
           >
@@ -1028,7 +1028,7 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
             relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
             ${selected === opt.value
               ? 'border-[#A855F7] bg-[#A855F7]/20'
-              : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+              : 'border-[var(--aura-border)] bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)]'
             }
           `}
         >
@@ -1038,15 +1038,15 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
               animate={{ scale: 1 }}
               className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#A855F7] flex items-center justify-center"
             >
-              <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+              <svg className="w-2.5 h-2.5 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </motion.div>
           )}
-          <span className={`text-[20px] font-bold leading-none ${selected === opt.value ? 'text-[#C084FC]' : 'text-white'}`}>
+          <span className={`text-[20px] font-bold leading-none ${selected === opt.value ? 'text-[#C084FC]' : 'text-[var(--aura-text)]'}`}>
             {opt.label}
           </span>
-          <span className="text-[10px] text-[#64748B] text-center leading-tight">{opt.description}</span>
+          <span className="text-[10px] text-[var(--aura-text-subtle)] text-center leading-tight">{opt.description}</span>
         </motion.button>
       ))}
     </div>
@@ -1080,12 +1080,12 @@ export function NcbReward({ onContinue }: { onContinue: () => void }) {
         >
           <span className="text-3xl">🎉</span>
         </motion.div>
-        <h3 className="text-[18px] font-bold text-white mb-1">NCB Reward Applied!</h3>
-        <p className="text-[14px] text-[#94A3B8] mb-3">
+        <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-1">NCB Reward Applied!</h3>
+        <p className="text-[14px] text-[var(--aura-text-muted)] mb-3">
           {state.newNcbPercentage}% discount on your Own Damage premium
         </p>
-        <div className="bg-[#2D2D35] rounded-xl p-3">
-          <p className="text-[12px] text-[#64748B]">For staying claim-free</p>
+        <div className="bg-[var(--aura-surface-2)] rounded-xl p-3">
+          <p className="text-[12px] text-[var(--aura-text-subtle)]">For staying claim-free</p>
           <p className="text-[20px] font-bold text-green-400">{state.newNcbPercentage}% OFF</p>
         </div>
       </div>
@@ -1127,7 +1127,7 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
   return (
     <div>
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aura-text-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input
@@ -1135,7 +1135,7 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search insurer"
-          className="w-full pl-9 pr-4 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7]/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] text-[var(--aura-text)] placeholder:text-[var(--aura-text-subtle)] focus:outline-none focus:border-[#A855F7]/50 transition-colors"
           autoFocus
         />
       </div>
@@ -1151,16 +1151,16 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
               w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
               ${selected === insurer
                 ? 'bg-[#A855F7]/8 border border-[#A855F7]'
-                : 'border border-transparent hover:bg-[#2D2D35]'
+                : 'border border-transparent hover:bg-[var(--aura-surface-2)]'
               }
             `}
           >
-            <span className="text-[14px] font-medium text-white/90">{insurer}</span>
+            <span className="text-[14px] font-medium text-[var(--aura-text)]">{insurer}</span>
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-              ${selected === insurer ? 'border-[#A855F7] bg-[#A855F7]' : 'border-white/20'}
+              ${selected === insurer ? 'border-[#A855F7] bg-[#A855F7]' : 'border-[var(--aura-border-strong)]'}
             `}>
               {selected === insurer && (
-                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </motion.svg>
               )}
@@ -1170,7 +1170,7 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
       </div>
       <button
         onClick={() => onSelect('skip')}
-        className="mt-3 w-full py-2.5 text-[12px] text-[#64748B] hover:text-[#94A3B8] transition-colors"
+        className="mt-3 w-full py-2.5 text-[12px] text-[var(--aura-text-subtle)] hover:text-[var(--aura-text-muted)] transition-colors"
       >
         Skip this step
       </button>
@@ -1193,9 +1193,9 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-sm"
     >
-      <div className="bg-[#1E1E22] border border-white/5 rounded-2xl overflow-hidden">
-        <div className="bg-[#2D2D35] px-5 py-3 border-b border-white/5">
-          <h3 className="text-[14px] font-semibold text-white/80">Vehicle Summary</h3>
+      <div className="bg-[var(--aura-surface)] border border-[var(--aura-border)] rounded-2xl overflow-hidden">
+        <div className="bg-[var(--aura-surface-2)] px-5 py-3 border-b border-[var(--aura-border)]">
+          <h3 className="text-[14px] font-semibold text-[var(--aura-text)]">Vehicle Summary</h3>
         </div>
         <div className="px-5 py-4 space-y-3">
           <SummaryRow label="Vehicle Type" value={vType} />
@@ -1224,8 +1224,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 function SummaryRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-[12px] text-[#64748B]">{label}</span>
-      <span className={`text-[13px] font-medium ${highlight ? 'text-green-400' : 'text-white/80'}`}>{value}</span>
+      <span className="text-[12px] text-[var(--aura-text-subtle)]">{label}</span>
+      <span className={`text-[13px] font-medium ${highlight ? 'text-green-400' : 'text-[var(--aura-text)]'}`}>{value}</span>
     </div>
   );
 }
@@ -1247,8 +1247,8 @@ export function RejectionScreen() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
         </div>
-        <h3 className="text-[16px] font-bold text-white mb-2">Unable to insure</h3>
-        <p className="text-[13px] text-[#94A3B8]">
+        <h3 className="text-[16px] font-bold text-[var(--aura-text)] mb-2">Unable to insure</h3>
+        <p className="text-[13px] text-[var(--aura-text-muted)]">
           We're currently unable to offer insurance for commercial vehicles. We'll notify you when this changes.
         </p>
       </div>
@@ -1332,14 +1332,14 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
       className="max-w-sm"
     >
       {/* Vehicle card */}
-      <div className="bg-[#1E1E22] border border-white/5 rounded-xl p-4 mb-4">
+      <div className="bg-[var(--aura-surface)] border border-[var(--aura-border)] rounded-xl p-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#A855F7]/15 flex items-center justify-center">
             <MotorIcon icon={vehicleType === 'bike' ? 'bike' : 'car'} className="w-5 h-5 text-[#C084FC]" />
           </div>
           <div>
-            <p className="text-[13px] font-semibold text-white">{vehicleData.make} {vehicleData.model}</p>
-            <p className="text-[11px] text-[#64748B]">{vehicleData.variant} · {vehicleData.fuelType}</p>
+            <p className="text-[13px] font-semibold text-[var(--aura-text)]">{vehicleData.make} {vehicleData.model}</p>
+            <p className="text-[11px] text-[var(--aura-text-subtle)]">{vehicleData.variant} · {vehicleData.fuelType}</p>
           </div>
         </div>
       </div>
@@ -1373,9 +1373,9 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
                 />
               </div>
             ) : (
-              <div className="w-5 h-5 rounded-full bg-[#1E1E22]/80 flex-shrink-0" />
+              <div className="w-5 h-5 rounded-full bg-[var(--aura-surface)] flex-shrink-0" />
             )}
-            <span className={`text-[13px] ${i < currentStage ? 'text-[#94A3B8]' : i === currentStage ? 'text-white' : 'text-[#64748B]'}`}>
+            <span className={`text-[13px] ${i < currentStage ? 'text-[var(--aura-text-muted)]' : i === currentStage ? 'text-[var(--aura-text)]' : 'text-[var(--aura-text-subtle)]'}`}>
               {stage.message}
             </span>
           </motion.div>
@@ -1383,7 +1383,7 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
       </div>
 
       {/* Progress bar */}
-      <div className="mt-4 h-1 bg-[#2D2D35] rounded-full overflow-hidden">
+      <div className="mt-4 h-1 bg-[var(--aura-surface-2)] rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-[#A855F7] to-[#C084FC] rounded-full"
           initial={{ width: '0%' }}
@@ -1446,8 +1446,8 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
     >
       {/* IDV display */}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[12px] text-[#94A3B8]">Insured value (IDV)</p>
-        <p className="text-[14px] font-semibold text-white">
+        <p className="text-[12px] text-[var(--aura-text-muted)]">Insured value (IDV)</p>
+        <p className="text-[14px] font-semibold text-[var(--aura-text)]">
           ₹{(idv / 100000).toFixed(1)} Lakh <button className="text-[#C084FC] text-[12px] ml-1">Edit</button>
         </p>
       </div>
@@ -1525,18 +1525,18 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl"
+                className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl"
               >
                 <div className="p-5">
                   <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                  <h3 className="text-[18px] font-bold text-white mb-1">Choose your garage network</h3>
-                  <p className="text-[12px] text-[#94A3B8] mb-5">Comprehensive plan lets you pick where your {vType} gets repaired</p>
+                  <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-1">Choose your garage network</h3>
+                  <p className="text-[12px] text-[var(--aura-text-muted)] mb-5">Comprehensive plan lets you pick where your {vType} gets repaired</p>
 
                   <div className="space-y-3">
                     {/* Network Garages */}
                     <button
                       onClick={() => handleGarageTierSelect('network')}
-                      className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group"
+                      className="w-full p-4 bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -1546,13 +1546,13 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                             </svg>
                           </div>
                           <div>
-                            <h4 className="text-[14px] font-semibold text-white group-hover:text-[#C084FC] transition-colors">Network Garages</h4>
-                            <p className="text-[11px] text-[#94A3B8]">Cashless repairs at 5,400+ ACKO partner garages</p>
+                            <h4 className="text-[14px] font-semibold text-[var(--aura-text)] group-hover:text-[#C084FC] transition-colors">Network Garages</h4>
+                            <p className="text-[11px] text-[var(--aura-text-muted)]">Cashless repairs at 5,400+ ACKO partner garages</p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 ml-3">
-                          <p className="text-[16px] font-bold text-white">{formatPrice(networkPlan?.totalPrice || 0)}</p>
-                          <p className="text-[10px] text-[#64748B]">+ 18% GST</p>
+                          <p className="text-[16px] font-bold text-[var(--aura-text)]">{formatPrice(networkPlan?.totalPrice || 0)}</p>
+                          <p className="text-[10px] text-[var(--aura-text-subtle)]">+ 18% GST</p>
                         </div>
                       </div>
                       {savings > 0 && (
@@ -1565,7 +1565,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                     {/* All Garages */}
                     <button
                       onClick={() => handleGarageTierSelect('all')}
-                      className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group"
+                      className="w-full p-4 bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -1575,13 +1575,13 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                             </svg>
                           </div>
                           <div>
-                            <h4 className="text-[14px] font-semibold text-white group-hover:text-[#C084FC] transition-colors">All Garages</h4>
-                            <p className="text-[11px] text-[#94A3B8]">Get repairs at any garage of your choice</p>
+                            <h4 className="text-[14px] font-semibold text-[var(--aura-text)] group-hover:text-[#C084FC] transition-colors">All Garages</h4>
+                            <p className="text-[11px] text-[var(--aura-text-muted)]">Get repairs at any garage of your choice</p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 ml-3">
-                          <p className="text-[16px] font-bold text-white">{formatPrice(allPlan?.totalPrice || 0)}</p>
-                          <p className="text-[10px] text-[#64748B]">+ 18% GST</p>
+                          <p className="text-[16px] font-bold text-[var(--aura-text)]">{formatPrice(allPlan?.totalPrice || 0)}</p>
+                          <p className="text-[10px] text-[var(--aura-text-subtle)]">+ 18% GST</p>
                         </div>
                       </div>
                       <span className="text-[10px] bg-[#A855F7]/15 text-[#C084FC] px-2 py-0.5 rounded-full border border-[#A855F7]/15">
@@ -1592,7 +1592,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
 
                   <button
                     onClick={() => setShowGarageTier(false)}
-                    className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
+                    className="w-full mt-4 py-3 text-[14px] text-[var(--aura-text-muted)] hover:text-[var(--aura-text-muted)] transition-colors"
                   >
                     Cancel
                   </button>
@@ -1645,8 +1645,8 @@ function PlanCard({
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         className={`
-          bg-[#1E1E22] border rounded-2xl overflow-hidden transition-all duration-200
-          ${recommended ? 'border-[#A855F7]/25 bg-[#2D2D35]' : 'border-white/5'}
+          bg-[var(--aura-surface)] border rounded-2xl overflow-hidden transition-all duration-200
+          ${recommended ? 'border-[#A855F7]/25 bg-[var(--aura-surface-2)]' : 'border-[var(--aura-border)]'}
         `}
       >
         {/* Header */}
@@ -1654,8 +1654,8 @@ function PlanCard({
           <div className="mb-3">
             <div className="flex items-start justify-between mb-1">
               <div>
-                <h3 className="text-[15px] font-semibold text-white">{title}</h3>
-                {subtitle && <p className="text-[11px] text-[#64748B] mt-0.5">{subtitle}</p>}
+                <h3 className="text-[15px] font-semibold text-[var(--aura-text)]">{title}</h3>
+                {subtitle && <p className="text-[11px] text-[var(--aura-text-subtle)] mt-0.5">{subtitle}</p>}
               </div>
               {badge && (
                 <span className="text-[10px] bg-[#A855F7]/20 text-[#C084FC] px-2 py-0.5 rounded-full border border-[#A855F7]/20 whitespace-nowrap">
@@ -1665,11 +1665,11 @@ function PlanCard({
             </div>
             <div className="flex items-center gap-2">
               {strikePrice && (
-                <p className="text-[14px] font-semibold text-[#64748B] line-through">{formatPrice(strikePrice)}</p>
+                <p className="text-[14px] font-semibold text-[var(--aura-text-subtle)] line-through">{formatPrice(strikePrice)}</p>
               )}
-              <p className="text-[18px] font-bold text-white">{price}</p>
+              <p className="text-[18px] font-bold text-[var(--aura-text)]">{price}</p>
             </div>
-            <p className="text-[12px] text-[#94A3B8] leading-relaxed mt-1">
+            <p className="text-[12px] text-[var(--aura-text-muted)] leading-relaxed mt-1">
               {description}{' '}
               <button
                 onClick={() => setExpanded(!expanded)}
@@ -1693,12 +1693,12 @@ function PlanCard({
                     {isGarageFeature ? (
                       <button
                         onClick={() => setShowGarageExplorer(true)}
-                        className="text-[12px] text-[#94A3B8] hover:text-[#C084FC] transition-colors text-left underline decoration-white/30 hover:decoration-[#C084FC]"
+                        className="text-[12px] text-[var(--aura-text-muted)] hover:text-[#C084FC] transition-colors text-left underline decoration-white/30 hover:decoration-[#C084FC]"
                       >
                         {feature}
                       </button>
                     ) : (
-                      <span className="text-[12px] text-[#94A3B8]">{feature}</span>
+                      <span className="text-[12px] text-[var(--aura-text-muted)]">{feature}</span>
                     )}
                   </div>
                 );
@@ -1710,7 +1710,7 @@ function PlanCard({
           {!expanded && (
             <button
               onClick={onSelect}
-              className="w-full py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[13px] font-semibold text-white hover:bg-[#2D2D35] transition-colors"
+              className="w-full py-2.5 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[13px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors"
             >
               {isComprehensive ? 'Explore plan' : 'Select this plan'}
             </button>
@@ -1725,16 +1725,16 @@ function PlanCard({
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="border-t border-white/5"
+              className="border-t border-[var(--aura-border)]"
             >
               {/* Tabs */}
-              <div className="flex border-b border-white/5">
+              <div className="flex border-b border-[var(--aura-border)]">
                 <button
                   onClick={() => setActiveTab('covered')}
                   className={`flex-1 py-3 text-[12px] font-medium transition-colors ${
                     activeTab === 'covered'
-                      ? 'text-white border-b-2 border-[#A855F7]'
-                      : 'text-[#64748B] hover:text-[#94A3B8]'
+                      ? 'text-[var(--aura-text)] border-b-2 border-[#A855F7]'
+                      : 'text-[var(--aura-text-subtle)] hover:text-[var(--aura-text-muted)]'
                   }`}
                 >
                   Covered
@@ -1743,8 +1743,8 @@ function PlanCard({
                   onClick={() => setActiveTab('not_covered')}
                   className={`flex-1 py-3 text-[12px] font-medium transition-colors ${
                     activeTab === 'not_covered'
-                      ? 'text-white border-b-2 border-[#A855F7]'
-                      : 'text-[#64748B] hover:text-[#94A3B8]'
+                      ? 'text-[var(--aura-text)] border-b-2 border-[#A855F7]'
+                      : 'text-[var(--aura-text-subtle)] hover:text-[var(--aura-text-muted)]'
                   }`}
                 >
                   Not covered
@@ -1753,8 +1753,8 @@ function PlanCard({
                   onClick={() => setActiveTab('upgrades')}
                   className={`flex-1 py-3 text-[12px] font-medium transition-colors ${
                     activeTab === 'upgrades'
-                      ? 'text-white border-b-2 border-[#A855F7]'
-                      : 'text-[#64748B] hover:text-[#94A3B8]'
+                      ? 'text-[var(--aura-text)] border-b-2 border-[#A855F7]'
+                      : 'text-[var(--aura-text-subtle)] hover:text-[var(--aura-text-muted)]'
                   }`}
                 >
                   {plan.type === 'third_party' ? 'Upgrades' : 'Available upgrades'}
@@ -1785,14 +1785,14 @@ function PlanCard({
                               {isGarageFeature ? (
                                 <button
                                   onClick={() => setShowGarageExplorer(true)}
-                                  className="text-[12px] font-medium text-white/90 hover:text-[#C084FC] transition-colors underline decoration-white/30 hover:decoration-[#C084FC] text-left"
+                                  className="text-[12px] font-medium text-[var(--aura-text)] hover:text-[#C084FC] transition-colors underline decoration-white/30 hover:decoration-[#C084FC] text-left"
                                 >
                                   {title}
                                 </button>
                               ) : (
-                                <p className="text-[12px] font-medium text-white/90">{title}</p>
+                                <p className="text-[12px] font-medium text-[var(--aura-text)]">{title}</p>
                               )}
-                              {desc && <p className="text-[11px] text-[#94A3B8] mt-0.5">{desc}</p>}
+                              {desc && <p className="text-[11px] text-[var(--aura-text-muted)] mt-0.5">{desc}</p>}
                             </div>
                           </div>
                         );
@@ -1817,8 +1817,8 @@ function PlanCard({
                               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                             <div className="flex-1">
-                              <p className="text-[12px] font-medium text-white/90">{title}</p>
-                              {desc && <p className="text-[11px] text-[#94A3B8] mt-0.5">{desc}</p>}
+                              <p className="text-[12px] font-medium text-[var(--aura-text)]">{title}</p>
+                              {desc && <p className="text-[11px] text-[var(--aura-text-muted)] mt-0.5">{desc}</p>}
                             </div>
                           </div>
                         );
@@ -1833,7 +1833,7 @@ function PlanCard({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 10 }}
                     >
-                      <p className="text-[12px] text-[#94A3B8] mb-3">
+                      <p className="text-[12px] text-[var(--aura-text-muted)] mb-3">
                         Opt for additional covers in the next steps to enhance your {plan.type === 'third_party' ? 'coverage' : `${vType} protection`}
                       </p>
                       <div className="space-y-2">
@@ -1866,14 +1866,14 @@ function PlanCard({
                           };
                           const addon = addonInfo[addonId];
                           return (
-                            <div key={i} className="py-2.5 px-3 bg-[#1E1E22]/80 rounded-lg border border-white/5">
+                            <div key={i} className="py-2.5 px-3 bg-[var(--aura-surface)] rounded-lg border border-[var(--aura-border)]">
                               <div className="flex items-start gap-2">
                                 <svg className="w-4 h-4 text-[#C084FC] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
                                 <div>
-                                  <p className="text-[12px] font-medium text-white/90">{addon?.name || addonId}</p>
-                                  <p className="text-[11px] text-[#64748B] mt-0.5">{addon?.desc || ''}</p>
+                                  <p className="text-[12px] font-medium text-[var(--aura-text)]">{addon?.name || addonId}</p>
+                                  <p className="text-[11px] text-[var(--aura-text-subtle)] mt-0.5">{addon?.desc || ''}</p>
                                 </div>
                               </div>
                             </div>
@@ -1886,7 +1886,7 @@ function PlanCard({
               </div>
 
               {/* CTA in expanded state */}
-              <div className="px-4 pb-4 border-t border-white/5 pt-4">
+              <div className="px-4 pb-4 border-t border-[var(--aura-border)] pt-4">
                 <button
                   onClick={onSelect}
                   style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
@@ -1896,7 +1896,7 @@ function PlanCard({
                 </button>
                 <button
                   onClick={() => setExpanded(false)}
-                  className="w-full py-2 mt-2 text-[12px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
+                  className="w-full py-2 mt-2 text-[12px] text-[var(--aura-text-muted)] hover:text-[var(--aura-text-muted)] transition-colors"
                 >
                   Close details
                 </button>
@@ -1980,29 +1980,29 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl max-h-[85vh] bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-2xl max-h-[85vh] bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--aura-border)]">
           <div>
-            <h2 className="text-[18px] font-bold text-white">Cashless Network Garages</h2>
-            <p className="text-[12px] text-[#94A3B8] mt-0.5">5,400+ garages across India</p>
+            <h2 className="text-[18px] font-bold text-[var(--aura-text)]">Cashless Network Garages</h2>
+            <p className="text-[12px] text-[var(--aura-text-muted)] mt-0.5">5,400+ garages across India</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2D2D35] hover:bg-[#2D2D35] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--aura-surface-2)] hover:bg-[var(--aura-surface-2)] transition-colors"
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-5 h-5 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Search & Filter */}
-        <div className="px-5 py-4 space-y-3 border-b border-white/5">
+        <div className="px-5 py-4 space-y-3 border-b border-[var(--aura-border)]">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aura-text-subtle)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -2015,7 +2015,7 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
               placeholder="Search by garage name or area..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[13px] text-white placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#A855F7]/50"
+              className="w-full pl-10 pr-4 py-2.5 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[13px] text-[var(--aura-text)] placeholder:text-[var(--aura-text-subtle)] focus:outline-none focus:ring-2 focus:ring-[#A855F7]/50"
             />
           </div>
 
@@ -2027,7 +2027,7 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
                 className={`px-4 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-all ${
                   selectedCity === city
                     ? 'bg-[#A855F7] text-white'
-                    : 'bg-[#2D2D35] text-[#94A3B8] hover:bg-[#2D2D35]'
+                    : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)]'
                 }`}
               >
                 {city === 'all' ? 'All Cities' : city}
@@ -2044,12 +2044,12 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
                 key={garage.id}
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-[#1E1E22]/80 rounded-xl border border-white/5 hover:bg-[#1E1E22] hover:border-white/5 transition-all"
+                className="p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)] hover:bg-[var(--aura-surface)] hover:border-[var(--aura-border)] transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-[14px] font-semibold text-white">{garage.name}</h3>
-                    <p className="text-[12px] text-[#94A3B8] mt-1">
+                    <h3 className="text-[14px] font-semibold text-[var(--aura-text)]">{garage.name}</h3>
+                    <p className="text-[12px] text-[var(--aura-text-muted)] mt-1">
                       {garage.area}, {garage.city}
                     </p>
                   </div>
@@ -2057,7 +2057,7 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
                     <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
-                    <span className="text-[12px] font-medium text-white">{garage.rating}</span>
+                    <span className="text-[12px] font-medium text-[var(--aura-text)]">{garage.rating}</span>
                   </div>
                 </div>
               </motion.div>
@@ -2065,7 +2065,8 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
           ) : (
             <div className="py-12 text-center">
               <svg
-                className="w-12 h-12 text-white/20 mx-auto mb-3"
+                className="w-12 h-12 mx-auto mb-3"
+                style={{ color: 'var(--aura-text)', opacity: 0.2 }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -2073,15 +2074,15 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
-              <p className="text-[14px] text-[#94A3B8]">No garages found</p>
-              <p className="text-[12px] text-[#64748B] mt-1">Try adjusting your search or filters</p>
+              <p className="text-[14px] text-[var(--aura-text-muted)]">No garages found</p>
+              <p className="text-[12px] text-[var(--aura-text-subtle)] mt-1">Try adjusting your search or filters</p>
             </div>
           )}
         </div>
 
         {/* Footer Info */}
-        <div className="px-5 py-3 bg-[#1E1E22]/80 border-t border-white/5">
-          <p className="text-[11px] text-[#64748B] text-center">
+        <div className="px-5 py-3 bg-[var(--aura-surface)] border-t border-[var(--aura-border)]">
+          <p className="text-[11px] text-[var(--aura-text-subtle)] text-center">
             Showing {filteredGarages.length} of 5,400+ partner garages • Coverage across all major cities
           </p>
         </div>
@@ -2151,8 +2152,8 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
     <>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
         <div className="mb-4">
-          <h3 className="text-[16px] font-bold text-white mb-1">Cut down your out-of-pocket expenses</h3>
-          <p className="text-[12px] text-[#94A3B8]">Recommended for you</p>
+          <h3 className="text-[16px] font-bold text-[var(--aura-text)] mb-1">Cut down your out-of-pocket expenses</h3>
+          <p className="text-[12px] text-[var(--aura-text-muted)]">Recommended for you</p>
         </div>
 
         {addons.map((addon: any) => {
@@ -2162,20 +2163,20 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
           const variantName = selectedItem?.variantId ? addon.variants?.find((v: any) => v.id === selectedItem.variantId)?.name : null;
 
           return (
-            <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[#2D2D35] border-[#A855F7]/30' : 'bg-[#1E1E22]/80 border-white/5 hover:border-white/8'}`}>
+            <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[var(--aura-surface-2)] border-[#A855F7]/30' : 'bg-[var(--aura-surface)] border-[var(--aura-border)] hover:border-[var(--aura-border-strong)]'}`}>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-[14px] font-semibold text-white">{addon.name}</h4>
+                    <h4 className="text-[14px] font-semibold text-[var(--aura-text)]">{addon.name}</h4>
                     {addon.hasVariants && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/15 px-2 py-0.5 rounded-full">2 options</span>}
                     {addon.recommended && <span className="text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">Recommended</span>}
                   </div>
-                  <p className="text-[12px] text-[#94A3B8] leading-relaxed">{addon.description}</p>
+                  <p className="text-[12px] text-[var(--aura-text-muted)] leading-relaxed">{addon.description}</p>
                   {selected && variantName && <p className="text-[11px] text-[#C084FC] mt-1">Selected: {variantName}</p>}
                 </div>
                 <div className="flex flex-col items-end gap-2 ml-4">
-                  <p className="text-[14px] font-bold text-white whitespace-nowrap">₹{displayPrice}</p>
-                  <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[#2D2D35] text-[#94A3B8] hover:bg-[#2D2D35] border border-white/5'}`}>
+                  <p className="text-[14px] font-bold text-[var(--aura-text)] whitespace-nowrap">₹{displayPrice}</p>
+                  <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'}`}>
                     {selected ? '−' : '+'}
                   </button>
                 </div>
@@ -2184,48 +2185,48 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
           );
         })}
 
-        <div className="mt-6 p-4 bg-[#1E1E22]/80 rounded-xl border border-white/5">
+        <div className="mt-6 p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)]">
           <div className="space-y-2 text-[13px]">
-            <div className="flex justify-between text-[#94A3B8]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
-            {totals.addonTotal > 0 && (<><div className="flex justify-between text-[#94A3B8]"><span>Add-ons</span><span>₹{totals.addonTotal.toLocaleString()}</span></div><div className="flex justify-between text-[#94A3B8]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
-            <div className="border-t border-white/5 pt-2 flex justify-between font-bold text-white text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
+            <div className="flex justify-between text-[var(--aura-text-muted)]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
+            {totals.addonTotal > 0 && (<><div className="flex justify-between text-[var(--aura-text-muted)]"><span>Add-ons</span><span>₹{totals.addonTotal.toLocaleString()}</span></div><div className="flex justify-between text-[var(--aura-text-muted)]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
+            <div className="border-t border-[var(--aura-border)] pt-2 flex justify-between font-bold text-[var(--aura-text)] text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
           </div>
         </div>
 
         <div className="flex gap-3 mt-4">
-          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] font-semibold text-white hover:bg-[#2D2D35] transition-colors">Continue without add-ons</button>
+          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
           <button onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }} className="flex-1 py-3 px-4 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
-        <p className="text-[11px] text-[#64748B] text-center mt-2">Next: Additional covers to reduce medical expenses</p>
+        <p className="text-[11px] text-[var(--aura-text-subtle)] text-center mt-2">Next: Additional covers to reduce medical expenses</p>
       </motion.div>
 
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
-                <h3 className="text-[18px] font-bold text-white mb-1">Select {showVariantModal.addon.name} variant</h3>
-                <p className="text-[12px] text-[#94A3B8] mb-4">{showVariantModal.addon.description}</p>
+                <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-1">Select {showVariantModal.addon.name} variant</h3>
+                <p className="text-[12px] text-[var(--aura-text-muted)] mb-4">{showVariantModal.addon.description}</p>
                 <div className="space-y-3">
                   {showVariantModal.addon.variants?.map((variant: any) => (
-                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
+                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-[15px] font-semibold text-white">{variant.name}</span>
+                          <span className="text-[15px] font-semibold text-[var(--aura-text)]">{variant.name}</span>
                           {variant.recommended && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/20 px-2 py-0.5 rounded-full">Recommended</span>}
                           {variant.badge && <span className="text-[10px] text-green-300 bg-green-500/30 px-2 py-0.5 rounded-full">{variant.badge}</span>}
                         </div>
-                        <span className="text-[16px] font-bold text-white">₹{variant.price}</span>
+                        <span className="text-[16px] font-bold text-[var(--aura-text)]">₹{variant.price}</span>
                       </div>
                       <ul className="space-y-1">
                         {variant.features?.map((feature: string, i: number) => (
-                          <li key={i} className="text-[11px] text-[#94A3B8] flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
+                          <li key={i} className="text-[11px] text-[var(--aura-text-muted)] flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
                         ))}
                       </ul>
                     </button>
                   ))}
                 </div>
-                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors">Cancel</button>
+                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[var(--aura-text-muted)] hover:text-[var(--aura-text-muted)] transition-colors">Cancel</button>
               </div>
             </motion.div>
           </motion.div>
@@ -2302,20 +2303,20 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
     const variantName = selectedItem?.variantId ? addon.variants?.find((v: any) => v.id === selectedItem.variantId)?.name : null;
 
     return (
-      <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[#2D2D35] border-[#A855F7]/30' : 'bg-[#1E1E22]/80 border-white/5 hover:border-white/8'}`}>
+      <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[var(--aura-surface-2)] border-[#A855F7]/30' : 'bg-[var(--aura-surface)] border-[var(--aura-border)] hover:border-[var(--aura-border-strong)]'}`}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-[14px] font-semibold text-white">{addon.name}</h4>
+              <h4 className="text-[14px] font-semibold text-[var(--aura-text)]">{addon.name}</h4>
               {addon.hasVariants && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/15 px-2 py-0.5 rounded-full">2 options</span>}
               {addon.mandatory && <span className="text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-full">Mandatory by law</span>}
             </div>
-            <p className="text-[12px] text-[#94A3B8] leading-relaxed">{addon.description}</p>
+            <p className="text-[12px] text-[var(--aura-text-muted)] leading-relaxed">{addon.description}</p>
             {selected && variantName && <p className="text-[11px] text-[#C084FC] mt-1">Selected: {variantName}</p>}
           </div>
           <div className="flex flex-col items-end gap-2 ml-4">
-            <p className="text-[14px] font-bold text-white whitespace-nowrap">{addon.hasVariants ? 'from ' : ''}₹{displayPrice}</p>
-            <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[#2D2D35] text-[#94A3B8] hover:bg-[#2D2D35] border border-white/5'}`}>
+            <p className="text-[14px] font-bold text-[var(--aura-text)] whitespace-nowrap">{addon.hasVariants ? 'from ' : ''}₹{displayPrice}</p>
+            <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'}`}>
               {selected ? '−' : '+'}
             </button>
           </div>
@@ -2328,34 +2329,34 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
     <>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
         <div className="mb-4">
-          <h3 className="text-[16px] font-bold text-white mb-1">Protect everyone in your {vType}</h3>
+          <h3 className="text-[16px] font-bold text-[var(--aura-text)] mb-1">Protect everyone in your {vType}</h3>
         </div>
 
         <div className="mb-4">
-          <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">For you</p>
+          <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">For you</p>
           {addons.filter((a: any) => a.id === 'personal_accident').map(renderAddonCard)}
         </div>
 
         <div className="mb-4">
-          <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">For your loved ones</p>
+          <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">For your loved ones</p>
           {addons.filter((a: any) => a.id === 'passenger_protection').map(renderAddonCard)}
         </div>
 
         <div className="mb-4">
-          <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">For your driver</p>
+          <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">For your driver</p>
           {addons.filter((a: any) => a.id === 'paid_driver').map(renderAddonCard)}
         </div>
 
-        <div className="mt-6 p-4 bg-[#1E1E22]/80 rounded-xl border border-white/5">
+        <div className="mt-6 p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)]">
           <div className="space-y-2 text-[13px]">
-            <div className="flex justify-between text-[#94A3B8]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
-            {totals.totalAddons > 0 && (<><div className="flex justify-between text-[#94A3B8]"><span>Add-ons</span><span>₹{totals.totalAddons.toLocaleString()}</span></div><div className="flex justify-between text-[#94A3B8]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
-            <div className="border-t border-white/5 pt-2 flex justify-between font-bold text-white text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
+            <div className="flex justify-between text-[var(--aura-text-muted)]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
+            {totals.totalAddons > 0 && (<><div className="flex justify-between text-[var(--aura-text-muted)]"><span>Add-ons</span><span>₹{totals.totalAddons.toLocaleString()}</span></div><div className="flex justify-between text-[var(--aura-text-muted)]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
+            <div className="border-t border-[var(--aura-border)] pt-2 flex justify-between font-bold text-[var(--aura-text)] text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
           </div>
         </div>
 
         <div className="flex gap-3 mt-4">
-          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] font-semibold text-white hover:bg-[#2D2D35] transition-colors">Continue without add-ons</button>
+          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
           <button onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }} className="flex-1 py-3 px-4 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
       </motion.div>
@@ -2363,30 +2364,30 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
-                <h3 className="text-[18px] font-bold text-white mb-1">Select Personal Accident coverage amount</h3>
-                <p className="text-[12px] text-[#94A3B8] mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
+                <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-1">Select Personal Accident coverage amount</h3>
+                <p className="text-[12px] text-[var(--aura-text-muted)] mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
                 <div className="space-y-3">
                   {showVariantModal.addon.variants?.map((variant: any) => (
-                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
+                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-[15px] font-semibold text-white">{variant.name}</span>
+                          <span className="text-[15px] font-semibold text-[var(--aura-text)]">{variant.name}</span>
                           {variant.recommended && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/20 px-2 py-0.5 rounded-full">Recommended</span>}
                           {variant.badge && <span className="text-[10px] text-green-300 bg-green-500/30 px-2 py-0.5 rounded-full">{variant.badge}</span>}
                         </div>
-                        <span className="text-[16px] font-bold text-white">₹{variant.price}</span>
+                        <span className="text-[16px] font-bold text-[var(--aura-text)]">₹{variant.price}</span>
                       </div>
                       <ul className="space-y-1">
                         {variant.features?.map((feature: string, i: number) => (
-                          <li key={i} className="text-[11px] text-[#94A3B8] flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
+                          <li key={i} className="text-[11px] text-[var(--aura-text-muted)] flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
                         ))}
                       </ul>
                     </button>
                   ))}
                 </div>
-                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors">Cancel</button>
+                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[var(--aura-text-muted)] hover:text-[var(--aura-text-muted)] transition-colors">Cancel</button>
               </div>
             </motion.div>
           </motion.div>
@@ -2450,20 +2451,20 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         animate={{ opacity: 1, y: 0 }}
         className="space-y-3 w-full max-w-sm"
       >
-        <p className="text-[13px] font-semibold text-[#94A3B8] uppercase tracking-wide px-1 mb-1">Upload important documents</p>
+        <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] uppercase tracking-wide px-1 mb-1">Upload important documents</p>
 
         {/* RC Card */}
-        <div className={`rounded-2xl border transition-all overflow-hidden ${rcUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 bg-[#1E1E22]'}`}>
+        <div className={`rounded-2xl border transition-all overflow-hidden ${rcUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-[var(--aura-border)] bg-[var(--aura-surface)]'}`}>
           <div className="p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${rcUploaded ? 'bg-green-500/20' : 'bg-[#2D2D35]'}`}>
-                <svg className={`w-5 h-5 ${rcUploaded ? 'text-green-400' : 'text-[#94A3B8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${rcUploaded ? 'bg-green-500/20' : 'bg-[var(--aura-surface-2)]'}`}>
+                <svg className={`w-5 h-5 ${rcUploaded ? 'text-green-400' : 'text-[var(--aura-text-muted)]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
                 </svg>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-[14px] font-semibold text-white">Registration Certificate (RC)</p>
+                  <p className="text-[14px] font-semibold text-[var(--aura-text)]">Registration Certificate (RC)</p>
                   {hasAutoRC && rcUploaded && !uploadingFor && (
                     <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Auto-fetched ✓</span>
                   )}
@@ -2471,25 +2472,25 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
                     <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
                   )}
                 </div>
-                <p className="text-[12px] text-[#64748B]">
+                <p className="text-[12px] text-[var(--aura-text-subtle)]">
                   {hasAutoRC ? 'Fetched from Vahan portal' : `Upload RC for ${regNo}`}
                 </p>
               </div>
             </div>
 
             {hasAutoRC && rcUploaded && (
-              <div className="bg-[#2D2D35] rounded-xl px-3 py-2.5 mb-3 space-y-1.5">
+              <div className="bg-[var(--aura-surface-2)] rounded-xl px-3 py-2.5 mb-3 space-y-1.5">
                 <div className="flex justify-between text-[12px]">
-                  <span className="text-[#64748B]">Registration holder</span>
-                  <span className="text-white font-medium">{ownerName}</span>
+                  <span className="text-[var(--aura-text-subtle)]">Registration holder</span>
+                  <span className="text-[var(--aura-text)] font-medium">{ownerName}</span>
                 </div>
                 <div className="flex justify-between text-[12px]">
-                  <span className="text-[#64748B]">Vehicle number</span>
-                  <span className="text-white font-medium">{regNo}</span>
+                  <span className="text-[var(--aura-text-subtle)]">Vehicle number</span>
+                  <span className="text-[var(--aura-text)] font-medium">{regNo}</span>
                 </div>
                 <div className="flex justify-between text-[12px]">
-                  <span className="text-[#64748B]">Chassis no.</span>
-                  <span className="text-white font-medium">{chassisNo}</span>
+                  <span className="text-[var(--aura-text-subtle)]">Chassis no.</span>
+                  <span className="text-[var(--aura-text)] font-medium">{chassisNo}</span>
                 </div>
               </div>
             )}
@@ -2497,7 +2498,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
             {uploadingFor === 'rc' ? (
               <div className="flex items-center gap-2 py-1">
                 <div className="w-4 h-4 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
-                <span className="text-[13px] text-[#64748B]">Uploading...</span>
+                <span className="text-[13px] text-[var(--aura-text-subtle)]">Uploading...</span>
               </div>
             ) : (
               <button onClick={() => setSourceSheet('rc')} className="text-[13px] text-[#A855F7] hover:text-[#C084FC] font-medium transition-colors">
@@ -2508,29 +2509,29 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         </div>
 
         {/* DL Card */}
-        <div className={`rounded-2xl border transition-all overflow-hidden ${dlUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 bg-[#1E1E22]'}`}>
+        <div className={`rounded-2xl border transition-all overflow-hidden ${dlUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-[var(--aura-border)] bg-[var(--aura-surface)]'}`}>
           <div className="p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dlUploaded ? 'bg-green-500/20' : 'bg-[#2D2D35]'}`}>
-                <svg className={`w-5 h-5 ${dlUploaded ? 'text-green-400' : 'text-[#94A3B8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dlUploaded ? 'bg-green-500/20' : 'bg-[var(--aura-surface-2)]'}`}>
+                <svg className={`w-5 h-5 ${dlUploaded ? 'text-green-400' : 'text-[var(--aura-text-muted)]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
                 </svg>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-[14px] font-semibold text-white">Driving Licence (DL)</p>
+                  <p className="text-[14px] font-semibold text-[var(--aura-text)]">Driving Licence (DL)</p>
                   {dlUploaded && (
                     <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
                   )}
                 </div>
-                <p className="text-[12px] text-[#64748B]">Upload DL for {ownerName}</p>
+                <p className="text-[12px] text-[var(--aura-text-subtle)]">Upload DL for {ownerName}</p>
               </div>
             </div>
 
             {uploadingFor === 'dl' ? (
               <div className="flex items-center gap-2 py-1">
                 <div className="w-4 h-4 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
-                <span className="text-[13px] text-[#64748B]">Uploading...</span>
+                <span className="text-[13px] text-[var(--aura-text-subtle)]">Uploading...</span>
               </div>
             ) : (
               <button onClick={() => setSourceSheet('dl')} className="text-[13px] text-[#A855F7] hover:text-[#C084FC] font-medium transition-colors">
@@ -2541,30 +2542,30 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         </div>
 
         {/* Previous Year's Policy — optional */}
-        <div className={`rounded-2xl border transition-all overflow-hidden ${prevPolicyUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 bg-[#1E1E22]'}`}>
+        <div className={`rounded-2xl border transition-all overflow-hidden ${prevPolicyUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-[var(--aura-border)] bg-[var(--aura-surface)]'}`}>
           <div className="p-4">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${prevPolicyUploaded ? 'bg-green-500/20' : 'bg-[#2D2D35]'}`}>
-                <svg className={`w-5 h-5 ${prevPolicyUploaded ? 'text-green-400' : 'text-[#94A3B8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${prevPolicyUploaded ? 'bg-green-500/20' : 'bg-[var(--aura-surface-2)]'}`}>
+                <svg className={`w-5 h-5 ${prevPolicyUploaded ? 'text-green-400' : 'text-[var(--aura-text-muted)]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-[14px] font-semibold text-white">Previous Year&apos;s Policy</p>
+                  <p className="text-[14px] font-semibold text-[var(--aura-text)]">Previous Year&apos;s Policy</p>
                   {prevPolicyUploaded && (
                     <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
                   )}
-                  <span className="text-[10px] text-[#64748B] bg-[#2D2D35] px-2 py-0.5 rounded-full">Optional</span>
+                  <span className="text-[10px] text-[var(--aura-text-subtle)] bg-[var(--aura-surface-2)] px-2 py-0.5 rounded-full">Optional</span>
                 </div>
-                <p className="text-[12px] text-[#64748B]">Helps speed up claim processing</p>
+                <p className="text-[12px] text-[var(--aura-text-subtle)]">Helps speed up claim processing</p>
               </div>
             </div>
 
             {uploadingFor === 'prev' ? (
               <div className="flex items-center gap-2 mt-3">
                 <div className="w-4 h-4 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
-                <span className="text-[13px] text-[#64748B]">Uploading...</span>
+                <span className="text-[13px] text-[var(--aura-text-subtle)]">Uploading...</span>
               </div>
             ) : (
               <button onClick={() => setSourceSheet('prev')} className="mt-3 text-[13px] text-[#A855F7] hover:text-[#C084FC] font-medium transition-colors">
@@ -2574,7 +2575,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
           </div>
         </div>
 
-        <p className="text-[12px] text-center text-[#64748B] py-1">
+        <p className="text-[12px] text-center text-[var(--aura-text-subtle)] py-1">
           Incorrect details?{' '}
           <button className="text-[#A855F7] underline underline-offset-2">Update here</button>
         </p>
@@ -2586,13 +2587,13 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
           className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
             canProceed
               ? 'text-white hover:opacity-90 active:scale-[0.97]'
-              : 'bg-[#2D2D35] text-[#64748B] cursor-not-allowed'
+              : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-subtle)] cursor-not-allowed'
           }`}
         >
           {canProceed ? 'Proceed →' : `Upload ${!rcUploaded ? 'RC' : 'DL'} to continue`}
         </button>
 
-        <button className="w-full py-2 text-[13px] text-[#64748B] hover:text-[#94A3B8] transition-colors">
+        <button className="w-full py-2 text-[13px] text-[var(--aura-text-subtle)] hover:text-[var(--aura-text-muted)] transition-colors">
           Save and continue later
         </button>
       </motion.div>
@@ -2613,24 +2614,24 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="w-full max-h-[45vh] flex flex-col"
-              style={{ background: '#1E1E22', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.05)' }}
+              style={{ background: 'var(--aura-surface)', borderRadius: '20px 20px 0 0', border: '1px solid var(--aura-border)' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex-shrink-0 pt-3 pb-2 px-5">
                 <div className="w-10 h-1 bg-white/10 rounded-full mx-auto mb-4" />
-                <p className="text-[16px] font-semibold text-white mb-1">Select a source</p>
-                <p className="text-[12px] text-[#64748B]">in PNG, JPEG, or PDF format (Max 10 MB)</p>
+                <p className="text-[16px] font-semibold text-[var(--aura-text)] mb-1">Select a source</p>
+                <p className="text-[12px] text-[var(--aura-text-subtle)]">in PNG, JPEG, or PDF format (Max 10 MB)</p>
               </div>
               <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-2">
                 {DOC_SOURCE_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     onClick={() => handleSourceSelect(opt.id)}
-                    className="w-full flex items-center gap-4 p-4 bg-[#2D2D35] hover:bg-[#383842] border border-white/5 hover:border-[#A855F7]/30 rounded-xl transition-all text-left"
+                    className="w-full flex items-center gap-4 p-4 bg-[var(--aura-surface-2)] hover:bg-[#383842] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl transition-all text-left"
                   >
                     <span className="text-2xl">{opt.icon}</span>
-                    <span className="text-[14px] font-medium text-white">{opt.label}</span>
-                    <svg className="w-4 h-4 text-[#64748B] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <span className="text-[14px] font-medium text-[var(--aura-text)]">{opt.label}</span>
+                    <svg className="w-4 h-4 text-[var(--aura-text-subtle)] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </button>

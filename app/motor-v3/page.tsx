@@ -158,6 +158,7 @@ function seedDemoState(vehicleType: VehicleType) {
 export default function MotorV3Journey() {
   const store = useMotorStore();
   const { updateState, resetJourney } = store;
+  const theme = useMotorStore(s => s.theme);
   const [screen, setScreen] = useState<Screen>('intro');
   const [showWelcome, setShowWelcome] = useState(true);
   const [hydrated, setHydrated] = useState(false);
@@ -226,7 +227,7 @@ export default function MotorV3Journey() {
   }
 
   return (
-    <div className="aura-dark">
+    <div className={theme === 'light' ? 'aura-light' : 'aura-dark'}>
       <MotorExpertPanel />
       <MotorAIChatPanel />
 
@@ -248,7 +249,7 @@ export default function MotorV3Journey() {
           <AuraMotorEntryScreen key="entry" onSelect={handleVehicleSelect} />
         )}
         {screen === 'chat' && (
-          <div key="chat" className="h-screen flex flex-col overflow-hidden" style={{ background: '#121214' }}>
+          <div key="chat" className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--aura-bg)' }}>
             <AuraMotorHeader />
             <AuraMotorChatContainer />
           </div>

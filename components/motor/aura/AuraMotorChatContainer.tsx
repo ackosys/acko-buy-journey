@@ -29,6 +29,17 @@ import {
   DocumentUploadWidget,
 } from './AuraMotorWidgets';
 import { PremiumBreakdown, DashboardCTA } from './AuraMotorFinalWidgets';
+import {
+  SafetyConditionPicker,
+  DamagePhotoCapture,
+  SelfInspectionWidget,
+  SurveyorAssigned,
+  ClaimHeartbeat,
+  SettlementOffer,
+  GarageSelectorClaim,
+  ReimbursementUpload,
+  ClaimClosure,
+} from './AuraClaimsWidgets';
 
 function AuraCelebration({ onContinue }: { onContinue?: () => void }) {
   const [confetti, setConfetti] = useState(true);
@@ -75,11 +86,11 @@ function AuraCelebration({ onContinue }: { onContinue?: () => void }) {
           </svg>
         </motion.div>
 
-        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-[22px] font-bold text-white mb-3">
+        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}           className="text-[22px] font-bold mb-3" style={{ color: 'var(--aura-text)' }}>
           Payment Successful!
         </motion.h2>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-[14px] mb-6 leading-relaxed" style={{ color: '#94A3B8' }}>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-[14px] mb-6 leading-relaxed" style={{ color: 'var(--aura-text-muted)' }}>
           Your motor insurance is now active.<br />Welcome to ACKO!
         </motion.p>
 
@@ -88,10 +99,10 @@ function AuraCelebration({ onContinue }: { onContinue?: () => void }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="rounded-xl p-4"
-          style={{ background: '#1E1E22', border: '1px solid rgba(255,255,255,0.05)' }}
+          style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}
         >
-          <p className="text-[12px] mb-2" style={{ color: '#64748B' }}>Policy Number</p>
-          <p className="text-[16px] font-bold text-white">ACKO/MOT/{Math.floor(Math.random() * 9000000 + 1000000)}</p>
+          <p className="text-[12px] mb-2" style={{ color: 'var(--aura-text-subtle)' }}>Policy Number</p>
+          <p className="text-[16px] font-bold" style={{ color: 'var(--aura-text)' }}>ACKO/MOT/{Math.floor(Math.random() * 9000000 + 1000000)}</p>
         </motion.div>
       </div>
     </motion.div>
@@ -309,6 +320,32 @@ export default function AuraMotorChatContainer() {
       userLabel = '';
     } else if (step.widgetType === 'dashboard_cta') {
       userLabel = response.choice === 'dashboard' ? 'Go to Dashboard' : 'Download Policy';
+    } else if (step.widgetType === 'safety_condition_picker') {
+      const conditions = (response as string[]);
+      userLabel = conditions.length > 0 ? `${conditions.length} safety issue${conditions.length > 1 ? 's' : ''} noted` : 'No specific conditions';
+    } else if (step.widgetType === 'damage_photo_capture') {
+      userLabel = response?.photosUploaded ? 'Damage photos uploaded' : 'Skipped photo upload';
+    } else if (step.widgetType === 'self_inspection') {
+      userLabel = 'Self inspection completed';
+    } else if (step.widgetType === 'surveyor_assigned') {
+      userLabel = 'Surveyor acknowledged';
+    } else if (step.widgetType === 'claim_heartbeat') {
+      userLabel = '';
+    } else if (step.widgetType === 'settlement_offer') {
+      userLabel = typeof response === 'number' ? `Accepted ₹${response.toLocaleString('en-IN')}` : 'Declined offer';
+    } else if (step.widgetType === 'garage_selector_claim') {
+      const GARAGE_NAMES: Record<string, string> = {
+        gomechanic: 'GoMechanic, Sector 29',
+        carnation: 'Carnation Auto, Cyber City',
+        pitstop: 'Pit Stop, MG Road',
+        autobahn: 'Autobahn Motors, DLF Phase 3',
+        outside_network: 'Other garage',
+      };
+      userLabel = `Selected: ${GARAGE_NAMES[response as string] || response}`;
+    } else if (step.widgetType === 'reimbursement_upload') {
+      userLabel = 'Invoice submitted for reimbursement';
+    } else if (step.widgetType === 'claim_closure') {
+      userLabel = '';
     }
 
     if (userLabel) {
@@ -390,6 +427,27 @@ export default function AuraMotorChatContainer() {
         return <DashboardCTA onSelect={(choice) => handleResponse({ choice })} />;
       case 'document_upload':
         return <DocumentUploadWidget onContinue={(result) => handleResponse(result)} />;
+      case 'safety_condition_picker':
+        return <SafetyConditionPicker onContinue={(conditions) => handleResponse(conditions)} />;
+      case 'damage_photo_capture':
+        return <DamagePhotoCapture onContinue={(result) => handleResponse(result)} />;
+      case 'self_inspection':
+        return <SelfInspectionWidget onComplete={(result) => handleResponse(result)} />;
+      case 'surveyor_assigned':
+        return <SurveyorAssigned onContinue={() => handleResponse('acknowledged')} />;
+      case 'claim_heartbeat': {
+        const claimState = useMotorStore.getState() as MotorJourneyState;
+        const lastClaim = claimState.dashboardSubmittedClaims[claimState.dashboardSubmittedClaims.length - 1];
+        return <ClaimHeartbeat claimType={lastClaim?.type} onContinue={() => handleResponse('done')} />;
+      }
+      case 'settlement_offer':
+        return <SettlementOffer onAccept={(amount) => handleResponse(amount)} onDecline={() => handleResponse('declined')} />;
+      case 'garage_selector_claim':
+        return <GarageSelectorClaim onSelect={(garageId) => handleResponse(garageId)} />;
+      case 'reimbursement_upload':
+        return <ReimbursementUpload onContinue={(result) => handleResponse(result)} />;
+      case 'claim_closure':
+        return <ClaimClosure onContinue={() => handleResponse('done')} />;
       default:
         return null;
     }
@@ -403,6 +461,8 @@ export default function AuraMotorChatContainer() {
       'ncb_reward', 'editable_summary', 'rejection_screen', 'plan_calculator',
       'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons',
       'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
+      'self_inspection', 'surveyor_assigned', 'claim_heartbeat', 'settlement_offer',
+      'claim_closure',
     ].includes(step.widgetType);
   };
 
@@ -474,23 +534,23 @@ export default function AuraMotorChatContainer() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto rounded-2xl shadow-2xl z-50 p-6"
-              style={{ background: '#1E1E22', border: '1px solid rgba(255,255,255,0.05)' }}
+              style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}
             >
               <div className="text-center">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#2D2D35' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--aura-surface-2)' }}>
                   <svg className="w-6 h-6" style={{ color: '#C084FC' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </div>
-                <h3 className="text-[16px] font-semibold text-white mb-2">Edit this answer?</h3>
-                <p className="text-[13px] mb-6" style={{ color: '#64748B' }}>
+                <h3 className="text-[16px] font-semibold mb-2" style={{ color: 'var(--aura-text)' }}>Edit this answer?</h3>
+                <p className="text-[13px] mb-6" style={{ color: 'var(--aura-text-subtle)' }}>
                   The conversation will continue from this point with your updated answer.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setEditModal({ stepId: '', visible: false })}
                     className="flex-1 py-2.5 rounded-xl text-[14px] font-medium transition-colors"
-                    style={{ border: '1px solid rgba(255,255,255,0.1)', color: '#94A3B8' }}
+                    style={{ border: '1px solid var(--aura-border-strong)', color: 'var(--aura-text-muted)' }}
                   >
                     Cancel
                   </button>
@@ -529,11 +589,11 @@ export default function AuraMotorChatContainer() {
                   ? 'bottom-0 top-16 rounded-t-[32px] overflow-y-auto pb-10'
                   : 'bottom-0 rounded-t-[32px] pb-10 max-h-[45vh] overflow-y-auto'
               }`}
-              style={{ background: '#1E1E22', borderTop: '1px solid rgba(255,255,255,0.05)' }}
+              style={{ background: 'var(--aura-surface)', borderTop: '1px solid var(--aura-border)' }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-[14px] font-semibold" style={{ color: '#94A3B8' }}>Update your answer</h4>
-                <button onClick={() => setEditingStepId(null)} className="transition-colors" style={{ color: '#64748B' }}>
+                <h4 className="text-[14px] font-semibold" style={{ color: 'var(--aura-text-muted)' }}>Update your answer</h4>
+                <button onClick={() => setEditingStepId(null)} className="transition-colors" style={{ color: 'var(--aura-text-subtle)' }}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>

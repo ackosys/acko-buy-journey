@@ -20,47 +20,47 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <div className="text-center mb-6">
-        <h3 className="text-[18px] font-bold text-white mb-2">Your Final Premium</h3>
-        <p className="text-[13px] text-[#94A3B8]">Complete breakdown of your {selectedPlan?.name || 'insurance plan'}</p>
+        <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-2">Your Final Premium</h3>
+        <p className="text-[13px] text-[var(--aura-text-muted)]">Complete breakdown of your {selectedPlan?.name || 'insurance plan'}</p>
       </div>
 
-      <div className="bg-[#1E1E22] border border-[#A855F7]/20 rounded-2xl p-5">
-        <div className="flex items-center gap-3 pb-4 mb-4 border-b border-white/5">
-          <div className="w-12 h-12 bg-[#2D2D35] rounded-xl flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <div className="bg-[var(--aura-surface)] border border-[#A855F7]/20 rounded-2xl p-5">
+        <div className="flex items-center gap-3 pb-4 mb-4 border-b border-[var(--aura-border)]">
+          <div className="w-12 h-12 bg-[var(--aura-surface-2)] rounded-xl flex items-center justify-center">
+            <svg className="w-6 h-6 text-[var(--aura-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-9M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
             </svg>
           </div>
           <div className="flex-1">
-            <p className="text-[14px] font-semibold text-white">{vehicleData.make} {vehicleData.model}</p>
-            <p className="text-[12px] text-[#94A3B8]">{vehicleData.variant} • {vehicleData.registrationYear}</p>
+            <p className="text-[14px] font-semibold text-[var(--aura-text)]">{vehicleData.make} {vehicleData.model}</p>
+            <p className="text-[12px] text-[var(--aura-text-muted)]">{vehicleData.variant} • {vehicleData.registrationYear}</p>
           </div>
         </div>
 
         <div className="space-y-3 mb-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-[14px] font-semibold text-white">{selectedPlan?.name}</p>
-              <p className="text-[11px] text-[#94A3B8] mt-0.5">{selectedPlan?.description}</p>
+              <p className="text-[14px] font-semibold text-[var(--aura-text)]">{selectedPlan?.name}</p>
+              <p className="text-[11px] text-[var(--aura-text-muted)] mt-0.5">{selectedPlan?.description}</p>
             </div>
-            <p className="text-[14px] font-bold text-white ml-4">₹{basePremium.toLocaleString()}</p>
+            <p className="text-[14px] font-bold text-[var(--aura-text)] ml-4">₹{basePremium.toLocaleString()}</p>
           </div>
-          <div className="flex justify-between text-[12px] text-[#94A3B8]">
+          <div className="flex justify-between text-[12px] text-[var(--aura-text-muted)]">
             <span>GST (18%)</span>
             <span>₹{gstOnBase.toLocaleString()}</span>
           </div>
         </div>
 
         {addons.length > 0 && (
-          <div className="border-t border-white/5 pt-4 mb-4">
-            <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">Selected Add-ons ({addons.length})</p>
+          <div className="border-t border-[var(--aura-border)] pt-4 mb-4">
+            <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">Selected Add-ons ({addons.length})</p>
             {addons.map((addon: any, i: number) => (
-              <div key={i} className="flex justify-between text-[12px] text-[#94A3B8] mb-2">
+              <div key={i} className="flex justify-between text-[12px] text-[var(--aura-text-muted)] mb-2">
                 <span>{addon.id.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</span>
                 <span>₹{addon.price.toLocaleString()}</span>
               </div>
             ))}
-            <div className="flex justify-between text-[12px] text-[#94A3B8] mt-2">
+            <div className="flex justify-between text-[12px] text-[var(--aura-text-muted)] mt-2">
               <span>GST on add-ons (18%)</span>
               <span>₹{gstOnAddons.toLocaleString()}</span>
             </div>
@@ -69,15 +69,15 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
 
         <div className="border-t-2 border-[#A855F7]/20 pt-4 mt-4">
           <div className="flex justify-between items-center">
-            <span className="text-[15px] font-bold text-white">Total Premium</span>
-            <span className="text-[24px] font-bold text-white">₹{grandTotal.toLocaleString()}</span>
+            <span className="text-[15px] font-bold text-[var(--aura-text)]">Total Premium</span>
+            <span className="text-[24px] font-bold text-[var(--aura-text)]">₹{grandTotal.toLocaleString()}</span>
           </div>
-          <p className="text-[11px] text-[#64748B] mt-1">For 1 year policy term</p>
+          <p className="text-[11px] text-[var(--aura-text-subtle)] mt-1">For 1 year policy term</p>
         </div>
       </div>
 
-      <div className="bg-[#1E1E22] rounded-xl p-4 border border-white/5">
-        <p className="text-[12px] font-semibold text-[#94A3B8] mb-3">What's included:</p>
+      <div className="bg-[var(--aura-surface)] rounded-xl p-4 border border-[var(--aura-border)]">
+        <p className="text-[12px] font-semibold text-[var(--aura-text-muted)] mb-3">What's included:</p>
         <div className="space-y-2">
           {selectedPlan?.features.slice(0, 4).map((feature: string, i: number) => {
             const [title] = feature.split(' — ');
@@ -86,7 +86,7 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
                 <svg className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
-                <span className="text-[11px] text-[#94A3B8]">{title}</span>
+                <span className="text-[11px] text-[var(--aura-text-muted)]">{title}</span>
               </div>
             );
           })}
@@ -152,17 +152,17 @@ export function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
           </svg>
         </motion.div>
 
-        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-[22px] font-bold text-white mb-3">
+        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-[22px] font-bold text-[var(--aura-text)] mb-3">
           Payment Successful! 🎉
         </motion.h2>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-[14px] text-[#94A3B8] mb-6 leading-relaxed">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-[14px] text-[var(--aura-text-muted)] mb-6 leading-relaxed">
           Your motor insurance is now active.<br />Welcome to ACKO!
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-[#1E1E22] rounded-xl p-4 border border-white/5">
-          <p className="text-[12px] text-[#94A3B8] mb-2">Policy Number</p>
-          <p className="text-[16px] font-bold text-white">ACKO/MOT/{Math.floor(Math.random() * 9000000 + 1000000)}</p>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-[var(--aura-surface)] rounded-xl p-4 border border-[var(--aura-border)]">
+          <p className="text-[12px] text-[var(--aura-text-muted)] mb-2">Policy Number</p>
+          <p className="text-[16px] font-bold text-[var(--aura-text)]">ACKO/MOT/{Math.floor(Math.random() * 9000000 + 1000000)}</p>
         </motion.div>
       </div>
     </motion.div>
@@ -173,7 +173,7 @@ export function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
 export function DashboardCTA({ onSelect }: { onSelect: (choice: string) => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-      <button onClick={() => onSelect('dashboard')} className="w-full p-4 bg-[#2D2D35] hover:bg-[#2D2D35] border border-white/8 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
+      <button onClick={() => onSelect('dashboard')} className="w-full p-4 bg-[var(--aura-surface-2)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border-strong)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#A855F7]/15 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
             <svg className="w-6 h-6 text-[#C084FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -181,16 +181,16 @@ export function DashboardCTA({ onSelect }: { onSelect: (choice: string) => void 
             </svg>
           </div>
           <div className="flex-1">
-            <p className="text-[14px] font-semibold text-white mb-0.5">Go to Dashboard</p>
-            <p className="text-[11px] text-[#94A3B8]">View policy details & manage claims</p>
+            <p className="text-[14px] font-semibold text-[var(--aura-text)] mb-0.5">Go to Dashboard</p>
+            <p className="text-[11px] text-[var(--aura-text-muted)]">View policy details & manage claims</p>
           </div>
-          <svg className="w-5 h-5 text-[#64748B] group-hover:text-[#94A3B8] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="w-5 h-5 text-[var(--aura-text-subtle)] group-hover:text-[var(--aura-text-muted)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </div>
       </button>
 
-      <button onClick={() => onSelect('download')} className="w-full p-4 bg-[#2D2D35] hover:bg-[#2D2D35] border border-white/8 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
+      <button onClick={() => onSelect('download')} className="w-full p-4 bg-[var(--aura-surface-2)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border-strong)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
             <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -198,10 +198,10 @@ export function DashboardCTA({ onSelect }: { onSelect: (choice: string) => void 
             </svg>
           </div>
           <div className="flex-1">
-            <p className="text-[14px] font-semibold text-white mb-0.5">Download Policy</p>
-            <p className="text-[11px] text-[#94A3B8]">Get your policy document as PDF</p>
+            <p className="text-[14px] font-semibold text-[var(--aura-text)] mb-0.5">Download Policy</p>
+            <p className="text-[11px] text-[var(--aura-text-muted)]">Get your policy document as PDF</p>
           </div>
-          <svg className="w-5 h-5 text-[#64748B] group-hover:text-[#94A3B8] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="w-5 h-5 text-[var(--aura-text-subtle)] group-hover:text-[var(--aura-text-muted)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </div>

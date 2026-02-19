@@ -4,13 +4,6 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { ChatMessage as ChatMessageType } from '@/lib/types';
 
-function AuraBotAvatar() {
-  return (
-    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 shadow-lg shadow-black/30">
-      <img src="/chatbot-avatar.png" alt="ACKO" className="w-full h-full object-cover" />
-    </div>
-  );
-}
 
 interface AuraChatMessageProps {
   message: ChatMessageType;
@@ -27,7 +20,10 @@ export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProp
         animate={{ opacity: 1 }}
         className="flex justify-center my-4"
       >
-        <span className="text-[12px] font-medium text-[#94A3B8] bg-[#1E1E22] px-4 py-1.5 rounded-full border border-white/5">
+        <span
+          className="text-[12px] font-medium px-4 py-1.5 rounded-full"
+          style={{ color: 'var(--aura-text-muted)', background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}
+        >
           {message.content}
         </span>
       </motion.div>
@@ -48,8 +44,8 @@ export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProp
           <div
             className="px-4 py-3 text-white font-medium"
             style={{
-              background: 'linear-gradient(135deg, #A855F7, #7E22CE)',
-              borderRadius: '20px 20px 4px 20px',
+              background: 'linear-gradient(0deg, #5920C5 0%, #7C47E1 100%)',
+              borderRadius: '20px 4px 20px 20px',
               boxShadow: '0 4px 12px rgba(168,85,247,0.3)',
             }}
           >
@@ -60,7 +56,8 @@ export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProp
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => onEdit(message.stepId!)}
-              className="absolute -left-8 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#2D2D35] border border-white/10 rounded-full flex items-center justify-center shadow-md hover:bg-[#3D3D45] transition-colors"
+              className="absolute -left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-colors"
+              style={{ background: 'var(--aura-surface-2)', border: '1px solid var(--aura-border-strong)' }}
               title="Edit this answer"
             >
               <svg className="w-3 h-3 text-[#C084FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,20 +75,16 @@ export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProp
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.215, 0.61, 0.355, 1] }}
-      className="flex gap-3 mb-4"
+      className="flex mb-4"
     >
-      <div className="flex-shrink-0 mt-0.5">
-        <AuraBotAvatar />
-      </div>
-
       <div className="max-w-[80%]">
         <div
           style={{
-            background: '#1E1E22',
-            color: '#F8FAFC',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '20px 20px 20px 4px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            background: 'var(--aura-surface)',
+            color: 'var(--aura-bot-text)',
+            border: '1px solid var(--aura-border)',
+            borderRadius: '4px 20px 20px 20px',
+            boxShadow: '0 4px 12px var(--aura-shadow)',
             padding: '12px 16px',
           }}
         >
@@ -112,18 +105,15 @@ export function AuraTypingIndicator() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex gap-3 mb-4"
+      className="flex mb-4"
     >
-      <div className="flex-shrink-0">
-        <AuraBotAvatar />
-      </div>
       <div
         className="flex items-center gap-1.5"
         style={{
-          background: '#1E1E22',
-          border: '1px solid rgba(255,255,255,0.05)',
-          borderRadius: '20px 20px 20px 4px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          background: 'var(--aura-surface)',
+          border: '1px solid var(--aura-border)',
+          borderRadius: '4px 20px 20px 20px',
+          boxShadow: '0 4px 12px var(--aura-shadow)',
           padding: '12px 16px',
         }}
       >
