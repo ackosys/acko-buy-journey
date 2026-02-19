@@ -30,7 +30,11 @@ export type LifeModule =
   | 'lifestyle'               // Alcohol, occupation, hobbies, medical
   | 'quote'                   // Coverage recommendation, premium
   | 'addons'                  // Riders selection
-  | 'review';                 // Final summary
+  | 'review'                  // Final summary
+  | 'payment'                 // Payment processing
+  | 'ekyc'                    // e-KYC verification
+  | 'medical'                 // Medical evaluation
+  | 'underwriting';           // Underwriting decision
 
 // Life widget types
 export type LifeWidgetType =
@@ -42,7 +46,12 @@ export type LifeWidgetType =
   | 'coverage_slider'         // Coverage amount selector
   | 'term_selector'           // Policy term selector
   | 'rider_toggle'            // Add-on riders with premium impact
-  | 'premium_summary';        // Quote display with breakdown
+  | 'premium_summary'         // Quote display with breakdown
+  | 'coverage_input'          // Direct-quote: user enters coverage + term
+  | 'payment_screen'          // Payment CTA
+  | 'ekyc_screen'             // e-KYC verification
+  | 'medical_screen'          // Medical evaluation scheduling
+  | 'underwriting_status';    // Underwriting timeline
 
 // Smoking status
 export type SmokingStatus = 'never' | 'past' | 'current';
@@ -88,6 +97,7 @@ export interface LifeJourneyState extends BaseJourneyState {
   outstandingLoans: number;      // Total outstanding loans (home + car + education + personal)
   monthlyExpenses: number;       // Monthly household expenses
   numberOfDependents: number;    // Spouse, children, parents
+  dependentTypes: string[];      // Which dependents (spouse, kids, parents, etc.)
   numberOfChildren: number;      // For education fund calculation
   youngestChildAge: number;      // To estimate education timeline
   existingLifeCover: number;     // Any existing term/life insurance
@@ -114,9 +124,14 @@ export interface LifeJourneyState extends BaseJourneyState {
   // Add-ons
   selectedRiders: LifeRider[];
   
+  // User path selection
+  userPath: 'direct' | 'guided' | '';
+
   // Journey progress
   currentModule: LifeModule;
   moduleOrder: LifeModule[];
+  ekycComplete: boolean;
+  medicalComplete: boolean;
   
   // Persona
   resolvedPersona: LifePersonaType;
@@ -173,6 +188,7 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
   outstandingLoans: 0,
   monthlyExpenses: 0,
   numberOfDependents: 0,
+  dependentTypes: [],
   numberOfChildren: 0,
   youngestChildAge: 0,
   existingLifeCover: 0,
@@ -195,8 +211,12 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
   quote: null,
   
   selectedRiders: [],
+
+  userPath: '',
   
-  moduleOrder: ['basic_info', 'lifestyle', 'quote', 'addons', 'review'],
+  moduleOrder: ['basic_info', 'lifestyle', 'quote', 'addons', 'review', 'payment', 'ekyc', 'medical', 'underwriting'],
+  ekycComplete: false,
+  medicalComplete: false,
   
   intentSignals: {},
 };

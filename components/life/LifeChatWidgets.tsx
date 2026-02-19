@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import type { Option, LifeRider, LifeJourneyState } from '../../lib/life/types';
 import { useLifeJourneyStore } from '../../lib/life/store';
+import { calculateBasePremium } from '../../lib/life/scripts';
 
 /* ═══════════════════════════════════════════════════════
    SVG Icon System — Life-specific icons
@@ -123,6 +124,67 @@ export function LifeSelectionCards({ options, onSelect }: { options: Option[]; o
           )}
         </motion.button>
       ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Multi Select — Grid with multi-selection and confirm
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeMultiSelect({ options, onSelect }: { options: Option[]; onSelect: (response: string) => void }) {
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const toggle = (id: string) => {
+    if (id === 'none') {
+      setSelected(prev => prev.includes('none') ? [] : ['none']);
+      return;
+    }
+    setSelected(prev => {
+      const without = prev.filter(s => s !== 'none');
+      return without.includes(id) ? without.filter(s => s !== id) : [...without, id];
+    });
+  };
+
+  return (
+    <div className="max-w-md">
+      <div className="grid grid-cols-2 gap-2.5">
+        {options.map((opt, i) => {
+          const isSelected = selected.includes(opt.id);
+          return (
+            <motion.button
+              key={opt.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              onClick={() => toggle(opt.id)}
+              className={`
+                flex items-center justify-center text-center px-4 py-3.5 rounded-xl border transition-all duration-150 active:scale-[0.97]
+                ${isSelected
+                  ? 'border-purple-400 bg-white/15'
+                  : 'border-white/10 bg-white/6 hover:bg-white/12 hover:border-white/20'
+                }
+              `}
+            >
+              <span className="text-label-md text-white/90 font-medium">{opt.label}</span>
+              {isSelected && (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-2 w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </motion.div>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+      <button
+        onClick={() => selected.length > 0 && onSelect(selected.join(','))}
+        disabled={selected.length === 0}
+        className="mt-4 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all hover:bg-white/90 active:scale-[0.97]"
+      >
+        Continue
+      </button>
     </div>
   );
 }
@@ -443,17 +505,153 @@ export function LifeRiderToggle({
 }
 
 /* ═══════════════════════════════════════════════════════
-   Premium Summary — Full quote display with breakdown
+   Coverage Card — Clean visual summary of recommended coverage
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeCoverageCard({ coverageAmount, policyTerm, coversTillAge, breakdownItems, onContinue }: {
+  coverageAmount: string;
+  policyTerm: string;
+  coversTillAge: number;
+  breakdownItems?: { label: string; value: string }[];
+  onContinue: () => void;
+}) {
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="max-w-sm mx-auto"
+    >
+      <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-purple-600/40 to-indigo-700/40 border border-white/10 backdrop-blur-sm">
+        <div className="px-5 pt-5 pb-4">
+          <p className="text-white/50 text-caption uppercase tracking-wider mb-1">Recommended Cover</p>
+          <p className="text-3xl font-bold text-white">{coverageAmount}</p>
+        </div>
+
+        <div className="h-px bg-white/10" />
+
+        <div className="px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-white/50 text-caption uppercase tracking-wider mb-0.5">Policy Term</p>
+            <p className="text-lg font-semibold text-white">{policyTerm}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-white/50 text-caption uppercase tracking-wider mb-0.5">Covers till age</p>
+            <p className="text-lg font-semibold text-white">{coversTillAge}</p>
+          </div>
+        </div>
+
+        {breakdownItems && breakdownItems.length > 0 && (
+          <>
+            <div className="h-px bg-white/10" />
+            <button
+              onClick={() => setShowBreakdown(!showBreakdown)}
+              className="w-full px-5 py-3 flex items-center justify-between text-white/60 hover:text-white/80 transition-colors"
+            >
+              <span className="text-caption font-medium">Why this is recommended</span>
+              <motion.svg
+                animate={{ rotate: showBreakdown ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </motion.svg>
+            </button>
+            <AnimatePresence>
+              {showBreakdown && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-5 pb-4 space-y-2">
+                    {breakdownItems.map((item, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <span className="text-caption text-white/50">{item.label}</span>
+                        <span className="text-caption text-white/80 font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
+      </div>
+
+      <button
+        onClick={onContinue}
+        className="mt-4 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold transition-all hover:bg-white/90 active:scale-[0.97]"
+      >
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Premium Summary — Interactive quote with coverage & tenure sliders
    ═══════════════════════════════════════════════════════ */
 
 export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
-  const store = useLifeJourneyStore();
   const state = useLifeJourneyStore.getState() as LifeJourneyState;
-  const { quote, name, age, recommendedCoverage, selectedRiders, resolvedPersona, annualIncome } = state;
+  const { age, recommendedCoverage, annualIncome } = state;
 
-  const coverage = recommendedCoverage || 10000000;
-  const yearlyPremium = quote?.yearlyPremium || 0;
-  const monthlyPremium = quote?.monthlyPremium || 0;
+  const minCoverage = 2500000;
+  // Max coverage: 40x income, capped at 100Cr, min 25L, intervals of 25L
+  const incomeMax = Math.max(minCoverage, (annualIncome || 0) * 40);
+  const maxCoverage = Math.min(1000000000, Math.floor(incomeMax / 2500000) * 2500000);
+  const coverageStep = 2500000;
+
+  const defaultCoverage = recommendedCoverage || 10000000;
+  const defaultTerm = state.selectedTerm || (60 - age);
+
+  const [coverage, setCoverage] = useState(() => Math.min(maxCoverage, Math.max(minCoverage, defaultCoverage)));
+  const [term, setTerm] = useState(defaultTerm);
+
+  const minTerm = 10;
+  const maxTerm = Math.min(60 - age, 40);
+  const [showFlexiDetails, setShowFlexiDetails] = useState(false);
+
+  const premium = calculateBasePremium({ ...state, recommendedCoverage: coverage, selectedTerm: term });
+  const monthly = Math.round(premium.totalPremium / 12);
+  const daily = Math.round(premium.totalPremium / 365);
+
+  const formatCoverage = (n: number) => {
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(0)}L`;
+    return `₹${n.toLocaleString('en-IN')}`;
+  };
+
+  const getProgress = (value: number, min: number, max: number) => {
+    return ((value - min) / (max - min)) * 100;
+  };
+
+  const handleContinue = () => {
+    useLifeJourneyStore.setState({
+      selectedCoverage: coverage,
+      selectedTerm: term,
+      quote: {
+        sumAssured: coverage,
+        policyTerm: term,
+        premiumFrequency: 'yearly' as const,
+        basePremium: premium.basePremium,
+        riders: [],
+        totalPremium: premium.totalPremium,
+        monthlyPremium: monthly,
+        yearlyPremium: premium.totalPremium,
+      },
+    });
+    onContinue();
+  };
 
   return (
     <motion.div
@@ -461,99 +659,139 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md"
     >
-      {/* Quote Card */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white/70 text-caption">Your Coverage</p>
-              <p className="text-white text-heading-lg font-bold">₹{(coverage / 10000000).toFixed(1)} Cr</p>
+        {/* Header with premium */}
+        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-5">
+          <p className="text-white/60 text-caption uppercase tracking-wider">Annual Premium</p>
+          <p className="text-white text-3xl font-bold mt-1">₹{premium.totalPremium.toLocaleString('en-IN')}<span className="text-lg font-normal text-white/60">/yr</span></p>
+          <p className="text-white/50 text-caption mt-1">₹{monthly.toLocaleString('en-IN')}/mo &middot; ₹{daily}/day</p>
+        </div>
+
+        <div className="px-5 py-5 space-y-6">
+          {/* Coverage slider */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-body-sm text-gray-500">Coverage</span>
+              <span className="text-label-md font-bold text-gray-900">{formatCoverage(coverage)}</span>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d={LIFE_ICON_PATHS.shield} />
-              </svg>
+            <div className="relative h-6 flex items-center">
+              <input
+                type="range"
+                min={minCoverage}
+                max={maxCoverage}
+                step={coverageStep}
+                value={coverage}
+                onChange={(e) => setCoverage(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, #9333ea ${getProgress(coverage, minCoverage, maxCoverage)}%, #e5e7eb ${getProgress(coverage, minCoverage, maxCoverage)}%)`
+                }}
+                className="absolute w-full h-1.5 rounded-full appearance-none cursor-pointer
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-600 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[10px] text-gray-400">{formatCoverage(minCoverage)}</span>
+              <span className="text-[10px] text-gray-400">{formatCoverage(maxCoverage)}</span>
+            </div>
+          </div>
+
+          {/* Tenure slider */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-body-sm text-gray-500">Policy Term</span>
+              <span className="text-label-md font-bold text-gray-900">{term} years <span className="font-normal text-gray-400">(till age {age + term})</span></span>
+            </div>
+            <div className="relative h-6 flex items-center">
+              <input
+                type="range"
+                min={minTerm}
+                max={maxTerm}
+                step={1}
+                value={term}
+                onChange={(e) => setTerm(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, #9333ea ${getProgress(term, minTerm, maxTerm)}%, #e5e7eb ${getProgress(term, minTerm, maxTerm)}%)`
+                }}
+                className="absolute w-full h-1.5 rounded-full appearance-none cursor-pointer
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-600 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[10px] text-gray-400">{minTerm} yrs</span>
+              <span className="text-[10px] text-gray-400">{maxTerm} yrs</span>
             </div>
           </div>
         </div>
 
-        {/* Details */}
-        <div className="px-5 py-4 space-y-3">
-          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-            <span className="text-body-sm text-gray-500">Policy Term</span>
-            <span className="text-label-md font-medium text-gray-900">30 years</span>
-          </div>
-          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-            <span className="text-body-sm text-gray-500">Annual Premium</span>
-            <span className="text-label-md font-bold text-gray-900">₹{yearlyPremium.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-            <span className="text-body-sm text-gray-500">Monthly</span>
-            <span className="text-label-md font-medium text-purple-600">₹{monthlyPremium.toLocaleString('en-IN')}/mo</span>
-          </div>
-          
-          {selectedRiders.length > 0 && (
-            <div className="pt-2">
-              <p className="text-caption text-gray-400 uppercase tracking-wider mb-2">Add-on Riders</p>
-              {selectedRiders.map((r) => (
-                <div key={r.id} className="flex justify-between items-center py-1.5">
-                  <span className="text-body-sm text-gray-600">{r.name}</span>
-                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        <div className="px-5 pb-2">
+          <div className="bg-purple-50 rounded-xl overflow-hidden border border-purple-100 transition-all duration-300">
+            <button 
+              onClick={() => setShowFlexiDetails(!showFlexiDetails)}
+              className="w-full text-left p-3.5 flex gap-3"
+            >
+              <div className="mt-0.5 flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={LIFE_ICON_PATHS.flexi} />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-label-sm font-bold text-purple-900">ACKO Flexi Benefit included</p>
+                  <svg 
+                    className={`w-4 h-4 text-purple-500 transition-transform duration-200 ${showFlexiDetails ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Daily cost */}
-          <div className="bg-purple-50 rounded-xl px-4 py-3 text-center">
-            <p className="text-caption text-purple-500">That&apos;s just</p>
-            <p className="text-heading-sm font-bold text-purple-700">₹{Math.round(yearlyPremium / 365)}/day</p>
-            <p className="text-caption text-purple-400">for ₹{(coverage / 10000000).toFixed(1)} Cr protection</p>
+                <p className="text-caption text-purple-700 mt-0.5 leading-snug">
+                  You can increase or decrease your coverage anytime later.
+                </p>
+              </div>
+            </button>
+            
+            <AnimatePresence>
+              {showFlexiDetails && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="px-3.5 pb-3.5 pt-0"
+                >
+                  <div className="h-px bg-purple-200/50 mb-3" />
+                  <p className="text-caption font-semibold text-purple-900 mb-2">Why Flexi matters:</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      'Your income grows over time',
+                      'Your loans change',
+                      'Your family size changes'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-caption text-purple-800">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
         {/* CTA */}
         <div className="px-5 pb-5">
           <button
-            onClick={onContinue}
+            onClick={handleContinue}
             className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30"
           >
             Continue with this plan
           </button>
         </div>
       </div>
-
-      {/* Opportunity Cost — for Growth Seekers */}
-      {resolvedPersona === 'growth_seeker' && annualIncome > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-4 bg-white/6 border border-white/10 rounded-2xl p-4"
-        >
-          <p className="text-label-sm font-semibold text-white/80 mb-3">Opportunity Cost Breakdown</p>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-body-sm text-white/60">Term Insurance Premium</span>
-              <span className="text-body-sm text-white font-medium">₹{yearlyPremium.toLocaleString('en-IN')}/yr</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-body-sm text-white/60">Available for Investment</span>
-              <span className="text-body-sm text-green-400 font-medium">₹{(annualIncome - yearlyPremium).toLocaleString('en-IN')}/yr</span>
-            </div>
-            <div className="h-px bg-white/10 my-2" />
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-              <p className="text-caption text-green-300">
-                Separate protection from investment — you get ₹{(coverage / 10000000).toFixed(1)} Cr coverage
-                AND ₹{((annualIncome - yearlyPremium) / 100000).toFixed(1)}L/yr to invest for growth.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
     </motion.div>
   );
 }
@@ -756,6 +994,536 @@ export function LifeCelebration() {
           ))}
         </div>
       </motion.div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Coverage Input — Direct-quote path: user picks coverage + term
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeCoverageInput({ onContinue }: { onContinue: () => void }) {
+  const state = useLifeJourneyStore.getState() as LifeJourneyState;
+  const { age, annualIncome } = state;
+
+  const minCoverage = 2500000; // 25L
+  // Max coverage: 40x income, capped at 100Cr, min 25L, intervals of 25L
+  const incomeMax = Math.max(minCoverage, (annualIncome || 0) * 40);
+  const maxCoverage = Math.min(1000000000, Math.floor(incomeMax / 2500000) * 2500000);
+  const coverageStep = 2500000;
+
+  const minTerm = 10;
+  const maxTerm = Math.min(60 - age, 40);
+
+  const [coverage, setCoverage] = useState(() => Math.min(maxCoverage, Math.max(minCoverage, 10000000)));
+  const [term, setTerm] = useState(Math.min(60 - age, 30));
+  const [showFlexiDetails, setShowFlexiDetails] = useState(false);
+
+  const formatCoverage = (n: number) => {
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(0)}L`;
+    return `₹${n.toLocaleString('en-IN')}`;
+  };
+
+  const getProgress = (value: number, min: number, max: number) => {
+    return ((value - min) / (max - min)) * 100;
+  };
+
+  const handleContinue = () => {
+    useLifeJourneyStore.setState({
+      selectedCoverage: coverage,
+      selectedTerm: term,
+      recommendedCoverage: coverage,
+    });
+    onContinue();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md"
+    >
+      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-4">
+          <p className="text-white/80 text-caption uppercase tracking-wider">Select your plan</p>
+          <p className="text-white text-lg font-bold mt-1">Choose coverage & term</p>
+        </div>
+
+        <div className="px-5 py-5 space-y-6">
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-body-sm text-gray-500">Coverage Amount</span>
+              <span className="text-label-md font-bold text-gray-900">{formatCoverage(coverage)}</span>
+            </div>
+            <div className="relative h-6 flex items-center">
+              <input
+                type="range"
+                min={minCoverage}
+                max={maxCoverage}
+                step={coverageStep}
+                value={coverage}
+                onChange={(e) => setCoverage(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, #9333ea ${getProgress(coverage, minCoverage, maxCoverage)}%, #e5e7eb ${getProgress(coverage, minCoverage, maxCoverage)}%)`
+                }}
+                className="absolute w-full h-1.5 rounded-full appearance-none cursor-pointer
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-600 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[10px] text-gray-400">{formatCoverage(minCoverage)}</span>
+              <span className="text-[10px] text-gray-400">{formatCoverage(maxCoverage)}</span>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-body-sm text-gray-500">Policy Term</span>
+              <span className="text-label-md font-bold text-gray-900">{term} years <span className="font-normal text-gray-400">(till age {age + term})</span></span>
+            </div>
+            <div className="relative h-6 flex items-center">
+              <input
+                type="range"
+                min={minTerm}
+                max={maxTerm}
+                step={1}
+                value={term}
+                onChange={(e) => setTerm(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, #9333ea ${getProgress(term, minTerm, maxTerm)}%, #e5e7eb ${getProgress(term, minTerm, maxTerm)}%)`
+                }}
+                className="absolute w-full h-1.5 rounded-full appearance-none cursor-pointer
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-600 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[10px] text-gray-400">{minTerm} yrs</span>
+              <span className="text-[10px] text-gray-400">{maxTerm} yrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-5 pb-2">
+          <div className="bg-purple-50 rounded-xl overflow-hidden border border-purple-100 transition-all duration-300">
+            <button 
+              onClick={() => setShowFlexiDetails(!showFlexiDetails)}
+              className="w-full text-left p-3.5 flex gap-3"
+            >
+              <div className="mt-0.5 flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={LIFE_ICON_PATHS.flexi} />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-label-sm font-bold text-purple-900">ACKO Flexi Benefit included</p>
+                  <svg 
+                    className={`w-4 h-4 text-purple-500 transition-transform duration-200 ${showFlexiDetails ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <p className="text-caption text-purple-700 mt-0.5 leading-snug">
+                  You can increase or decrease your coverage anytime later.
+                </p>
+              </div>
+            </button>
+            
+            <AnimatePresence>
+              {showFlexiDetails && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="px-3.5 pb-3.5 pt-0"
+                >
+                  <div className="h-px bg-purple-200/50 mb-3" />
+                  <p className="text-caption font-semibold text-purple-900 mb-2">Why Flexi matters:</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      'Your income grows over time',
+                      'Your loans change',
+                      'Your family size changes'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-caption text-purple-800">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className="px-5 pb-5">
+          <button
+            onClick={handleContinue}
+            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30"
+          >
+            Get my quote
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Payment Screen — Plan summary + Pay CTA
+   ═══════════════════════════════════════════════════════ */
+
+export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
+  const state = useLifeJourneyStore.getState() as LifeJourneyState;
+  const [processing, setProcessing] = useState(false);
+
+  const formatAmt = (n: number) => {
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+    return `₹${n.toLocaleString('en-IN')}`;
+  };
+
+  const yearlyPremium = state.quote?.yearlyPremium || 0;
+  const monthlyPremium = state.quote?.monthlyPremium || 0;
+
+  const handlePay = () => {
+    setProcessing(true);
+    setTimeout(() => {
+      setProcessing(false);
+      onContinue();
+    }, 2000);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md"
+    >
+      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-5">
+          <p className="text-white/60 text-caption uppercase tracking-wider">Your Coverage</p>
+          <p className="text-white text-2xl font-bold mt-1">{formatAmt(state.selectedCoverage)}</p>
+          <p className="text-white/50 text-caption mt-1">{state.selectedTerm} years &middot; till age {state.age + state.selectedTerm}</p>
+        </div>
+
+        <div className="px-5 py-4 space-y-3">
+          <div className="flex justify-between items-center py-2 border-b border-gray-50">
+            <span className="text-body-sm text-gray-500">Annual Premium</span>
+            <span className="text-label-md font-bold text-gray-900">₹{yearlyPremium.toLocaleString('en-IN')}</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b border-gray-50">
+            <span className="text-body-sm text-gray-500">Monthly</span>
+            <span className="text-label-md text-gray-700">₹{monthlyPremium.toLocaleString('en-IN')}/mo</span>
+          </div>
+          {state.selectedRiders.length > 0 && (
+            <div className="flex justify-between items-center py-2">
+              <span className="text-body-sm text-gray-500">Riders</span>
+              <span className="text-body-sm text-gray-600">{state.selectedRiders.map(r => r.name).join(', ')}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="px-5 pb-5">
+          <button
+            onClick={handlePay}
+            disabled={processing}
+            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 disabled:opacity-70"
+          >
+            {processing ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
+                Processing...
+              </span>
+            ) : (
+              `Pay ₹${yearlyPremium.toLocaleString('en-IN')}`
+            )}
+          </button>
+          <p className="text-[11px] text-gray-400 text-center mt-2">
+            Secure payment &middot; 100% refund if not approved
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   e-KYC Screen — Aadhaar-based identity verification
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeEkycScreen({ onContinue }: { onContinue: () => void }) {
+  const [step, setStep] = useState<'start' | 'otp' | 'verifying' | 'done'>('start');
+  const [otp, setOtp] = useState('');
+
+  const handleStart = () => setStep('otp');
+
+  const handleVerify = () => {
+    if (otp.length < 4) return;
+    setStep('verifying');
+    setTimeout(() => {
+      setStep('done');
+      setTimeout(() => onContinue(), 1200);
+    }, 2000);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md"
+    >
+      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-label-md font-bold text-gray-900">e-KYC Verification</h3>
+              <p className="text-caption text-gray-400">Aadhaar-based OTP verification</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-5 py-5">
+          {step === 'start' && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {['Enter your Aadhaar number', 'Receive OTP on linked mobile', 'Verify — takes under 2 minutes'].map((text, i) => (
+                  <div key={i} className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 text-[11px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</div>
+                    <span className="text-body-sm text-gray-600">{text}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={handleStart}
+                className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+              >
+                Start e-KYC
+              </button>
+            </div>
+          )}
+
+          {step === 'otp' && (
+            <div className="space-y-4">
+              <p className="text-body-sm text-gray-600">Enter the OTP sent to your Aadhaar-linked mobile number.</p>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                placeholder="Enter 6-digit OTP"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-center text-lg font-semibold tracking-[0.3em] text-gray-900 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/30"
+                autoFocus
+              />
+              <button
+                onClick={handleVerify}
+                disabled={otp.length < 4}
+                className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform disabled:opacity-40"
+              >
+                Verify
+              </button>
+            </div>
+          )}
+
+          {step === 'verifying' && (
+            <div className="flex flex-col items-center py-6">
+              <svg className="w-8 h-8 text-purple-500 animate-spin mb-3" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
+              <p className="text-body-sm text-gray-600">Verifying your identity...</p>
+            </div>
+          )}
+
+          {step === 'done' && (
+            <div className="flex flex-col items-center py-6">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-3">
+                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+              </motion.div>
+              <p className="text-label-md font-semibold text-gray-900">Identity Verified</p>
+              <p className="text-caption text-gray-400 mt-1">e-KYC completed successfully</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Medical Screen — Tele-medical & health tests scheduling
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeMedicalScreen({ onContinue }: { onContinue: () => void }) {
+  const [scheduled, setScheduled] = useState(false);
+
+  const handleSchedule = () => {
+    setScheduled(true);
+    setTimeout(() => onContinue(), 1500);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md"
+    >
+      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-label-md font-bold text-gray-900">Medical Evaluation</h3>
+              <p className="text-caption text-gray-400">Quick health assessment</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-5 py-5">
+          {!scheduled ? (
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { icon: '📞', title: 'Tele-medical call', desc: 'A 10-minute video call with a doctor' },
+                  { icon: '🩺', title: 'Lab tests (if required)', desc: 'Based on your age and coverage amount' },
+                  { icon: '📋', title: 'Income proof', desc: 'Salary slips, ITR, or bank statements' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <span className="text-lg flex-shrink-0 mt-0.5">{item.icon}</span>
+                    <div>
+                      <p className="text-label-sm font-semibold text-gray-900">{item.title}</p>
+                      <p className="text-caption text-gray-400">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-purple-50 rounded-xl px-4 py-3">
+                <p className="text-caption text-purple-700">
+                  We&apos;ll call you within 24 hours to schedule a convenient time.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSchedule}
+                className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+              >
+                Schedule my evaluation
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center py-6">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-3">
+                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+              </motion.div>
+              <p className="text-label-md font-semibold text-gray-900">Evaluation Scheduled</p>
+              <p className="text-caption text-gray-400 mt-1">We&apos;ll contact you within 24 hours</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Underwriting Status — Timeline & review progress
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeUnderwritingStatus({ onContinue }: { onContinue: () => void }) {
+  const steps = [
+    { title: 'Application received', status: 'done' as const },
+    { title: 'Payment confirmed', status: 'done' as const },
+    { title: 'e-KYC verified', status: 'done' as const },
+    { title: 'Medical evaluation', status: 'active' as const },
+    { title: 'Underwriting review', status: 'upcoming' as const },
+    { title: 'Policy issuance', status: 'upcoming' as const },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md"
+    >
+      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h3 className="text-label-md font-bold text-gray-900">Application Status</h3>
+          <p className="text-caption text-gray-400">Estimated completion: 3-5 business days</p>
+        </div>
+
+        <div className="px-5 py-4">
+          {steps.map((s, i) => (
+            <div key={i} className="flex gap-3 relative">
+              <div className="flex flex-col items-center">
+                {s.status === 'done' ? (
+                  <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                ) : s.status === 'active' ? (
+                  <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse" />
+                  </div>
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-gray-300" />
+                  </div>
+                )}
+                {i < steps.length - 1 && (
+                  <div className={`w-px h-6 ${s.status === 'done' ? 'bg-emerald-200' : 'bg-gray-200'}`} />
+                )}
+              </div>
+              <div className="pb-6 last:pb-0">
+                <p className={`text-label-sm font-medium ${s.status === 'done' ? 'text-gray-900' : s.status === 'active' ? 'text-purple-700' : 'text-gray-400'}`}>
+                  {s.title}
+                </p>
+                {s.status === 'active' && (
+                  <p className="text-[11px] text-purple-500 mt-0.5">In progress</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
+          <p className="text-caption text-gray-500">
+            If you&apos;re not approved, we refund 100% of your premium — no questions asked.
+          </p>
+        </div>
+
+        <div className="px-5 pb-5 pt-3">
+          <button
+            onClick={onContinue}
+            className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 }

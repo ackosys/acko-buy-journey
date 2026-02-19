@@ -95,7 +95,13 @@ function LifeSplashScreen({ onDone }: { onDone: () => void }) {
 
 export default function LifeJourneyPage() {
   const store = useLifeJourneyStore();
-  const { showExpertPanel, showAIChat, journeyComplete, paymentComplete } = store;
+  const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; medicalComplete: boolean };
+
+  const completedStep = paymentComplete
+    ? (ekycComplete
+      ? (medicalComplete ? 4 : 3)
+      : 2)
+    : (journeyComplete ? 1 : 0);
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -107,6 +113,9 @@ export default function LifeJourneyPage() {
       conversationHistory: [],
       journeyComplete: false,
       paymentComplete: false,
+      ekycComplete: false,
+      medicalComplete: false,
+      userPath: '',
       currentModule: 'basic_info',
     });
   }, []);
@@ -139,6 +148,7 @@ export default function LifeJourneyPage() {
         {screen === 'entry' && !showSplash && (
           <LifeEntryScreen
             key="entry"
+            completedStep={completedStep}
             onBuyJourney={() => setScreen('landing')}
             onJumpToEkyc={() => setScreen('landing')}
             onJumpToVerification={() => setScreen('landing')}
