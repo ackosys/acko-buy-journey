@@ -35,7 +35,7 @@ const vehicleTypeSelect: MotorConversationStep = {
     ],
     options: [
       { id: 'car', label: 'Car', description: 'Hatchback, Sedan, SUV, etc.', icon: 'car' },
-      { id: 'bike', label: 'Bike', description: 'Scooter, Motorcycle, etc.', icon: 'bike' },
+      { id: 'bike', label: 'Bike', description: 'Scooter, Motorcycle, etc.', icon: 'scooter' },
     ],
   }),
   processResponse: (response) => ({
@@ -58,8 +58,8 @@ const registrationHasNumber: MotorConversationStep = {
       `Are you looking to renew insurance for your current ${vLabel(state)}, or insure a brand-new one?`,
     ],
     options: [
-      { id: 'yes', label: 'Renew / Switch insurance', description: `I already have a ${vLabel(state)}`, icon: 'document' },
-      { id: 'no', label: `Insure my new ${vLabel(state)}`, description: `Just got a brand-new ${vLabel(state)}`, icon: 'star' },
+      { id: 'yes', label: 'Renew / Switch insurance', description: `I already have a ${vLabel(state)}`, icon: 'renew' },
+      { id: 'no', label: `Insure my new ${vLabel(state)}`, description: `Just got a brand-new ${vLabel(state)}`, icon: state.vehicleType === 'bike' ? 'new_bike' : 'new_car' },
     ],
   }),
   processResponse: (response) => ({
@@ -237,14 +237,14 @@ const manualEntrySelectFuel: MotorConversationStep = {
     const isBike = state.vehicleType === 'bike';
     const fuelOptions = isBike
       ? [
-          { id: 'petrol', label: 'Petrol', icon: 'fuel' },
+          { id: 'petrol', label: 'Petrol', icon: 'petrol' },
           { id: 'electric', label: 'Electric', icon: 'electric' },
         ]
       : [
-          { id: 'petrol', label: 'Petrol', icon: 'fuel' },
-          { id: 'diesel', label: 'Diesel', icon: 'fuel' },
+          { id: 'petrol', label: 'Petrol', icon: 'petrol' },
+          { id: 'diesel', label: 'Diesel', icon: 'diesel' },
           { id: 'electric', label: 'Electric', icon: 'electric' },
-          { id: 'cng', label: 'CNG', icon: 'fuel' },
+          { id: 'cng', label: 'CNG', icon: 'cng' },
         ];
     return {
       botMessages: [
@@ -326,27 +326,27 @@ const manualEntrySelectYear: MotorConversationStep = {
    ═══════════════════════════════════════════════ */
 
 const POPULAR_CARS = [
-  { id: 'tata_nexon', label: 'TATA Nexon', description: '2020-2023' },
-  { id: 'tata_punch', label: 'TATA Punch' },
-  { id: 'mahindra_xuv700', label: 'Mahindra XUV 700' },
-  { id: 'honda_city', label: 'Honda City' },
-  { id: 'kia_carens', label: 'Kia Carens' },
-  { id: 'hyundai_creta', label: 'Hyundai Creta' },
-  { id: 'kia_seltos', label: 'Kia Seltos' },
-  { id: 'tata_tiago', label: 'Tata Tiago' },
-  { id: 'maruti_swift', label: 'Maruti Swift' },
+  { id: 'tata_nexon', label: 'TATA Nexon', logoUrl: '/logos/TATA.png' },
+  { id: 'tata_punch', label: 'TATA Punch', logoUrl: '/logos/TATA.png' },
+  { id: 'mahindra_xuv700', label: 'Mahindra XUV 700', logoUrl: '/logos/Mahindra.png' },
+  { id: 'honda_city', label: 'Honda City', logoUrl: '/logos/Honda.png' },
+  { id: 'kia_carens', label: 'Kia Carens', logoUrl: '/logos/Kia.png' },
+  { id: 'hyundai_creta', label: 'Hyundai Creta', logoUrl: '/logos/Hyundai.png' },
+  { id: 'kia_seltos', label: 'Kia Seltos', logoUrl: '/logos/Kia.png' },
+  { id: 'tata_tiago', label: 'Tata Tiago', logoUrl: '/logos/TATA.png' },
+  { id: 'maruti_swift', label: 'Maruti Swift', logoUrl: '/logos/Suzuki.png' },
 ];
 
 const POPULAR_BIKES = [
-  { id: 'hero_splendor', label: 'Hero Splendor Plus', description: '100cc Commuter' },
-  { id: 'honda_activa', label: 'Honda Activa 6G', description: '110cc Scooter' },
-  { id: 'honda_shine', label: 'Honda Shine', description: '125cc Commuter' },
-  { id: 'tvs_jupiter', label: 'TVS Jupiter', description: '110cc Scooter' },
-  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar 150', description: '150cc Sports' },
-  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350', description: '350cc Cruiser' },
-  { id: 'tvs_apache', label: 'TVS Apache RTR 160', description: '160cc Sports' },
-  { id: 'hero_hf_deluxe', label: 'Hero HF Deluxe', description: '100cc Commuter' },
-  { id: 'suzuki_access', label: 'Suzuki Access 125', description: '125cc Scooter' },
+  { id: 'hero_splendor', label: 'Hero Splendor Plus', description: '100cc Commuter', logoUrl: '/logos/Hero.png' },
+  { id: 'honda_activa', label: 'Honda Activa 6G', description: '110cc Scooter', logoUrl: '/logos/Honda.png' },
+  { id: 'honda_shine', label: 'Honda Shine', description: '125cc Commuter', logoUrl: '/logos/Honda.png' },
+  { id: 'tvs_jupiter', label: 'TVS Jupiter', description: '110cc Scooter', logoUrl: '/logos/TVS.png' },
+  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar 150', description: '150cc Sports', logoUrl: '/logos/Bajaj.png' },
+  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350', description: '350cc Cruiser', logoUrl: '/logos/Royal Enfield.png' },
+  { id: 'tvs_apache', label: 'TVS Apache RTR 160', description: '160cc Sports', logoUrl: '/logos/TVS.png' },
+  { id: 'hero_hf_deluxe', label: 'Hero HF Deluxe', description: '100cc Commuter', logoUrl: '/logos/Hero.png' },
+  { id: 'suzuki_access', label: 'Suzuki Access 125', description: '125cc Scooter', logoUrl: '/logos/Suzuki.png' },
 ];
 
 /* Step 1: Popular vehicle suggestions (car or bike) */
@@ -364,7 +364,7 @@ const brandNewPopularCars: MotorConversationStep = {
       ],
       subText: `Select from popular models or search for yours.`,
       options: [
-        ...popularList.map(c => ({ ...c, icon: isBike ? 'bike' : 'car' })),
+        ...popularList.map(c => ({ ...c, icon: isBike ? 'bike' : 'car', logoUrl: (c as any).logoUrl })),
         { id: 'other', label: 'Other — Select make & model', icon: 'search' },
       ],
     };
@@ -406,7 +406,7 @@ const brandNewCommercialCheck: MotorConversationStep = {
     subText: 'Vehicle used as a taxi, to deliver goods, etc.',
     options: [
       { id: 'no', label: 'No, personal use', icon: 'user' },
-      { id: 'yes', label: 'Yes, commercial', icon: 'building' },
+      { id: 'yes', label: 'Yes, commercial', icon: 'commercial_car' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -700,7 +700,7 @@ const preQuoteCommercialCheck: MotorConversationStep = {
     subText: `Commercial vehicles (taxis, delivery, etc.) have different insurance requirements.`,
     options: [
       { id: 'no', label: 'No, personal use', icon: 'user' },
-      { id: 'yes', label: 'Yes, commercial', icon: 'building' },
+      { id: 'yes', label: 'Yes, commercial', icon: 'commercial_car' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -739,7 +739,7 @@ const preQuotePolicyStatus: MotorConversationStep = {
     subText: `This determines which plans and No Claim Bonus discounts are available to you.`,
     options: [
       { id: 'no', label: 'No, it\'s still active', icon: 'shield' },
-      { id: 'yes', label: 'Yes, it has expired', icon: 'clock' },
+      { id: 'yes', label: 'Yes, it has expired', icon: 'policy' },
       { id: 'not_sure', label: 'Not sure', icon: 'help' },
     ],
   }),
@@ -839,6 +839,7 @@ const preQuoteExpiredPolicyType: MotorConversationStep = {
       { id: 'comprehensive', label: 'Comprehensive', description: 'Covers own damage + third party', icon: 'shield' },
       { id: 'third_party', label: 'Third Party', description: 'Only covers damage to others', icon: 'shield_search' },
       { id: 'not_sure', label: 'Not sure', icon: 'help' },
+
     ],
   }),
   processResponse: (response, state) => ({
@@ -1167,7 +1168,7 @@ const completionDownloadConfirm: MotorConversationStep = {
       `Would you like to do anything else?`,
     ],
     options: [
-      { id: 'dashboard', label: 'Go to Dashboard', icon: 'forward', description: 'View policy details & manage claims' },
+      { id: 'dashboard', label: 'Go to Dashboard', icon: 'policy', description: 'View policy details & manage claims' },
       { id: 'done', label: 'I\'m all set', icon: 'check' },
     ],
   }),
