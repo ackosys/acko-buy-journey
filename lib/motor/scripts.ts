@@ -301,7 +301,7 @@ const manualEntrySelectYear: MotorConversationStep = {
 
 /* ═══════════════════════════════════════════════
    MODULE: BRAND NEW VEHICLE — Purchase flow
-   (matches ACKO new car buy journey design)
+   (matches ACKO new vehicle buy journey design)
    ═══════════════════════════════════════════════ */
 
 const POPULAR_CARS = [
@@ -316,27 +316,45 @@ const POPULAR_CARS = [
   { id: 'maruti_swift', label: 'Maruti Swift' },
 ];
 
-/* Step 1: Popular car suggestions */
+const POPULAR_BIKES = [
+  { id: 'hero_splendor', label: 'Hero Splendor Plus' },
+  { id: 'honda_activa', label: 'Honda Activa 6G' },
+  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar NS200' },
+  { id: 'tvs_apache', label: 'TVS Apache RTR 200' },
+  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350' },
+  { id: 'yamaha_fz', label: 'Yamaha FZ-S' },
+  { id: 'honda_shine', label: 'Honda Shine' },
+  { id: 'tvs_jupiter', label: 'TVS Jupiter' },
+  { id: 'royal_enfield_hunter', label: 'Royal Enfield Hunter 350' },
+];
+
+/* Step 1: Popular vehicle suggestions (car or bike) */
 const brandNewPopularCars: MotorConversationStep = {
   id: 'brand_new.popular_cars',
   module: 'manual_entry',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
-    botMessages: [
-      `Let us start with the basics.`,
-      `Which ${vLabel(state)} are you planning to buy?`,
-    ],
-    subText: `Select from popular models or search for yours.`,
-    options: [
-      ...POPULAR_CARS.map(c => ({ ...c, icon: 'car' })),
-      { id: 'other', label: 'Other — Select make & model', icon: 'search' },
-    ],
-  }),
-  processResponse: (response) => {
+  getScript: (state) => {
+    const isBike = state.vehicleType === 'bike';
+    const popularList = isBike ? POPULAR_BIKES : POPULAR_CARS;
+    return {
+      botMessages: [
+        `Let us start with the basics.`,
+        `Which ${vLabel(state)} are you planning to buy?`,
+      ],
+      subText: `Select from popular models or search for yours.`,
+      options: [
+        ...popularList.map(c => ({ ...c, icon: isBike ? 'bike' : 'car' })),
+        { id: 'other', label: 'Other — Select make & model', icon: 'search' },
+      ],
+    };
+  },
+  processResponse: (response, state) => {
     if (response === 'other') return {};
-    const car = POPULAR_CARS.find(c => c.id === response);
-    if (!car) return {};
-    const [make, ...modelParts] = car.label.split(' ');
+    const isBike = state.vehicleType === 'bike';
+    const popularList = isBike ? POPULAR_BIKES : POPULAR_CARS;
+    const vehicle = popularList.find(c => c.id === response);
+    if (!vehicle) return {};
+    const [make, ...modelParts] = vehicle.label.split(' ');
     return {
       vehicleData: {
         make: make,
@@ -475,7 +493,7 @@ const brandNewViewPrices: MotorConversationStep = {
 
 /* ═══════════════════════════════════════════════
    MODULE: OWNER DETAILS — Post-addon, pre-payment
-   (Brand new car specific — engine/chassis, loan)
+   (Brand new vehicle specific — engine/chassis, loan)
    ═══════════════════════════════════════════════ */
 
 const ownerDetailsIntro: MotorConversationStep = {
@@ -530,11 +548,11 @@ const ownerDetailsEngineNumber: MotorConversationStep = {
   id: 'owner_details.engine_number',
   module: 'owner_details',
   widgetType: 'text_input',
-  getScript: () => ({
+  getScript: (state) => ({
     botMessages: [
-      `What is your car's engine number?`,
+      `What is your ${vLabel(state)}'s engine number?`,
     ],
-    subText: `You can get this from your car dealer or the vehicle invoice.`,
+    subText: `You can get this from your ${vLabel(state)} dealer or the vehicle invoice.`,
     placeholder: 'e.g., 32IUYRQEWJHEJH',
     inputType: 'text' as const,
   }),
@@ -593,9 +611,9 @@ const ownerDetailsLoanCheck: MotorConversationStep = {
   id: 'owner_details.loan_check',
   module: 'owner_details',
   widgetType: 'selection_cards',
-  getScript: () => ({
+  getScript: (state) => ({
     botMessages: [
-      `Have you taken a car loan for this vehicle?`,
+      `Have you taken a ${vLabel(state)} loan for this vehicle?`,
     ],
     subText: `If yes, your lender will be added as a beneficiary on the policy. This is required by most banks and NBFCs.`,
     options: [

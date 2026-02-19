@@ -1068,7 +1068,9 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
   const availablePlans = useMotorStore((s) => s.availablePlans) || [];
   const idv = useMotorStore((s) => s.idv);
   const vehicleEntryType = useMotorStore((s) => s.vehicleEntryType);
+  const vehicleType = useMotorStore((s) => s.vehicleType);
   const isBrandNew = vehicleEntryType === 'brand_new';
+  const vType = vehicleType === 'bike' ? 'bike' : 'car';
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showGarageTier, setShowGarageTier] = useState(false);
@@ -1120,9 +1122,9 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
         <PlanCard
           plan={zeroDepLowest}
           title="Zero Depreciation Plan (Bumper to Bumper)"
-          badge="Recommended for your car"
+          badge={`Recommended for your ${vType}`}
           price={formatPrice(zeroDepLowest.totalPrice)}
-          description="Covers damage to your car and damage caused by your car to others and their property. Covers full cost of car parts if they are replaced during repairs."
+          description={`Covers damage to your ${vType} and damage caused by your ${vType} to others and their property. Covers full cost of ${vType} parts if they are replaced during repairs.`}
           onSelect={() => handlePlanClick(zeroDepLowest)}
           recommended
         />
@@ -1134,10 +1136,10 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
           plan={comprehensiveLowest}
           title={isBrandNew ? 'Comprehensive' : 'Comprehensive Plans'}
           subtitle={isBrandNew ? undefined : '2 options starting from'}
-          badge={isBrandNew ? undefined : 'Recommended for your car'}
+          badge={isBrandNew ? undefined : `Recommended for your ${vType}`}
           price={formatPrice(comprehensiveLowest.totalPrice)}
           strikePrice={isBrandNew ? undefined : comprehensiveLowest.totalPrice + 1000}
-          description="Covers damage to your car and damage caused by your car to others and their property."
+          description={`Covers damage to your ${vType} and damage caused by your ${vType} to others and their property.`}
           onSelect={() => handlePlanClick(comprehensiveLowest)}
         />
       )}
@@ -1163,7 +1165,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
           title="Third-party Plan"
           subtitle="Minimum coverage required by law"
           price={`${formatPrice(thirdPartyPlan.totalPrice)} (Same across all insurers)`}
-          description="It covers damage caused by your car to others and their property, but does not cover any damage caused to your car."
+          description={`It covers damage caused by your ${vType} to others and their property, but does not cover any damage caused to your ${vType}.`}
           onSelect={() => handlePlanClick(thirdPartyPlan)}
         />
       )}
@@ -1193,7 +1195,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                 <div className="p-5">
                   <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
                   <h3 className="text-[18px] font-bold text-white mb-1">Choose your garage network</h3>
-                  <p className="text-[12px] text-white/50 mb-5">Comprehensive plan lets you pick where your car gets repaired</p>
+                  <p className="text-[12px] text-white/50 mb-5">Comprehensive plan lets you pick where your {vType} gets repaired</p>
 
                   <div className="space-y-3">
                     {/* Network Garages */}
@@ -1290,6 +1292,8 @@ function PlanCard({
   onSelect: () => void;
   recommended?: boolean;
 }) {
+  const vehicleType = useMotorStore((s) => s.vehicleType);
+  const vType = vehicleType === 'bike' ? 'bike' : 'car';
   const isComprehensive = plan?.type === 'comprehensive';
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'covered' | 'not_covered' | 'upgrades'>('covered');
@@ -1495,7 +1499,7 @@ function PlanCard({
                       exit={{ opacity: 0, x: 10 }}
                     >
                       <p className="text-[12px] text-white/50 mb-3">
-                        Opt for additional covers in the next steps to enhance your {plan.type === 'third_party' ? 'coverage' : 'car protection'}
+                        Opt for additional covers in the next steps to enhance your {plan.type === 'third_party' ? 'coverage' : `${vType} protection`}
                       </p>
                       <div className="space-y-2">
                         {plan.addOnsAvailable.map((addonId: string, i: number) => {
@@ -1505,16 +1509,16 @@ function PlanCard({
                               desc: 'It covers engine damage caused by oil leaks and water penetration. Standard plans only cover engine damage caused in an accident.',
                             },
                             extra_car_protection: {
-                              name: 'Extra Car Protection',
-                              desc: 'It offers 24x7 roadside assistance, key repair/replacement, and reimbursement for outstation repairs.',
+                              name: `Extra ${vType === 'bike' ? 'Bike' : 'Car'} Protection`,
+                              desc: `It offers 24x7 roadside assistance, key repair/replacement, and reimbursement for outstation repairs.`,
                             },
                             consumables_cover: {
                               name: 'Consumables Cover',
-                              desc: 'It pays for the cost of nuts and bolts, brake oil, engine oil etc. used during car repairs. Standard plans don\'t cover this.',
+                              desc: `It pays for the cost of nuts and bolts, brake oil, engine oil etc. used during ${vType} repairs. Standard plans don't cover this.`,
                             },
                             personal_accident: {
                               name: 'Personal Accident Cover',
-                              desc: 'It\'s mandatory to add this cover if you don\'t have it. It provides coverage of up to ₹15 lakh for accidental death or injury of the car owner.',
+                              desc: `It's mandatory to add this cover if you don't have it. It provides coverage of up to ₹15 lakh for accidental death or injury of the ${vType} owner.`,
                             },
                             passenger_protection: {
                               name: 'Passenger Protection',
@@ -1584,16 +1588,16 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
   const garages = [
     { id: 1, name: 'Elite Auto Service', city: 'Mumbai', area: 'Andheri West', rating: 4.5 },
     { id: 2, name: 'City Motors Garage', city: 'Mumbai', area: 'Bandra East', rating: 4.7 },
-    { id: 3, name: 'Premium Car Care', city: 'Delhi', area: 'Connaught Place', rating: 4.6 },
+    { id: 3, name: 'Premium Auto Care', city: 'Delhi', area: 'Connaught Place', rating: 4.6 },
     { id: 4, name: 'Royal Auto Works', city: 'Bangalore', area: 'Koramangala', rating: 4.8 },
     { id: 5, name: 'Swift Service Center', city: 'Mumbai', area: 'Powai', rating: 4.4 },
     { id: 6, name: 'Highway Garage', city: 'Delhi', area: 'Dwarka', rating: 4.3 },
-    { id: 7, name: 'Metro Car Service', city: 'Bangalore', area: 'Whitefield', rating: 4.6 },
+    { id: 7, name: 'Metro Auto Service', city: 'Bangalore', area: 'Whitefield', rating: 4.6 },
     { id: 8, name: 'Grand Auto Care', city: 'Pune', area: 'Hinjewadi', rating: 4.5 },
     { id: 9, name: 'Rapid Repairs', city: 'Mumbai', area: 'Goregaon', rating: 4.2 },
     { id: 10, name: 'Speed Zone Garage', city: 'Delhi', area: 'Rohini', rating: 4.7 },
     { id: 11, name: 'Precision Motors', city: 'Bangalore', area: 'Indiranagar', rating: 4.9 },
-    { id: 12, name: 'Central Car Clinic', city: 'Mumbai', area: 'Kurla', rating: 4.3 },
+    { id: 12, name: 'Central Auto Clinic', city: 'Mumbai', area: 'Kurla', rating: 4.3 },
     { id: 13, name: 'Pro Auto Solutions', city: 'Delhi', area: 'Saket', rating: 4.6 },
     { id: 14, name: 'Prime Service Hub', city: 'Pune', area: 'Viman Nagar', rating: 4.4 },
     { id: 15, name: 'Express Auto Repair', city: 'Bangalore', area: 'BTM Layout', rating: 4.5 },
@@ -1601,17 +1605,17 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
     { id: 17, name: 'Capital Garage Services', city: 'Delhi', area: 'Janakpuri', rating: 4.2 },
     { id: 18, name: 'Tech Auto Care', city: 'Bangalore', area: 'Electronic City', rating: 4.7 },
     { id: 19, name: 'Ace Automobile Center', city: 'Pune', area: 'Kharadi', rating: 4.6 },
-    { id: 20, name: 'Skyline Car Service', city: 'Mumbai', area: 'Thane', rating: 4.5 },
+    { id: 20, name: 'Skyline Auto Service', city: 'Mumbai', area: 'Thane', rating: 4.5 },
     { id: 21, name: 'Max Auto Works', city: 'Delhi', area: 'Vasant Kunj', rating: 4.4 },
     { id: 22, name: 'Urban Motors', city: 'Bangalore', area: 'Marathahalli', rating: 4.9 },
     { id: 23, name: 'Crystal Auto Care', city: 'Pune', area: 'Baner', rating: 4.3 },
     { id: 24, name: 'Victory Garage', city: 'Mumbai', area: 'Borivali', rating: 4.7 },
     { id: 25, name: 'Elite Service Station', city: 'Delhi', area: 'Lajpat Nagar', rating: 4.5 },
     { id: 26, name: 'Smart Auto Solutions', city: 'Bangalore', area: 'Yelahanka', rating: 4.6 },
-    { id: 27, name: 'Prestige Car Clinic', city: 'Pune', area: 'Wakad', rating: 4.8 },
+    { id: 27, name: 'Prestige Auto Clinic', city: 'Pune', area: 'Wakad', rating: 4.8 },
     { id: 28, name: 'Infinity Motors', city: 'Mumbai', area: 'Kandivali', rating: 4.4 },
     { id: 29, name: 'Supreme Auto Hub', city: 'Delhi', area: 'Pitampura', rating: 4.2 },
-    { id: 30, name: 'Phoenix Car Care', city: 'Bangalore', area: 'Jayanagar', rating: 4.7 },
+    { id: 30, name: 'Phoenix Auto Care', city: 'Bangalore', area: 'Jayanagar', rating: 4.7 },
   ];
 
   const cities = ['all', ...Array.from(new Set(garages.map((g) => g.city)))];
@@ -1897,7 +1901,8 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
 
 // Protect Everyone Addons Widget
 export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any[]) => void }) {
-  const { updateState, selectedAddOns = [], selectedPlan } = useMotorStore();
+  const { updateState, selectedAddOns = [], selectedPlan, vehicleType } = useMotorStore();
+  const vType = vehicleType === 'bike' ? 'bike' : 'car';
   const [selectedItems, setSelectedItems] = useState<Map<string, { id: string; variantId?: string; price: number }>>(new Map());
   const [showVariantModal, setShowVariantModal] = useState<{ addon: any; show: boolean }>({ addon: null, show: false });
 
@@ -1987,7 +1992,7 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
     <>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
         <div className="mb-4">
-          <h3 className="text-[16px] font-bold text-white mb-1">Protect everyone in your car</h3>
+          <h3 className="text-[16px] font-bold text-white mb-1">Protect everyone in your {vType}</h3>
         </div>
 
         <div className="mb-4">

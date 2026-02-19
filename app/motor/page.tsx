@@ -6,10 +6,11 @@ import { useMotorStore } from '../../lib/motor/store';
 import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
 import MotorHeader from '../../components/motor/MotorHeader';
 import MotorChatContainer from '../../components/motor/MotorChatContainer';
+import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
 import AckoLogo from '../../components/AckoLogo';
 import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
 
-type Screen = 'entry' | 'chat';
+type Screen = 'intro' | 'entry' | 'chat';
 
 /* ═══════════════════════════════════════════════
    Welcome Overlay — Auto-dismiss splash
@@ -30,7 +31,6 @@ function WelcomeOverlay({ onDone }: { onDone: () => void }) {
       style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #3a1d8e 30%, #6C4DE8 60%, #9b7bf7 100%)' }}
       onClick={onDone}
     >
-      {/* Animated particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {Array.from({ length: 12 }).map((_, i) => (
           <motion.div
@@ -64,14 +64,12 @@ function WelcomeOverlay({ onDone }: { onDone: () => void }) {
           Quick, simple, and affordable
         </p>
         <div className="flex items-center justify-center gap-3 mb-6">
-          {/* Car icon */}
           <motion.div animate={{ x: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
             <svg className="w-8 h-8 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
             </svg>
           </motion.div>
           <span className="text-2xl text-white/40">&</span>
-          {/* Bike icon */}
           <motion.div animate={{ x: [0, -5, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}>
             <svg className="w-8 h-8 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
               <circle cx="5.5" cy="17" r="3" />
@@ -93,9 +91,79 @@ function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   );
 }
 
+/* ═══════════════════════════════════════════════
+   Helper: seed demo state for deep-linking into
+   mid-journey or post-payment steps
+   ═══════════════════════════════════════════════ */
+function seedDemoState(vehicleType: VehicleType) {
+  const isCar = vehicleType === 'car';
+  const { updateState: storeUpdate } = useMotorStore.getState() as any;
+  storeUpdate({
+    vehicleType,
+    userName: 'Rahul',
+    registrationNumber: isCar ? 'DL01XX1234' : 'KA05AB9876',
+    vehicleEntryType: 'existing',
+    vehicleDataSource: 'auto_fetched',
+    autoFetchSuccess: true,
+    vehicleData: {
+      make: isCar ? 'Maruti' : 'Royal Enfield',
+      model: isCar ? 'Swift Dzire' : 'Classic 350',
+      variant: isCar ? 'LXI' : 'Dual Channel',
+      fuelType: 'petrol',
+      registrationYear: 2021,
+      registrationMonth: 'March',
+      hasCngKit: false,
+      isCommercialVehicle: false,
+    },
+    previousPolicy: {
+      insurer: 'TATA AIG',
+      expiryDate: '28/06/2024',
+      policyType: 'comprehensive',
+      ncbPercentage: 35,
+      hadClaims: false,
+    },
+    policyStatus: 'active',
+    preQuoteComplete: true,
+    selectedPlanType: 'comprehensive',
+    selectedGarageTier: 'network',
+    selectedPlan: {
+      name: 'Comprehensive (Network)',
+      type: 'comprehensive',
+      garageTier: 'network',
+      odPremium: isCar ? 5400 : 1800,
+      tpPremium: isCar ? 2094 : 714,
+      ncbDiscount: isCar ? 1890 : 630,
+      totalPrice: isCar ? 7500 : 2500,
+      addOnsAvailable: isCar
+        ? ['engine_protection', 'extra_car_protection', 'consumables_cover', 'personal_accident', 'passenger_protection', 'paid_driver']
+        : ['engine_protection', 'consumables_cover', 'personal_accident', 'passenger_protection', 'paid_driver'],
+      features: [
+        'Own Damage cover — Accident, fire, theft, natural calamity',
+        'Third-party liability — Mandatory legal coverage',
+        'Cashless claims at 5,400+ garages — No upfront payment',
+        'Personal Accident cover — ₹15 lakh for owner-driver',
+      ],
+      notCovered: [
+        'Normal wear and tear',
+        'Mechanical or electrical breakdown',
+        'Driving without valid license',
+        'Consequential damage',
+      ],
+    },
+    selectedAddOns: [],
+    availablePlans: [],
+    idv: isCar ? 750000 : 175000,
+    idvMin: isCar ? 675000 : 157500,
+    idvMax: isCar ? 787500 : 183750,
+    paymentComplete: false,
+    totalPremium: isCar ? 7500 : 2500,
+  } as Partial<MotorJourneyState>);
+}
+
 export default function MotorJourney() {
-  const { updateState, resetJourney } = useMotorStore();
-  const [screen, setScreen] = useState<Screen>('entry');
+  const store = useMotorStore();
+  const { updateState, resetJourney } = store;
+  const [screen, setScreen] = useState<Screen>('intro');
   const [showWelcome, setShowWelcome] = useState(true);
   const [hydrated, setHydrated] = useState(false);
 
@@ -112,6 +180,45 @@ export default function MotorJourney() {
       currentStepId: 'registration.has_number',
       currentModule: 'registration',
     } as Partial<MotorJourneyState>);
+    setScreen('chat');
+  };
+
+  const handleJumpTo = (stepId: string, vehicleType: VehicleType) => {
+    resetJourney();
+
+    const isDashboardStep = stepId.startsWith('db.');
+    const needsDemoState = stepId !== 'vehicle_type.select';
+
+    if (needsDemoState) {
+      seedDemoState(vehicleType);
+    }
+
+    if (isDashboardStep) {
+      updateState({
+        vehicleType,
+        paymentComplete: true,
+        journeyComplete: false,
+        currentStepId: stepId,
+        currentModule: 'dashboard',
+      } as Partial<MotorJourneyState>);
+    } else {
+      const moduleMap: Record<string, string> = {
+        'vehicle_type.select': 'vehicle_type',
+        'registration.has_number': 'registration',
+        'registration.enter_number': 'registration',
+        'manual_entry.congratulations': 'manual_entry',
+        'quote.plan_selection': 'quote',
+        'addons.out_of_pocket': 'addons',
+        'review.premium_breakdown': 'review',
+      };
+
+      updateState({
+        vehicleType,
+        currentStepId: stepId,
+        currentModule: moduleMap[stepId] || 'vehicle_type',
+      } as Partial<MotorJourneyState>);
+    }
+
     setScreen('chat');
   };
 
@@ -132,6 +239,13 @@ export default function MotorJourney() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
+        {screen === 'intro' && (
+          <MotorPrototypeIntro
+            key="intro"
+            onDone={() => setScreen('entry')}
+            onJumpTo={handleJumpTo}
+          />
+        )}
         {screen === 'entry' && (
           <MotorEntryScreen key="entry" onSelect={handleVehicleSelect} />
         )}
