@@ -1468,9 +1468,8 @@ const lifeUnderwriting: ConversationStep<LifeJourneyState> = {
   widgetType: 'underwriting_status',
   getScript: (_persona, state) => ({
     botMessages: [
-      `Medical evaluation scheduled!`,
-      ``,
-      `Your application is now in underwriting review. Here's what happens next:`,
+      `All done! 🎉 Your application is now with our underwriting team.`,
+      `They'll review your KYC, financial verification, and medical evaluation — typically takes **3–5 business days**.\n\nYou'll be notified by Email & WhatsApp the moment a decision is made.`,
     ],
   }),
   processResponse: (_response, _state) => ({

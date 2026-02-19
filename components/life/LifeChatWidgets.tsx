@@ -3085,77 +3085,557 @@ export function LifeMedicalScreen({ onContinue }: { onContinue: () => void }) {
    Underwriting Status — Timeline & review progress
    ═══════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════
+   Underwriting Status — Full post-submission flow
+   Stages: in_review → checking → approved / info_needed / not_approved
+   Also handles: tasks_pending (mixed hub state)
+   ═══════════════════════════════════════════════════════ */
+
+type UWStage =
+  | 'in_review'
+  | 'tasks_pending'
+  | 'checking'
+  | 'approved'
+  | 'info_needed'
+  | 'not_approved';
+
+type TaskStatus = 'completed' | 'under_review' | 'pending';
+
+interface UWTask { id: string; label: string; status: TaskStatus; eta?: string; }
+
+const UW_TIMELINE = [
+  { label: 'Application received',  done: true },
+  { label: 'Payment confirmed',     done: true },
+  { label: 'e-KYC verified',        done: true },
+  { label: 'Financial verification', done: true },
+  { label: 'Medical evaluation',    done: true },
+  { label: 'Underwriting review',   done: false, active: true },
+  { label: 'Policy issuance',       done: false, active: false },
+];
+
+function UWTimelineRow({ label, done, active, last }: { label: string; done: boolean; active?: boolean; last?: boolean }) {
+  return (
+    <div className="flex gap-3">
+      <div className="flex flex-col items-center">
+        {done ? (
+          <motion.div
+            initial={{ scale: 0 }} animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0"
+          >
+            <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </motion.div>
+        ) : active ? (
+          <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse" />
+          </div>
+        ) : (
+          <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-2 h-2 rounded-full bg-gray-300" />
+          </div>
+        )}
+        {!last && <div className={`w-px flex-1 min-h-[20px] mt-0.5 ${done ? 'bg-emerald-200' : 'bg-gray-100'}`} />}
+      </div>
+      <div className="pb-4">
+        <p className={`text-label-sm font-medium leading-tight ${done ? 'text-gray-900' : active ? 'text-purple-700' : 'text-gray-400'}`}>
+          {label}
+        </p>
+        {active && <p className="text-[11px] text-purple-500 mt-0.5 font-medium">In progress · 3–5 business days</p>}
+        {done && <p className="text-[11px] text-emerald-500 mt-0.5">Completed</p>}
+      </div>
+    </div>
+  );
+}
+
+function TaskPill({ status }: { status: TaskStatus }) {
+  if (status === 'completed') return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wide">
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+      Done
+    </span>
+  );
+  if (status === 'under_review') return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wide">
+      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse inline-block" />
+      Review
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-wide">
+      Pending
+    </span>
+  );
+}
+
 export function LifeUnderwritingStatus({ onContinue }: { onContinue: () => void }) {
-  const steps = [
-    { title: 'Application received', status: 'done' as const },
-    { title: 'Payment confirmed', status: 'done' as const },
-    { title: 'e-KYC verified', status: 'done' as const },
-    { title: 'Medical evaluation', status: 'active' as const },
-    { title: 'Underwriting review', status: 'upcoming' as const },
-    { title: 'Policy issuance', status: 'upcoming' as const },
+  const state = useLifeJourneyStore.getState() as LifeJourneyState;
+  const [stage, setStage] = useState<UWStage>('in_review');
+  const [checking, setChecking] = useState(false);
+  const [uploadedInfo, setUploadedInfo] = useState(false);
+  const [policyNo] = useState(() => `ACKO-LIFE-${Date.now().toString().slice(-8)}`);
+
+  // Demo: simulate which outcome the user gets by cycling through options
+  const [demoOutcome, setDemoOutcome] = useState<'approved' | 'info_needed' | 'not_approved'>('approved');
+
+  const tasks: UWTask[] = [
+    { id: 'kyc',       label: 'e-KYC Verification',       status: 'completed',    eta: 'Completed' },
+    { id: 'financial', label: 'Financial Verification',    status: 'under_review', eta: 'Est. 1–2 business days' },
+    { id: 'medical',   label: 'Medical Evaluation',        status: 'completed',    eta: 'Completed' },
   ];
 
+  const allComplete = tasks.every(t => t.status === 'completed');
+
+  const handleCheckStatus = () => {
+    setChecking(true);
+    setTimeout(() => {
+      setChecking(false);
+      setStage(demoOutcome);
+    }, 2200);
+  };
+
+  const formatCoverage = (n: number) => {
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(0)}L`;
+    return `₹${n.toLocaleString('en-IN')}`;
+  };
+
+  const coverage = formatCoverage(state.selectedCoverage || 10000000);
+  const premium = `₹${(state.quote?.yearlyPremium || 0).toLocaleString('en-IN')}/yr`;
+  const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-md"
-    >
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-md">
       <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h3 className="text-label-md font-bold text-gray-900">Application Status</h3>
-          <p className="text-caption text-gray-400">Estimated completion: 3-5 business days</p>
+
+        {/* ── Header ── */}
+        <div className={`px-5 py-4 border-b border-gray-100 ${stage === 'approved' ? 'bg-gradient-to-r from-emerald-600 to-emerald-700' : stage === 'not_approved' ? 'bg-gradient-to-r from-gray-700 to-gray-800' : 'bg-white'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${stage === 'approved' ? 'bg-white/20' : stage === 'not_approved' ? 'bg-white/10' : 'bg-purple-50'}`}>
+              {stage === 'approved' ? (
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+              ) : stage === 'not_approved' ? (
+                <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <h3 className={`text-label-md font-bold ${stage === 'approved' || stage === 'not_approved' ? 'text-white' : 'text-gray-900'}`}>
+                {stage === 'in_review' && 'Application Status'}
+                {stage === 'tasks_pending' && 'Pending Tasks'}
+                {stage === 'checking' && 'Checking Status…'}
+                {stage === 'approved' && 'Policy Approved!'}
+                {stage === 'info_needed' && 'Information Required'}
+                {stage === 'not_approved' && 'Application Not Approved'}
+              </h3>
+              <p className={`text-caption ${stage === 'approved' || stage === 'not_approved' ? 'text-white/60' : 'text-gray-400'}`}>
+                {stage === 'in_review' && 'Underwriting review in progress'}
+                {stage === 'tasks_pending' && 'Complete these to proceed'}
+                {stage === 'checking' && 'Contacting underwriting team…'}
+                {stage === 'approved' && `Policy No. ${policyNo}`}
+                {stage === 'info_needed' && 'Action needed from you'}
+                {stage === 'not_approved' && '100% refund initiated'}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="px-5 py-4">
-          {steps.map((s, i) => (
-            <div key={i} className="flex gap-3 relative">
-              <div className="flex flex-col items-center">
-                {s.status === 'done' ? (
-                  <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        {/* ── Body ── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={stage}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -12 }}
+            transition={{ duration: 0.22 }}
+          >
+
+            {/* IN REVIEW */}
+            {stage === 'in_review' && (
+              <div className="px-5 py-5 space-y-5">
+                {/* Timeline */}
+                <div>
+                  {UW_TIMELINE.map((step, i) => (
+                    <motion.div
+                      key={step.label}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.07 }}
+                    >
+                      <UWTimelineRow
+                        label={step.label}
+                        done={step.done}
+                        active={(step as any).active}
+                        last={i === UW_TIMELINE.length - 1}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* ETA bar */}
+                <div className="bg-purple-50 border border-purple-100 rounded-xl px-4 py-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-label-sm font-bold text-purple-900">Estimated decision</p>
+                    <p className="text-label-sm font-bold text-purple-700">3–5 business days</p>
+                  </div>
+                  <div className="w-full bg-purple-100 rounded-full h-1.5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '60%' }}
+                      transition={{ duration: 1.2, ease: 'easeOut', delay: 0.5 }}
+                      className="bg-purple-600 h-1.5 rounded-full"
+                    />
+                  </div>
+                  <p className="text-caption text-purple-600">Your application is with our underwriting team</p>
+                </div>
+
+                {/* What happens next */}
+                <div className="space-y-2">
+                  <p className="text-caption font-semibold text-gray-500 uppercase tracking-wide">What happens next</p>
+                  {[
+                    { icon: '🔍', t: 'Risk assessment', d: 'Medical, financial & lifestyle data reviewed' },
+                    { icon: '📩', t: 'Decision notification', d: 'Email + WhatsApp when decision is made' },
+                    { icon: '📄', t: 'Policy issuance', d: 'Policy document sent digitally on approval' },
+                  ].map(({ icon, t, d }) => (
+                    <div key={t} className="flex gap-3 items-start">
+                      <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
+                      <div>
+                        <p className="text-label-sm font-semibold text-gray-800">{t}</p>
+                        <p className="text-caption text-gray-400">{d}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Demo outcome selector */}
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-2">
+                  <p className="text-caption font-semibold text-amber-800">Demo: simulate outcome</p>
+                  <div className="flex gap-2">
+                    {(['approved', 'info_needed', 'not_approved'] as const).map(o => (
+                      <button key={o} onClick={() => setDemoOutcome(o)}
+                        className={`flex-1 py-1.5 rounded-lg border text-[10px] font-bold uppercase transition-all
+                          ${demoOutcome === o ? 'border-amber-500 bg-amber-100 text-amber-800' : 'border-amber-200 text-amber-600'}`}>
+                        {o === 'approved' ? '✅ Approved' : o === 'info_needed' ? '⚠️ Info' : '❌ Declined'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleCheckStatus}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Check Status
+                </button>
+                <button
+                  onClick={() => setStage('tasks_pending')}
+                  className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium"
+                >
+                  View task breakdown
+                </button>
+              </div>
+            )}
+
+            {/* TASKS PENDING HUB */}
+            {stage === 'tasks_pending' && (
+              <div className="px-5 py-5 space-y-4">
+                <p className="text-body-sm text-gray-600">All three tasks must be completed before policy issuance. You can work on them simultaneously.</p>
+
+                <div className="space-y-3">
+                  {tasks.map((task) => (
+                    <div key={task.id} className={`flex items-center justify-between px-4 py-3.5 rounded-xl border transition-all
+                      ${task.status === 'completed' ? 'border-emerald-200 bg-emerald-50' : task.status === 'under_review' ? 'border-amber-200 bg-amber-50' : 'border-gray-200 bg-gray-50'}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0
+                          ${task.status === 'completed' ? 'bg-emerald-100' : task.status === 'under_review' ? 'bg-amber-100' : 'bg-gray-100'}`}>
+                          {task.id === 'kyc' && (
+                            <svg className={`w-4 h-4 ${task.status === 'completed' ? 'text-emerald-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                            </svg>
+                          )}
+                          {task.id === 'financial' && (
+                            <svg className={`w-4 h-4 ${task.status === 'under_review' ? 'text-amber-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                            </svg>
+                          )}
+                          {task.id === 'medical' && (
+                            <svg className={`w-4 h-4 ${task.status === 'completed' ? 'text-emerald-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-label-sm font-semibold text-gray-900">{task.label}</p>
+                          <p className="text-caption text-gray-400">{task.eta}</p>
+                        </div>
+                      </div>
+                      <TaskPill status={task.status} />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                  <p className="text-caption text-gray-500 leading-relaxed">
+                    You can complete tasks independently — no need to wait for one to finish before starting another.
+                  </p>
+                </div>
+
+                <button onClick={() => setStage('in_review')}
+                  className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-md font-semibold active:scale-[0.97] transition-transform">
+                  Back to status
+                </button>
+              </div>
+            )}
+
+            {/* CHECKING */}
+            {stage === 'checking' && (
+              <div className="px-5 py-10 flex flex-col items-center gap-4">
+                <div className="relative w-16 h-16">
+                  <svg className="w-16 h-16 text-purple-100 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40 22" strokeLinecap="round" />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                     </svg>
                   </div>
-                ) : s.status === 'active' ? (
-                  <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <div className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse" />
-                  </div>
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-gray-300" />
-                  </div>
-                )}
-                {i < steps.length - 1 && (
-                  <div className={`w-px h-6 ${s.status === 'done' ? 'bg-emerald-200' : 'bg-gray-200'}`} />
-                )}
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-label-md font-semibold text-gray-900">Checking with underwriting team</p>
+                  <p className="text-caption text-gray-400">This takes a moment…</p>
+                </div>
               </div>
-              <div className="pb-6 last:pb-0">
-                <p className={`text-label-sm font-medium ${s.status === 'done' ? 'text-gray-900' : s.status === 'active' ? 'text-purple-700' : 'text-gray-400'}`}>
-                  {s.title}
-                </p>
-                {s.status === 'active' && (
-                  <p className="text-[11px] text-purple-500 mt-0.5">In progress</p>
-                )}
+            )}
+
+            {/* APPROVED */}
+            {stage === 'approved' && (
+              <div className="space-y-5">
+                {/* Celebration banner */}
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 px-5 pt-5 pb-4 space-y-3">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 280, damping: 15 }}
+                    className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto shadow-lg shadow-emerald-100"
+                  >
+                    <svg className="w-9 h-9 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </motion.div>
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="text-center">
+                    <p className="text-label-lg font-bold text-emerald-900">Your policy is active!</p>
+                    <p className="text-caption text-emerald-600 mt-0.5">Coverage starts from today</p>
+                  </motion.div>
+                </div>
+
+                {/* Policy card */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+                  className="mx-5 rounded-2xl overflow-hidden border border-gray-100 shadow-md shadow-gray-100">
+                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-4">
+                    <p className="text-white/60 text-caption uppercase tracking-widest">ACKO Flexi Life Plan</p>
+                    <p className="text-white text-xl font-bold mt-0.5">{coverage}</p>
+                    <p className="text-white/50 text-caption mt-0.5">{state.selectedTerm || 30} year term · {premium}</p>
+                  </div>
+                  <div className="bg-white px-5 py-4 divide-y divide-gray-50">
+                    {[
+                      { l: 'Policy Number', v: policyNo },
+                      { l: 'Policyholder', v: state.name || 'Policyholder' },
+                      { l: 'Start Date', v: today },
+                      { l: 'Status', v: '● Active', green: true },
+                    ].map(({ l, v, green }) => (
+                      <div key={l} className="flex justify-between items-center py-2">
+                        <span className="text-caption text-gray-400">{l}</span>
+                        <span className={`text-caption font-semibold ${green ? 'text-emerald-600' : 'text-gray-900'}`}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Actions */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="px-5 pb-5 space-y-3">
+                  <button className="w-full py-3.5 rounded-xl bg-emerald-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                    Download Policy Document
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button className="py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium">
+                      View coverage details
+                    </button>
+                    <button className="py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium">
+                      Add nominee
+                    </button>
+                  </div>
+                  <button
+                    onClick={onContinue}
+                    className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-md font-semibold active:scale-[0.97] transition-transform"
+                  >
+                    Done
+                  </button>
+                </motion.div>
               </div>
-            </div>
-          ))}
-        </div>
+            )}
 
-        <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
-          <p className="text-caption text-gray-500">
-            If you&apos;re not approved, we refund 100% of your premium — no questions asked.
-          </p>
-        </div>
+            {/* INFO NEEDED */}
+            {stage === 'info_needed' && (
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3.5">
+                  <svg className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  <div>
+                    <p className="text-label-sm font-bold text-amber-900">Our underwriter needs more information</p>
+                    <p className="text-caption text-amber-700 mt-0.5 leading-relaxed">Your application is on hold. Please provide the requested details to proceed.</p>
+                  </div>
+                </div>
 
-        <div className="px-5 pb-5 pt-3">
-          <button
-            onClick={onContinue}
-            className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
-          >
-            Got it
-          </button>
-        </div>
+                <div className="space-y-3">
+                  <p className="text-caption font-semibold text-gray-500 uppercase tracking-wide">Items required</p>
+                  {[
+                    {
+                      tag: 'Document',
+                      title: 'Clarification on medical history',
+                      desc: 'Please upload a recent consultation note from your doctor regarding your declared hypertension.',
+                      cta: 'Upload document',
+                      color: 'orange',
+                    },
+                    {
+                      tag: 'Call',
+                      title: 'Income verification call',
+                      desc: 'A 10-minute call to verify your business income details.',
+                      cta: 'Schedule call',
+                      color: 'blue',
+                    },
+                  ].map(({ tag, title, desc, cta, color }) => (
+                    <div key={title} className="border border-gray-200 rounded-xl overflow-hidden">
+                      <div className="px-4 py-3 flex items-start gap-3">
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${color === 'orange' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {tag}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-label-sm font-semibold text-gray-900">{title}</p>
+                          <p className="text-caption text-gray-500 mt-0.5 leading-snug">{desc}</p>
+                        </div>
+                      </div>
+                      <div className="border-t border-gray-100 px-4 py-2.5">
+                        <button
+                          onClick={() => setUploadedInfo(true)}
+                          className={`text-label-sm font-semibold ${uploadedInfo ? 'text-emerald-600' : color === 'orange' ? 'text-orange-600' : 'text-blue-600'}`}>
+                          {uploadedInfo ? '✓ Submitted' : cta} →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                  <p className="text-caption text-gray-500 leading-relaxed">
+                    Once submitted, our team will review within <span className="font-semibold text-gray-700">1–2 business days</span> and update you by Email & WhatsApp.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => { setChecking(true); setTimeout(() => { setChecking(false); setStage('approved'); }, 2000); }}
+                  disabled={!uploadedInfo}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold disabled:opacity-40 active:scale-[0.97] transition-transform"
+                >
+                  Submit & Continue
+                </button>
+                <button
+                  className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium"
+                  onClick={() => {}}
+                >
+                  Talk to us · 1800 266 5433
+                </button>
+              </div>
+            )}
+
+            {/* NOT APPROVED */}
+            {stage === 'not_approved' && (
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex flex-col items-center py-2 gap-3 text-center">
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-label-md font-bold text-gray-900">We're unable to approve this application</p>
+                    <p className="text-caption text-gray-500 mt-1 leading-relaxed max-w-xs mx-auto">
+                      After careful review of your health and financial profile, we're unable to offer coverage at this time.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Refund card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                  className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3.5 flex items-center gap-3"
+                >
+                  <svg className="w-8 h-8 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75" />
+                  </svg>
+                  <div>
+                    <p className="text-label-sm font-bold text-emerald-900">100% Premium Refund</p>
+                    <p className="text-caption text-emerald-700 mt-0.5">₹{(state.quote?.yearlyPremium || 0).toLocaleString('en-IN')} will be refunded to your original payment method within 7–10 business days.</p>
+                  </div>
+                </motion.div>
+
+                {/* Alternatives */}
+                <div className="space-y-2">
+                  <p className="text-caption font-semibold text-gray-500 uppercase tracking-wide">What you can do</p>
+                  {[
+                    { icon: '🔄', t: 'Re-apply after 6 months', d: 'Your health profile may improve over time' },
+                    { icon: '💬', t: 'Talk to an advisor', d: 'Explore what coverage options are available for you' },
+                    { icon: '🏥', t: 'Consider a health insurance plan', d: 'We have excellent health covers starting ₹800/month' },
+                  ].map(({ icon, t, d }) => (
+                    <div key={t} className="flex gap-3 px-3 py-3 rounded-xl border border-gray-100 items-start">
+                      <span className="text-lg flex-shrink-0">{icon}</span>
+                      <div>
+                        <p className="text-label-sm font-semibold text-gray-800">{t}</p>
+                        <p className="text-caption text-gray-400">{d}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                  Talk to us · 1800 266 5433
+                </button>
+                <button onClick={onContinue} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">
+                  Close
+                </button>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
+
+        {/* ── Footer ── */}
+        {!['checking', 'approved'].includes(stage) && (
+          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+              Help
+            </button>
+            <span className="text-caption text-gray-300">·</span>
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              support.life@acko.com
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
