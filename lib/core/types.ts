@@ -29,6 +29,10 @@ export interface StepScript {
     step: number;
     labels: Record<number, string>;
   };
+  coverageAmount?: string;
+  policyTerm?: string;
+  coversTillAge?: number;
+  breakdownItems?: { label: string; value: string }[];
 }
 
 /** Generic conversation step — LOBs provide their own state type via TState */

@@ -89,6 +89,7 @@ export type WidgetType =
   | 'member_form'
   | 'si_selector'
   | 'coverage_chat'
+  | 'coverage_card'
   | 'none';
 
 export type PostPaymentScenario = 'all_clear' | 'waiting_period' | 'member_rejected' | 'extra_payment' | 'no_test' | 'home_test_only';
@@ -139,6 +140,10 @@ export interface StepScript {
     step: number;
     labels: Record<number, string>;
   };
+  coverageAmount?: string;
+  policyTerm?: string;
+  coversTillAge?: number;
+  breakdownItems?: { label: string; value: string }[];
 }
 
 export interface PlanDetails {

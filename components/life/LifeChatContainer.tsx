@@ -14,14 +14,21 @@ import { getLifeStep } from '../../lib/life/scripts';
 import LifeChatMessage, { LifeTypingIndicator } from './LifeChatMessage';
 import {
   LifeSelectionCards,
+  LifeMultiSelect,
   LifeNumberInput,
   LifeTextInput,
   LifeDatePicker,
   LifeRiderToggle,
+  LifeCoverageCard,
   LifePremiumSummary,
   LifeReviewSummary,
   LifePostPaymentTimeline,
   LifeCelebration,
+  LifeCoverageInput,
+  LifePaymentScreen,
+  LifeEkycScreen,
+  LifeMedicalScreen,
+  LifeUnderwritingStatus,
 } from './LifeChatWidgets';
 import type { LifeJourneyState } from '../../lib/life/types';
 
@@ -188,6 +195,16 @@ export default function LifeChatContainer() {
       userLabel = `DOB: ${response}`;
     } else if (step.widgetType === 'premium_summary') {
       userLabel = 'Reviewed quote, continuing';
+    } else if (step.widgetType === 'coverage_input') {
+      userLabel = 'Selected coverage & term';
+    } else if (step.widgetType === 'payment_screen') {
+      userLabel = 'Payment completed ✓';
+    } else if (step.widgetType === 'ekyc_screen') {
+      userLabel = 'e-KYC verified ✓';
+    } else if (step.widgetType === 'medical_screen') {
+      userLabel = 'Medical evaluation scheduled ✓';
+    } else if (step.widgetType === 'underwriting_status') {
+      userLabel = 'Acknowledged';
     }
 
     addMessage({
@@ -228,7 +245,7 @@ export default function LifeChatContainer() {
   const isLargeWidget = () => {
     const step = getLifeStep(currentStepId);
     if (!step) return false;
-    return ['premium_summary', 'review_summary', 'post_payment_timeline', 'celebration'].includes(step.widgetType);
+    return ['coverage_card', 'premium_summary', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
   };
 
   // Render edit widget
@@ -244,6 +261,8 @@ export default function LifeChatContainer() {
       case 'selection_cards':
       case 'yes_no':
         return <LifeSelectionCards options={script.options || []} onSelect={handleEditResponse} />;
+      case 'multi_select':
+        return <LifeMultiSelect options={script.options || []} onSelect={handleEditResponse} />;
       case 'number_input':
         return <LifeNumberInput placeholder={script.placeholder || ''} subText={script.subText} inputType={script.inputType} min={script.min} max={script.max} onSubmit={handleEditResponse} />;
       case 'text_input':
@@ -268,6 +287,8 @@ export default function LifeChatContainer() {
     switch (step.widgetType) {
       case 'selection_cards':
         return <LifeSelectionCards options={script.options || []} onSelect={handleResponse} />;
+      case 'multi_select':
+        return <LifeMultiSelect options={script.options || []} onSelect={handleResponse} />;
       case 'yes_no':
         return <LifeSelectionCards options={script.options || []} onSelect={handleResponse} />;
       case 'number_input':
@@ -278,10 +299,22 @@ export default function LifeChatContainer() {
         return <LifeDatePicker placeholder={script.placeholder} onSubmit={handleResponse} />;
       case 'rider_toggle':
         return <LifeRiderToggle options={script.options || []} onSelect={handleResponse} />;
+      case 'coverage_card':
+        return <LifeCoverageCard coverageAmount={script.coverageAmount || ''} policyTerm={script.policyTerm || ''} coversTillAge={script.coversTillAge || 0} breakdownItems={script.breakdownItems} onContinue={() => handleResponse('continue')} />;
       case 'premium_summary':
         return <LifePremiumSummary onContinue={() => handleResponse('continue')} />;
       case 'celebration':
         return <LifeCelebration />;
+      case 'coverage_input':
+        return <LifeCoverageInput onContinue={() => handleResponse('continue')} />;
+      case 'payment_screen':
+        return <LifePaymentScreen onContinue={() => handleResponse('continue')} />;
+      case 'ekyc_screen':
+        return <LifeEkycScreen onContinue={() => handleResponse('continue')} />;
+      case 'medical_screen':
+        return <LifeMedicalScreen onContinue={() => handleResponse('continue')} />;
+      case 'underwriting_status':
+        return <LifeUnderwritingStatus onContinue={() => handleResponse('continue')} />;
       default:
         return null;
     }
