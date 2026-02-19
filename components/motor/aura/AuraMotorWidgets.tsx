@@ -11,33 +11,92 @@ import { getMotorAddOns } from '../../../lib/motor/plans';
    SVG Icons for Motor
    ═══════════════════════════════════════════════ */
 
-const MOTOR_ICONS: Record<string, string> = {
-  car: 'M8 17h.01M16 17h.01M3 11l1.5-5A2 2 0 016.4 4.5h11.2a2 2 0 011.9 1.5L21 11m-18 0h18v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z',
-  bike: 'M5.5 17a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm13 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM7.5 14.5L10 9l3 3h4l1.5-3',
-  shield: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
-  document: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
-  check: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-  clock: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
-  star: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
-  user: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
-  building: 'M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21',
-  forward: 'M3 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062A1.125 1.125 0 013 16.81V8.688z',
-  help: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827m0 0v.75m0-3.75h.008v.008H12v-.008z',
-  shield_search: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
-  fuel: 'M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z',
-  electric: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
-  upload: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5',
-  download: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3',
-  refresh: 'M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.016 4.656v4.992',
-  switch: 'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5',
+/* Maps icon key → public/icons/ filename */
+const MOTOR_ICON_FILES: Record<string, string> = {
+  car: 'Car.svg',
+  bike: 'Bike.svg',
+  scooter: 'Scooter.svg',
+  shield: 'Car coverage.svg',
+  shield_search: 'Third Party.svg',
+  document: 'Policy document.svg',
+  claim_doc: 'Claim_Document.svg',
+  check: 'Tick.svg',
+  clock: 'Time.svg',
+  star: 'special_car_star.svg',
+  new_car: 'New car.svg',
+  new_bike: 'New Bike.svg',
+  user: 'Profile.svg',
+  building: 'industry.svg',
+  forward: 'chevron right.svg',
+  help: 'Customer service.svg',
+  chat_bubble: 'Messages.svg',
+  search: 'magnifier.svg',
+  switch: 'Transfer policy.svg',
+  fuel: 'Fuel.svg',
+  petrol: 'Petrol.svg',
+  diesel: 'Diesel.svg',
+  electric: 'Flash.svg',
+  cng: 'CNG.svg',
+  upload: 'Document received.svg',
+  download: 'Download.svg',
+  refresh: 'Refresh.svg',
+  map_pin: 'Location.svg',
+  phone: 'Phone.svg',
+  camera: 'Camera.svg',
+  garage: 'Garage.svg',
+  towing: 'Towing.svg',
+  claim: 'Claim.svg',
+  zero_dep: 'Zero Dep Car.svg',
+  engine: 'Engine_protect.svg',
+  passenger: 'Passenger_Protection.svg',
+  theft: 'Theft_cover.svg',
+  consumables: 'Consumables_cover.svg',
+  police: 'Police.svg',
+  renew: 'Renew.svg',
+  payment: 'Payment.svg',
+  pdf: 'PDF file.svg',
+  edit: 'Edit.svg',
+  policy: 'Policy.svg',
+  add_on: 'add-on.svg',
+  compare: 'Compare.svg',
+  discount: 'Discount.svg',
+  gift: 'Gift.svg',
+  key: 'Key.svg',
+  mail: 'Mail.svg',
+  notification: 'Notification.svg',
+  print: 'Print.svg',
+  profile: 'Profile.svg',
+  settings: 'settings.svg',
+  share: 'Share.svg',
+  trash: 'Delete.svg',
+  wallet: 'wallet.svg',
+  accident: 'Car_accident.svg',
+  bike_accident: 'Bike_Accident.svg',
+  broken_glass: 'Broken Car Glass.svg',
+  commercial_car: 'Commercial Use_Taxi_car.svg',
+  commercial_bike: 'Commercial Use_Taxi_bike.svg',
+  extra_car_protect: 'Extra_car_protect.svg',
+  fire: 'Fire Accident Cover.svg',
+  used_car: 'Used_car.svg',
+  sold_car: 'Sold_car.svg',
+  fastag: 'Fastag.svg',
 };
 
 function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: string }) {
-  const path = MOTOR_ICONS[icon];
-  if (!path) return <span className="text-2xl">{icon}</span>;
+  const file = MOTOR_ICON_FILES[icon];
+  if (file) {
+    return (
+      <img
+        src={`/icons/${encodeURIComponent(file)}`}
+        alt={icon}
+        className={className}
+        style={{ filter: 'brightness(0) invert(1)', opacity: 0.85 }}
+      />
+    );
+  }
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827m0 0v.75m0-3.75h.008v.008H12v-.008z" />
     </svg>
   );
 }
@@ -49,6 +108,7 @@ function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: 
 export function MotorSelectionCards({ options, onSelect }: { options: Option[]; onSelect: (id: string) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
   const useGrid = options.length <= 4 && options.every(o => o.icon);
+  const useLogoGrid = options.filter(o => o.logoUrl).length >= 3;
 
   const handleSelect = (id: string) => {
     setSelected(id);
@@ -89,6 +149,73 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             {opt.description && (
               <p className="text-[12px] text-[#64748B] mt-1">{opt.description}</p>
             )}
+          </motion.button>
+        ))}
+      </div>
+    );
+  }
+
+  if (useLogoGrid) {
+    const logoOptions = options.filter(o => o.logoUrl);
+    const otherOptions = options.filter(o => !o.logoUrl);
+    return (
+      <div>
+        <div className="grid grid-cols-3 gap-2">
+          {logoOptions.map((opt, i) => (
+            <motion.button
+              key={opt.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.025 }}
+              onClick={() => handleSelect(opt.id)}
+              className={`
+                relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
+                ${selected === opt.id
+                  ? 'border-[#A855F7] bg-[#A855F7]/10 ring-1 ring-[#A855F7]/30'
+                  : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+                }
+              `}
+            >
+              <div className="w-10 h-10 rounded-lg bg-[#2D2D35] flex items-center justify-center overflow-hidden">
+                <img src={opt.logoUrl!} alt={opt.label} className="w-7 h-7 object-contain" />
+              </div>
+              <span className="text-[11px] font-medium text-white/80 text-center leading-tight">{opt.label}</span>
+              {opt.description && (
+                <span className="text-[9px] text-[#64748B] text-center leading-tight">{opt.description}</span>
+              )}
+              {selected === opt.id && (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#A855F7] flex items-center justify-center">
+                  <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </motion.div>
+              )}
+            </motion.button>
+          ))}
+        </div>
+        {otherOptions.map((opt, i) => (
+          <motion.button
+            key={opt.id}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: (logoOptions.length + i) * 0.025 }}
+            onClick={() => handleSelect(opt.id)}
+            className={`
+              w-full mt-2 text-left px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
+              ${selected === opt.id
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+              }
+            `}
+          >
+            <div className="flex items-center gap-3">
+              {opt.icon && (
+                <div className="w-8 h-8 rounded-lg bg-[#2D2D35] flex items-center justify-center flex-shrink-0">
+                  <MotorIcon icon={opt.icon} className="w-4 h-4 text-[#C084FC]" />
+                </div>
+              )}
+              <span className="text-[13px] font-medium text-white/80">{opt.label}</span>
+            </div>
           </motion.button>
         ))}
       </div>
@@ -367,11 +494,50 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
    Vehicle Details Card — After successful fetch
    ═══════════════════════════════════════════════ */
 
+const VEHICLE_IMAGE_MAP: Record<string, string> = {
+  'Maruti Suzuki': '/car-images/Swift.png',
+  'Hyundai': '/car-images/Venue.png',
+  'Tata': '/car-images/Nexon.png',
+  'Kia': '/car-images/Verna.png',
+  'Mahindra': '/car-images/XUV700.png',
+  'Toyota': '/car-images/Toyota.png',
+  'Honda': '/car-images/Citroen.png',
+  'MG': '/car-images/MG comet.png',
+  'Volkswagen': '/car-images/Citroen.png',
+  'Skoda': '/car-images/Verna.png',
+  'BMW': '/car-images/harrier.png',
+  'Audi': '/car-images/harrier.png',
+  'Mercedes-Benz': '/car-images/harrier.png',
+  'Jeep': '/car-images/XUV700.png',
+  'Renault': '/car-images/Citroen.png',
+  'Nissan': '/car-images/Venue.png',
+};
+
+const BIKE_IMAGE_MAP: Record<string, string> = {
+  'Hero': '/car-images/Splendor.png',
+  'Honda': '/car-images/Activa.png',
+  'Bajaj': '/car-images/Pulsar.png',
+  'TVS': '/car-images/CT 100.png',
+  'Royal Enfield': '/car-images/KTM.png',
+  'Yamaha': '/car-images/Pulsar.png',
+  'Suzuki': '/car-images/Activa.png',
+  'KTM': '/car-images/KTM.png',
+  'Kawasaki': '/car-images/kawasaki.png',
+  'Ola': '/car-images/Activa.png',
+  'Ather': '/car-images/Activa.png',
+};
+
+function getVehicleImage(make: string, vehicleType: string): string {
+  const map = vehicleType === 'bike' ? BIKE_IMAGE_MAP : VEHICLE_IMAGE_MAP;
+  return map[make] || (vehicleType === 'bike' ? '/car-images/Splendor.png' : '/car-images/Swift.png');
+}
+
 export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
   const state = useMotorStore.getState() as MotorJourneyState;
   const v = state.vehicleData;
   const p = state.previousPolicy;
   const [confirmed, setConfirmed] = useState(false);
+  const vehicleImg = getVehicleImage(v.make, state.vehicleType || 'car');
 
   const handleConfirm = () => {
     setConfirmed(true);
@@ -388,8 +554,8 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
         {/* Vehicle Header */}
         <div className="bg-[#2D2D35] px-5 py-4 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-[#2D2D35] flex items-center justify-center">
-              <MotorIcon icon={state.vehicleType === 'bike' ? 'bike' : 'car'} className="w-6 h-6 text-[#C084FC]" />
+            <div className="w-14 h-14 rounded-xl bg-[#1E1E22] flex items-center justify-center overflow-hidden p-1">
+              <img src={vehicleImg} alt={`${v.make} ${v.model}`} className="w-full h-full object-contain" />
             </div>
             <div>
               <h3 className="text-[16px] font-bold text-white">{v.make} {v.model}</h3>
@@ -758,26 +924,38 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
   return (
     <div>
       <div className="flex gap-2 mb-3">
-        <select
-          value={selectedYear ?? ''}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="flex-1 px-3 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white focus:outline-none focus:border-[#A855F7]/50 appearance-none cursor-pointer"
-        >
-          <option value="" disabled className="bg-[#1E1E22]">Year</option>
-          {years.map(y => (
-            <option key={y} value={y} className="bg-[#1E1E22]">{y}</option>
-          ))}
-        </select>
-        <select
-          value={selectedMonth ?? ''}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          className="flex-1 px-3 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white focus:outline-none focus:border-[#A855F7]/50 appearance-none cursor-pointer"
-        >
-          <option value="" disabled className="bg-[#1E1E22]">Month</option>
-          {availableMonths.map(m => (
-            <option key={m} value={m} className="bg-[#1E1E22]">{m}</option>
-          ))}
-        </select>
+        <div className="relative flex-1">
+          <select
+            value={selectedYear ?? ''}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="w-full px-3 py-2.5 bg-[#2D2D35] border border-[#A855F7]/30 rounded-xl text-[14px] text-white focus:outline-none focus:border-[#A855F7] cursor-pointer pr-8 appearance-none"
+            style={{ colorScheme: 'dark' }}
+          >
+            <option value="" disabled>Year</option>
+            {years.map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+        <div className="relative flex-1">
+          <select
+            value={selectedMonth ?? ''}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="w-full px-3 py-2.5 bg-[#2D2D35] border border-[#A855F7]/30 rounded-xl text-[14px] text-white focus:outline-none focus:border-[#A855F7] cursor-pointer pr-8 appearance-none"
+            style={{ colorScheme: 'dark' }}
+          >
+            <option value="" disabled>Month</option>
+            {availableMonths.map(m => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-1.5">
@@ -792,7 +970,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
               py-2.5 rounded-lg text-center transition-all duration-200 active:scale-[0.95]
               ${selectedYear === year
                 ? 'bg-[#A855F7] text-white font-bold shadow-lg shadow-[#A855F7]/25'
-                : 'bg-[#1E1E22] text-[#94A3B8] hover:bg-[#2D2D35]'
+                : 'bg-[#1E1E22] text-[#94A3B8] hover:bg-[#2D2D35] border border-white/5'
               }
             `}
           >
@@ -838,45 +1016,39 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
   };
 
   return (
-    <div>
-      <div className="space-y-1.5">
-        {NCB_OPTIONS.map((opt, i) => (
-          <motion.button
-            key={opt.value}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            onClick={() => handleSelect(opt.value)}
-            className={`
-              w-full flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
-              ${selected === opt.value
-                ? 'border-[#A855F7] bg-[#A855F7]/8'
-                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
-              }
-            `}
-          >
-            <div className={`
-              w-11 h-11 rounded-xl flex items-center justify-center font-bold text-[15px]
-              ${selected === opt.value ? 'bg-[#A855F7]/20 text-[#C084FC]' : 'bg-[#2D2D35] text-[#94A3B8]'}
-            `}>
-              {opt.label}
-            </div>
-            <div className="text-left flex-1">
-              <span className="text-[14px] font-semibold text-white/90">{opt.label} NCB</span>
-              <p className="text-[12px] text-[#64748B]">{opt.description}</p>
-            </div>
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-              ${selected === opt.value ? 'border-[#A855F7] bg-[#A855F7]' : 'border-white/20'}
-            `}>
-              {selected === opt.value && (
-                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </motion.svg>
-              )}
-            </div>
-          </motion.button>
-        ))}
-      </div>
+    <div className="grid grid-cols-3 gap-2">
+      {NCB_OPTIONS.map((opt, i) => (
+        <motion.button
+          key={opt.value}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.04 }}
+          onClick={() => handleSelect(opt.value)}
+          className={`
+            relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
+            ${selected === opt.value
+              ? 'border-[#A855F7] bg-[#A855F7]/20'
+              : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
+            }
+          `}
+        >
+          {selected === opt.value && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#A855F7] flex items-center justify-center"
+            >
+              <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </motion.div>
+          )}
+          <span className={`text-[20px] font-bold leading-none ${selected === opt.value ? 'text-[#C084FC]' : 'text-white'}`}>
+            {opt.label}
+          </span>
+          <span className="text-[10px] text-[#64748B] text-center leading-tight">{opt.description}</span>
+        </motion.button>
+      ))}
     </div>
   );
 }
@@ -2215,6 +2387,254 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
                   ))}
                 </div>
                 <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors">Cancel</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   Document Upload Widget (Aura)
+   ═══════════════════════════════════════════════ */
+
+type DocSource = 'camera' | 'gallery' | 'pdf' | 'digilocker';
+
+interface DocUploadResult {
+  rcUploaded: boolean;
+  dlUploaded: boolean;
+  prevPolicyUploaded: boolean;
+}
+
+const DOC_SOURCE_OPTIONS: { id: DocSource; label: string; icon: string }[] = [
+  { id: 'camera', label: 'Click photos with camera', icon: '📷' },
+  { id: 'gallery', label: 'Upload both sides from gallery', icon: '🖼️' },
+  { id: 'pdf', label: 'Upload PDF / Zip file', icon: '📄' },
+  { id: 'digilocker', label: 'Fetch from Digilocker', icon: '🔒' },
+];
+
+export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocUploadResult) => void }) {
+  const state = useMotorStore() as MotorJourneyState;
+  const hasAutoRC = !!(state.registrationNumber && state.vehicleData?.make);
+
+  const [rcUploaded, setRcUploaded] = useState(hasAutoRC);
+  const [dlUploaded, setDlUploaded] = useState(false);
+  const [prevPolicyUploaded, setPrevPolicyUploaded] = useState(false);
+  const [sourceSheet, setSourceSheet] = useState<'rc' | 'dl' | 'prev' | null>(null);
+  const [uploadingFor, setUploadingFor] = useState<'rc' | 'dl' | 'prev' | null>(null);
+
+  const ownerName = state.ownerName || 'You';
+  const regNo = state.registrationNumber || 'your vehicle';
+  const chassisNo = state.chassisNumber || 'XXXXXXXXXXXX';
+
+  const handleSourceSelect = (_source: DocSource) => {
+    const target = sourceSheet;
+    setSourceSheet(null);
+    setUploadingFor(target);
+    setTimeout(() => {
+      if (target === 'rc') setRcUploaded(true);
+      if (target === 'dl') setDlUploaded(true);
+      if (target === 'prev') setPrevPolicyUploaded(true);
+      setUploadingFor(null);
+    }, 900);
+  };
+
+  const canProceed = rcUploaded && dlUploaded;
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-3 w-full max-w-sm"
+      >
+        <p className="text-[13px] font-semibold text-[#94A3B8] uppercase tracking-wide px-1 mb-1">Upload important documents</p>
+
+        {/* RC Card */}
+        <div className={`rounded-2xl border transition-all overflow-hidden ${rcUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 bg-[#1E1E22]'}`}>
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${rcUploaded ? 'bg-green-500/20' : 'bg-[#2D2D35]'}`}>
+                <svg className={`w-5 h-5 ${rcUploaded ? 'text-green-400' : 'text-[#94A3B8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[14px] font-semibold text-white">Registration Certificate (RC)</p>
+                  {hasAutoRC && rcUploaded && !uploadingFor && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Auto-fetched ✓</span>
+                  )}
+                  {!hasAutoRC && rcUploaded && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
+                  )}
+                </div>
+                <p className="text-[12px] text-[#64748B]">
+                  {hasAutoRC ? 'Fetched from Vahan portal' : `Upload RC for ${regNo}`}
+                </p>
+              </div>
+            </div>
+
+            {hasAutoRC && rcUploaded && (
+              <div className="bg-[#2D2D35] rounded-xl px-3 py-2.5 mb-3 space-y-1.5">
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-[#64748B]">Registration holder</span>
+                  <span className="text-white font-medium">{ownerName}</span>
+                </div>
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-[#64748B]">Vehicle number</span>
+                  <span className="text-white font-medium">{regNo}</span>
+                </div>
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-[#64748B]">Chassis no.</span>
+                  <span className="text-white font-medium">{chassisNo}</span>
+                </div>
+              </div>
+            )}
+
+            {uploadingFor === 'rc' ? (
+              <div className="flex items-center gap-2 py-1">
+                <div className="w-4 h-4 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px] text-[#64748B]">Uploading...</span>
+              </div>
+            ) : (
+              <button onClick={() => setSourceSheet('rc')} className="text-[13px] text-[#A855F7] hover:text-[#C084FC] font-medium transition-colors">
+                {rcUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* DL Card */}
+        <div className={`rounded-2xl border transition-all overflow-hidden ${dlUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 bg-[#1E1E22]'}`}>
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dlUploaded ? 'bg-green-500/20' : 'bg-[#2D2D35]'}`}>
+                <svg className={`w-5 h-5 ${dlUploaded ? 'text-green-400' : 'text-[#94A3B8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[14px] font-semibold text-white">Driving Licence (DL)</p>
+                  {dlUploaded && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
+                  )}
+                </div>
+                <p className="text-[12px] text-[#64748B]">Upload DL for {ownerName}</p>
+              </div>
+            </div>
+
+            {uploadingFor === 'dl' ? (
+              <div className="flex items-center gap-2 py-1">
+                <div className="w-4 h-4 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px] text-[#64748B]">Uploading...</span>
+              </div>
+            ) : (
+              <button onClick={() => setSourceSheet('dl')} className="text-[13px] text-[#A855F7] hover:text-[#C084FC] font-medium transition-colors">
+                {dlUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Previous Year's Policy — optional */}
+        <div className={`rounded-2xl border transition-all overflow-hidden ${prevPolicyUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 bg-[#1E1E22]'}`}>
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${prevPolicyUploaded ? 'bg-green-500/20' : 'bg-[#2D2D35]'}`}>
+                <svg className={`w-5 h-5 ${prevPolicyUploaded ? 'text-green-400' : 'text-[#94A3B8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[14px] font-semibold text-white">Previous Year&apos;s Policy</p>
+                  {prevPolicyUploaded && (
+                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
+                  )}
+                  <span className="text-[10px] text-[#64748B] bg-[#2D2D35] px-2 py-0.5 rounded-full">Optional</span>
+                </div>
+                <p className="text-[12px] text-[#64748B]">Helps speed up claim processing</p>
+              </div>
+            </div>
+
+            {uploadingFor === 'prev' ? (
+              <div className="flex items-center gap-2 mt-3">
+                <div className="w-4 h-4 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px] text-[#64748B]">Uploading...</span>
+              </div>
+            ) : (
+              <button onClick={() => setSourceSheet('prev')} className="mt-3 text-[13px] text-[#A855F7] hover:text-[#C084FC] font-medium transition-colors">
+                {prevPolicyUploaded ? 'Replace ↗' : '+ Add more'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <p className="text-[12px] text-center text-[#64748B] py-1">
+          Incorrect details?{' '}
+          <button className="text-[#A855F7] underline underline-offset-2">Update here</button>
+        </p>
+
+        <button
+          onClick={() => canProceed && onContinue({ rcUploaded, dlUploaded, prevPolicyUploaded })}
+          disabled={!canProceed}
+          style={canProceed ? { background: 'linear-gradient(135deg, #A855F7, #7E22CE)' } : {}}
+          className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
+            canProceed
+              ? 'text-white hover:opacity-90 active:scale-[0.97]'
+              : 'bg-[#2D2D35] text-[#64748B] cursor-not-allowed'
+          }`}
+        >
+          {canProceed ? 'Proceed →' : `Upload ${!rcUploaded ? 'RC' : 'DL'} to continue`}
+        </button>
+
+        <button className="w-full py-2 text-[13px] text-[#64748B] hover:text-[#94A3B8] transition-colors">
+          Save and continue later
+        </button>
+      </motion.div>
+
+      {/* Source selector bottom sheet */}
+      <AnimatePresence>
+        {sourceSheet && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 flex items-end"
+            onClick={() => setSourceSheet(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="w-full max-h-[45vh] flex flex-col"
+              style={{ background: '#1E1E22', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.05)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex-shrink-0 pt-3 pb-2 px-5">
+                <div className="w-10 h-1 bg-white/10 rounded-full mx-auto mb-4" />
+                <p className="text-[16px] font-semibold text-white mb-1">Select a source</p>
+                <p className="text-[12px] text-[#64748B]">in PNG, JPEG, or PDF format (Max 10 MB)</p>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-2">
+                {DOC_SOURCE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleSourceSelect(opt.id)}
+                    className="w-full flex items-center gap-4 p-4 bg-[#2D2D35] hover:bg-[#383842] border border-white/5 hover:border-[#A855F7]/30 rounded-xl transition-all text-left"
+                  >
+                    <span className="text-2xl">{opt.icon}</span>
+                    <span className="text-[14px] font-medium text-white">{opt.label}</span>
+                    <svg className="w-4 h-4 text-[#64748B] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </button>
+                ))}
               </div>
             </motion.div>
           </motion.div>

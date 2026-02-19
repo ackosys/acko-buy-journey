@@ -98,10 +98,10 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'selection_cards',
     getScript: (state) => {
       const options = [
-        { id: 'raise_claim', label: 'Raise a Claim', icon: 'document', description: 'File accident or damage claim' },
+        { id: 'raise_claim', label: 'Raise a Claim', icon: 'claim', description: 'File accident or damage claim' },
         { id: 'get_answers', label: 'Get Answers', icon: 'help', description: 'Coverage FAQs' },
         { id: 'download_doc', label: 'Download Documents', icon: 'download', description: 'Policy, RC card, certificates' },
-        { id: 'edit_policy', label: 'Edit Policy', icon: 'refresh', description: 'Modify add-ons, nominee' },
+        { id: 'edit_policy', label: 'Edit Policy', icon: 'edit', description: 'Modify add-ons, nominee' },
       ];
       if (hasActiveRequests(state)) {
         const claimCount = state.dashboardSubmittedClaims.length;
@@ -150,7 +150,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
           id: `claim_${i}`,
           label: `Claim ${c.id}`,
           description: `${CLAIM_TYPE_LABELS[c.type] || c.type} · ${c.status} · ${timeLabel}`,
-          icon: 'document',
+          icon: 'claim',
         });
       });
 
@@ -161,7 +161,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
           id: `edit_${i}`,
           label: `Edit: ${e.type}`,
           description: `${e.summary} · ${e.status} · ${timeLabel}`,
-          icon: 'refresh',
+          icon: 'edit',
         });
       });
 
@@ -276,9 +276,9 @@ const motorDashboardSteps: MotorConversationStep[] = [
         botMessages: [`What happened?`],
         options: [
           { id: 'own_damage_accident', label: `My ${v} was in an accident`, icon: v, description: 'Collision, hit & run, natural calamity, fire' },
-          { id: 'own_damage_theft', label: `My ${v} was stolen`, icon: 'document', description: 'Vehicle theft or break-in' },
-          { id: 'own_damage_accessories', label: `My ${v} accessories were stolen`, icon: 'document', description: 'Parts or accessories stolen' },
-          { id: 'third_party', label: 'I caused damage to someone else', icon: 'shield', description: 'Property or injury to a third party' },
+          { id: 'own_damage_theft', label: `My ${v} was stolen`, icon: 'theft', description: 'Vehicle theft or break-in' },
+          { id: 'own_damage_accessories', label: `My ${v} accessories were stolen`, icon: 'theft', description: 'Parts or accessories stolen' },
+          { id: 'third_party', label: 'I caused damage to someone else', icon: 'shield_search', description: 'Property or injury to a third party' },
         ],
       };
     },
@@ -436,10 +436,10 @@ const motorDashboardSteps: MotorConversationStep[] = [
         botMessages: [`Where is your ${v} right now?`],
         subText: `This helps us arrange towing or a surveyor visit if needed.`,
         options: [
-          { id: 'home_office', label: 'Home / Office', description: 'Drove it back or towed it home' },
-          { id: 'garage_dealership', label: 'Garage / Dealership', description: 'Already at a repair shop' },
-          { id: 'accident_site', label: 'Still at accident site', description: 'Vehicle has not been moved' },
-          { id: 'police_station', label: 'Police station', description: 'Vehicle is with the police' },
+          { id: 'home_office', label: 'Home / Office', description: 'Drove it back or towed it home', icon: 'map_pin' },
+          { id: 'garage_dealership', label: 'Garage / Dealership', description: 'Already at a repair shop', icon: 'garage' },
+          { id: 'accident_site', label: 'Still at accident site', description: 'Vehicle has not been moved', icon: 'accident' },
+          { id: 'police_station', label: 'Police station', description: 'Vehicle is with the police', icon: 'police' },
         ],
       };
     },
@@ -483,8 +483,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
       botMessages: [`Do you need help with towing?`],
       subText: `Our towing team will contact you within 15 minutes of your claim being filed.`,
       options: [
-        { id: 'yes', label: 'Yes, I need towing', description: 'Our team will call you shortly' },
-        { id: 'no', label: 'No, I will manage', description: 'I have arranged transport' },
+        { id: 'yes', label: 'Yes, I need towing', description: 'Our team will call you shortly', icon: 'towing' },
+        { id: 'no', label: 'No, I will manage', description: 'I have arranged transport', icon: 'check' },
       ],
     }),
     processResponse: (response) => ({ dashboardClaimNeedsTowing: response === 'yes' }),
@@ -860,7 +860,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getScript: () => ({
       botMessages: ['Select a document to download:'],
       options: [
-        ...MOTOR_DOCUMENTS.map(d => ({ id: d.id, label: d.name, icon: 'document' })),
+        ...MOTOR_DOCUMENTS.map(d => ({ id: d.id, label: d.name, icon: 'pdf' })),
         { id: 'back', label: 'Back to Dashboard', icon: 'switch' },
       ],
     }),
