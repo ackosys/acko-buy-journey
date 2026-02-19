@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
 
 interface LifeLandingPageProps {
-  onGetStarted: () => void;
+  onGetStarted: (path: 'direct' | 'guided') => void;
 }
 
 function FadeIn({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -308,7 +308,7 @@ export default function LifeLandingPage({ onGetStarted }: LifeLandingPageProps) 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              onClick={onGetStarted}
+              onClick={() => onGetStarted('guided')}
               className="w-full py-4 bg-white text-[#3a1d8e] rounded-2xl text-base font-bold transition-all active:scale-[0.97] hover:bg-white/90"
             >
               Check quote

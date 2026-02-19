@@ -11,12 +11,11 @@ import { useLifeJourneyStore } from '../../lib/life/store';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
 import LifeEntryScreen from '../../components/life/LifeEntryScreen';
 import LifeLandingPage from '../../components/life/LifeLandingPage';
-import LifePathSelection from '../../components/life/LifePathSelection';
 import LifeHeader from '../../components/life/LifeHeader';
 import { LifeExpertPanel, LifeAIChatPanel } from '../../components/life/LifePanels';
 import AckoLogo from '../../components/AckoLogo';
 
-type Screen = 'entry' | 'landing' | 'pathSelection' | 'chat';
+type Screen = 'entry' | 'landing' | 'chat';
 
 /* ═══════════════════════════════════════════════
    Splash Screen — Auto-dismiss on entry
@@ -123,14 +122,9 @@ export default function LifeJourneyPage() {
 
   const dismissSplash = useCallback(() => setShowSplash(false), []);
 
-  const handleLandingContinue = () => {
-    setScreen('pathSelection');
-  };
-
-  const handlePathSelection = (path: 'direct' | 'guided') => {
+  const handleBuyJourney = (path: 'direct' | 'guided') => {
     store.updateState({ userPath: path });
     setScreen('chat');
-    // Start with intro for now - we'll route properly in the conversation flow
     store.updateState({ currentStepId: 'life_intro' });
   };
 
@@ -156,7 +150,7 @@ export default function LifeJourneyPage() {
           <LifeEntryScreen
             key="entry"
             completedStep={completedStep}
-            onBuyJourney={() => setScreen('landing')}
+            onBuyJourney={handleBuyJourney}
             onJumpToEkyc={() => setScreen('landing')}
             onJumpToVerification={() => setScreen('landing')}
           />
@@ -164,12 +158,7 @@ export default function LifeJourneyPage() {
 
         {/* Landing Page */}
         {screen === 'landing' && (
-          <LifeLandingPage key="landing" onGetStarted={handleLandingContinue} />
-        )}
-
-        {/* Path Selection */}
-        {screen === 'pathSelection' && (
-          <LifePathSelection key="pathSelection" onSelectPath={handlePathSelection} />
+          <LifeLandingPage key="landing" onGetStarted={handleBuyJourney} />
         )}
 
         {/* Main Chat Journey */}
