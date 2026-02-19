@@ -3640,3 +3640,728 @@ export function LifeUnderwritingStatus({ onContinue }: { onContinue: () => void 
     </motion.div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════
+   FINANCIAL VERIFICATION SCREEN
+   Paths: Salaried (EPFO / AA / Upload) · Business (GST / Upload) · Self-employed (Upload)
+   ═══════════════════════════════════════════════════════ */
+
+export function LifeFinancialScreen({ onContinue }: { onContinue: () => void }) {
+  type FinancialStage =
+    | 'intro'
+    | 'salaried_methods'
+    | 'epfo_mobile' | 'epfo_otp' | 'epfo_verifying' | 'epfo_success' | 'epfo_failure' | 'epfo_timeout'
+    | 'aa_consent' | 'aa_bank' | 'aa_verifying' | 'aa_success' | 'aa_failure'
+    | 'doc_salaried'
+    | 'business_methods' | 'gst_entry' | 'gst_verifying' | 'gst_success' | 'gst_failure' | 'doc_business'
+    | 'doc_self'
+    | 'verified';
+
+  const [history, setHistory] = useState<FinancialStage[]>(['intro']);
+  const stage = history[history.length - 1];
+  const goTo = (s: FinancialStage) => setHistory(h => [...h, s]);
+  const goBack = () => setHistory(h => h.length > 1 ? h.slice(0, -1) : h);
+
+  const [mobile, setMobile] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpTimer, setOtpTimer] = useState(30);
+  const [otpAttempts, setOtpAttempts] = useState(0);
+  const [gstNumber, setGstNumber] = useState('');
+  const [ownershipPct, setOwnershipPct] = useState('100');
+  const [selectedBank, setSelectedBank] = useState('');
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, boolean>>({});
+  const digitRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const otpValue = otp.join('');
+
+  useEffect(() => {
+    if (stage !== 'epfo_otp' || otpTimer <= 0) return;
+    const t = setTimeout(() => setOtpTimer(p => p - 1), 1000);
+    return () => clearTimeout(t);
+  }, [stage, otpTimer]);
+
+  useEffect(() => {
+    if (stage === 'epfo_verifying') {
+      const t = setTimeout(() => {
+        if (otpValue === '000000') goTo('epfo_failure');
+        else if (mobile === '9999999999') goTo('epfo_timeout');
+        else goTo('epfo_success');
+      }, 2500);
+      return () => clearTimeout(t);
+    }
+    if (stage === 'aa_verifying') {
+      const t = setTimeout(() => goTo('aa_success'), 3000);
+      return () => clearTimeout(t);
+    }
+    if (stage === 'gst_verifying') {
+      const t = setTimeout(() => {
+        if (gstNumber.length < 15) goTo('gst_failure');
+        else goTo('gst_success');
+      }, 2500);
+      return () => clearTimeout(t);
+    }
+  }, [stage]);
+
+  const handleOtpChange = (idx: number, val: string) => {
+    if (!/^\d*$/.test(val)) return;
+    const next = [...otp];
+    next[idx] = val.slice(-1);
+    setOtp(next);
+    if (val && idx < 5) digitRefs.current[idx + 1]?.focus();
+    if (!val && idx > 0) digitRefs.current[idx - 1]?.focus();
+  };
+
+  const toggleDoc = (key: string) => setUploadedDocs(p => ({ ...p, [key]: !p[key] }));
+
+  const getTitle = (): string => {
+    if (stage === 'intro') return 'Financial Verification';
+    if (stage === 'salaried_methods') return 'Choose verification method';
+    if (['epfo_mobile', 'epfo_otp', 'epfo_verifying', 'epfo_success', 'epfo_failure', 'epfo_timeout'].includes(stage)) return 'EPFO Verification';
+    if (['aa_consent', 'aa_bank', 'aa_verifying', 'aa_success', 'aa_failure'].includes(stage)) return 'Account Aggregator';
+    if (stage === 'doc_salaried') return 'Upload Salary Slips';
+    if (stage === 'business_methods') return 'Choose verification method';
+    if (['gst_entry', 'gst_verifying', 'gst_success', 'gst_failure'].includes(stage)) return 'GST Verification';
+    if (['doc_business', 'doc_self'].includes(stage)) return 'Upload Financial Documents';
+    if (stage === 'verified') return 'Income Verified ✅';
+    return 'Financial Verification';
+  };
+
+  const canGoBack = history.length > 1 && !['epfo_verifying', 'aa_verifying', 'gst_verifying', 'verified'].includes(stage);
+  const isSuccess = ['epfo_success', 'aa_success', 'gst_success', 'verified'].includes(stage);
+
+  const renderContent = () => {
+    switch (stage) {
+
+      /* ── INTRO: Occupation path ── */
+      case 'intro':
+        return (
+          <div className="p-5 space-y-3">
+            <div className="text-center pb-1">
+              <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                </svg>
+              </div>
+              <p className="text-label-sm font-semibold text-gray-800">How are you currently employed?</p>
+              <p className="text-caption text-gray-400 mt-0.5">We'll show you the right verification method</p>
+            </div>
+            {[
+              { id: 'salaried', icon: '🏢', label: 'Salaried', desc: 'Working for a company or organisation', next: () => goTo('salaried_methods') },
+              { id: 'business', icon: '🏪', label: 'Business owner', desc: 'Running your own business (GST registered)', next: () => goTo('business_methods') },
+              { id: 'self', icon: '💼', label: 'Self-employed / Freelancer', desc: 'Professional, consultant, or independent worker', next: () => goTo('doc_self') },
+            ].map(({ id, icon, label, desc, next }) => (
+              <button key={id} onClick={next} className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/50 transition-all active:scale-[0.98] text-left">
+                <span className="text-2xl flex-shrink-0">{icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-label-sm font-semibold text-gray-800">{label}</p>
+                  <p className="text-caption text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            ))}
+          </div>
+        );
+
+      /* ── SALARIED: Method selection ── */
+      case 'salaried_methods':
+        return (
+          <div className="p-5 space-y-3">
+            <p className="text-caption text-gray-400 pb-1">3 ways to verify — pick whichever works best</p>
+            {[
+              { id: 'epfo', badge: 'Instant · Recommended', badgeColor: 'bg-emerald-50 text-emerald-600', icon: '📊', title: 'EPFO / Provident Fund', desc: 'OTP sent to your EPFO-registered mobile', onTap: () => goTo('epfo_mobile') },
+              { id: 'aa', badge: 'Instant · Consent-based', badgeColor: 'bg-blue-50 text-blue-600', icon: '🏦', title: 'Account Aggregator', desc: 'Securely share bank statements via RBI framework', onTap: () => goTo('aa_consent') },
+              { id: 'upload', badge: '24–48 hrs review', badgeColor: 'bg-orange-50 text-orange-600', icon: '📄', title: 'Upload salary slips', desc: 'Last 3 months salary slips (PDF, PNG, JPEG)', onTap: () => goTo('doc_salaried') },
+            ].map(({ id, badge, badgeColor, icon, title, desc, onTap }) => (
+              <button key={id} onClick={onTap} className="w-full flex items-start gap-3 p-4 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/30 transition-all active:scale-[0.98] text-left">
+                <span className="text-xl flex-shrink-0 mt-0.5">{icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <p className="text-label-sm font-semibold text-gray-800">{title}</p>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>{badge}</span>
+                  </div>
+                  <p className="text-caption text-gray-400">{desc}</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            ))}
+          </div>
+        );
+
+      /* ── EPFO: Mobile entry ── */
+      case 'epfo_mobile':
+        return (
+          <div className="p-5">
+            <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3m-6 4.5h9" />
+              </svg>
+            </div>
+            <p className="text-label-md font-semibold text-gray-800 mb-1">EPFO-registered mobile</p>
+            <p className="text-caption text-gray-500 mb-4">Enter the mobile number linked to your PF account. An OTP will be sent.</p>
+            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 transition-all mb-1.5">
+              <span className="px-3 py-3 text-label-sm text-gray-500 border-r border-gray-100 bg-gray-50">+91</span>
+              <input type="tel" inputMode="numeric" maxLength={10} value={mobile}
+                onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                placeholder="Enter 10-digit number"
+                className="flex-1 px-3 py-3 text-label-sm text-gray-800 bg-transparent outline-none placeholder:text-gray-300" />
+            </div>
+            <p className="text-[10px] text-gray-400 mb-4">💡 Demo: any number works. Use 9999999999 to simulate timeout.</p>
+            <button disabled={mobile.length < 10}
+              onClick={() => { setOtpTimer(30); setOtp(['', '', '', '', '', '']); goTo('epfo_otp'); }}
+              className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition-all">
+              Send OTP
+            </button>
+          </div>
+        );
+
+      /* ── EPFO: OTP entry ── */
+      case 'epfo_otp':
+        return (
+          <div className="p-5">
+            <div className="w-11 h-11 bg-purple-50 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
+            </div>
+            <p className="text-label-md font-semibold text-gray-800 mb-1">Enter OTP</p>
+            <p className="text-caption text-gray-500 mb-4">Sent to +91 {mobile.slice(0, 5)}xxxxx via EPFO</p>
+            <div className="flex gap-2.5 justify-center mb-4">
+              {otp.map((d, i) => (
+                <input key={i} ref={el => { digitRefs.current[i] = el; }} type="tel" inputMode="numeric" maxLength={1} value={d}
+                  onChange={e => handleOtpChange(i, e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Backspace' && !d && i > 0) digitRefs.current[i - 1]?.focus(); }}
+                  className="w-11 h-12 text-center text-lg font-bold text-gray-800 border border-gray-200 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all bg-gray-50" />
+              ))}
+            </div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-caption text-gray-400">
+                {otpTimer > 0 ? `Resend in ${otpTimer}s` : (
+                  <button onClick={() => { setOtpTimer(30); setOtp(['', '', '', '', '', '']); }} className="text-purple-600 font-medium">Resend OTP</button>
+                )}
+              </p>
+              <p className="text-caption text-gray-400">Attempts: {otpAttempts}/3</p>
+            </div>
+            <p className="text-[10px] text-gray-400 text-center mb-3">💡 Demo: 000000 = failure · anything else = success</p>
+            <button disabled={otpValue.length < 6}
+              onClick={() => { setOtpAttempts(p => p + 1); goTo('epfo_verifying'); }}
+              className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition-all">
+              Verify OTP
+            </button>
+          </div>
+        );
+
+      /* ── EPFO: Verifying ── */
+      case 'epfo_verifying':
+        return (
+          <div className="p-8 flex flex-col items-center">
+            <div className="relative mb-4">
+              <div className="w-16 h-16 rounded-full border-4 border-purple-100 border-t-purple-500 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-label-md font-semibold text-gray-800 mb-1">Checking EPFO records…</p>
+            <p className="text-caption text-gray-400">Contacting EPFO portal — takes a few seconds</p>
+          </div>
+        );
+
+      /* ── EPFO: Success ── */
+      case 'epfo_success':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <p className="text-label-lg font-bold text-gray-800">PF Income Verified</p>
+              <p className="text-caption text-gray-500 text-center mt-1">Successfully verified via EPFO</p>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5 space-y-2">
+              {[{ label: 'UAN', value: '10012345678' }, { label: 'Employer', value: 'Verified ✓' }, { label: 'Member status', value: 'Active' }].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-caption text-gray-400">{label}</span>
+                  <span className="text-caption font-medium text-gray-700">{value}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => goTo('verified')} className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-all">
+              Continue
+            </button>
+          </div>
+        );
+
+      /* ── EPFO: Failure ── */
+      case 'epfo_failure':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <p className="text-label-md font-semibold text-gray-800">Verification failed</p>
+              <p className="text-caption text-gray-500 text-center mt-1">
+                {otpAttempts >= 3 ? 'Too many attempts. Please use another method.' : 'Incorrect OTP. Try again or use another method.'}
+              </p>
+            </div>
+            <div className="space-y-2.5 mt-2">
+              {otpAttempts < 3 && (
+                <button onClick={() => { setOtp(['', '', '', '', '', '']); setOtpTimer(30); goTo('epfo_otp'); }}
+                  className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97]">
+                  Try again
+                </button>
+              )}
+              <button onClick={() => goTo('salaried_methods')} className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 text-label-sm font-medium hover:bg-gray-50">
+                Use another method
+              </button>
+            </div>
+          </div>
+        );
+
+      /* ── EPFO: Timeout ── */
+      case 'epfo_timeout':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-label-md font-semibold text-gray-800">Taking a bit longer…</p>
+              <p className="text-caption text-gray-500 text-center mt-1">EPFO verification is in progress. We'll notify you via Email & WhatsApp once done.</p>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3.5 mb-5">
+              <p className="text-caption text-amber-700">You can continue and check the status anytime from the Pending Tasks hub.</p>
+            </div>
+            <div className="space-y-2">
+              <button onClick={onContinue} className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-all">
+                Back to Pending Tasks
+              </button>
+              <button onClick={() => goTo('salaried_methods')} className="w-full py-2 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+                Try another method
+              </button>
+            </div>
+          </div>
+        );
+
+      /* ── AA: Consent ── */
+      case 'aa_consent':
+        return (
+          <div className="p-5">
+            <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <p className="text-label-md font-semibold text-gray-800 mb-1">Account Aggregator Consent</p>
+            <p className="text-caption text-gray-500 mb-4">Governed by RBI's AA framework. You control what's shared.</p>
+            <div className="bg-gray-50 rounded-xl p-4 mb-4 space-y-2.5">
+              <p className="text-caption font-semibold text-gray-600 mb-1">What will be accessed:</p>
+              {[{ icon: '💳', text: 'Bank account statements (last 6 months)' }, { icon: '📊', text: 'Salary credits and recurring transactions' }, { icon: '🔒', text: 'Read-only — no payment access' }].map(({ icon, text }) => (
+                <div key={text} className="flex items-center gap-2.5">
+                  <span className="text-base">{icon}</span>
+                  <p className="text-caption text-gray-600">{text}</p>
+                </div>
+              ))}
+            </div>
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 flex items-start gap-2">
+              <svg className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              </svg>
+              <p className="text-[10px] text-blue-700">Your consent is valid for this transaction only. Data is not retained post-issuance.</p>
+            </div>
+            <button onClick={() => goTo('aa_bank')} className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-all">
+              I consent — proceed
+            </button>
+          </div>
+        );
+
+      /* ── AA: Bank selection ── */
+      case 'aa_bank':
+        return (
+          <div className="p-5">
+            <p className="text-label-sm font-semibold text-gray-800 mb-1">Select your bank</p>
+            <p className="text-caption text-gray-500 mb-4">You'll authenticate through your bank's AA portal</p>
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              {[{ id: 'sbi', name: 'State Bank of India', abbr: 'SBI' }, { id: 'hdfc', name: 'HDFC Bank', abbr: 'HDFC' }, { id: 'icici', name: 'ICICI Bank', abbr: 'ICICI' }, { id: 'axis', name: 'Axis Bank', abbr: 'Axis' }, { id: 'kotak', name: 'Kotak Mahindra', abbr: 'Kotak' }, { id: 'other', name: 'Other bank', abbr: '+ More' }].map(({ id, name, abbr }) => (
+                <button key={id} onClick={() => setSelectedBank(id)}
+                  className={`p-3 rounded-xl border text-left transition-all active:scale-[0.97] ${selectedBank === id ? 'border-purple-400 bg-purple-50' : 'border-gray-100 hover:border-purple-200 bg-gray-50'}`}>
+                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mb-1.5 shadow-sm">
+                    <span className="text-[9px] font-bold text-gray-600">{abbr}</span>
+                  </div>
+                  <p className="text-[11px] font-medium text-gray-700 leading-tight">{name}</p>
+                </button>
+              ))}
+            </div>
+            <button disabled={!selectedBank} onClick={() => goTo('aa_verifying')}
+              className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold disabled:opacity-40 active:scale-[0.97] transition-all">
+              Proceed to bank
+            </button>
+          </div>
+        );
+
+      /* ── AA: Verifying ── */
+      case 'aa_verifying':
+        return (
+          <div className="p-8 flex flex-col items-center">
+            <div className="relative mb-4">
+              <div className="w-16 h-16 rounded-full border-4 border-blue-100 border-t-blue-500 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-label-md font-semibold text-gray-800 mb-1">Connecting to your bank…</p>
+            <p className="text-caption text-gray-400 text-center">Securely fetching statement data via AA framework</p>
+            <div className="mt-4 space-y-1.5 w-full max-w-xs">
+              {['Authenticating…', 'Fetching statements…', 'Analysing income…'].map((t, i) => (
+                <motion.div key={t} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.9 }} className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                  <p className="text-caption text-gray-400">{t}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        );
+
+      /* ── AA: Success ── */
+      case 'aa_success':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <p className="text-label-lg font-bold text-gray-800">Income Verified</p>
+              <p className="text-caption text-gray-500 text-center mt-1">Verified via Account Aggregator</p>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5 space-y-2">
+              {[{ label: 'Method', value: 'Account Aggregator' }, { label: 'Data source', value: 'Bank statements (6 months)' }, { label: 'Status', value: 'Verified ✓' }].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-caption text-gray-400">{label}</span>
+                  <span className="text-caption font-medium text-gray-700">{value}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => goTo('verified')} className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-all">
+              Continue
+            </button>
+          </div>
+        );
+
+      /* ── AA: Failure ── */
+      case 'aa_failure':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <p className="text-label-md font-semibold text-gray-800">Couldn't connect to bank</p>
+              <p className="text-caption text-gray-500 text-center mt-1">The Account Aggregator connection failed. Please try again or use another method.</p>
+            </div>
+            <div className="space-y-2.5 mt-2">
+              <button onClick={() => goTo('aa_bank')} className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97]">Try again</button>
+              <button onClick={() => goTo('salaried_methods')} className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 text-label-sm font-medium hover:bg-gray-50">Use another method</button>
+            </div>
+          </div>
+        );
+
+      /* ── DOC UPLOAD: Salary slips ── */
+      case 'doc_salaried': {
+        const months = ['Month 1 (most recent)', 'Month 2', 'Month 3'];
+        const allUploaded = months.every((_, i) => uploadedDocs[`sal_${i}`]);
+        return (
+          <div className="p-5">
+            <p className="text-label-sm font-semibold text-gray-800 mb-1">Upload salary slips</p>
+            <p className="text-caption text-gray-500 mb-4">Last 3 months. PDF, PNG, or JPEG. Max 10 MB each.</p>
+            <div className="space-y-2.5 mb-5">
+              {months.map((month, i) => (
+                <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${uploadedDocs[`sal_${i}`] ? 'border-emerald-200 bg-emerald-50' : 'border-gray-100 bg-gray-50'}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${uploadedDocs[`sal_${i}`] ? 'bg-emerald-100' : 'bg-white shadow-sm'}`}>
+                    {uploadedDocs[`sal_${i}`]
+                      ? <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                      : <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-caption font-medium text-gray-700">{month}</p>
+                    <p className="text-[10px] text-gray-400">{uploadedDocs[`sal_${i}`] ? 'Uploaded ✓' : 'Not uploaded'}</p>
+                  </div>
+                  <button onClick={() => toggleDoc(`sal_${i}`)}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-[0.97] ${uploadedDocs[`sal_${i}`] ? 'bg-red-50 text-red-400 hover:bg-red-100' : 'bg-purple-600 text-white hover:bg-purple-700'}`}>
+                    {uploadedDocs[`sal_${i}`] ? 'Remove' : 'Upload'}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button disabled={!allUploaded} onClick={() => goTo('verified')}
+              className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition-all">
+              Submit for review
+            </button>
+            <p className="text-[10px] text-gray-400 text-center mt-2">Review typically takes 24–48 hours</p>
+          </div>
+        );
+      }
+
+      /* ── BUSINESS: Method selection ── */
+      case 'business_methods':
+        return (
+          <div className="p-5 space-y-3">
+            <p className="text-caption text-gray-400 pb-1">Choose your preferred verification method</p>
+            {[
+              { id: 'gst', badge: 'Instant', badgeColor: 'bg-emerald-50 text-emerald-600', icon: '🧾', title: 'GST Verification', desc: 'Auto-verify via your GSTIN — takes seconds', onTap: () => goTo('gst_entry') },
+              { id: 'upload', badge: '24–48 hrs review', badgeColor: 'bg-orange-50 text-orange-600', icon: '📂', title: 'Upload financial documents', desc: 'ITR last 3 years, Form 16A, or audited P&L', onTap: () => goTo('doc_business') },
+            ].map(({ id, badge, badgeColor, icon, title, desc, onTap }) => (
+              <button key={id} onClick={onTap} className="w-full flex items-start gap-3 p-4 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/30 transition-all active:scale-[0.98] text-left">
+                <span className="text-xl flex-shrink-0 mt-0.5">{icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <p className="text-label-sm font-semibold text-gray-800">{title}</p>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>{badge}</span>
+                  </div>
+                  <p className="text-caption text-gray-400">{desc}</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            ))}
+          </div>
+        );
+
+      /* ── GST: Entry ── */
+      case 'gst_entry':
+        return (
+          <div className="p-5">
+            <div className="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+            </div>
+            <p className="text-label-sm font-semibold text-gray-800 mb-4">Enter your GST details</p>
+            <div className="space-y-3 mb-5">
+              <div>
+                <label className="text-caption text-gray-500 mb-1.5 block">GSTIN (15-digit)</label>
+                <input type="text" maxLength={15} value={gstNumber} onChange={e => setGstNumber(e.target.value.toUpperCase())}
+                  placeholder="e.g. 22AAAAA0000A1Z5"
+                  className="w-full px-3.5 py-3 text-label-sm text-gray-800 border border-gray-200 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-gray-300 uppercase font-mono tracking-wider" />
+                <p className="text-[10px] text-gray-400 mt-1">💡 Demo: enter exactly 15 characters to verify successfully</p>
+              </div>
+              <div>
+                <label className="text-caption text-gray-500 mb-1.5 block">Your ownership percentage</label>
+                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
+                  <input type="number" min="1" max="100" value={ownershipPct} onChange={e => setOwnershipPct(e.target.value)}
+                    className="flex-1 px-3.5 py-3 text-label-sm text-gray-800 bg-transparent outline-none" />
+                  <span className="px-3 py-3 text-label-sm text-gray-500 border-l border-gray-100 bg-gray-50">%</span>
+                </div>
+              </div>
+            </div>
+            <button disabled={gstNumber.length < 5} onClick={() => goTo('gst_verifying')}
+              className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition-all">
+              Verify GST
+            </button>
+          </div>
+        );
+
+      /* ── GST: Verifying ── */
+      case 'gst_verifying':
+        return (
+          <div className="p-8 flex flex-col items-center">
+            <div className="relative mb-4">
+              <div className="w-16 h-16 rounded-full border-4 border-orange-100 border-t-orange-400 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center text-2xl">🧾</div>
+            </div>
+            <p className="text-label-md font-semibold text-gray-800 mb-1">Verifying GSTIN…</p>
+            <p className="text-caption text-gray-400">Cross-checking with GST portal</p>
+          </div>
+        );
+
+      /* ── GST: Success ── */
+      case 'gst_success':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <p className="text-label-lg font-bold text-gray-800">GST Verified</p>
+              <p className="text-caption text-gray-500 text-center mt-1">Business income verified via GSTIN</p>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5 space-y-2">
+              {[{ label: 'GSTIN', value: gstNumber }, { label: 'Ownership', value: `${ownershipPct}%` }, { label: 'Status', value: 'Active · Verified ✓' }].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-caption text-gray-400">{label}</span>
+                  <span className="text-caption font-medium text-gray-700">{value}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => goTo('verified')} className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-all">
+              Continue
+            </button>
+          </div>
+        );
+
+      /* ── GST: Failure ── */
+      case 'gst_failure':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-3">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <p className="text-label-md font-semibold text-gray-800">GSTIN not verified</p>
+              <p className="text-caption text-gray-500 text-center mt-1">We couldn't verify this GST number. Check it and retry, or upload documents instead.</p>
+            </div>
+            <div className="space-y-2.5 mt-2">
+              <button onClick={() => goTo('gst_entry')} className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97]">Try again</button>
+              <button onClick={() => goTo('doc_business')} className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 text-label-sm font-medium hover:bg-gray-50">Upload documents instead</button>
+            </div>
+          </div>
+        );
+
+      /* ── DOC UPLOAD: Business / Self-employed ── */
+      case 'doc_business':
+      case 'doc_self': {
+        const docOptions = [
+          { key: 'itr', label: 'Income Tax Returns', sublabel: 'Last 3 years (ITR-3 or ITR-4)' },
+          { key: 'form16', label: 'Form 16A', sublabel: 'Last 3 years' },
+          { key: 'pnl', label: 'Audited P&L Account', sublabel: 'Last 3 years, CA-certified' },
+        ];
+        const anyUploaded = docOptions.some(d => uploadedDocs[d.key]);
+        return (
+          <div className="p-5">
+            <p className="text-label-sm font-semibold text-gray-800 mb-1">Upload financial documents</p>
+            <p className="text-caption text-gray-500 mb-2">Upload any one of the following. PDF or ZIP. Max 20 MB.</p>
+            <div className="bg-amber-50 rounded-lg px-3 py-2 mb-4">
+              <p className="text-[10px] text-amber-700">Only one document type required — upload whichever is most accessible.</p>
+            </div>
+            <div className="space-y-2.5 mb-5">
+              {docOptions.map(({ key, label, sublabel }) => (
+                <div key={key} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${uploadedDocs[key] ? 'border-emerald-200 bg-emerald-50' : 'border-gray-100 bg-gray-50'}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${uploadedDocs[key] ? 'bg-emerald-100' : 'bg-white shadow-sm'}`}>
+                    {uploadedDocs[key]
+                      ? <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                      : <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-caption font-medium text-gray-700">{label}</p>
+                    <p className="text-[10px] text-gray-400">{sublabel}</p>
+                  </div>
+                  <button onClick={() => toggleDoc(key)}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-[0.97] ${uploadedDocs[key] ? 'bg-red-50 text-red-400 hover:bg-red-100' : 'bg-purple-600 text-white hover:bg-purple-700'}`}>
+                    {uploadedDocs[key] ? 'Remove' : 'Upload'}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button disabled={!anyUploaded} onClick={() => goTo('verified')}
+              className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition-all">
+              Submit for review
+            </button>
+            <p className="text-[10px] text-gray-400 text-center mt-2">Review typically takes 24–48 hours</p>
+          </div>
+        );
+      }
+
+      /* ── ALL VERIFIED ── */
+      case 'verified':
+        return (
+          <div className="p-5">
+            <div className="flex flex-col items-center py-6">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 12 }}
+                className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </motion.div>
+              <h3 className="text-heading-sm font-bold text-gray-800 mb-1">Income verified!</h3>
+              <p className="text-caption text-gray-500 text-center">Financial details captured. Next up: medical evaluation.</p>
+            </div>
+            <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 mb-5">
+              <p className="text-caption font-semibold text-purple-700 mb-2.5">What's next</p>
+              <div className="space-y-2">
+                {[{ icon: '📹', text: '15–20 min video call with a doctor (VMER)' }, { icon: '📋', text: 'Review and confirm your health responses' }, { icon: '🏠', text: 'Home tests may be requested if applicable' }].map(({ icon, text }) => (
+                  <div key={text} className="flex items-center gap-2.5">
+                    <span className="text-base">{icon}</span>
+                    <p className="text-caption text-purple-700">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button onClick={onContinue} className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-all">
+              Start medical evaluation →
+            </button>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }} className="w-full max-w-sm mx-auto">
+      <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+
+        {/* Header */}
+        <div className={`px-5 py-3.5 flex items-center gap-3 border-b border-gray-100 ${isSuccess ? 'bg-emerald-50' : 'bg-purple-50'}`}>
+          {canGoBack && (
+            <button onClick={goBack} className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          )}
+          <p className={`text-label-sm font-semibold flex-1 truncate ${isSuccess ? 'text-emerald-700' : 'text-purple-700'}`}>{getTitle()}</p>
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isSuccess ? 'bg-emerald-400' : 'bg-purple-400'}`} />
+        </div>
+
+        {/* Content — slides per stage */}
+        <AnimatePresence mode="wait">
+          <motion.div key={stage} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.18 }}>
+            {renderContent()}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Footer */}
+        {!['epfo_verifying', 'aa_verifying', 'gst_verifying', 'verified'].includes(stage) && (
+          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+              Help
+            </button>
+            <span className="text-caption text-gray-300">·</span>
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              support.life@acko.com
+            </button>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}

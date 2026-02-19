@@ -59,6 +59,7 @@ interface LifeEntryScreenProps {
   completedStep?: number;
   onBuyJourney: () => void;
   onJumpToEkyc: () => void;
+  onJumpToFinancial: () => void;
   onJumpToMedical: () => void;
   onJumpToUnderwriting: () => void;
 }
@@ -98,6 +99,7 @@ export default function LifeEntryScreen({
   completedStep = 0,
   onBuyJourney,
   onJumpToEkyc,
+  onJumpToFinancial,
   onJumpToMedical,
   onJumpToUnderwriting,
 }: LifeEntryScreenProps) {
@@ -151,10 +153,10 @@ export default function LifeEntryScreen({
       number: 3,
       state: step3State,
       title: 'Income & Medical Verification',
-      desc: 'Income proof, video call with doctor, home tests if needed',
+        desc: 'Income proof, video call with doctor, home tests if needed',
       cards: [
         {
-          onClick: onJumpToMedical,
+          onClick: onJumpToFinancial,
           accent: false,
           icon: (
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
