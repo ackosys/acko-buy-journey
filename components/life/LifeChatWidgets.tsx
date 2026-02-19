@@ -625,7 +625,6 @@ export function LifeAccidentalRiderWidget({ onContinue }: { onContinue: () => vo
 
   // Generate filtered options
   const getOptions = (rate: number, currentPremium: number) => {
-    // Remaining limit available for THIS rider
     const remainingLimit = accidentalLimit - (accTotalPremium - currentPremium);
     const maxSA = (remainingLimit / rate) * 100000;
 
@@ -638,15 +637,11 @@ export function LifeAccidentalRiderWidget({ onContinue }: { onContinue: () => vo
       { label: '₹1 Crore', value: 10000000 },
     ];
     
-    // Filter out options that exceed the limit
-    // Note: We always allow 0 (unselect) and current selection
     return allOpts.filter(o => o.value === 0 || o.value <= maxSA || o.value === (currentPremium / rate) * 100000);
   };
 
   const handleContinue = () => {
-    // Filter existing non-accidental riders to preserve them (like critical illness if already selected in a weird flow, though usually this is first)
     const otherRiders = (state.selectedRiders || []).filter(r => r.id === 'critical_illness');
-    
     const newRiders: LifeRider[] = [...otherRiders];
 
     if (accDeathSA > 0) {
@@ -673,7 +668,6 @@ export function LifeAccidentalRiderWidget({ onContinue }: { onContinue: () => vo
       });
     }
 
-    // Update total premium in quote
     const totalRiderPremium = newRiders.reduce((sum, r) => sum + (r.premium || 0), 0);
     const newTotalPremium = basePremium + totalRiderPremium;
 
@@ -701,16 +695,23 @@ export function LifeAccidentalRiderWidget({ onContinue }: { onContinue: () => vo
     >
       <div className="space-y-4">
         {/* Accidental Death Card */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <div className="flex gap-4 mb-4">
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
+          <div className="flex gap-4 mb-5">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl">🛡️</span>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#F3F4F6"/>
+                <path d="M12 2L12 22" stroke="#E5E7EB" strokeWidth="2"/>
+                <path d="M12 5L14.5 10L9.5 14L12 19" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 3C7 3 5 7 5 10C5 15 9 19 12 21C15 19 19 15 19 10C19 7 17 3 12 3Z" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <div>
+            <div className="flex-1">
               <h4 className="font-bold text-gray-900 text-body-lg">Accidental death cover</h4>
-              <div className="flex items-start gap-2 mt-1">
-                <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                <p className="text-caption text-gray-500">Pays selected sum assured in addition to base cover</p>
+              <div className="flex items-start gap-2 mt-1.5">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <p className="text-body-sm text-gray-500 leading-snug">Pays selected sum assured in addition to base cover</p>
               </div>
             </div>
           </div>
@@ -722,21 +723,30 @@ export function LifeAccidentalRiderWidget({ onContinue }: { onContinue: () => vo
         </div>
 
         {/* Accidental Disability Card */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <div className="flex gap-4 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl">♿</span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
+          <div className="flex gap-4 mb-5">
+            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 20C9.55228 20 10 19.5523 10 19C10 18.4477 9.55228 18 9 18C8.44772 18 8 18.4477 8 19C8 19.5523 8.44772 20 9 20Z" fill="white"/>
+                <path d="M15 20C15.5523 20 16 19.5523 16 19C16 18.4477 15.5523 18 15 18C14.4477 18 14 18.4477 14 19C14 19.5523 14.4477 20 15 20Z" fill="white"/>
+                <path d="M17 19H19V17H16.2C16.4 16.2 16.5 15.4 16.5 14.5C16.5 12 14.5 10 12 10H10V7H12C12.6 7 13 6.6 13 6V4H11V6H9V4H7V6C7 6.6 7.4 7 8 7H9V10C6.2 10 4 12.2 4 15V19H7V15C7 13.3 8.3 12 10 12H12C13.7 12 15 13.3 15 15H12V17H15C15 17.7 14.7 18.4 14.3 19H13" fill="white"/>
+                <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" fill="white"/>
+              </svg>
             </div>
-            <div>
+            <div className="flex-1">
               <h4 className="font-bold text-gray-900 text-body-lg">Accidental disability cover</h4>
-              <div className="space-y-1 mt-1">
+              <div className="space-y-1.5 mt-1.5">
                 <div className="flex items-start gap-2">
-                  <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  <p className="text-caption text-gray-500">Get sum assured if permanently disabled due to accident</p>
+                  <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-body-sm text-gray-500 leading-snug">Get sum assured if permanently disabled due to accident</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  <p className="text-caption text-gray-500">No premiums to pay for remaining policy term</p>
+                  <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-body-sm text-gray-500 leading-snug">No premiums to pay for remaining policy term</p>
                 </div>
               </div>
             </div>
@@ -866,16 +876,25 @@ export function LifeCriticalIllnessWidget({ onContinue }: { onContinue: () => vo
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md w-full"
     >
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 mb-4">
-        <div className="flex gap-4 mb-4">
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl">🏥</span>
+      <div className="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <div className="flex gap-4 mb-5">
+          <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center flex-shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" fill="#FCE7F3"/>
+              <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="#F472B6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 10V16" stroke="#EC4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 13H15" stroke="#EC4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 10H21" stroke="#F472B6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 2V4" stroke="#F472B6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <h4 className="font-bold text-gray-900 text-body-lg">Critical illness cover</h4>
-            <div className="flex items-start gap-2 mt-1">
-              <svg className="w-3.5 h-3.5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              <p className="text-caption text-gray-500">Lump sum payout for 21 critical illnesses</p>
+            <div className="flex items-start gap-2 mt-1.5">
+              <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <p className="text-body-sm text-gray-500 leading-snug">Lump sum payout for 21 critical illnesses</p>
             </div>
           </div>
         </div>
