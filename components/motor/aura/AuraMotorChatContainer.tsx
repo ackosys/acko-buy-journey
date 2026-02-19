@@ -26,8 +26,8 @@ import {
   OutOfPocketAddons,
   ProtectEveryoneAddons,
   MotorTextInput,
-} from '../MotorWidgets';
-import { PremiumBreakdown, DashboardCTA } from '../MotorFinalWidgets';
+} from './AuraMotorWidgets';
+import { PremiumBreakdown, DashboardCTA } from './AuraMotorFinalWidgets';
 
 function AuraCelebration({ onContinue }: { onContinue?: () => void }) {
   const [confetti, setConfetti] = useState(true);

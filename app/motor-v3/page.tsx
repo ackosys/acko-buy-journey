@@ -6,7 +6,7 @@ import { useMotorStore } from '../../lib/motor/store';
 import AuraMotorEntryScreen from '../../components/motor/aura/AuraMotorEntryScreen';
 import AuraMotorHeader from '../../components/motor/aura/AuraMotorHeader';
 import AuraMotorChatContainer from '../../components/motor/aura/AuraMotorChatContainer';
-import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
+import AuraMotorPrototypeIntro from '../../components/motor/aura/AuraMotorPrototypeIntro';
 import AckoLogo from '../../components/AckoLogo';
 import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
 
@@ -234,7 +234,7 @@ export default function MotorV3Journey() {
 
       <AnimatePresence mode="wait">
         {screen === 'intro' && (
-          <MotorPrototypeIntro
+          <AuraMotorPrototypeIntro
             key="intro"
             onDone={() => setScreen('entry')}
             onJumpTo={handleJumpTo}
