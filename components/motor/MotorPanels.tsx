@@ -528,8 +528,8 @@ export function MotorAIChatPanel() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" /></svg>
+                <div className="w-9 h-9 rounded-full overflow-hidden">
+                  <img src="/ai-assistant.png" alt="AI Assistant" className="w-9 h-9 object-cover" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">AI Assistant</h3>
@@ -548,8 +548,8 @@ export function MotorAIChatPanel() {
               {messages.length === 0 && (
                 <div>
                   <div className="flex gap-3 mb-6">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-900/20">
-                      <img src="/acko-avatar.png" alt="ACKO" className="w-8 h-8 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 shadow-lg shadow-purple-900/20">
+                      <img src="/ai-assistant.png" alt="AI" className="w-8 h-8 object-cover" />
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%]">
                       <p className="text-sm text-white/90">Hey there! I&apos;m your ACKO motor insurance assistant. Ask me anything — plans, coverage, claims, add-ons, or pricing. I&apos;m here to help you make the best choice for your vehicle. 🚗</p>
@@ -577,8 +577,8 @@ export function MotorAIChatPanel() {
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start gap-3'}`}>
                   {msg.role === 'bot' && (
-                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-900/20">
-                      <img src="/acko-avatar.png" alt="ACKO" className="w-7 h-7 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 mt-1 shadow-lg shadow-purple-900/20">
+                      <img src="/ai-assistant.png" alt="AI" className="w-7 h-7 object-cover" />
                     </div>
                   )}
                   <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm whitespace-pre-line ${
@@ -595,7 +595,7 @@ export function MotorAIChatPanel() {
             {/* Expert nudge */}
             <div className="px-6 pb-2">
               <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                <img src="/brand-ambassador.png" alt="Expert" className="w-7 h-7 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <img src="/motor-expert.png" alt="Expert" className="w-7 h-7 rounded-full object-cover" />
                 <p className="text-[11px] text-white/50 flex-1">Need to talk to a real person?</p>
                 <button onClick={() => { updateState({ showAIChat: false, showExpertPanel: true } as Partial<MotorJourneyState>); }} className="text-[11px] text-purple-300 font-semibold hover:text-white transition-colors">Connect</button>
               </div>

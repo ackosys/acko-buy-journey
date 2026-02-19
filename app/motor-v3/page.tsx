@@ -7,6 +7,7 @@ import AuraMotorEntryScreen from '../../components/motor/aura/AuraMotorEntryScre
 import AuraMotorHeader from '../../components/motor/aura/AuraMotorHeader';
 import AuraMotorChatContainer from '../../components/motor/aura/AuraMotorChatContainer';
 import AuraMotorPrototypeIntro from '../../components/motor/aura/AuraMotorPrototypeIntro';
+import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
 import AckoLogo from '../../components/AckoLogo';
 import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
 
@@ -226,6 +227,9 @@ export default function MotorV3Journey() {
 
   return (
     <div className="aura-dark">
+      <MotorExpertPanel />
+      <MotorAIChatPanel />
+
       <AnimatePresence>
         {showWelcome && screen === 'entry' && (
           <AuraWelcomeOverlay key="welcome-overlay" onDone={dismissWelcome} />
