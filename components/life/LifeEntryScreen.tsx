@@ -107,7 +107,7 @@ export default function LifeEntryScreen({ completedStep = 0, onBuyJourney, onJum
                 transition={{ duration: 0.3 }}
               >
                 <p className="text-purple-200/70 text-sm mb-4 ml-10">Start a conversational journey to find the right term plan</p>
-                <div className="ml-10 space-y-2">
+                <div className="ml-10 space-y-3">
                   <button
                     onClick={step1State === 'current' ? () => onBuyJourney('direct') : undefined}
                     disabled={step1State !== 'current'}
@@ -132,18 +132,18 @@ export default function LifeEntryScreen({ completedStep = 0, onBuyJourney, onJum
                   <button
                     onClick={step1State === 'current' ? () => onBuyJourney('guided') : undefined}
                     disabled={step1State !== 'current'}
-                    className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-3 flex items-center gap-3 transition-all active:scale-[0.98] text-left disabled:pointer-events-none"
+                    className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-4 flex items-center gap-3 transition-all active:scale-[0.98] text-left disabled:pointer-events-none"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-xs font-medium">Help me decide</p>
-                      <p className="text-purple-200/50 text-[11px] mt-0.5">We'll calculate the right coverage for you</p>
+                      <p className="text-white text-sm font-semibold">Help me decide</p>
+                      <p className="text-purple-200/60 text-xs mt-0.5">We'll calculate the right coverage for you</p>
                     </div>
-                    <svg className="w-3.5 h-3.5 text-white/30 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-white/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </button>
