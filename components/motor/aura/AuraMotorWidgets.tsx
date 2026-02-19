@@ -2,10 +2,10 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { Option } from '../../lib/core/types';
-import { useMotorStore } from '../../lib/motor/store';
-import { MotorJourneyState, NcbPercentage } from '../../lib/motor/types';
-import { getMotorAddOns } from '../../lib/motor/plans';
+import { Option } from '../../../lib/core/types';
+import { useMotorStore } from '../../../lib/motor/store';
+import { MotorJourneyState, NcbPercentage } from '../../../lib/motor/types';
+import { getMotorAddOns } from '../../../lib/motor/plans';
 
 /* ═══════════════════════════════════════════════
    SVG Icons for Motor
@@ -68,8 +68,8 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             className={`
               relative flex flex-col items-center text-center p-5 rounded-2xl border transition-all duration-200 active:scale-[0.96] min-h-[120px] justify-center
               ${selected === opt.id
-                ? 'border-purple-400 bg-white/15 shadow-lg shadow-purple-900/20'
-                : 'border-white/10 bg-white/6 hover:bg-white/12 hover:border-white/20'
+                ? 'border-[#A855F7] bg-[#2D2D35] shadow-lg shadow-black/20'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35] hover:border-white/8'
               }
             `}
           >
@@ -78,12 +78,12 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
                 {opt.badge}
               </span>
             )}
-            <div className="mb-2 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-              <MotorIcon icon={opt.icon!} className="w-6 h-6 text-purple-300" />
+            <div className="mb-2 w-10 h-10 rounded-xl bg-[#2D2D35] flex items-center justify-center">
+              <MotorIcon icon={opt.icon!} className="w-6 h-6 text-[#C084FC]" />
             </div>
             <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
             {opt.description && (
-              <p className="text-[12px] text-white/40 mt-1">{opt.description}</p>
+              <p className="text-[12px] text-[#64748B] mt-1">{opt.description}</p>
             )}
           </motion.button>
         ))}
@@ -103,20 +103,20 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
           className={`
             text-left px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
             ${selected === opt.id
-              ? 'border-purple-400 bg-white/15 shadow-md shadow-purple-900/20'
-              : 'border-white/10 bg-white/6 hover:bg-white/12 hover:border-white/20'
+              ? 'border-[#A855F7] bg-[#2D2D35] shadow-md shadow-black/20'
+              : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35] hover:border-white/8'
             }
           `}
         >
           <div className="flex items-center gap-3">
             {opt.icon && (
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                <MotorIcon icon={opt.icon} className="w-4.5 h-4.5 text-purple-300" />
+              <div className="w-8 h-8 rounded-lg bg-[#2D2D35] flex items-center justify-center flex-shrink-0">
+                <MotorIcon icon={opt.icon} className="w-4.5 h-4.5 text-[#C084FC]" />
               </div>
             )}
             <div className="flex-1">
               <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
-              {opt.description && <p className="text-[12px] text-white/40 mt-0.5">{opt.description}</p>}
+              {opt.description && <p className="text-[12px] text-[#64748B] mt-0.5">{opt.description}</p>}
             </div>
           </div>
         </motion.button>
@@ -175,7 +175,7 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
           onChange={handleChange}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder={placeholder || 'MH 04 EQ 4392'}
-          className="w-full pl-16 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-[18px] font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors tracking-wider uppercase"
+          className="w-full pl-16 pr-4 py-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[18px] font-semibold text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] focus:bg-[#2D2D35] transition-colors tracking-wider uppercase"
           maxLength={16}
           autoComplete="off"
         />
@@ -183,7 +183,8 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Find my {useMotorStore.getState().vehicleType === 'bike' ? 'bike' : 'car'}
       </button>
@@ -229,13 +230,14 @@ export function MotorTextInput({
         onChange={(e) => { setValue(e.target.value); setError(''); }}
         onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         placeholder={placeholder || 'Type here...'}
-        className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-[16px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors"
+        className="w-full px-4 py-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[16px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] focus:bg-[#2D2D35] transition-colors"
         autoComplete="off"
       />
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="mt-3 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+        className="mt-3 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Continue
       </button>
@@ -290,13 +292,13 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
       className="max-w-sm"
     >
       {/* Vehicle reg plate */}
-      <div className="bg-white/8 border border-white/15 rounded-xl p-4 mb-4">
+      <div className="bg-[#1E1E22] border border-white/5 rounded-xl p-4 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-            <MotorIcon icon={vehicleType === 'bike' ? 'bike' : 'car'} className="w-5 h-5 text-purple-300" />
+          <div className="w-10 h-10 rounded-lg bg-[#A855F7]/15 flex items-center justify-center">
+            <MotorIcon icon={vehicleType === 'bike' ? 'bike' : 'car'} className="w-5 h-5 text-[#C084FC]" />
           </div>
           <div>
-            <p className="text-[11px] text-white/40 uppercase tracking-wider">Registration</p>
+            <p className="text-[11px] text-[#64748B] uppercase tracking-wider">Registration</p>
             <p className="text-[16px] font-bold text-white tracking-wider">{registrationNumber || 'N/A'}</p>
           </div>
         </div>
@@ -327,13 +329,13 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="w-4 h-4 border-2 border-purple-400/30 border-t-purple-400 rounded-full"
+                  className="w-4 h-4 border-2 border-[#A855F7]/30 border-t-[#A855F7] rounded-full"
                 />
               </div>
             ) : (
-              <div className="w-5 h-5 rounded-full bg-white/5 flex-shrink-0" />
+              <div className="w-5 h-5 rounded-full bg-[#1E1E22]/80 flex-shrink-0" />
             )}
-            <span className={`text-[13px] ${i < currentStage ? 'text-white/70' : i === currentStage ? 'text-white' : 'text-white/30'}`}>
+            <span className={`text-[13px] ${i < currentStage ? 'text-[#94A3B8]' : i === currentStage ? 'text-white' : 'text-[#64748B]'}`}>
               {stage.message}
             </span>
           </motion.div>
@@ -341,9 +343,9 @@ export function ProgressiveLoader({ onComplete }: { onComplete: (result: 'succes
       </div>
 
       {/* Progress bar */}
-      <div className="mt-4 h-1 bg-white/10 rounded-full overflow-hidden">
+      <div className="mt-4 h-1 bg-[#2D2D35] rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full"
+          className="h-full bg-gradient-to-r from-[#A855F7] to-[#C084FC] rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: stagesComplete ? '100%' : `${(currentStage / LOADING_STAGES.length) * 100}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -374,16 +376,16 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-sm"
     >
-      <div className="bg-white/8 border border-white/15 rounded-2xl overflow-hidden">
+      <div className="bg-[#1E1E22] border border-white/5 rounded-2xl overflow-hidden">
         {/* Vehicle Header */}
-        <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/10 px-5 py-4 border-b border-white/10">
+        <div className="bg-[#2D2D35] px-5 py-4 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center">
-              <MotorIcon icon={state.vehicleType === 'bike' ? 'bike' : 'car'} className="w-6 h-6 text-purple-300" />
+            <div className="w-11 h-11 rounded-xl bg-[#2D2D35] flex items-center justify-center">
+              <MotorIcon icon={state.vehicleType === 'bike' ? 'bike' : 'car'} className="w-6 h-6 text-[#C084FC]" />
             </div>
             <div>
               <h3 className="text-[16px] font-bold text-white">{v.make} {v.model}</h3>
-              <p className="text-[12px] text-white/50">{v.variant} · {v.fuelType} · {v.registrationYear}</p>
+              <p className="text-[12px] text-[#94A3B8]">{v.variant} · {v.fuelType} · {v.registrationYear}</p>
             </div>
           </div>
         </div>
@@ -391,24 +393,24 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
         {/* Details Grid */}
         <div className="px-5 py-4 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-[12px] text-white/40">Registration</span>
+            <span className="text-[12px] text-[#64748B]">Registration</span>
             <span className="text-[13px] font-semibold text-white tracking-wider">{state.registrationNumber}</span>
           </div>
           {p.insurer && (
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-white/40">Current Insurer</span>
+              <span className="text-[12px] text-[#64748B]">Current Insurer</span>
               <span className="text-[13px] font-medium text-white/80">{p.insurer}</span>
             </div>
           )}
           {p.expiryDate && (
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-white/40">Policy Expiry</span>
+              <span className="text-[12px] text-[#64748B]">Policy Expiry</span>
               <span className="text-[13px] font-medium text-white/80">{p.expiryDate}</span>
             </div>
           )}
           {p.ncbPercentage > 0 && (
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-white/40">NCB</span>
+              <span className="text-[12px] text-[#64748B]">NCB</span>
               <span className="text-[13px] font-medium text-green-400">{p.ncbPercentage}%</span>
             </div>
           )}
@@ -418,13 +420,14 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       <button
         onClick={handleConfirm}
         disabled={confirmed}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97] disabled:opacity-60"
+        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97] disabled:opacity-60"
       >
         {confirmed ? 'Confirmed' : 'Yes, this is correct'}
       </button>
 
       <button
-        className="mt-2 w-full py-2.5 text-[13px] text-white/50 hover:text-white/70 transition-colors"
+        className="mt-2 w-full py-2.5 text-[13px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
       >
         This is not my vehicle
       </button>
@@ -470,7 +473,7 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={`Search ${vehicleType === 'bike' ? 'bike' : 'car'} brand`}
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
+        className="w-full px-4 py-3 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] transition-colors mb-3"
         autoFocus
       />
       <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto scrollbar-hide">
@@ -484,8 +487,8 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
             className={`
               text-left px-3 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === brand
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
               }
             `}
           >
@@ -547,7 +550,7 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={`Search ${brand} model`}
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
+        className="w-full px-4 py-3 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] transition-colors mb-3"
         autoFocus
       />
       <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto scrollbar-hide">
@@ -561,8 +564,8 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
             className={`
               text-left px-3 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === model
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
               }
             `}
           >
@@ -600,7 +603,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search or type variant"
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
+        className="w-full px-4 py-3 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] transition-colors mb-3"
         autoFocus
       />
       <div className="grid grid-cols-3 gap-2 max-h-[250px] overflow-y-auto scrollbar-hide">
@@ -614,8 +617,8 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
             className={`
               px-3 py-2.5 rounded-lg border text-center transition-all duration-200 active:scale-[0.97]
               ${selected === variant
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
               }
             `}
           >
@@ -626,7 +629,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
       {search && !filtered.length && (
         <button
           onClick={() => handleSelect(search)}
-          className="mt-2 w-full py-3 bg-purple-500/20 border border-purple-400/30 rounded-xl text-[14px] text-purple-300 font-medium"
+          className="mt-2 w-full py-3 bg-[#A855F7]/15 border border-[#A855F7]/20 rounded-xl text-[14px] text-[#C084FC] font-medium"
         >
           Use "{search}"
         </button>
@@ -662,8 +665,8 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
             className={`
               px-3 py-3 rounded-lg border text-center transition-all duration-200 active:scale-[0.97]
               ${selected === year
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
               }
             `}
           >
@@ -709,23 +712,23 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
             className={`
               w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === opt.value
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
               }
             `}
           >
             <div className={`
               w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[16px]
-              ${selected === opt.value ? 'bg-purple-500/30 text-purple-300' : 'bg-white/10 text-white/70'}
+              ${selected === opt.value ? 'bg-[#A855F7]/20 text-[#C084FC]' : 'bg-[#2D2D35] text-[#94A3B8]'}
             `}>
               {opt.label}
             </div>
             <div className="text-left flex-1">
               <span className="text-[14px] font-semibold text-white/90">{opt.label} NCB</span>
-              <p className="text-[12px] text-white/40">{opt.description}</p>
+              <p className="text-[12px] text-[#64748B]">{opt.description}</p>
             </div>
             {selected === opt.value && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-5 h-5 rounded-full bg-[#A855F7] flex items-center justify-center">
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
@@ -766,17 +769,18 @@ export function NcbReward({ onContinue }: { onContinue: () => void }) {
           <span className="text-3xl">🎉</span>
         </motion.div>
         <h3 className="text-[18px] font-bold text-white mb-1">NCB Reward Applied!</h3>
-        <p className="text-[14px] text-white/60 mb-3">
+        <p className="text-[14px] text-[#94A3B8] mb-3">
           {state.newNcbPercentage}% discount on your Own Damage premium
         </p>
-        <div className="bg-white/10 rounded-xl p-3">
-          <p className="text-[12px] text-white/40">For staying claim-free</p>
+        <div className="bg-[#2D2D35] rounded-xl p-3">
+          <p className="text-[12px] text-[#64748B]">For staying claim-free</p>
           <p className="text-[20px] font-bold text-green-400">{state.newNcbPercentage}% OFF</p>
         </div>
       </div>
       <button
         onClick={onContinue}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Continue
       </button>
@@ -815,7 +819,7 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search insurer"
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
+        className="w-full px-4 py-3 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#A855F7] transition-colors mb-3"
         autoFocus
       />
       <div className="space-y-2 max-h-[250px] overflow-y-auto scrollbar-hide">
@@ -829,8 +833,8 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
             className={`
               w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === insurer
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-[#A855F7] bg-[#2D2D35]'
+                : 'border-white/5 bg-[#1E1E22] hover:bg-[#2D2D35]'
               }
             `}
           >
@@ -840,7 +844,7 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
       </div>
       <button
         onClick={() => onSelect('skip')}
-        className="mt-3 w-full py-2.5 text-[13px] text-white/50 hover:text-white/70 transition-colors"
+        className="mt-3 w-full py-2.5 text-[13px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
       >
         Skip this step
       </button>
@@ -863,8 +867,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-sm"
     >
-      <div className="bg-white/8 border border-white/15 rounded-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/10 px-5 py-3 border-b border-white/10">
+      <div className="bg-[#1E1E22] border border-white/5 rounded-2xl overflow-hidden">
+        <div className="bg-[#2D2D35] px-5 py-3 border-b border-white/5">
           <h3 className="text-[14px] font-semibold text-white/80">Vehicle Summary</h3>
         </div>
         <div className="px-5 py-4 space-y-3">
@@ -882,7 +886,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 
       <button
         onClick={onConfirm}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         View prices
       </button>
@@ -893,7 +898,7 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 function SummaryRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-[12px] text-white/40">{label}</span>
+      <span className="text-[12px] text-[#64748B]">{label}</span>
       <span className={`text-[13px] font-medium ${highlight ? 'text-green-400' : 'text-white/80'}`}>{value}</span>
     </div>
   );
@@ -917,7 +922,7 @@ export function RejectionScreen() {
           </svg>
         </div>
         <h3 className="text-[16px] font-bold text-white mb-2">Unable to insure</h3>
-        <p className="text-[13px] text-white/50">
+        <p className="text-[13px] text-[#94A3B8]">
           We're currently unable to offer insurance for commercial vehicles. We'll notify you when this changes.
         </p>
       </div>
@@ -959,7 +964,7 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
       // Generate plans (import inline to avoid issues)
       setTimeout(async () => {
         try {
-          const { getMotorPlanDetails, calculateIDV } = await import('../../lib/motor/plans');
+          const { getMotorPlanDetails, calculateIDV } = await import('../../../lib/motor/plans');
           const state = useMotorStore.getState() as MotorJourneyState;
           
           // Calculate IDV
@@ -1001,14 +1006,14 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
       className="max-w-sm"
     >
       {/* Vehicle card */}
-      <div className="bg-white/8 border border-white/15 rounded-xl p-4 mb-4">
+      <div className="bg-[#1E1E22] border border-white/5 rounded-xl p-4 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-            <MotorIcon icon={vehicleType === 'bike' ? 'bike' : 'car'} className="w-5 h-5 text-purple-300" />
+          <div className="w-10 h-10 rounded-lg bg-[#A855F7]/15 flex items-center justify-center">
+            <MotorIcon icon={vehicleType === 'bike' ? 'bike' : 'car'} className="w-5 h-5 text-[#C084FC]" />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-white">{vehicleData.make} {vehicleData.model}</p>
-            <p className="text-[11px] text-white/40">{vehicleData.variant} · {vehicleData.fuelType}</p>
+            <p className="text-[11px] text-[#64748B]">{vehicleData.variant} · {vehicleData.fuelType}</p>
           </div>
         </div>
       </div>
@@ -1038,13 +1043,13 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="w-4 h-4 border-2 border-purple-400/30 border-t-purple-400 rounded-full"
+                  className="w-4 h-4 border-2 border-[#A855F7]/30 border-t-[#A855F7] rounded-full"
                 />
               </div>
             ) : (
-              <div className="w-5 h-5 rounded-full bg-white/5 flex-shrink-0" />
+              <div className="w-5 h-5 rounded-full bg-[#1E1E22]/80 flex-shrink-0" />
             )}
-            <span className={`text-[13px] ${i < currentStage ? 'text-white/70' : i === currentStage ? 'text-white' : 'text-white/30'}`}>
+            <span className={`text-[13px] ${i < currentStage ? 'text-[#94A3B8]' : i === currentStage ? 'text-white' : 'text-[#64748B]'}`}>
               {stage.message}
             </span>
           </motion.div>
@@ -1052,9 +1057,9 @@ export function PlanCalculator({ onComplete }: { onComplete: (result: any) => vo
       </div>
 
       {/* Progress bar */}
-      <div className="mt-4 h-1 bg-white/10 rounded-full overflow-hidden">
+      <div className="mt-4 h-1 bg-[#2D2D35] rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full"
+          className="h-full bg-gradient-to-r from-[#A855F7] to-[#C084FC] rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: stagesComplete ? '100%' : `${(currentStage / CALC_STAGES.length) * 100}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -1115,9 +1120,9 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
     >
       {/* IDV display */}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[12px] text-white/50">Insured value (IDV)</p>
+        <p className="text-[12px] text-[#94A3B8]">Insured value (IDV)</p>
         <p className="text-[14px] font-semibold text-white">
-          ₹{(idv / 100000).toFixed(1)} Lakh <button className="text-purple-300 text-[12px] ml-1">Edit</button>
+          ₹{(idv / 100000).toFixed(1)} Lakh <button className="text-[#C084FC] text-[12px] ml-1">Edit</button>
         </p>
       </div>
 
@@ -1194,34 +1199,34 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl"
+                className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl"
               >
                 <div className="p-5">
                   <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
                   <h3 className="text-[18px] font-bold text-white mb-1">Choose your garage network</h3>
-                  <p className="text-[12px] text-white/50 mb-5">Comprehensive plan lets you pick where your {vType} gets repaired</p>
+                  <p className="text-[12px] text-[#94A3B8] mb-5">Comprehensive plan lets you pick where your {vType} gets repaired</p>
 
                   <div className="space-y-3">
                     {/* Network Garages */}
                     <button
                       onClick={() => handleGarageTierSelect('network')}
-                      className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 rounded-xl text-left transition-all group"
+                      className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                            <svg className="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <div className="w-8 h-8 rounded-lg bg-[#A855F7]/15 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-[#C084FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                             </svg>
                           </div>
                           <div>
-                            <h4 className="text-[14px] font-semibold text-white group-hover:text-purple-200 transition-colors">Network Garages</h4>
-                            <p className="text-[11px] text-white/50">Cashless repairs at 5,400+ ACKO partner garages</p>
+                            <h4 className="text-[14px] font-semibold text-white group-hover:text-[#C084FC] transition-colors">Network Garages</h4>
+                            <p className="text-[11px] text-[#94A3B8]">Cashless repairs at 5,400+ ACKO partner garages</p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 ml-3">
                           <p className="text-[16px] font-bold text-white">{formatPrice(networkPlan?.totalPrice || 0)}</p>
-                          <p className="text-[10px] text-white/40">+ 18% GST</p>
+                          <p className="text-[10px] text-[#64748B]">+ 18% GST</p>
                         </div>
                       </div>
                       {savings > 0 && (
@@ -1234,26 +1239,26 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
                     {/* All Garages */}
                     <button
                       onClick={() => handleGarageTierSelect('all')}
-                      className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 rounded-xl text-left transition-all group"
+                      className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                            <svg className="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <div className="w-8 h-8 rounded-lg bg-[#A855F7]/15 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-[#C084FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.384 3.168 1.03-5.995L2.073 7.533l6.02-.874L11.42 1.5l3.326 5.159 6.02.874-4.993 4.81 1.03 5.995z" />
                             </svg>
                           </div>
                           <div>
-                            <h4 className="text-[14px] font-semibold text-white group-hover:text-purple-200 transition-colors">All Garages</h4>
-                            <p className="text-[11px] text-white/50">Get repairs at any garage of your choice</p>
+                            <h4 className="text-[14px] font-semibold text-white group-hover:text-[#C084FC] transition-colors">All Garages</h4>
+                            <p className="text-[11px] text-[#94A3B8]">Get repairs at any garage of your choice</p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 ml-3">
                           <p className="text-[16px] font-bold text-white">{formatPrice(allPlan?.totalPrice || 0)}</p>
-                          <p className="text-[10px] text-white/40">+ 18% GST</p>
+                          <p className="text-[10px] text-[#64748B]">+ 18% GST</p>
                         </div>
                       </div>
-                      <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/20">
+                      <span className="text-[10px] bg-[#A855F7]/15 text-[#C084FC] px-2 py-0.5 rounded-full border border-[#A855F7]/15">
                         Recommended
                       </span>
                     </button>
@@ -1261,7 +1266,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
 
                   <button
                     onClick={() => setShowGarageTier(false)}
-                    className="w-full mt-4 py-3 text-[14px] text-white/50 hover:text-white/70 transition-colors"
+                    className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
                   >
                     Cancel
                   </button>
@@ -1314,8 +1319,8 @@ function PlanCard({
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         className={`
-          bg-white/8 border rounded-2xl overflow-hidden transition-all duration-200
-          ${recommended ? 'border-purple-400/40 bg-white/10' : 'border-white/10'}
+          bg-[#1E1E22] border rounded-2xl overflow-hidden transition-all duration-200
+          ${recommended ? 'border-[#A855F7]/25 bg-[#2D2D35]' : 'border-white/5'}
         `}
       >
         {/* Header */}
@@ -1324,25 +1329,25 @@ function PlanCard({
             <div className="flex items-start justify-between mb-1">
               <div>
                 <h3 className="text-[15px] font-semibold text-white">{title}</h3>
-                {subtitle && <p className="text-[11px] text-white/40 mt-0.5">{subtitle}</p>}
+                {subtitle && <p className="text-[11px] text-[#64748B] mt-0.5">{subtitle}</p>}
               </div>
               {badge && (
-                <span className="text-[10px] bg-purple-500/30 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/30 whitespace-nowrap">
+                <span className="text-[10px] bg-[#A855F7]/20 text-[#C084FC] px-2 py-0.5 rounded-full border border-[#A855F7]/20 whitespace-nowrap">
                   {badge}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
               {strikePrice && (
-                <p className="text-[14px] font-semibold text-white/40 line-through">{formatPrice(strikePrice)}</p>
+                <p className="text-[14px] font-semibold text-[#64748B] line-through">{formatPrice(strikePrice)}</p>
               )}
               <p className="text-[18px] font-bold text-white">{price}</p>
             </div>
-            <p className="text-[12px] text-white/50 leading-relaxed mt-1">
+            <p className="text-[12px] text-[#94A3B8] leading-relaxed mt-1">
               {description}{' '}
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="text-purple-300 underline hover:text-purple-200 transition-colors"
+                className="text-[#C084FC] underline hover:text-[#C084FC] transition-colors"
               >
                 Learn more
               </button>
@@ -1362,12 +1367,12 @@ function PlanCard({
                     {isGarageFeature ? (
                       <button
                         onClick={() => setShowGarageExplorer(true)}
-                        className="text-[12px] text-white/70 hover:text-purple-300 transition-colors text-left underline decoration-white/30 hover:decoration-purple-300"
+                        className="text-[12px] text-[#94A3B8] hover:text-[#C084FC] transition-colors text-left underline decoration-white/30 hover:decoration-[#C084FC]"
                       >
                         {feature}
                       </button>
                     ) : (
-                      <span className="text-[12px] text-white/70">{feature}</span>
+                      <span className="text-[12px] text-[#94A3B8]">{feature}</span>
                     )}
                   </div>
                 );
@@ -1379,7 +1384,7 @@ function PlanCard({
           {!expanded && (
             <button
               onClick={onSelect}
-              className="w-full py-2.5 bg-white/10 border border-white/20 rounded-xl text-[13px] font-semibold text-white hover:bg-white/15 transition-colors"
+              className="w-full py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[13px] font-semibold text-white hover:bg-[#2D2D35] transition-colors"
             >
               {isComprehensive ? 'Explore plan' : 'Select this plan'}
             </button>
@@ -1394,16 +1399,16 @@ function PlanCard({
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="border-t border-white/10"
+              className="border-t border-white/5"
             >
               {/* Tabs */}
-              <div className="flex border-b border-white/10">
+              <div className="flex border-b border-white/5">
                 <button
                   onClick={() => setActiveTab('covered')}
                   className={`flex-1 py-3 text-[12px] font-medium transition-colors ${
                     activeTab === 'covered'
-                      ? 'text-white border-b-2 border-purple-400'
-                      : 'text-white/40 hover:text-white/60'
+                      ? 'text-white border-b-2 border-[#A855F7]'
+                      : 'text-[#64748B] hover:text-[#94A3B8]'
                   }`}
                 >
                   Covered
@@ -1412,8 +1417,8 @@ function PlanCard({
                   onClick={() => setActiveTab('not_covered')}
                   className={`flex-1 py-3 text-[12px] font-medium transition-colors ${
                     activeTab === 'not_covered'
-                      ? 'text-white border-b-2 border-purple-400'
-                      : 'text-white/40 hover:text-white/60'
+                      ? 'text-white border-b-2 border-[#A855F7]'
+                      : 'text-[#64748B] hover:text-[#94A3B8]'
                   }`}
                 >
                   Not covered
@@ -1422,8 +1427,8 @@ function PlanCard({
                   onClick={() => setActiveTab('upgrades')}
                   className={`flex-1 py-3 text-[12px] font-medium transition-colors ${
                     activeTab === 'upgrades'
-                      ? 'text-white border-b-2 border-purple-400'
-                      : 'text-white/40 hover:text-white/60'
+                      ? 'text-white border-b-2 border-[#A855F7]'
+                      : 'text-[#64748B] hover:text-[#94A3B8]'
                   }`}
                 >
                   {plan.type === 'third_party' ? 'Upgrades' : 'Available upgrades'}
@@ -1454,14 +1459,14 @@ function PlanCard({
                               {isGarageFeature ? (
                                 <button
                                   onClick={() => setShowGarageExplorer(true)}
-                                  className="text-[12px] font-medium text-white/90 hover:text-purple-300 transition-colors underline decoration-white/30 hover:decoration-purple-300 text-left"
+                                  className="text-[12px] font-medium text-white/90 hover:text-[#C084FC] transition-colors underline decoration-white/30 hover:decoration-[#C084FC] text-left"
                                 >
                                   {title}
                                 </button>
                               ) : (
                                 <p className="text-[12px] font-medium text-white/90">{title}</p>
                               )}
-                              {desc && <p className="text-[11px] text-white/50 mt-0.5">{desc}</p>}
+                              {desc && <p className="text-[11px] text-[#94A3B8] mt-0.5">{desc}</p>}
                             </div>
                           </div>
                         );
@@ -1487,7 +1492,7 @@ function PlanCard({
                             </svg>
                             <div className="flex-1">
                               <p className="text-[12px] font-medium text-white/90">{title}</p>
-                              {desc && <p className="text-[11px] text-white/50 mt-0.5">{desc}</p>}
+                              {desc && <p className="text-[11px] text-[#94A3B8] mt-0.5">{desc}</p>}
                             </div>
                           </div>
                         );
@@ -1502,7 +1507,7 @@ function PlanCard({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 10 }}
                     >
-                      <p className="text-[12px] text-white/50 mb-3">
+                      <p className="text-[12px] text-[#94A3B8] mb-3">
                         Opt for additional covers in the next steps to enhance your {plan.type === 'third_party' ? 'coverage' : `${vType} protection`}
                       </p>
                       <div className="space-y-2">
@@ -1535,14 +1540,14 @@ function PlanCard({
                           };
                           const addon = addonInfo[addonId];
                           return (
-                            <div key={i} className="py-2.5 px-3 bg-white/5 rounded-lg border border-white/8">
+                            <div key={i} className="py-2.5 px-3 bg-[#1E1E22]/80 rounded-lg border border-white/5">
                               <div className="flex items-start gap-2">
-                                <svg className="w-4 h-4 text-purple-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                <svg className="w-4 h-4 text-[#C084FC] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
                                 <div>
                                   <p className="text-[12px] font-medium text-white/90">{addon?.name || addonId}</p>
-                                  <p className="text-[11px] text-white/40 mt-0.5">{addon?.desc || ''}</p>
+                                  <p className="text-[11px] text-[#64748B] mt-0.5">{addon?.desc || ''}</p>
                                 </div>
                               </div>
                             </div>
@@ -1555,16 +1560,17 @@ function PlanCard({
               </div>
 
               {/* CTA in expanded state */}
-              <div className="px-4 pb-4 border-t border-white/10 pt-4">
+              <div className="px-4 pb-4 border-t border-white/5 pt-4">
                 <button
                   onClick={onSelect}
-                  className="w-full py-3 bg-white text-[#1C0B47] rounded-xl text-[14px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+                  style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+                  className="w-full py-3 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
                 >
                   Select this plan
                 </button>
                 <button
                   onClick={() => setExpanded(false)}
-                  className="w-full py-2 mt-2 text-[12px] text-white/50 hover:text-white/70 transition-colors"
+                  className="w-full py-2 mt-2 text-[12px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors"
                 >
                   Close details
                 </button>
@@ -1648,17 +1654,17 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl max-h-[85vh] bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-2xl max-h-[85vh] bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
           <div>
             <h2 className="text-[18px] font-bold text-white">Cashless Network Garages</h2>
-            <p className="text-[12px] text-white/50 mt-0.5">5,400+ garages across India</p>
+            <p className="text-[12px] text-[#94A3B8] mt-0.5">5,400+ garages across India</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2D2D35] hover:bg-[#2D2D35] transition-colors"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1667,10 +1673,10 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
         </div>
 
         {/* Search & Filter */}
-        <div className="px-5 py-4 space-y-3 border-b border-white/10">
+        <div className="px-5 py-4 space-y-3 border-b border-white/5">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1683,7 +1689,7 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
               placeholder="Search by garage name or area..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#2D2D35] border border-white/5 rounded-xl text-[13px] text-white placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#A855F7]/50"
             />
           </div>
 
@@ -1694,8 +1700,8 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
                 onClick={() => setSelectedCity(city)}
                 className={`px-4 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-all ${
                   selectedCity === city
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/15'
+                    ? 'bg-[#A855F7] text-white'
+                    : 'bg-[#2D2D35] text-[#94A3B8] hover:bg-[#2D2D35]'
                 }`}
               >
                 {city === 'all' ? 'All Cities' : city}
@@ -1712,12 +1718,12 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
                 key={garage.id}
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/8 hover:border-white/20 transition-all"
+                className="p-4 bg-[#1E1E22]/80 rounded-xl border border-white/5 hover:bg-[#1E1E22] hover:border-white/5 transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="text-[14px] font-semibold text-white">{garage.name}</h3>
-                    <p className="text-[12px] text-white/50 mt-1">
+                    <p className="text-[12px] text-[#94A3B8] mt-1">
                       {garage.area}, {garage.city}
                     </p>
                   </div>
@@ -1741,15 +1747,15 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
-              <p className="text-[14px] text-white/50">No garages found</p>
-              <p className="text-[12px] text-white/30 mt-1">Try adjusting your search or filters</p>
+              <p className="text-[14px] text-[#94A3B8]">No garages found</p>
+              <p className="text-[12px] text-[#64748B] mt-1">Try adjusting your search or filters</p>
             </div>
           )}
         </div>
 
         {/* Footer Info */}
-        <div className="px-5 py-3 bg-white/5 border-t border-white/10">
-          <p className="text-[11px] text-white/40 text-center">
+        <div className="px-5 py-3 bg-[#1E1E22]/80 border-t border-white/5">
+          <p className="text-[11px] text-[#64748B] text-center">
             Showing {filteredGarages.length} of 5,400+ partner garages • Coverage across all major cities
           </p>
         </div>
@@ -1820,7 +1826,7 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
         <div className="mb-4">
           <h3 className="text-[16px] font-bold text-white mb-1">Cut down your out-of-pocket expenses</h3>
-          <p className="text-[12px] text-white/50">Recommended for you</p>
+          <p className="text-[12px] text-[#94A3B8]">Recommended for you</p>
         </div>
 
         {addons.map((addon: any) => {
@@ -1830,20 +1836,20 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
           const variantName = selectedItem?.variantId ? addon.variants?.find((v: any) => v.id === selectedItem.variantId)?.name : null;
 
           return (
-            <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-white/10 border-purple-400/50' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+            <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[#2D2D35] border-[#A855F7]/30' : 'bg-[#1E1E22]/80 border-white/5 hover:border-white/8'}`}>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-[14px] font-semibold text-white">{addon.name}</h4>
-                    {addon.hasVariants && <span className="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full">2 options</span>}
+                    {addon.hasVariants && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/15 px-2 py-0.5 rounded-full">2 options</span>}
                     {addon.recommended && <span className="text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">Recommended</span>}
                   </div>
-                  <p className="text-[12px] text-white/60 leading-relaxed">{addon.description}</p>
-                  {selected && variantName && <p className="text-[11px] text-purple-300 mt-1">Selected: {variantName}</p>}
+                  <p className="text-[12px] text-[#94A3B8] leading-relaxed">{addon.description}</p>
+                  {selected && variantName && <p className="text-[11px] text-[#C084FC] mt-1">Selected: {variantName}</p>}
                 </div>
                 <div className="flex flex-col items-end gap-2 ml-4">
                   <p className="text-[14px] font-bold text-white whitespace-nowrap">₹{displayPrice}</p>
-                  <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'}`}>
+                  <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[#2D2D35] text-[#94A3B8] hover:bg-[#2D2D35] border border-white/5'}`}>
                     {selected ? '−' : '+'}
                   </button>
                 </div>
@@ -1852,48 +1858,48 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
           );
         })}
 
-        <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
+        <div className="mt-6 p-4 bg-[#1E1E22]/80 rounded-xl border border-white/5">
           <div className="space-y-2 text-[13px]">
-            <div className="flex justify-between text-white/70"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
-            {totals.addonTotal > 0 && (<><div className="flex justify-between text-white/70"><span>Add-ons</span><span>₹{totals.addonTotal.toLocaleString()}</span></div><div className="flex justify-between text-white/70"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
-            <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-white text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
+            <div className="flex justify-between text-[#94A3B8]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
+            {totals.addonTotal > 0 && (<><div className="flex justify-between text-[#94A3B8]"><span>Add-ons</span><span>₹{totals.addonTotal.toLocaleString()}</span></div><div className="flex justify-between text-[#94A3B8]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
+            <div className="border-t border-white/5 pt-2 flex justify-between font-bold text-white text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
           </div>
         </div>
 
         <div className="flex gap-3 mt-4">
-          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-xl text-[14px] font-semibold text-white hover:bg-white/15 transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} className="flex-1 py-3 px-4 bg-white text-[#1C0B47] rounded-xl text-[14px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] font-semibold text-white hover:bg-[#2D2D35] transition-colors">Continue without add-ons</button>
+          <button onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }} className="flex-1 py-3 px-4 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
-        <p className="text-[11px] text-white/40 text-center mt-2">Next: Additional covers to reduce medical expenses</p>
+        <p className="text-[11px] text-[#64748B] text-center mt-2">Next: Additional covers to reduce medical expenses</p>
       </motion.div>
 
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
                 <h3 className="text-[18px] font-bold text-white mb-1">Select {showVariantModal.addon.name} variant</h3>
-                <p className="text-[12px] text-white/50 mb-4">{showVariantModal.addon.description}</p>
+                <p className="text-[12px] text-[#94A3B8] mb-4">{showVariantModal.addon.description}</p>
                 <div className="space-y-3">
                   {showVariantModal.addon.variants?.map((variant: any) => (
-                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 rounded-xl text-left transition-all group">
+                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-[15px] font-semibold text-white">{variant.name}</span>
-                          {variant.recommended && <span className="text-[10px] text-purple-300 bg-purple-500/30 px-2 py-0.5 rounded-full">Recommended</span>}
+                          {variant.recommended && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/20 px-2 py-0.5 rounded-full">Recommended</span>}
                           {variant.badge && <span className="text-[10px] text-green-300 bg-green-500/30 px-2 py-0.5 rounded-full">{variant.badge}</span>}
                         </div>
                         <span className="text-[16px] font-bold text-white">₹{variant.price}</span>
                       </div>
                       <ul className="space-y-1">
                         {variant.features?.map((feature: string, i: number) => (
-                          <li key={i} className="text-[11px] text-white/60 flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
+                          <li key={i} className="text-[11px] text-[#94A3B8] flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
                         ))}
                       </ul>
                     </button>
                   ))}
                 </div>
-                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-white/50 hover:text-white/70 transition-colors">Cancel</button>
+                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors">Cancel</button>
               </div>
             </motion.div>
           </motion.div>
@@ -1970,20 +1976,20 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
     const variantName = selectedItem?.variantId ? addon.variants?.find((v: any) => v.id === selectedItem.variantId)?.name : null;
 
     return (
-      <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-white/10 border-purple-400/50' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+      <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[#2D2D35] border-[#A855F7]/30' : 'bg-[#1E1E22]/80 border-white/5 hover:border-white/8'}`}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h4 className="text-[14px] font-semibold text-white">{addon.name}</h4>
-              {addon.hasVariants && <span className="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full">2 options</span>}
+              {addon.hasVariants && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/15 px-2 py-0.5 rounded-full">2 options</span>}
               {addon.mandatory && <span className="text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-full">Mandatory by law</span>}
             </div>
-            <p className="text-[12px] text-white/60 leading-relaxed">{addon.description}</p>
-            {selected && variantName && <p className="text-[11px] text-purple-300 mt-1">Selected: {variantName}</p>}
+            <p className="text-[12px] text-[#94A3B8] leading-relaxed">{addon.description}</p>
+            {selected && variantName && <p className="text-[11px] text-[#C084FC] mt-1">Selected: {variantName}</p>}
           </div>
           <div className="flex flex-col items-end gap-2 ml-4">
             <p className="text-[14px] font-bold text-white whitespace-nowrap">{addon.hasVariants ? 'from ' : ''}₹{displayPrice}</p>
-            <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'}`}>
+            <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[#2D2D35] text-[#94A3B8] hover:bg-[#2D2D35] border border-white/5'}`}>
               {selected ? '−' : '+'}
             </button>
           </div>
@@ -2000,319 +2006,61 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
         </div>
 
         <div className="mb-4">
-          <p className="text-[13px] font-semibold text-white/70 mb-3">For you</p>
+          <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">For you</p>
           {addons.filter((a: any) => a.id === 'personal_accident').map(renderAddonCard)}
         </div>
 
         <div className="mb-4">
-          <p className="text-[13px] font-semibold text-white/70 mb-3">For your loved ones</p>
+          <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">For your loved ones</p>
           {addons.filter((a: any) => a.id === 'passenger_protection').map(renderAddonCard)}
         </div>
 
         <div className="mb-4">
-          <p className="text-[13px] font-semibold text-white/70 mb-3">For your driver</p>
+          <p className="text-[13px] font-semibold text-[#94A3B8] mb-3">For your driver</p>
           {addons.filter((a: any) => a.id === 'paid_driver').map(renderAddonCard)}
         </div>
 
-        <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
+        <div className="mt-6 p-4 bg-[#1E1E22]/80 rounded-xl border border-white/5">
           <div className="space-y-2 text-[13px]">
-            <div className="flex justify-between text-white/70"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
-            {totals.totalAddons > 0 && (<><div className="flex justify-between text-white/70"><span>Add-ons</span><span>₹{totals.totalAddons.toLocaleString()}</span></div><div className="flex justify-between text-white/70"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
-            <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-white text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
+            <div className="flex justify-between text-[#94A3B8]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
+            {totals.totalAddons > 0 && (<><div className="flex justify-between text-[#94A3B8]"><span>Add-ons</span><span>₹{totals.totalAddons.toLocaleString()}</span></div><div className="flex justify-between text-[#94A3B8]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
+            <div className="border-t border-white/5 pt-2 flex justify-between font-bold text-white text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
           </div>
         </div>
 
         <div className="flex gap-3 mt-4">
-          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-xl text-[14px] font-semibold text-white hover:bg-white/15 transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} className="flex-1 py-3 px-4 bg-white text-[#1C0B47] rounded-xl text-[14px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[#2D2D35] border border-white/5 rounded-xl text-[14px] font-semibold text-white hover:bg-[#2D2D35] transition-colors">Continue without add-ons</button>
+          <button onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }} className="flex-1 py-3 px-4 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
       </motion.div>
 
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-gradient-to-br from-[#2D1B69] to-[#1C0B47] rounded-t-3xl sm:rounded-3xl shadow-2xl">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[#1E1E22] rounded-t-3xl sm:rounded-3xl shadow-2xl">
               <div className="p-5">
                 <h3 className="text-[18px] font-bold text-white mb-1">Select Personal Accident coverage amount</h3>
-                <p className="text-[12px] text-white/50 mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
+                <p className="text-[12px] text-[#94A3B8] mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
                 <div className="space-y-3">
                   {showVariantModal.addon.variants?.map((variant: any) => (
-                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 rounded-xl text-left transition-all group">
+                    <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[#1E1E22]/80 hover:bg-[#2D2D35] border border-white/5 hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-[15px] font-semibold text-white">{variant.name}</span>
-                          {variant.recommended && <span className="text-[10px] text-purple-300 bg-purple-500/30 px-2 py-0.5 rounded-full">Recommended</span>}
+                          {variant.recommended && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/20 px-2 py-0.5 rounded-full">Recommended</span>}
                           {variant.badge && <span className="text-[10px] text-green-300 bg-green-500/30 px-2 py-0.5 rounded-full">{variant.badge}</span>}
                         </div>
                         <span className="text-[16px] font-bold text-white">₹{variant.price}</span>
                       </div>
                       <ul className="space-y-1">
                         {variant.features?.map((feature: string, i: number) => (
-                          <li key={i} className="text-[11px] text-white/60 flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
+                          <li key={i} className="text-[11px] text-[#94A3B8] flex items-start gap-2"><span className="text-green-400 mt-0.5">•</span><span>{feature}</span></li>
                         ))}
                       </ul>
                     </button>
                   ))}
                 </div>
-                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-white/50 hover:text-white/70 transition-colors">Cancel</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   Document Upload Widget — Claims FNOL
-   ═══════════════════════════════════════════════ */
-
-type DocSource = 'camera' | 'gallery' | 'pdf' | 'digilocker';
-
-interface DocUploadResult {
-  rcUploaded: boolean;
-  dlUploaded: boolean;
-  prevPolicyUploaded: boolean;
-}
-
-const DOC_SOURCE_OPTIONS: { id: DocSource; label: string; icon: string }[] = [
-  { id: 'camera', label: 'Click photos with camera', icon: '📷' },
-  { id: 'gallery', label: 'Upload both sides from gallery', icon: '🖼️' },
-  { id: 'pdf', label: 'Upload PDF / Zip file', icon: '📄' },
-  { id: 'digilocker', label: 'Fetch from Digilocker', icon: '🔒' },
-];
-
-export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocUploadResult) => void }) {
-  const state = useMotorStore() as MotorJourneyState;
-  const hasAutoRC = !!(state.registrationNumber && state.vehicleData?.make);
-
-  const [rcUploaded, setRcUploaded] = useState(hasAutoRC);
-  const [dlUploaded, setDlUploaded] = useState(false);
-  const [prevPolicyUploaded, setPrevPolicyUploaded] = useState(false);
-  const [sourceSheet, setSourceSheet] = useState<'rc' | 'dl' | 'prev' | null>(null);
-  const [uploadingFor, setUploadingFor] = useState<'rc' | 'dl' | 'prev' | null>(null);
-
-  const ownerName = state.ownerName || 'You';
-  const regNo = state.registrationNumber || 'your vehicle';
-  const chassisNo = state.chassisNumber || 'XXXXXXXXXXXX';
-
-  const handleSourceSelect = (_source: DocSource) => {
-    const target = sourceSheet;
-    setSourceSheet(null);
-    setUploadingFor(target);
-    setTimeout(() => {
-      if (target === 'rc') setRcUploaded(true);
-      if (target === 'dl') setDlUploaded(true);
-      if (target === 'prev') setPrevPolicyUploaded(true);
-      setUploadingFor(null);
-    }, 900);
-  };
-
-  const canProceed = rcUploaded && dlUploaded;
-
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-3 w-full max-w-sm"
-      >
-        <p className="text-[13px] font-semibold text-white/50 uppercase tracking-wide px-1 mb-1">Upload important documents</p>
-
-        {/* RC Card */}
-        <div className={`rounded-2xl border transition-all overflow-hidden ${rcUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
-          <div className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${rcUploaded ? 'bg-green-500/20' : 'bg-white/10'}`}>
-                <svg className={`w-5 h-5 ${rcUploaded ? 'text-green-400' : 'text-white/60'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-[14px] font-semibold text-white">Registration Certificate (RC)</p>
-                  {hasAutoRC && rcUploaded && !uploadingFor && (
-                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Auto-fetched ✓</span>
-                  )}
-                  {!hasAutoRC && rcUploaded && (
-                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
-                  )}
-                </div>
-                <p className="text-[12px] text-white/50">
-                  {hasAutoRC ? 'Fetched from Vahan portal' : `Upload RC for ${regNo}`}
-                </p>
-              </div>
-            </div>
-
-            {hasAutoRC && rcUploaded && (
-              <div className="bg-white/5 rounded-xl px-3 py-2.5 mb-3 space-y-1.5">
-                <div className="flex justify-between text-[12px]">
-                  <span className="text-white/50">Registration holder</span>
-                  <span className="text-white font-medium">{ownerName}</span>
-                </div>
-                <div className="flex justify-between text-[12px]">
-                  <span className="text-white/50">Vehicle number</span>
-                  <span className="text-white font-medium">{regNo}</span>
-                </div>
-                <div className="flex justify-between text-[12px]">
-                  <span className="text-white/50">Chassis no.</span>
-                  <span className="text-white font-medium">{chassisNo}</span>
-                </div>
-              </div>
-            )}
-
-            {uploadingFor === 'rc' ? (
-              <div className="flex items-center gap-2 py-1">
-                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-                <span className="text-[13px] text-white/60">Uploading...</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => setSourceSheet('rc')}
-                className="text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
-              >
-                {rcUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* DL Card */}
-        <div className={`rounded-2xl border transition-all overflow-hidden ${dlUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
-          <div className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dlUploaded ? 'bg-green-500/20' : 'bg-white/10'}`}>
-                <svg className={`w-5 h-5 ${dlUploaded ? 'text-green-400' : 'text-white/60'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-[14px] font-semibold text-white">Driving Licence (DL)</p>
-                  {dlUploaded && (
-                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
-                  )}
-                </div>
-                <p className="text-[12px] text-white/50">Upload DL for {ownerName}</p>
-              </div>
-            </div>
-
-            {uploadingFor === 'dl' ? (
-              <div className="flex items-center gap-2 py-1">
-                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-                <span className="text-[13px] text-white/60">Uploading...</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => setSourceSheet('dl')}
-                className="text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
-              >
-                {dlUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Previous Year's Policy — optional */}
-        <div className={`rounded-2xl border transition-all overflow-hidden ${prevPolicyUploaded ? 'border-green-500/40 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
-          <div className="p-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${prevPolicyUploaded ? 'bg-green-500/20' : 'bg-white/10'}`}>
-                <svg className={`w-5 h-5 ${prevPolicyUploaded ? 'text-green-400' : 'text-white/60'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-[14px] font-semibold text-white">Previous Year&apos;s Policy</p>
-                  {prevPolicyUploaded && (
-                    <span className="text-[10px] font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">Uploaded ✓</span>
-                  )}
-                  <span className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full">Optional</span>
-                </div>
-                <p className="text-[12px] text-white/50">Helps speed up claim processing</p>
-              </div>
-            </div>
-
-            {uploadingFor === 'prev' ? (
-              <div className="flex items-center gap-2 mt-3">
-                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-                <span className="text-[13px] text-white/60">Uploading...</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => setSourceSheet('prev')}
-                className="mt-3 text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
-              >
-                {prevPolicyUploaded ? 'Replace ↗' : '+ Add more'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Incorrect details link */}
-        <p className="text-[12px] text-center text-white/40 py-1">
-          Incorrect details?{' '}
-          <button className="text-purple-400 underline underline-offset-2">Update here</button>
-        </p>
-
-        {/* Proceed CTA */}
-        <button
-          onClick={() => canProceed && onContinue({ rcUploaded, dlUploaded, prevPolicyUploaded })}
-          disabled={!canProceed}
-          className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
-            canProceed
-              ? 'bg-white text-[#1C0B47] hover:bg-white/90 active:scale-[0.97]'
-              : 'bg-white/10 text-white/30 cursor-not-allowed'
-          }`}
-        >
-          {canProceed ? 'Proceed \u2192' : `Upload ${!rcUploaded ? 'RC' : 'DL'} to continue`}
-        </button>
-
-        <button className="w-full py-2 text-[13px] text-white/30 hover:text-white/50 transition-colors">
-          Save and continue later
-        </button>
-      </motion.div>
-
-      {/* Source selector bottom sheet */}
-      <AnimatePresence>
-        {sourceSheet && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-end"
-            onClick={() => setSourceSheet(null)}
-          >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-h-[45vh] flex flex-col"
-              style={{ background: '#1C1028', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.08)' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex-shrink-0 pt-3 pb-2 px-5">
-                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <p className="text-[16px] font-semibold text-white mb-1">Select a source</p>
-                <p className="text-[12px] text-white/50">in PNG, JPEG, or PDF format (Max 10 MB)</p>
-              </div>
-              <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-2">
-                {DOC_SOURCE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => handleSourceSelect(opt.id)}
-                    className="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/8 hover:border-purple-400/30 rounded-xl transition-all text-left"
-                  >
-                    <span className="text-2xl">{opt.icon}</span>
-                    <span className="text-[14px] font-medium text-white">{opt.label}</span>
-                    <svg className="w-4 h-4 text-white/30 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </button>
-                ))}
+                <button onClick={() => setShowVariantModal({ addon: null, show: false })} className="w-full mt-4 py-3 text-[14px] text-[#94A3B8] hover:text-[#94A3B8] transition-colors">Cancel</button>
               </div>
             </motion.div>
           </motion.div>

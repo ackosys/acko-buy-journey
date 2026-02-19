@@ -54,13 +54,12 @@ const registrationHasNumber: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Great, ${vLabel(state)} insurance it is.`,
-      `Do you have your vehicle registration number?`,
+      `Happy to help! 😊`,
+      `Are you looking to renew insurance for your current ${vLabel(state)}, or insure a brand-new one?`,
     ],
-    subText: `This helps us fetch your ${vLabel(state)} details automatically and save you time.`,
     options: [
-      { id: 'yes', label: 'Yes, I have it', description: 'Enter your registration number', icon: 'document' },
-      { id: 'no', label: 'No, brand new vehicle', description: `Just bought a new ${vLabel(state)}`, icon: 'star' },
+      { id: 'yes', label: 'Renew / Switch insurance', description: `I already have a ${vLabel(state)}`, icon: 'document' },
+      { id: 'no', label: `Insure my new ${vLabel(state)}`, description: `Just got a brand-new ${vLabel(state)}`, icon: 'star' },
     ],
   }),
   processResponse: (response) => ({
@@ -152,7 +151,10 @@ const vehicleFetchFound: MotorConversationStep = {
     ],
   }),
   processResponse: () => ({}),
-  getNextStep: () => 'pre_quote.cng_check',
+  getNextStep: (_, state) => {
+    if (state.vehicleType === 'bike') return 'pre_quote.policy_status';
+    return 'pre_quote.cng_check';
+  },
 };
 
 /* ═══════════════════════════════════════════════
@@ -231,27 +233,43 @@ const manualEntrySelectFuel: MotorConversationStep = {
   id: 'manual_entry.select_fuel',
   module: 'manual_entry',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
-    botMessages: [
-      `What fuel type does your ${state.vehicleData.model} run on?`,
-    ],
-    subText: `Fuel type affects your premium calculation.`,
-    options: [
-      { id: 'petrol', label: 'Petrol', icon: 'fuel' },
-      { id: 'diesel', label: 'Diesel', icon: 'fuel' },
-      { id: 'electric', label: 'Electric', icon: 'electric' },
-      { id: 'cng', label: 'CNG', icon: 'fuel' },
-    ],
-  }),
+  getScript: (state) => {
+    const isBike = state.vehicleType === 'bike';
+    const fuelOptions = isBike
+      ? [
+          { id: 'petrol', label: 'Petrol', icon: 'fuel' },
+          { id: 'electric', label: 'Electric', icon: 'electric' },
+        ]
+      : [
+          { id: 'petrol', label: 'Petrol', icon: 'fuel' },
+          { id: 'diesel', label: 'Diesel', icon: 'fuel' },
+          { id: 'electric', label: 'Electric', icon: 'electric' },
+          { id: 'cng', label: 'CNG', icon: 'fuel' },
+        ];
+    return {
+      botMessages: [
+        `What fuel type does your ${state.vehicleData.model} run on?`,
+      ],
+      subText: `Fuel type affects your premium calculation.`,
+      options: fuelOptions,
+    };
+  },
   processResponse: (response, state) => ({
     vehicleData: { ...state.vehicleData, fuelType: response },
   }),
-  getNextStep: () => 'manual_entry.select_variant',
+  getNextStep: (_, state) => {
+    if (state.vehicleType === 'bike') {
+      if (state.vehicleEntryType === 'brand_new') return 'brand_new.delivery_date';
+      return 'manual_entry.select_year';
+    }
+    return 'manual_entry.select_variant';
+  },
 };
 
 const manualEntrySelectVariant: MotorConversationStep = {
   id: 'manual_entry.select_variant',
   module: 'manual_entry',
+  condition: (state) => state.vehicleType !== 'bike',
   widgetType: 'variant_selector',
   getScript: (state) => ({
     botMessages: [
@@ -294,8 +312,11 @@ const manualEntrySelectYear: MotorConversationStep = {
     },
   }),
   getNextStep: (_, state) => {
-    if (state.vehicleEntryType === 'brand_new') return 'brand_new.commercial_check';
-    return 'pre_quote.cng_check';
+    const isBike = state.vehicleType === 'bike';
+    if (state.vehicleEntryType === 'brand_new') {
+      return isBike ? 'brand_new.delivery_date' : 'brand_new.commercial_check';
+    }
+    return isBike ? 'pre_quote.policy_status' : 'pre_quote.cng_check';
   },
 };
 
@@ -317,15 +338,15 @@ const POPULAR_CARS = [
 ];
 
 const POPULAR_BIKES = [
-  { id: 'hero_splendor', label: 'Hero Splendor Plus' },
-  { id: 'honda_activa', label: 'Honda Activa 6G' },
-  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar NS200' },
-  { id: 'tvs_apache', label: 'TVS Apache RTR 200' },
-  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350' },
-  { id: 'yamaha_fz', label: 'Yamaha FZ-S' },
-  { id: 'honda_shine', label: 'Honda Shine' },
-  { id: 'tvs_jupiter', label: 'TVS Jupiter' },
-  { id: 'royal_enfield_hunter', label: 'Royal Enfield Hunter 350' },
+  { id: 'hero_splendor', label: 'Hero Splendor Plus', description: '100cc Commuter' },
+  { id: 'honda_activa', label: 'Honda Activa 6G', description: '110cc Scooter' },
+  { id: 'honda_shine', label: 'Honda Shine', description: '125cc Commuter' },
+  { id: 'tvs_jupiter', label: 'TVS Jupiter', description: '110cc Scooter' },
+  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar 150', description: '150cc Sports' },
+  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350', description: '350cc Cruiser' },
+  { id: 'tvs_apache', label: 'TVS Apache RTR 160', description: '160cc Sports' },
+  { id: 'hero_hf_deluxe', label: 'Hero HF Deluxe', description: '100cc Commuter' },
+  { id: 'suzuki_access', label: 'Suzuki Access 125', description: '125cc Scooter' },
 ];
 
 /* Step 1: Popular vehicle suggestions (car or bike) */
@@ -374,10 +395,11 @@ const brandNewPopularCars: MotorConversationStep = {
   },
 };
 
-/* Step 2: Commercial vehicle check */
+/* Step 2: Commercial vehicle check (cars only — bikes skip) */
 const brandNewCommercialCheck: MotorConversationStep = {
   id: 'brand_new.commercial_check',
   module: 'manual_entry',
+  condition: (state) => state.vehicleType !== 'bike',
   widgetType: 'selection_cards',
   getScript: () => ({
     botMessages: ['Is this a commercial vehicle?'],
@@ -645,6 +667,7 @@ const ownerDetailsLoanProvider: MotorConversationStep = {
 const preQuoteCngCheck: MotorConversationStep = {
   id: 'pre_quote.cng_check',
   module: 'pre_quote',
+  condition: (state) => state.vehicleType !== 'bike',
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
@@ -661,11 +684,6 @@ const preQuoteCngCheck: MotorConversationStep = {
     vehicleData: { ...state.vehicleData, hasCngKit: response === 'yes' },
   }),
   getNextStep: (_, state) => {
-    // If auto-fetched, we already have policy data — go to commercial check
-    if (state.vehicleDataSource === 'auto_fetched') {
-      return 'pre_quote.commercial_check';
-    }
-    // Manual entry — need to check if insured
     return 'pre_quote.commercial_check';
   },
 };
@@ -673,6 +691,7 @@ const preQuoteCngCheck: MotorConversationStep = {
 const preQuoteCommercialCheck: MotorConversationStep = {
   id: 'pre_quote.commercial_check',
   module: 'pre_quote',
+  condition: (state) => state.vehicleType !== 'bike',
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
@@ -687,13 +706,8 @@ const preQuoteCommercialCheck: MotorConversationStep = {
   processResponse: (response, state) => ({
     vehicleData: { ...state.vehicleData, isCommercialVehicle: response === 'yes' },
   }),
-  getNextStep: (response, state) => {
+  getNextStep: (response) => {
     if (response === 'yes') return 'pre_quote.commercial_rejection';
-    // If auto-fetched with previous policy, ask about expiry status
-    if (state.vehicleDataSource === 'auto_fetched') {
-      return 'pre_quote.policy_status';
-    }
-    // Manual/brand new — ask if they have insurance
     return 'pre_quote.policy_status';
   },
 };
@@ -1135,11 +1149,31 @@ const completionDashboard: MotorConversationStep = {
   }),
   processResponse: (response) => ({
     paymentComplete: true,
-    journeyComplete: response?.choice === 'download',
   }),
   getNextStep: (response) => {
     const choice = response?.choice || response;
     if (choice === 'dashboard') return 'db.welcome';
+    return 'completion.download_confirm';
+  },
+};
+
+const completionDownloadConfirm: MotorConversationStep = {
+  id: 'completion.download_confirm',
+  module: 'completion',
+  widgetType: 'selection_cards',
+  getScript: () => ({
+    botMessages: [
+      `Your policy document is being downloaded. You'll find it in your device's downloads folder.`,
+      `Would you like to do anything else?`,
+    ],
+    options: [
+      { id: 'dashboard', label: 'Go to Dashboard', icon: 'forward', description: 'View policy details & manage claims' },
+      { id: 'done', label: 'I\'m all set', icon: 'check' },
+    ],
+  }),
+  processResponse: () => ({}),
+  getNextStep: (response) => {
+    if (response === 'dashboard') return 'db.welcome';
     return 'completion.end';
   },
 };
@@ -1149,9 +1183,13 @@ const completionEnd: MotorConversationStep = {
   module: 'completion',
   widgetType: 'none',
   getScript: () => ({
-    botMessages: [],
+    botMessages: [
+      `You're all set! If you need anything, you can always come back to your dashboard. Drive safe!`,
+    ],
   }),
-  processResponse: () => ({}),
+  processResponse: () => ({
+    journeyComplete: true,
+  }),
   getNextStep: () => 'completion.end',
 };
 
@@ -1212,6 +1250,7 @@ const MOTOR_STEPS: Record<string, MotorConversationStep> = {
   'payment.process': paymentProcess,
   'payment.success': paymentSuccess,
   'completion.dashboard': completionDashboard,
+  'completion.download_confirm': completionDownloadConfirm,
   'completion.end': completionEnd,
 };
 

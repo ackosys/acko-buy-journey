@@ -100,7 +100,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
       const options = [
         { id: 'raise_claim', label: 'Raise a Claim', icon: 'document', description: 'File accident or damage claim' },
         { id: 'get_answers', label: 'Get Answers', icon: 'help', description: 'Coverage FAQs' },
-        { id: 'download_doc', label: 'Download Documents', icon: 'upload', description: 'Policy, RC card, certificates' },
+        { id: 'download_doc', label: 'Download Documents', icon: 'download', description: 'Policy, RC card, certificates' },
         { id: 'edit_policy', label: 'Edit Policy', icon: 'refresh', description: 'Modify add-ons, nominee' },
       ];
       if (hasActiveRequests(state)) {
@@ -488,10 +488,51 @@ const motorDashboardSteps: MotorConversationStep[] = [
       ],
     }),
     processResponse: (response) => ({ dashboardClaimNeedsTowing: response === 'yes' }),
+    getNextStep: () => 'db.claim_docs_intro',
+  },
+
+  /* Step 10: Document upload intro */
+  {
+    id: 'db.claim_docs_intro',
+    module: 'claims',
+    widgetType: 'none',
+    getScript: (state) => {
+      const hasTowing = state.dashboardClaimNeedsTowing === true;
+      const hasAutoRC = !!(state.registrationNumber && state.vehicleData?.make);
+      const towingAck = hasTowing
+        ? `Got it — our towing team will reach you within 15 minutes. 🚛`
+        : `Got it, glad you're sorted.`;
+      const rcNote = hasAutoRC
+        ? `We've already fetched your RC details from the Vahan portal, so that's taken care of.`
+        : `We'll need you to upload your Registration Certificate (RC).`;
+      return {
+        botMessages: [
+          towingAck,
+          `One last thing before we file your claim.`,
+          `${rcNote} We also need your Driving Licence (DL) to verify the driver's identity.`,
+          `This helps us process your claim faster. 📄`,
+        ],
+      };
+    },
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_docs_upload',
+  },
+
+  /* Step 11: Document upload widget */
+  {
+    id: 'db.claim_docs_upload',
+    module: 'claims',
+    widgetType: 'document_upload',
+    getScript: () => ({ botMessages: [] }),
+    processResponse: (response) => ({
+      dashboardClaimRcUploaded: !!response?.rcUploaded,
+      dashboardClaimDlUploaded: !!response?.dlUploaded,
+      dashboardClaimPrevPolicyUploaded: !!response?.prevPolicyUploaded,
+    }),
     getNextStep: () => 'db.claim_review',
   },
 
-  /* Step 10: Review & confirm */
+  /* Step 13: Review & confirm */
   {
     id: 'db.claim_review',
     module: 'claims',
@@ -522,7 +563,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getNextStep: (response) => response === 'confirm' ? 'db.claim_submitted' : 'db.actions',
   },
 
-  /* Step 11: Submission confirmation */
+  /* Step 14: Submission confirmation */
   {
     id: 'db.claim_submitted',
     module: 'claims',
@@ -587,6 +628,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
             vehicleLocation: state.dashboardClaimVehicleLocation,
             safeToDriver: state.dashboardClaimSafeToDriver,
             needsTowing: state.dashboardClaimNeedsTowing,
+            rcUploaded: state.dashboardClaimRcUploaded,
+            dlUploaded: state.dashboardClaimDlUploaded,
             status,
             submittedAt: Date.now(),
           },
@@ -601,6 +644,9 @@ const motorDashboardSteps: MotorConversationStep[] = [
         dashboardClaimVehicleLocation: '',
         dashboardClaimSafeToDriver: null,
         dashboardClaimNeedsTowing: null,
+        dashboardClaimRcUploaded: false,
+        dashboardClaimDlUploaded: false,
+        dashboardClaimPrevPolicyUploaded: false,
       };
     },
     getNextStep: (response) => response === 'track' ? 'db.track_overview' : 'db.actions',

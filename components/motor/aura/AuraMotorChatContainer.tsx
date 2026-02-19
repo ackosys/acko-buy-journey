@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMotorStore } from '../../lib/motor/store';
-import { getMotorStep } from '../../lib/motor/scripts';
-import { MotorJourneyState } from '../../lib/motor/types';
-import ChatMessage, { TypingIndicator } from '../ChatMessage';
+import { useMotorStore } from '../../../lib/motor/store';
+import { getMotorStep } from '../../../lib/motor/scripts';
+import { MotorJourneyState } from '../../../lib/motor/types';
+import AuraChatMessage, { AuraTypingIndicator } from './AuraChatMessage';
 import { ChatMessage as ChatMessageType } from '@/lib/types';
 import {
   MotorSelectionCards,
@@ -26,12 +26,10 @@ import {
   OutOfPocketAddons,
   ProtectEveryoneAddons,
   MotorTextInput,
-  DocumentUploadWidget,
-} from './MotorWidgets';
-import { PremiumBreakdown, DashboardCTA } from './MotorFinalWidgets';
+} from './AuraMotorWidgets';
+import { PremiumBreakdown, DashboardCTA } from './AuraMotorFinalWidgets';
 
-// Add MotorCelebration locally since it needs to be inline
-function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
+function AuraCelebration({ onContinue }: { onContinue?: () => void }) {
   const [confetti, setConfetti] = useState(true);
 
   useEffect(() => {
@@ -39,12 +37,9 @@ function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-advance after celebration
   useEffect(() => {
     if (onContinue) {
-      const advanceTimer = setTimeout(() => {
-        onContinue();
-      }, 3500); // Advance after confetti ends
+      const advanceTimer = setTimeout(() => onContinue(), 3500);
       return () => clearTimeout(advanceTimer);
     }
   }, [onContinue]);
@@ -60,7 +55,7 @@ function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
               animate={{ y: 600, opacity: 0, rotate: Math.random() * 720 }}
               transition={{ duration: 2 + Math.random() * 2, delay: Math.random() * 0.5, ease: 'linear' }}
               className="absolute w-2 h-2 rounded-full"
-              style={{ backgroundColor: ['#FFD700', '#FF6B6B', '#4ECDC4', '#A78BFA', '#F472B6'][Math.floor(Math.random() * 5)] }}
+              style={{ backgroundColor: ['#A855F7', '#C084FC', '#22C55E', '#3B82F6', '#EC4899'][Math.floor(Math.random() * 5)] }}
             />
           ))}
         </div>
@@ -71,7 +66,8 @@ function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', damping: 10, stiffness: 200, delay: 0.2 }}
-          className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-xl shadow-green-500/30"
+          className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
+          style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: '0 8px 24px rgba(34,197,94,0.3)' }}
         >
           <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -79,15 +75,21 @@ function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
         </motion.div>
 
         <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-[22px] font-bold text-white mb-3">
-          Payment Successful! 🎉
+          Payment Successful!
         </motion.h2>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-[14px] text-white/70 mb-6 leading-relaxed">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-[14px] mb-6 leading-relaxed" style={{ color: '#94A3B8' }}>
           Your motor insurance is now active.<br />Welcome to ACKO!
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-[12px] text-white/50 mb-2">Policy Number</p>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="rounded-xl p-4"
+          style={{ background: '#1E1E22', border: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <p className="text-[12px] mb-2" style={{ color: '#64748B' }}>Policy Number</p>
           <p className="text-[16px] font-bold text-white">ACKO/MOT/{Math.floor(Math.random() * 9000000 + 1000000)}</p>
         </motion.div>
       </div>
@@ -95,7 +97,7 @@ function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
   );
 }
 
-export default function MotorChatContainer() {
+export default function AuraMotorChatContainer() {
   const {
     currentStepId,
     conversationHistory,
@@ -111,24 +113,18 @@ export default function MotorChatContainer() {
   const [editModal, setEditModal] = useState<{ stepId: string; visible: boolean }>({ stepId: '', visible: false });
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
 
-  // Scroll to bottom
   useEffect(() => {
     setTimeout(() => {
-      scrollRef.current?.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }, 100);
   }, [conversationHistory, isTyping, showWidget]);
 
-  // Process current step
   useEffect(() => {
     const step = getMotorStep(currentStepId);
     if (!step) return;
 
     const currentState = useMotorStore.getState() as MotorJourneyState;
 
-    // Skip if condition not met
     if (step.condition && !step.condition(currentState)) {
       const nextStepId = step.getNextStep(null, currentState);
       const nextStep = getMotorStep(nextStepId);
@@ -180,7 +176,6 @@ export default function MotorChatContainer() {
     addBotMessage();
   }, [currentStepId]);
 
-  // Handle edit
   const handleEditRequest = (stepId: string) => {
     setEditModal({ stepId, visible: true });
   };
@@ -191,7 +186,6 @@ export default function MotorChatContainer() {
     setEditingStepId(stepId);
   };
 
-  // Handle response from the inline edit widget
   const handleEditResponse = useCallback((response: any) => {
     if (!editingStepId) return;
     const step = getMotorStep(editingStepId);
@@ -206,26 +200,20 @@ export default function MotorChatContainer() {
       if (opt) userLabel = opt.label;
     }
 
-    // Special labels for motor widgets
     if (step.widgetType === 'plan_selector') {
       userLabel = `Selected: ${response.plan?.name || 'plan'}`;
     }
 
-    // Trim all messages after this step's user message, then re-route
     trimAndUpdateFromStep(editingStepId, userLabel);
 
-    // Apply the state update from the new response
     const stateUpdate = step.processResponse(response, currentState);
     const mergedState = { ...currentState, ...stateUpdate } as MotorJourneyState;
     updateState(stateUpdate as Partial<MotorJourneyState>);
 
     setEditingStepId(null);
     setShowWidget(false);
-
-    // Clear processedRef so new steps can be processed fresh
     processedRef.current.clear();
 
-    // Navigate to the correct next step based on new response
     const nextStepId = step.getNextStep(response, mergedState);
     const nextStep = getMotorStep(nextStepId);
     setTimeout(() => {
@@ -236,7 +224,6 @@ export default function MotorChatContainer() {
     }, 300);
   }, [editingStepId, trimAndUpdateFromStep]);
 
-  // Render edit widget (for in-place editing)
   const renderEditWidget = () => {
     if (!editingStepId) return null;
     const step = getMotorStep(editingStepId);
@@ -277,14 +264,12 @@ export default function MotorChatContainer() {
     }
   };
 
-  // Check if the edit widget requires a full-size overlay (not bottom sheet)
   const isLargeEditWidget = () => {
     if (!editingStepId) return false;
     const step = getMotorStep(editingStepId);
     return ['brand_selector', 'model_selector', 'variant_selector', 'year_selector', 'ncb_selector', 'insurer_selector', 'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons'].includes(step?.widgetType || '');
   };
 
-  // Handle response
   const handleResponse = useCallback((response: any) => {
     const step = getMotorStep(currentStepId);
     if (!step) return;
@@ -298,7 +283,6 @@ export default function MotorChatContainer() {
       if (opt) userLabel = opt.label;
     }
 
-    // Special labels
     if (step.widgetType === 'progressive_loader') {
       userLabel = response === 'success' ? 'Vehicle found!' : 'Details not found';
     } else if (step.widgetType === 'vehicle_details_card') {
@@ -308,7 +292,6 @@ export default function MotorChatContainer() {
     } else if (step.widgetType === 'editable_summary') {
       userLabel = 'Confirmed — view prices';
     } else if (step.widgetType === 'plan_calculator') {
-      // Plan calculator is a loading state - don't show user message
       userLabel = '';
     } else if (step.widgetType === 'plan_selector') {
       const planName = response.plan?.name || 'plan';
@@ -325,16 +308,8 @@ export default function MotorChatContainer() {
       userLabel = '';
     } else if (step.widgetType === 'dashboard_cta') {
       userLabel = response.choice === 'dashboard' ? 'Go to Dashboard' : 'Download Policy';
-    } else if (step.widgetType === 'document_upload') {
-      const docsUploaded = [
-        response?.rcUploaded && 'RC',
-        response?.dlUploaded && 'DL',
-        response?.prevPolicyUploaded && 'Previous Policy',
-      ].filter(Boolean).join(', ');
-      userLabel = `Documents uploaded: ${docsUploaded}`;
     }
 
-    // Add user message (skip for loading states)
     if (userLabel) {
       addMessage({
         type: 'user',
@@ -360,7 +335,6 @@ export default function MotorChatContainer() {
     }, 300);
   }, [currentStepId]);
 
-  // Render widget
   const renderWidget = () => {
     const step = getMotorStep(currentStepId);
     if (!step || !showWidget) return null;
@@ -410,17 +384,14 @@ export default function MotorChatContainer() {
       case 'premium_breakdown':
         return <PremiumBreakdown onContinue={() => handleResponse({})} />;
       case 'motor_celebration':
-        return <MotorCelebration onContinue={() => handleResponse({})} />;
+        return <AuraCelebration onContinue={() => handleResponse({})} />;
       case 'dashboard_cta':
         return <DashboardCTA onSelect={(choice) => handleResponse({ choice })} />;
-      case 'document_upload':
-        return <DocumentUploadWidget onContinue={(result) => handleResponse(result)} />;
       default:
         return null;
     }
   };
 
-  // Large widgets render inline in chat
   const isLargeWidget = () => {
     const step = getMotorStep(currentStepId);
     if (!step) return false;
@@ -430,28 +401,27 @@ export default function MotorChatContainer() {
       'ncb_selector', 'ncb_reward', 'insurer_selector',
       'editable_summary', 'rejection_screen', 'plan_calculator',
       'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons',
-      'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
+      'premium_breakdown', 'motor_celebration', 'dashboard_cta',
     ].includes(step.widgetType);
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 chat-bg-dark">
-      {/* Scrollable chat messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
+    <div className="flex-1 flex flex-col min-h-0 aura-chat-bg">
+      {/* Scrollable chat */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-lg mx-auto">
           <AnimatePresence initial={false}>
             {conversationHistory.map((msg) => (
-              <ChatMessage key={msg.id} message={msg as ChatMessageType} onEdit={handleEditRequest} />
+              <AuraChatMessage key={msg.id} message={msg as ChatMessageType} onEdit={handleEditRequest} />
             ))}
           </AnimatePresence>
 
           {isTyping && (
             <div className="mb-4">
-              <TypingIndicator />
+              <AuraTypingIndicator />
             </div>
           )}
 
-          {/* Large widgets render inline */}
           <AnimatePresence>
             {showWidget && isLargeWidget() && (
               <motion.div
@@ -470,7 +440,7 @@ export default function MotorChatContainer() {
         </div>
       </div>
 
-      {/* Sticky bottom widget for input-type widgets */}
+      {/* Sticky bottom widget */}
       <AnimatePresence>
         {showWidget && !isLargeWidget() && (
           <motion.div
@@ -478,9 +448,9 @@ export default function MotorChatContainer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)] max-h-[45vh] overflow-y-auto"
+            className="shrink-0 aura-widget-glass max-h-[45vh] overflow-y-auto"
           >
-            <div className="max-w-lg mx-auto px-5 py-5 pb-8">
+            <div className="max-w-lg mx-auto px-6 py-5 pb-8">
               {renderWidget()}
             </div>
           </motion.div>
@@ -493,7 +463,7 @@ export default function MotorChatContainer() {
           <>
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
+              animate={{ opacity: 0.6 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black z-50"
               onClick={() => setEditModal({ stepId: '', visible: false })}
@@ -502,28 +472,31 @@ export default function MotorChatContainer() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto bg-[#2A1463] border border-white/15 rounded-2xl shadow-2xl z-50 p-6"
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto rounded-2xl shadow-2xl z-50 p-6"
+              style={{ background: '#1E1E22', border: '1px solid rgba(255,255,255,0.05)' }}
             >
               <div className="text-center">
-                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#2D2D35' }}>
+                  <svg className="w-6 h-6" style={{ color: '#C084FC' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </div>
                 <h3 className="text-[16px] font-semibold text-white mb-2">Edit this answer?</h3>
-                <p className="text-[13px] text-white/50 mb-6">
+                <p className="text-[13px] mb-6" style={{ color: '#64748B' }}>
                   The conversation will continue from this point with your updated answer.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setEditModal({ stepId: '', visible: false })}
-                    className="flex-1 py-2.5 border border-white/20 text-white/70 rounded-xl text-[14px] font-medium hover:bg-white/10 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl text-[14px] font-medium transition-colors"
+                    style={{ border: '1px solid rgba(255,255,255,0.1)', color: '#94A3B8' }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmEdit}
-                    className="flex-1 py-2.5 bg-white text-[#1C0B47] rounded-xl text-[14px] font-medium hover:bg-white/90 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl text-[14px] font-medium text-white transition-colors"
+                    style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
                   >
                     Edit answer
                   </button>
@@ -534,13 +507,13 @@ export default function MotorChatContainer() {
         )}
       </AnimatePresence>
 
-      {/* Edit Widget Bottom Sheet / Full Overlay */}
+      {/* Edit Widget Bottom Sheet */}
       <AnimatePresence>
         {editingStepId && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
+              animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black z-50"
               onClick={() => setEditingStepId(null)}
@@ -550,15 +523,16 @@ export default function MotorChatContainer() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 60 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className={`fixed inset-x-0 z-50 bg-[#1E0F46] border-t border-white/10 shadow-2xl px-5 py-6 max-w-lg mx-auto ${
+              className={`fixed inset-x-0 z-50 shadow-2xl px-6 py-6 max-w-lg mx-auto ${
                 isLargeEditWidget()
-                  ? 'bottom-0 top-16 rounded-t-2xl overflow-y-auto pb-10'
-                  : 'bottom-0 rounded-t-2xl pb-10 max-h-[45vh] overflow-y-auto'
+                  ? 'bottom-0 top-16 rounded-t-[32px] overflow-y-auto pb-10'
+                  : 'bottom-0 rounded-t-[32px] pb-10 max-h-[45vh] overflow-y-auto'
               }`}
+              style={{ background: '#1E1E22', borderTop: '1px solid rgba(255,255,255,0.05)' }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-[14px] font-semibold text-white/80">Update your answer</h4>
-                <button onClick={() => setEditingStepId(null)} className="text-white/40 hover:text-white/70 transition-colors">
+                <h4 className="text-[14px] font-semibold" style={{ color: '#94A3B8' }}>Update your answer</h4>
+                <button onClick={() => setEditingStepId(null)} className="transition-colors" style={{ color: '#64748B' }}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>

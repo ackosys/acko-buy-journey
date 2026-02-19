@@ -186,3 +186,40 @@
     border-width: 0.5px;
   }
 }
+
+/* ══════════════════════════════════════════════════
+   AURA DARK THEME — Glassmorphism + Gradient Accents
+   ══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+.aura-dark {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+.aura-chat-bg {
+  background: linear-gradient(180deg, #121214 0%, #18181B 40%, #121214 100%);
+}
+
+.aura-widget-glass {
+  background: rgba(30, 30, 34, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes auraPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.aura-pop-in {
+  animation: auraPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

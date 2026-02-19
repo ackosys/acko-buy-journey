@@ -62,6 +62,7 @@ export type MotorWidgetType =
   | 'premium_breakdown'
   | 'motor_celebration'
   | 'dashboard_cta'
+  | 'document_upload'
   | 'none';
 
 export interface VehicleData {
@@ -105,6 +106,8 @@ export interface MotorClaim {
   vehicleLocation: string;
   safeToDriver: boolean | null;
   needsTowing: boolean | null;
+  rcUploaded?: boolean;
+  dlUploaded?: boolean;
   status: string;
   submittedAt: number;
 }
@@ -197,6 +200,11 @@ export interface MotorJourneyState extends BaseJourneyState {
   dashboardClaimVehicleLocation: string;
   dashboardClaimSafeToDriver: boolean | null;
   dashboardClaimNeedsTowing: boolean | null;
+
+  /* ── Dashboard: Document Uploads (Claims) ── */
+  dashboardClaimRcUploaded: boolean;
+  dashboardClaimDlUploaded: boolean;
+  dashboardClaimPrevPolicyUploaded: boolean;
 
   /* ── Dashboard: Edits ── */
   dashboardSubmittedEdits: MotorEditRequest[];
@@ -317,6 +325,9 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   dashboardClaimVehicleLocation: '',
   dashboardClaimSafeToDriver: null,
   dashboardClaimNeedsTowing: null,
+  dashboardClaimRcUploaded: false,
+  dashboardClaimDlUploaded: false,
+  dashboardClaimPrevPolicyUploaded: false,
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
 };
