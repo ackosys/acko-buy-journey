@@ -1997,7 +1997,7 @@ export function LifeEkycScreen({ onContinue }: { onContinue: () => void }) {
                 >
                   Upload & Submit
                 </button>
-                <button onClick={() => setStage(stage === 'error_service_down' ? 'error_service_down' : 'error_locked')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back</button>
+                <button onClick={() => setStage('error_locked')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back</button>
               </div>
             )}
 
@@ -2030,81 +2030,1052 @@ export function LifeEkycScreen({ onContinue }: { onContinue: () => void }) {
    Medical Screen — Tele-medical & health tests scheduling
    ═══════════════════════════════════════════════════════ */
 
-export function LifeMedicalScreen({ onContinue }: { onContinue: () => void }) {
-  const [scheduled, setScheduled] = useState(false);
+/* ═══════════════════════════════════════════════════════
+   Medical Screen — Full VMER flow per p2i_flow.md
+   Stages: intro → availability → slot_picker → scheduled →
+           call_active → post_call_review → under_review →
+           ppmc_intro → ppmc_address → ppmc_slot → ppmc_confirmed →
+           docs_required → docs_submitted → complete
+   Edge cases: slot_conflict, ppmc_offline, partial doc upload
+   ═══════════════════════════════════════════════════════ */
 
-  const handleSchedule = () => {
-    setScheduled(true);
-    setTimeout(() => onContinue(), 1500);
+type MedStage =
+  | 'intro'
+  | 'availability_now'
+  | 'availability_none'
+  | 'slot_picker'
+  | 'slot_conflict'
+  | 'scheduled'
+  | 'call_active'
+  | 'post_call_review'
+  | 'review_submitting'
+  | 'under_review'
+  | 'ppmc_intro'
+  | 'ppmc_address'
+  | 'ppmc_address_new'
+  | 'ppmc_slot'
+  | 'ppmc_confirmed'
+  | 'ppmc_offline'
+  | 'docs_required'
+  | 'docs_confirm'
+  | 'docs_submitted'
+  | 'complete';
+
+interface SlotSelection { dateLabel: string; dateIndex: number; time: string; }
+interface AddressEntry { id: string; label: string; address: string; }
+
+const SLOT_DAYS = Array.from({ length: 7 }, (_, i) => {
+  const d = new Date(); d.setDate(d.getDate() + i);
+  return {
+    idx: i,
+    day: d.toLocaleDateString('en-IN', { weekday: 'short' }),
+    date: d.getDate(),
+    month: d.toLocaleDateString('en-IN', { month: 'short' }),
+    full: d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }),
   };
+});
+
+const SLOT_TIMES = {
+  Morning: ['9:00 AM', '10:00 AM', '11:00 AM'],
+  Afternoon: ['12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'],
+  Evening: ['5:00 PM', '6:00 PM', '7:00 PM'],
+};
+
+// Simulate unavailable slots
+const UNAVAILABLE: Record<number, string[]> = { 0: ['9:00 AM', '10:00 AM', '12:00 PM'], 1: ['9:00 AM', '1:00 PM'], 2: ['11:00 AM'] };
+
+// Slot conflict trigger: picking 9 AM on day 2 or later simulates conflict
+const isConflictSlot = (dayIdx: number, time: string) => dayIdx >= 2 && time === '9:00 AM';
+
+const SAVED_ADDRESSES: AddressEntry[] = [
+  { id: 'home', label: 'Home', address: 'Flat 4B, Prestige Lakeside Habitat, Whitefield, Bangalore 560066' },
+  { id: 'work', label: 'Work', address: 'ACKO Tower, 3rd Floor, Koramangala 5th Block, Bangalore 560095' },
+];
+
+const MEDICAL_CONDITIONS = ['Diabetes', 'Hypertension', 'Heart Disease', 'Asthma / COPD', 'Cancer (any type)', 'Kidney Disease', 'Liver Disease', 'Thyroid Disorder', 'None of the above'];
+
+const CONDITION_DOCS: Record<string, string[]> = {
+  Diabetes: ['Latest HbA1c report (within 3 months)', 'Recent blood sugar report', 'Prescription/treatment summary'],
+  Hypertension: ['Latest BP readings log or report', 'ECG report (within 6 months)', 'Prescription/treatment summary'],
+  'Heart Disease': ['Latest ECG & 2D Echo report', 'Cardiologist consultation notes', 'Angiography/stent reports (if any)'],
+  'Asthma / COPD': ['Spirometry/PFT report', 'Prescription/treatment summary'],
+  'Cancer (any type)': ['Histopathology/biopsy report', 'Oncologist consultation notes', 'Latest treatment status letter'],
+  'Kidney Disease': ['Latest kidney function test (KFT)', 'Urine analysis report', 'Nephrologist consultation notes'],
+  'Liver Disease': ['Latest LFT report', 'USG Abdomen report', 'Hepatologist consultation notes'],
+  'Thyroid Disorder': ['Latest TSH/T3/T4 report', 'Prescription/treatment summary'],
+};
+
+function MedSlotPicker({
+  title,
+  onSelect,
+  onBack,
+}: {
+  title: string;
+  onSelect: (slot: SlotSelection) => void;
+  onBack?: () => void;
+}) {
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-md"
-    >
+    <div className="space-y-4">
+      <p className="text-body-sm font-semibold text-gray-700">{title}</p>
+
+      {/* Day picker — horizontal scroll */}
+      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+        {SLOT_DAYS.map((d) => (
+          <button
+            key={d.idx}
+            onClick={() => { setSelectedDay(d.idx); setSelectedTime(null); }}
+            className={`flex-shrink-0 flex flex-col items-center px-3.5 py-2.5 rounded-xl border transition-all min-w-[52px]
+              ${selectedDay === d.idx ? 'border-purple-500 bg-purple-600 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-purple-300'}`}
+          >
+            <span className={`text-[10px] font-semibold uppercase tracking-wide ${selectedDay === d.idx ? 'text-purple-100' : 'text-gray-400'}`}>{d.day}</span>
+            <span className="text-lg font-bold leading-tight">{d.date}</span>
+            <span className={`text-[10px] ${selectedDay === d.idx ? 'text-purple-200' : 'text-gray-400'}`}>{d.month}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Time slots grouped by period */}
+      <div className="space-y-3">
+        {(Object.entries(SLOT_TIMES) as [string, string[]][]).map(([period, times]) => (
+          <div key={period}>
+            <p className="text-caption font-semibold text-gray-400 uppercase tracking-wide mb-1.5">{period}</p>
+            <div className="flex flex-wrap gap-2">
+              {times.map((t) => {
+                const unavailable = (UNAVAILABLE[selectedDay] || []).includes(t);
+                const selected = selectedTime === t;
+                return (
+                  <button
+                    key={t}
+                    disabled={unavailable}
+                    onClick={() => setSelectedTime(t)}
+                    className={`px-3 py-2 rounded-xl border text-label-sm font-medium transition-all
+                      ${unavailable ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                        : selected ? 'border-purple-500 bg-purple-600 text-white shadow-md shadow-purple-200'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-purple-300 hover:bg-purple-50'}`}
+                  >
+                    {t}
+                    {unavailable && <span className="ml-1 text-[9px] text-gray-300">Full</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        disabled={!selectedTime}
+        onClick={() => {
+          if (!selectedTime) return;
+          onSelect({ dateLabel: SLOT_DAYS[selectedDay].full, dateIndex: selectedDay, time: selectedTime });
+        }}
+        className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold disabled:opacity-40 active:scale-[0.97] transition-transform"
+      >
+        Confirm Slot
+      </button>
+      {onBack && (
+        <button onClick={onBack} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back</button>
+      )}
+    </div>
+  );
+}
+
+function MedYesNo({ question, onAnswer }: { question: string; onAnswer: (yes: boolean) => void }) {
+  const [val, setVal] = useState<boolean | null>(null);
+  return (
+    <div className="space-y-1.5">
+      <p className="text-body-sm text-gray-800">{question}</p>
+      <div className="flex gap-2">
+        {[true, false].map((opt) => (
+          <button
+            key={String(opt)}
+            onClick={() => { setVal(opt); setTimeout(() => onAnswer(opt), 150); }}
+            className={`flex-1 py-2.5 rounded-xl border text-label-sm font-semibold transition-all active:scale-[0.97]
+              ${val === opt ? opt ? 'border-purple-500 bg-purple-600 text-white' : 'border-gray-400 bg-gray-700 text-white' : 'border-gray-200 text-gray-700 hover:border-gray-300'}`}
+          >
+            {opt ? 'Yes' : 'No'}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function LifeMedicalScreen({ onContinue }: { onContinue: () => void }) {
+  const [stage, setStage] = useState<MedStage>('intro');
+  const [joinCountdown, setJoinCountdown] = useState(300); // 5 mins in seconds
+  const [bookedSlot, setBookedSlot] = useState<SlotSelection | null>(null);
+  const [ppBookedSlot, setPpBookedSlot] = useState<SlotSelection | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<string>('home');
+  const [newAddress, setNewAddress] = useState({ flat: '', area: '', pincode: '', city: '', state: '', saveAs: 'Other' });
+  const [ppmc, setPpmc] = useState(false); // whether additional tests needed
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, boolean>>({});
+  const [confirmPartial, setConfirmPartial] = useState(false);
+  const [bookingId] = useState(() => `ACKO-MED-${Math.random().toString(36).slice(2, 8).toUpperCase()}`);
+  const [ppBookingId] = useState(() => `ACKO-HOME-${Math.random().toString(36).slice(2, 8).toUpperCase()}`);
+
+  // Health review form state
+  const [tobacco, setTobacco] = useState<boolean | null>(null);
+  const [alcohol, setAlcohol] = useState<boolean | null>(null);
+  const [alcoholFreq, setAlcoholFreq] = useState('');
+  const [alcoholUnits, setAlcoholUnits] = useState('');
+  const [doctorAdvised, setDoctorAdvised] = useState<boolean | null>(null);
+  const [doctorComment, setDoctorComment] = useState('');
+  const [familyHistory, setFamilyHistory] = useState<boolean | null>(null);
+  const [conditions, setConditions] = useState<string[]>([]);
+  const [stdHiv, setStdHiv] = useState<boolean | null>(null);
+  const [adventureSports, setAdventureSports] = useState<boolean | null>(null);
+  const [adventureDetails, setAdventureDetails] = useState('');
+  const [intlTravel, setIntlTravel] = useState<boolean | null>(null);
+  const [intlDetails, setIntlDetails] = useState('');
+  const [legalIssues, setLegalIssues] = useState<boolean | null>(null);
+  const [reviewConfirmed, setReviewConfirmed] = useState(false);
+  const [reviewSection, setReviewSection] = useState<'health' | 'lifestyle' | 'misc'>('health');
+
+  // Countdown for "doctor available now"
+  useEffect(() => {
+    if (stage !== 'availability_now') return;
+    const t = setInterval(() => setJoinCountdown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [stage]);
+
+  const fmtCountdown = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+  const handleSlotSelect = (slot: SlotSelection, isForPpmc = false) => {
+    if (!isForPpmc && isConflictSlot(slot.dateIndex, slot.time)) {
+      setBookedSlot(slot);
+      setStage('slot_conflict');
+      return;
+    }
+    if (isForPpmc) { setPpBookedSlot(slot); setStage('ppmc_confirmed'); }
+    else { setBookedSlot(slot); setStage('scheduled'); }
+  };
+
+  const isReviewComplete = () =>
+    tobacco !== null && alcohol !== null && familyHistory !== null &&
+    conditions.length > 0 && stdHiv !== null && adventureSports !== null &&
+    intlTravel !== null && legalIssues !== null && reviewConfirmed;
+
+  const flaggedConditions = conditions.filter(c => c !== 'None of the above' && CONDITION_DOCS[c]);
+  const allDocsUploaded = flaggedConditions.length === 0 || flaggedConditions.every(c => uploadedDocs[c]);
+
+  const HEADER_LABELS: Record<MedStage, { title: string; sub: string }> = {
+    intro: { title: 'Medical Evaluation', sub: 'VMER — Video Medical Evaluation' },
+    availability_now: { title: 'Doctor Available', sub: 'Join in ~5 minutes' },
+    availability_none: { title: 'No Doctor Available', sub: 'Schedule for later' },
+    slot_picker: { title: 'Schedule Your Call', sub: 'Pick a date & time' },
+    slot_conflict: { title: 'Slot Taken', sub: 'Please pick another time' },
+    scheduled: { title: 'Call Scheduled', sub: bookedSlot ? `${bookedSlot.dateLabel}, ${bookedSlot.time}` : '' },
+    call_active: { title: 'Video Call', sub: 'In progress with doctor' },
+    post_call_review: { title: 'Review Your Answers', sub: `${reviewSection === 'health' ? 'Health' : reviewSection === 'lifestyle' ? 'Lifestyle' : 'Miscellaneous'} information` },
+    review_submitting: { title: 'Submitting', sub: 'Saving your responses…' },
+    under_review: { title: 'Under Review', sub: 'Medical info submitted' },
+    ppmc_intro: { title: 'Additional Tests', sub: 'Home health test required' },
+    ppmc_address: { title: 'Test Location', sub: 'Choose address for home test' },
+    ppmc_address_new: { title: 'New Address', sub: 'Where should we come?' },
+    ppmc_slot: { title: 'Schedule Home Test', sub: 'Pick a date & time' },
+    ppmc_confirmed: { title: 'Test Booked', sub: ppBookedSlot ? `${ppBookedSlot.dateLabel}, ${ppBookedSlot.time}` : '' },
+    ppmc_offline: { title: 'We\'ll Reach Out', sub: 'Manual scheduling' },
+    docs_required: { title: 'Upload Documents', sub: `${flaggedConditions.length} condition${flaggedConditions.length !== 1 ? 's' : ''} flagged` },
+    docs_confirm: { title: 'Confirm Upload', sub: 'Double-check before submitting' },
+    docs_submitted: { title: 'Documents Uploaded', sub: 'Under review' },
+    complete: { title: 'Evaluation Complete', sub: 'All done!' },
+  };
+
+  const { title: hTitle, sub: hSub } = HEADER_LABELS[stage] || { title: 'Medical', sub: '' };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-md">
       <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+
+        {/* ── Header ── */}
         <div className="px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
               </svg>
             </div>
-            <div>
-              <h3 className="text-label-md font-bold text-gray-900">Medical Evaluation</h3>
-              <p className="text-caption text-gray-400">Quick health assessment</p>
+            <div className="min-w-0">
+              <h3 className="text-label-md font-bold text-gray-900">{hTitle}</h3>
+              <p className="text-caption text-gray-400 truncate">{hSub}</p>
             </div>
           </div>
         </div>
 
-        <div className="px-5 py-5">
-          {!scheduled ? (
-            <div className="space-y-4">
+        {/* ── Body ── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={stage}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -12 }}
+            transition={{ duration: 0.2 }}
+            className="px-5 py-5"
+          >
+
+            {/* INTRO */}
+            {stage === 'intro' && (
+              <div className="space-y-4">
+                <div className="bg-purple-50 border border-purple-100 rounded-xl px-4 py-3.5 space-y-1">
+                  <p className="text-label-sm font-bold text-purple-900">What is VMER?</p>
+                  <p className="text-caption text-purple-700 leading-relaxed">
+                    A 15–20 minute <span className="font-semibold">video call with a licensed doctor</span> to assess your health. Required for all term life policies.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { icon: '📹', t: 'Video call with a doctor', d: '15–20 mins, camera & mic required' },
+                    { icon: '🔇', t: 'Quiet location needed', d: 'Find a private space before joining' },
+                    { icon: '📋', t: 'Topics covered', d: 'Health history, lifestyle, medications' },
+                    { icon: '✅', t: 'Post-call review', d: 'You\'ll confirm the answers discussed' },
+                  ].map(({ icon, t, d }) => (
+                    <div key={t} className="flex gap-3 items-start">
+                      <span className="text-lg flex-shrink-0 mt-0.5">{icon}</span>
+                      <div>
+                        <p className="text-label-sm font-semibold text-gray-900">{t}</p>
+                        <p className="text-caption text-gray-400">{d}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setStage('availability_now')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Check Doctor Availability
+                </button>
+              </div>
+            )}
+
+            {/* DOCTOR AVAILABLE NOW */}
+            {stage === 'availability_now' && (
+              <div className="space-y-5">
+                <div className="flex flex-col items-center py-3 gap-2">
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                  </div>
+                  <p className="text-label-lg font-bold text-gray-900">Dr. Meera Krishnan is available</p>
+                  <p className="text-caption text-gray-500">MBBS, MD — Available now</p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-center justify-between">
+                  <p className="text-body-sm text-emerald-800 font-medium">Call starts in</p>
+                  <span className="text-2xl font-bold text-emerald-700 tabular-nums">{fmtCountdown(joinCountdown)}</span>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-1.5">
+                  <p className="text-label-sm font-semibold text-amber-800">Before you join</p>
+                  {['Ensure camera & microphone are working', 'Move to a quiet, private location', 'Keep your Aadhaar / PAN card nearby'].map(s => (
+                    <div key={s} className="flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      <span className="text-caption text-amber-700">{s}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setStage('call_active')}
+                  className="w-full py-3.5 rounded-xl bg-emerald-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-emerald-600/20"
+                >
+                  Join Call Now
+                </button>
+                <button
+                  onClick={() => setStage('slot_picker')}
+                  className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium active:scale-[0.97] transition-transform"
+                >
+                  Schedule for later instead
+                </button>
+              </div>
+            )}
+
+            {/* DOCTOR NOT AVAILABLE */}
+            {stage === 'availability_none' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-3 gap-2 text-center">
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-label-md font-bold text-gray-900">No doctor available right now</p>
+                  <p className="text-caption text-gray-500">Next available slot: <span className="font-semibold text-purple-600">Today, 4:00 PM</span></p>
+                </div>
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                  <p className="text-caption text-gray-500">You'll receive an SMS & WhatsApp link 1 hour before your scheduled slot.</p>
+                </div>
+                <button
+                  onClick={() => setStage('slot_picker')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Schedule a call
+                </button>
+              </div>
+            )}
+
+            {/* SLOT PICKER */}
+            {stage === 'slot_picker' && (
+              <MedSlotPicker
+                title="Choose a date and time for your VMER call"
+                onSelect={(s) => handleSlotSelect(s, false)}
+                onBack={() => setStage('availability_now')}
+              />
+            )}
+
+            {/* SLOT CONFLICT */}
+            {stage === 'slot_conflict' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-3 gap-3 text-center">
+                  <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-label-md font-bold text-gray-900">Slot just got booked</p>
+                    <p className="text-caption text-gray-500 mt-1">
+                      {bookedSlot?.time} on {bookedSlot?.dateLabel} was taken by another user while you were selecting. Please choose a different time.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setStage('slot_picker')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Pick another slot
+                </button>
+              </div>
+            )}
+
+            {/* SCHEDULED */}
+            {stage === 'scheduled' && bookedSlot && (
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ scale: 0 }} animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+                  className="flex flex-col items-center py-2 gap-2 text-center"
+                >
+                  <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-label-lg font-bold text-gray-900">Call Scheduled!</p>
+                    <p className="text-body-sm font-semibold text-purple-700 mt-0.5">{bookedSlot.dateLabel}</p>
+                    <p className="text-caption text-gray-500">{bookedSlot.time}</p>
+                  </div>
+                </motion.div>
+
+                <div className="bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 space-y-2">
+                  <p className="text-label-sm font-bold text-purple-900">Pre-call checklist</p>
+                  {['Camera & microphone working', 'Quiet, private location', 'Aadhaar / PAN card nearby', 'List of current medications (if any)', 'Comfortable clothing for brief physical check if asked'].map(s => (
+                    <div key={s} className="flex items-start gap-2">
+                      <svg className="w-3.5 h-3.5 text-purple-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                      <span className="text-caption text-purple-700">{s}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                  <p className="text-caption text-gray-500">
+                    You'll receive a <span className="font-semibold">WhatsApp & SMS reminder</span> 1 hour before the call with your join link.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setStage('call_active')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  Join Call (Demo)
+                </button>
+                <button
+                  onClick={() => setStage('slot_picker')}
+                  className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1"
+                >
+                  Reschedule
+                </button>
+              </div>
+            )}
+
+            {/* CALL ACTIVE */}
+            {stage === 'call_active' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-4 gap-3">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-xl">
+                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      </svg>
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-label-md font-bold text-gray-900">Dr. Meera Krishnan</p>
+                    <p className="text-caption text-emerald-600 font-medium">● Connected</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 space-y-1">
+                  <p className="text-label-sm font-semibold text-gray-700">Topics during this call</p>
+                  {['Current medications & supplements', 'Past surgeries or hospitalizations', 'Family medical history', 'Lifestyle: smoking, alcohol, exercise', 'Occupation & travel history'].map(s => (
+                    <div key={s} className="flex items-center gap-2 text-caption text-gray-500">
+                      <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
+                      {s}
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setStage('post_call_review')}
+                  className="w-full py-3.5 rounded-xl bg-emerald-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
+                >
+                  End Call & Review Answers
+                </button>
+              </div>
+            )}
+
+            {/* POST-CALL REVIEW */}
+            {stage === 'post_call_review' && (
+              <div className="space-y-5">
+                {/* Section tabs */}
+                <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+                  {(['health', 'lifestyle', 'misc'] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setReviewSection(s)}
+                      className={`flex-1 py-1.5 rounded-lg text-caption font-semibold transition-all capitalize
+                        ${reviewSection === s ? 'bg-white text-purple-700 shadow-sm' : 'text-gray-500'}`}
+                    >
+                      {s === 'misc' ? 'Misc' : s.charAt(0).toUpperCase() + s.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* HEALTH SECTION */}
+                {reviewSection === 'health' && (
+                  <div className="space-y-5">
+                    <MedYesNo question="Have you used tobacco or smoked in the last year?" onAnswer={setTobacco} />
+                    <MedYesNo question="Do you consume alcohol?" onAnswer={setAlcohol} />
+                    {alcohol === true && (
+                      <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="pl-4 border-l-2 border-purple-100 space-y-3">
+                        <div>
+                          <label className="text-caption font-semibold text-gray-500 block mb-1.5">Frequency</label>
+                          <div className="flex flex-wrap gap-2">
+                            {['Daily', '4–6 times/week', '2–3 times/week', 'Occasionally'].map(f => (
+                              <button key={f} onClick={() => setAlcoholFreq(f)}
+                                className={`px-3 py-1.5 rounded-lg border text-caption font-medium transition-all ${alcoholFreq === f ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 text-gray-600'}`}>
+                                {f}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-caption font-semibold text-gray-500 block mb-1.5">Units per week</label>
+                          <input
+                            type="number" inputMode="numeric" value={alcoholUnits}
+                            onChange={e => setAlcoholUnits(e.target.value)}
+                            placeholder="e.g. 7"
+                            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-body-sm text-gray-900 focus:outline-none focus:border-purple-400"
+                          />
+                        </div>
+                        <MedYesNo question="Has a doctor advised you to reduce or stop alcohol?" onAnswer={setDoctorAdvised} />
+                        {doctorAdvised === true && (
+                          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <textarea value={doctorComment} onChange={e => setDoctorComment(e.target.value)}
+                              placeholder="Additional comments (optional)"
+                              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-body-sm text-gray-600 focus:outline-none focus:border-purple-400 resize-none" rows={2} />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    )}
+                    <MedYesNo question="Have any family members passed away before age 60 due to a serious health condition?" onAnswer={setFamilyHistory} />
+                    <div>
+                      <p className="text-body-sm text-gray-800 mb-2">Have you ever received medical attention for any of the following?</p>
+                      <div className="flex flex-wrap gap-2">
+                        {MEDICAL_CONDITIONS.map(c => {
+                          const sel = conditions.includes(c);
+                          return (
+                            <button key={c} onClick={() => {
+                              if (c === 'None of the above') { setConditions(sel ? [] : ['None of the above']); return; }
+                              setConditions(prev => sel ? prev.filter(x => x !== c) : [...prev.filter(x => x !== 'None of the above'), c]);
+                            }}
+                              className={`px-3 py-1.5 rounded-lg border text-caption font-medium transition-all ${sel ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
+                              {c}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <MedYesNo question="Do you or your spouse have any history of STD or HIV?" onAnswer={setStdHiv} />
+                    <button onClick={() => setReviewSection('lifestyle')}
+                      className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-md font-semibold active:scale-[0.97] transition-transform">
+                      Next: Lifestyle →
+                    </button>
+                  </div>
+                )}
+
+                {/* LIFESTYLE SECTION */}
+                {reviewSection === 'lifestyle' && (
+                  <div className="space-y-5">
+                    <MedYesNo question="Have you participated in adventure sports in the last 5 years?" onAnswer={setAdventureSports} />
+                    {adventureSports === true && (
+                      <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="pl-4 border-l-2 border-purple-100">
+                        <textarea value={adventureDetails} onChange={e => setAdventureDetails(e.target.value)}
+                          placeholder="Activity, type, frequency — e.g. Skydiving, solo, twice a year"
+                          className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-body-sm text-gray-600 focus:outline-none focus:border-purple-400 resize-none" rows={2} />
+                      </motion.div>
+                    )}
+                    <MedYesNo question="Have you travelled internationally in the last 6 months, or planning to?" onAnswer={setIntlTravel} />
+                    {intlTravel === true && (
+                      <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="pl-4 border-l-2 border-purple-100">
+                        <textarea value={intlDetails} onChange={e => setIntlDetails(e.target.value)}
+                          placeholder="Countries, purpose, duration, accommodation type"
+                          className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-body-sm text-gray-600 focus:outline-none focus:border-purple-400 resize-none" rows={2} />
+                      </motion.div>
+                    )}
+                    <button onClick={() => setReviewSection('misc')}
+                      className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-md font-semibold active:scale-[0.97] transition-transform">
+                      Next: Miscellaneous →
+                    </button>
+                    <button onClick={() => setReviewSection('health')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back to Health</button>
+                  </div>
+                )}
+
+                {/* MISC SECTION */}
+                {reviewSection === 'misc' && (
+                  <div className="space-y-5">
+                    <MedYesNo question="Do you have any pending legal cases or criminal proceedings in India or abroad?" onAnswer={setLegalIssues} />
+
+                    <div className="h-px bg-gray-100" />
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={reviewConfirmed} onChange={e => setReviewConfirmed(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 accent-purple-600 rounded flex-shrink-0" />
+                      <span className="text-caption text-gray-600 leading-relaxed">
+                        I confirm that all the information provided is <span className="font-semibold">true and accurate</span> to the best of my knowledge. I understand that incorrect disclosure may affect my policy.
+                      </span>
+                    </label>
+
+                    <button
+                      disabled={!isReviewComplete()}
+                      onClick={() => {
+                        setStage('review_submitting');
+                        setTimeout(() => {
+                          setPpmc(flaggedConditions.length > 0);
+                          setStage('under_review');
+                        }, 2000);
+                      }}
+                      className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold disabled:opacity-40 active:scale-[0.97] transition-transform"
+                    >
+                      Submit & Confirm
+                    </button>
+                    <button
+                      className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium"
+                      onClick={() => {/* Talk to us */ }}
+                    >
+                      Want to make changes? Talk to us
+                    </button>
+                    <button onClick={() => setReviewSection('lifestyle')} className="w-full text-center text-caption text-gray-400 hover:text-gray-600 py-1">← Back to Lifestyle</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* REVIEW SUBMITTING */}
+            {stage === 'review_submitting' && (
+              <div className="flex flex-col items-center py-8 gap-4">
+                <svg className="w-10 h-10 text-purple-400 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40 22" strokeLinecap="round" />
+                </svg>
+                <p className="text-body-sm text-gray-600">Saving your responses…</p>
+              </div>
+            )}
+
+            {/* UNDER REVIEW */}
+            {stage === 'under_review' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-2 gap-2 text-center">
+                  <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                    </svg>
+                  </div>
+                  <p className="text-label-md font-bold text-gray-900">Responses submitted</p>
+                  <p className="text-caption text-gray-500">Your medical information is under review</p>
+                </div>
+
+                {ppmc ? (
+                  <div className="space-y-3">
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                      <p className="text-label-sm font-bold text-amber-900">Additional tests required</p>
+                      <p className="text-caption text-amber-700 mt-0.5">Based on your responses, we need a few health tests to complete your evaluation.</p>
+                    </div>
+                    <button onClick={() => setStage('ppmc_intro')}
+                      className="w-full py-3.5 rounded-xl bg-amber-500 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                      Schedule Home Tests →
+                    </button>
+                    {flaggedConditions.length > 0 && (
+                      <button onClick={() => setStage('docs_required')}
+                        className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 text-label-sm font-medium">
+                        Upload condition documents ({flaggedConditions.length})
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3">
+                      <p className="text-label-sm font-bold text-emerald-900">No additional tests needed</p>
+                      <p className="text-caption text-emerald-700 mt-0.5">Your responses look good. Medical evaluation is complete!</p>
+                    </div>
+                    <button onClick={() => { setStage('complete'); setTimeout(() => onContinue(), 1800); }}
+                      className="w-full py-3.5 rounded-xl bg-emerald-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                      Continue
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PPMC INTRO */}
+            {stage === 'ppmc_intro' && (
+              <div className="space-y-4">
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3.5">
+                  <p className="text-label-sm font-bold text-amber-900">Additional health tests required</p>
+                  <p className="text-caption text-amber-700 mt-1 leading-relaxed">We need a few basic tests to better understand your health before issuing your policy. A technician will visit your home.</p>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { icon: '📅', t: 'Schedule test', s: 'pending' as const },
+                    { icon: '🏠', t: 'Sample collection at home', s: 'upcoming' as const },
+                    { icon: '🔬', t: 'Reports under evaluation', s: 'upcoming' as const },
+                    { icon: '✅', t: 'Tests complete', s: 'upcoming' as const },
+                  ].map(({ icon, t, s }, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm ${s === 'pending' ? 'bg-purple-100' : 'bg-gray-100'}`}>{icon}</div>
+                      <span className={`text-body-sm font-medium ${s === 'pending' ? 'text-gray-900' : 'text-gray-400'}`}>{t}</span>
+                      {s === 'pending' && <span className="ml-auto text-caption text-purple-600 font-semibold">Now</span>}
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 flex items-center gap-2">
+                  <span className="text-lg">⏰</span>
+                  <p className="text-caption text-red-700 font-medium">Fasting for 12 hours is mandatory before the test</p>
+                </div>
+                <button onClick={() => setStage('ppmc_address')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                  Schedule Home Test
+                </button>
+                <button onClick={() => setStage('ppmc_offline')}
+                  className="w-full py-2 text-center text-caption text-gray-400 hover:text-gray-600">
+                  Can't schedule online? We'll call you
+                </button>
+              </div>
+            )}
+
+            {/* PPMC ADDRESS PICKER */}
+            {stage === 'ppmc_address' && (
+              <div className="space-y-4">
+                <p className="text-body-sm font-semibold text-gray-700">Where should the technician come?</p>
+                {SAVED_ADDRESSES.map(addr => (
+                  <button key={addr.id} onClick={() => setSelectedAddress(addr.id)}
+                    className={`w-full flex items-start gap-3 px-4 py-3.5 rounded-xl border text-left transition-all
+                      ${selectedAddress === addr.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${selectedAddress === addr.id ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                      <span className="text-sm">{addr.id === 'home' ? '🏠' : '🏢'}</span>
+                    </div>
+                    <div>
+                      <p className={`text-label-sm font-bold ${selectedAddress === addr.id ? 'text-purple-800' : 'text-gray-800'}`}>{addr.label}</p>
+                      <p className="text-caption text-gray-500 leading-snug">{addr.address}</p>
+                    </div>
+                    {selectedAddress === addr.id && (
+                      <svg className="w-5 h-5 text-purple-500 ml-auto flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    )}
+                  </button>
+                ))}
+                <button onClick={() => setStage('ppmc_address_new')}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-dashed border-gray-300 text-left hover:border-purple-300 hover:bg-purple-50 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                  </div>
+                  <span className="text-label-sm font-medium text-gray-600">Add new address</span>
+                </button>
+                <button onClick={() => setStage('ppmc_slot')} disabled={!selectedAddress}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold disabled:opacity-40 active:scale-[0.97] transition-transform">
+                  Continue with this address
+                </button>
+              </div>
+            )}
+
+            {/* PPMC NEW ADDRESS */}
+            {stage === 'ppmc_address_new' && (
               <div className="space-y-3">
                 {[
-                  { icon: '📞', title: 'Tele-medical call', desc: 'A 10-minute video call with a doctor' },
-                  { icon: '🩺', title: 'Lab tests (if required)', desc: 'Based on your age and coverage amount' },
-                  { icon: '📋', title: 'Income proof', desc: 'Salary slips, ITR, or bank statements' },
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-3 items-start">
-                    <span className="text-lg flex-shrink-0 mt-0.5">{item.icon}</span>
-                    <div>
-                      <p className="text-label-sm font-semibold text-gray-900">{item.title}</p>
-                      <p className="text-caption text-gray-400">{item.desc}</p>
+                  { key: 'flat', label: 'Flat / House No.', placeholder: 'e.g. 4B' },
+                  { key: 'area', label: 'Street / Area / Road', placeholder: 'e.g. MG Road, Koramangala' },
+                  { key: 'pincode', label: 'Pincode', placeholder: '560001' },
+                  { key: 'city', label: 'City', placeholder: 'Bangalore' },
+                  { key: 'state', label: 'State', placeholder: 'Karnataka' },
+                ].map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <label className="text-caption font-semibold text-gray-500 block mb-1">{label}</label>
+                    <input
+                      value={newAddress[key as keyof typeof newAddress]}
+                      onChange={e => setNewAddress(p => ({ ...p, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-body-sm text-gray-900 focus:outline-none focus:border-purple-400"
+                    />
+                  </div>
+                ))}
+                <div>
+                  <label className="text-caption font-semibold text-gray-500 block mb-1.5">Save as</label>
+                  <div className="flex gap-2">
+                    {['Home', 'Work', 'Other'].map(tag => (
+                      <button key={tag} onClick={() => setNewAddress(p => ({ ...p, saveAs: tag }))}
+                        className={`px-4 py-2 rounded-xl border text-label-sm font-medium transition-all ${newAddress.saveAs === tag ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 text-gray-600'}`}>
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setSelectedAddress('new'); setStage('ppmc_slot'); }}
+                  disabled={!newAddress.flat || !newAddress.pincode || !newAddress.city}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold disabled:opacity-40 active:scale-[0.97] transition-transform mt-1"
+                >
+                  Save & Continue
+                </button>
+                <button onClick={() => setStage('ppmc_address')} className="w-full text-center text-caption text-gray-400 py-1">← Back</button>
+              </div>
+            )}
+
+            {/* PPMC SLOT PICKER */}
+            {stage === 'ppmc_slot' && (
+              <MedSlotPicker
+                title="When should the technician visit?"
+                onSelect={(s) => handleSlotSelect(s, true)}
+                onBack={() => setStage('ppmc_address')}
+              />
+            )}
+
+            {/* PPMC CONFIRMED */}
+            {stage === 'ppmc_confirmed' && ppBookedSlot && (
+              <div className="space-y-4">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+                  className="flex flex-col items-center py-2 gap-2 text-center">
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                  <p className="text-label-lg font-bold text-gray-900">Home Test Booked!</p>
+                </motion.div>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl divide-y divide-gray-100">
+                  {[
+                    { l: 'Booking ID', v: ppBookingId },
+                    { l: 'Date', v: ppBookedSlot.dateLabel },
+                    { l: 'Time', v: ppBookedSlot.time },
+                    { l: 'Address', v: selectedAddress === 'home' ? SAVED_ADDRESSES[0].address : selectedAddress === 'work' ? SAVED_ADDRESSES[1].address : `${newAddress.flat}, ${newAddress.area}, ${newAddress.city}` },
+                    { l: 'Technician', v: 'Assigned 2 hours before visit' },
+                  ].map(({ l, v }) => (
+                    <div key={l} className="px-4 py-2.5 flex justify-between gap-3">
+                      <span className="text-caption text-gray-400 flex-shrink-0">{l}</span>
+                      <span className="text-caption text-gray-800 font-medium text-right">{v}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 flex items-center gap-2">
+                  <span className="text-base">⏰</span>
+                  <p className="text-caption text-red-700 font-semibold">Fast for 12 hours before the test</p>
+                </div>
+
+                {flaggedConditions.length > 0 && (
+                  <button onClick={() => setStage('docs_required')}
+                    className="w-full py-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 text-label-sm font-semibold active:scale-[0.97] transition-transform">
+                    Also upload condition documents ({flaggedConditions.length} required)
+                  </button>
+                )}
+
+                <button onClick={() => { setStage('complete'); setTimeout(() => onContinue(), 1800); }}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                  Done
+                </button>
+              </div>
+            )}
+
+            {/* PPMC OFFLINE FALLBACK */}
+            {stage === 'ppmc_offline' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-3 gap-3 text-center">
+                  <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-label-md font-bold text-gray-900">We'll reach out to you</p>
+                    <p className="text-caption text-gray-500 mt-1 leading-relaxed">Our team will contact you within 24 hours to schedule your home test at a convenient time.</p>
+                  </div>
+                </div>
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 space-y-1">
+                  <p className="text-caption text-gray-500">You'll be contacted on: <span className="font-semibold text-gray-800">your registered mobile</span></p>
+                  <p className="text-caption text-gray-400">Or reach us at <span className="font-medium text-purple-600">1800 266 5433</span></p>
+                </div>
+                <button onClick={() => { setStage('complete'); setTimeout(() => onContinue(), 1800); }}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                  Got it
+                </button>
+              </div>
+            )}
+
+            {/* DOCS REQUIRED */}
+            {stage === 'docs_required' && (
+              <div className="space-y-4">
+                <p className="text-body-sm text-gray-700">Based on your health history, please upload the following documents for each condition.</p>
+                {flaggedConditions.map(cond => (
+                  <div key={cond} className="border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                      <p className="text-label-sm font-bold text-gray-800">{cond}</p>
+                    </div>
+                    <div className="px-4 py-3 space-y-2">
+                      {CONDITION_DOCS[cond]?.map((doc, i) => (
+                        <div key={i} className="flex items-center gap-2 text-caption text-gray-600">
+                          <svg className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                          {doc}
+                        </div>
+                      ))}
+                      <button onClick={() => setUploadedDocs(p => ({ ...p, [cond]: true }))}
+                        className={`mt-2 w-full py-2.5 rounded-xl border text-label-sm font-semibold transition-all active:scale-[0.97]
+                          ${uploadedDocs[cond] ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-dashed border-purple-300 text-purple-600 hover:bg-purple-50'}`}>
+                        {uploadedDocs[cond] ? '✓ Uploaded' : 'Upload documents (PDF, PNG, JPEG, ZIP · Max 100MB)'}
+                      </button>
                     </div>
                   </div>
                 ))}
-              </div>
 
-              <div className="bg-purple-50 rounded-xl px-4 py-3">
-                <p className="text-caption text-purple-700">
-                  We&apos;ll call you within 24 hours to schedule a convenient time.
-                </p>
-              </div>
-
-              <button
-                onClick={handleSchedule}
-                className="w-full py-3 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform"
-              >
-                Schedule my evaluation
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center py-6">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300 }}>
-                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-3">
-                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
+                <div className="border border-dashed border-gray-200 rounded-xl px-4 py-3 text-center">
+                  <p className="text-caption text-gray-400 mb-1.5">Miscellaneous documents</p>
+                  <button className="text-caption text-purple-500 font-medium">+ Add other documents</button>
                 </div>
-              </motion.div>
-              <p className="text-label-md font-semibold text-gray-900">Evaluation Scheduled</p>
-              <p className="text-caption text-gray-400 mt-1">We&apos;ll contact you within 24 hours</p>
-            </div>
-          )}
-        </div>
+
+                <button onClick={() => setStage('docs_confirm')}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                  Submit Documents
+                </button>
+                <div className="flex gap-2">
+                  <button className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium">
+                    I don't have these
+                  </button>
+                  <button className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-label-sm font-medium">
+                    Talk to us
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* DOCS CONFIRM */}
+            {stage === 'docs_confirm' && (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center py-2 gap-2 text-center">
+                  <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                  </div>
+                  <p className="text-label-md font-bold text-gray-900">Have you uploaded all required documents?</p>
+                </div>
+
+                {!allDocsUploaded && (
+                  <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                    <p className="text-caption text-amber-700">
+                      Some documents are missing: <span className="font-semibold">{flaggedConditions.filter(c => !uploadedDocs[c]).join(', ')}</span>. Partial uploads are accepted — a health check may be scheduled later.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button onClick={() => setStage('docs_required')}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 text-label-sm font-semibold">
+                    No, go back
+                  </button>
+                  <button onClick={() => { setStage('docs_submitted'); }}
+                    className="flex-1 py-3 rounded-xl bg-purple-600 text-white text-label-sm font-semibold active:scale-[0.97] transition-transform">
+                    Yes, submit
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* DOCS SUBMITTED */}
+            {stage === 'docs_submitted' && (
+              <div className="space-y-4">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+                  className="flex flex-col items-center py-2 gap-2 text-center">
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                  <p className="text-label-lg font-bold text-gray-900">Documents Uploaded</p>
+                  <p className="text-caption text-gray-500">We'll review your documents in 24–48 hours and notify you</p>
+                </motion.div>
+                <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 space-y-1">
+                  <p className="text-caption text-gray-500">Need help? Reach us at</p>
+                  <p className="text-caption font-semibold text-purple-600">1800 266 5433 · support.life@acko.com</p>
+                </div>
+                <button onClick={() => { setStage('complete'); setTimeout(() => onContinue(), 1800); }}
+                  className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform">
+                  Done
+                </button>
+              </div>
+            )}
+
+            {/* COMPLETE */}
+            {stage === 'complete' && (
+              <div className="flex flex-col items-center py-6 gap-4">
+                <motion.div initial={{ scale: 0, rotate: -15 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 280, damping: 15 }}>
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center shadow-lg shadow-emerald-100">
+                    <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-center">
+                  <p className="text-label-lg font-bold text-gray-900">Medical Evaluation Complete</p>
+                  <p className="text-caption text-gray-400 mt-1">Your application moves to underwriting review</p>
+                </motion.div>
+                <p className="text-caption text-gray-400">Proceeding…</p>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
+
+        {/* ── Footer support bar ── */}
+        {!['review_submitting', 'complete', 'call_active'].includes(stage) && (
+          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+              FAQs
+            </button>
+            <button className="flex items-center gap-1.5 text-caption text-gray-400 hover:text-purple-600 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+              1800 266 5433
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

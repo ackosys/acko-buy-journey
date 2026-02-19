@@ -1447,10 +1447,8 @@ const lifeMedicalEval: ConversationStep<LifeJourneyState> = {
   widgetType: 'medical_screen',
   getScript: (_persona, state) => ({
     botMessages: [
-      `e-KYC complete!`,
-      ``,
-      `Now let's schedule your medical evaluation.`,
-      `This includes a tele-medical call with a doctor, and lab tests if required based on your age and coverage.`,
+      `e-KYC verified! ✅`,
+      `Next up: your **Video Medical Evaluation (VMER)** — a 15–20 minute video call with a licensed doctor.\n\nAfter the call, you'll review and confirm your health & lifestyle responses. Additional home tests may be required based on your profile.`,
     ],
   }),
   processResponse: (_response, _state) => ({
