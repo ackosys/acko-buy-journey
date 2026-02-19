@@ -1247,110 +1247,18 @@ const lifeQuoteDisplay: ConversationStep<LifeJourneyState> = {
 const lifeAddonsIntro: ConversationStep<LifeJourneyState> = {
   id: 'life_addons_intro',
   module: 'addons',
-  widgetType: 'none',
+  widgetType: 'rider_selection',
   getScript: (persona, state) => {
     const messages: string[] = [
-      `Now, would you like to add extra protection with riders?`,
-      `Riders enhance your coverage for specific situations.`,
-      `You can always add or remove them later.`,
+      `Now, let's look at some additional covers to enhance your protection.`,
     ];
     
     return { botMessages: messages };
   },
   processResponse: (_response, _state) => ({}),
-  getNextStep: (_response, _state) => 'life_addons_accidental_death',
-};
-
-const lifeAddonsAccidentalDeath: ConversationStep<LifeJourneyState> = {
-  id: 'life_addons_accidental_death',
-  module: 'addons',
-  widgetType: 'rider_toggle',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `Accidental Death Benefit Rider`,
-      `Provides additional payout (up to 3x your base coverage) if death occurs due to an accident.`,
-      `Would you like to add this?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes, add this rider' },
-      { id: 'no', label: 'No, skip' },
-    ],
-  }),
-  processResponse: (response, _state) => {
-    const riders: LifeRider[] = response === 'yes'
-      ? [{ id: 'accidental_death', name: 'Accidental Death Benefit', description: '3x coverage for accidental death', coverageMultiplier: 3, premiumImpact: 50, selected: true }]
-      : [];
-    return { selectedRiders: riders };
-  },
-  getNextStep: (_response, _state) => 'life_addons_critical_illness',
-};
-
-const lifeAddonsCriticalIllness: ConversationStep<LifeJourneyState> = {
-  id: 'life_addons_critical_illness',
-  module: 'addons',
-  widgetType: 'rider_toggle',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `Critical Illness Benefit Rider`,
-      `Pays a lump sum if you're diagnosed with any of 21 critical illnesses (cancer, heart attack, stroke, etc.).`,
-      `This helps cover treatment costs without waiting for death benefit.`,
-      `Add this rider?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes, add this rider' },
-      { id: 'no', label: 'No, skip' },
-    ],
-  }),
-  processResponse: (response, state) => {
-    const existingRiders = state.selectedRiders || [];
-    if (response === 'yes') {
-      const newRider: LifeRider = {
-        id: 'critical_illness',
-        name: 'Critical Illness Benefit',
-        description: 'Coverage for 21 critical illnesses',
-        coverageMultiplier: 1,
-        premiumImpact: 100,
-        selected: true,
-      };
-      return { selectedRiders: [...existingRiders, newRider] };
-    }
-    return { selectedRiders: existingRiders };
-  },
-  getNextStep: (_response, _state) => 'life_addons_disability',
-};
-
-const lifeAddonsDisability: ConversationStep<LifeJourneyState> = {
-  id: 'life_addons_disability',
-  module: 'addons',
-  widgetType: 'rider_toggle',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `Accidental Total Permanent Disability Rider`,
-      `Provides financial support if an accident leaves you permanently disabled and unable to work.`,
-      `Add this rider?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes, add this rider' },
-      { id: 'no', label: 'No, skip' },
-    ],
-  }),
-  processResponse: (response, state) => {
-    const existingRiders = state.selectedRiders || [];
-    if (response === 'yes') {
-      const newRider: LifeRider = {
-        id: 'disability',
-        name: 'Accidental Total Permanent Disability',
-        description: 'Coverage for permanent disability',
-        coverageMultiplier: 1,
-        premiumImpact: 75,
-        selected: true,
-      };
-      return { selectedRiders: [...existingRiders, newRider] };
-    }
-    return { selectedRiders: existingRiders };
-  },
   getNextStep: (_response, _state) => 'life_review',
 };
+
 
 /* ═══════════════════════════════════════════════
    MODULE: REVIEW — Final Summary
@@ -1551,9 +1459,6 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   // Shared: quote and add-ons
   lifeQuoteDisplay,
   lifeAddonsIntro,
-  lifeAddonsAccidentalDeath,
-  lifeAddonsCriticalIllness,
-  lifeAddonsDisability,
   
   // Shared: review and post-purchase
   lifeReview,

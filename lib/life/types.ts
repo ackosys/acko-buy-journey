@@ -46,6 +46,7 @@ export type LifeWidgetType =
   | 'coverage_slider'         // Coverage amount selector
   | 'term_selector'           // Policy term selector
   | 'rider_toggle'            // Add-on riders with premium impact
+  | 'rider_selection'         // Complex rider selection with sum assured
   | 'premium_summary'         // Quote display with breakdown
   | 'coverage_input'          // Direct-quote: user enters coverage + term
   | 'payment_screen'          // Payment CTA
@@ -61,12 +62,14 @@ export type OccupationRisk = 'low' | 'medium' | 'high';
 
 // Life Insurance Riders
 export interface LifeRider {
-  id: 'accidental_death' | 'critical_illness' | 'disability';
+  id: 'accidental_death' | 'accidental_disability' | 'critical_illness';
   name: string;
   description: string;
-  coverageMultiplier: number; // e.g., 3x base sum assured for accidental death
-  premiumImpact: number;      // Additional premium per ₹1L coverage
+  coverageMultiplier?: number; // e.g., 3x base sum assured for accidental death
+  premiumImpact?: number;      // Additional premium per ₹1L coverage
   selected: boolean;
+  sumAssured?: number; // Selected sum assured for this rider
+  premium?: number; // Calculated premium for this rider
 }
 
 // Life Insurance Plan/Quote
