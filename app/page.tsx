@@ -20,7 +20,7 @@ const LOBS: LobConfig[] = [
     description: 'Instant policy. Hassle-free claims.',
     icon: 'car',
     active: true,
-    route: '/motor',
+    route: '/motor?vehicle=car',
   },
   {
     id: 'bike',
@@ -29,7 +29,7 @@ const LOBS: LobConfig[] = [
     description: 'Instant policy. Hassle-free claims.',
     icon: 'bike',
     active: true,
-    route: '/motor',
+    route: '/motor?vehicle=bike',
   },
   {
     id: 'health',
