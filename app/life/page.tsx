@@ -9,13 +9,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
+import LifeShowcaseScreen from '../../components/life/LifeShowcaseScreen';
 import LifeEntryScreen from '../../components/life/LifeEntryScreen';
 import LifeLandingPage from '../../components/life/LifeLandingPage';
 import LifeHeader from '../../components/life/LifeHeader';
 import { LifeExpertPanel, LifeAIChatPanel } from '../../components/life/LifePanels';
 import AckoLogo from '../../components/AckoLogo';
 
-type Screen = 'entry' | 'landing' | 'chat';
+type Screen = 'showcase' | 'entry' | 'landing' | 'chat';
 
 /* ═══════════════════════════════════════════════
    Splash Screen — Auto-dismiss on entry
@@ -102,7 +103,7 @@ export default function LifeJourneyPage() {
       ? (medicalComplete ? 4 : 3)
       : 2)
     : (journeyComplete ? 1 : 0);
-  const [screen, setScreen] = useState<Screen>('entry');
+  const [screen, setScreen] = useState<Screen>('showcase');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
@@ -128,6 +129,31 @@ export default function LifeJourneyPage() {
     store.updateState({ currentStepId: 'life_intro' });
   };
 
+  const handleJumpToEkyc = () => {
+    // TODO: Implement e-KYC jump
+    console.log('Jump to e-KYC');
+  };
+
+  const handleJumpToIncomeVerification = () => {
+    // TODO: Implement income verification jump
+    console.log('Jump to Income Verification');
+  };
+
+  const handleJumpToMedicalVerification = () => {
+    // TODO: Implement medical verification jump
+    console.log('Jump to Medical Verification');
+  };
+
+  const handleJumpToUnderwriting = () => {
+    // TODO: Implement underwriting jump
+    console.log('Jump to Underwriting');
+  };
+
+  const handleJumpToClaims = () => {
+    // TODO: Implement claims jump
+    console.log('Jump to Claims');
+  };
+
   if (!hydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #2A1463 50%, #1C0B47 100%)' }}>
@@ -145,6 +171,19 @@ export default function LifeJourneyPage() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
+        {/* Showcase Screen — all journey options */}
+        {screen === 'showcase' && !showSplash && (
+          <LifeShowcaseScreen
+            key="showcase"
+            onBuyJourney={handleBuyJourney}
+            onJumpToEkyc={handleJumpToEkyc}
+            onJumpToIncomeVerification={handleJumpToIncomeVerification}
+            onJumpToMedicalVerification={handleJumpToMedicalVerification}
+            onJumpToUnderwriting={handleJumpToUnderwriting}
+            onJumpToClaims={handleJumpToClaims}
+          />
+        )}
+
         {/* Entry Screen — stepper journey overview */}
         {screen === 'entry' && !showSplash && (
           <LifeEntryScreen
