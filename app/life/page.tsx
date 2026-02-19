@@ -127,6 +127,15 @@ export default function LifeJourneyPage() {
     store.updateState({ currentStepId: 'life_intro' });
   };
 
+  const jumpToStep = (stepId: string) => {
+    store.updateState({
+      currentStepId: stepId,
+      conversationHistory: [],
+      paymentComplete: true,
+    });
+    setScreen('chat');
+  };
+
   if (!hydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #2A1463 50%, #1C0B47 100%)' }}>
@@ -150,8 +159,9 @@ export default function LifeJourneyPage() {
             key="entry"
             completedStep={completedStep}
             onBuyJourney={() => setScreen('landing')}
-            onJumpToEkyc={() => setScreen('landing')}
-            onJumpToVerification={() => setScreen('landing')}
+            onJumpToEkyc={() => jumpToStep('life_ekyc')}
+            onJumpToMedical={() => jumpToStep('life_medical_eval')}
+            onJumpToUnderwriting={() => jumpToStep('life_underwriting')}
           />
         )}
 
