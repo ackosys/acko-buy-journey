@@ -1,21 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import { useMotorStore } from '../../lib/motor/store';
-import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
+// COMMENTED OUT: Intro and entry screens — replaced by AuraMotorEntryNav
+// import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
+// import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
+import AuraMotorEntryNav from '../../components/motor/aura/AuraMotorEntryNav';
 import MotorHeader from '../../components/motor/MotorHeader';
 import MotorChatContainer from '../../components/motor/MotorChatContainer';
-import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
 import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
 import AckoLogo from '../../components/AckoLogo';
 import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
 
-type Screen = 'intro' | 'entry' | 'chat';
+type Screen = 'explore' | 'chat';
 
-/* ═══════════════════════════════════════════════
-   Welcome Overlay — Auto-dismiss splash
-   ═══════════════════════════════════════════════ */
+/* COMMENTED OUT: WelcomeOverlay — temporarily disabled, replaced by explore nav
 function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onDone, 2500);
@@ -91,6 +92,7 @@ function WelcomeOverlay({ onDone }: { onDone: () => void }) {
     </motion.div>
   );
 }
+END COMMENTED OUT */
 
 /* ═══════════════════════════════════════════════
    Helper: seed demo state for deep-linking into
@@ -161,11 +163,13 @@ function seedDemoState(vehicleType: VehicleType) {
   } as Partial<MotorJourneyState>);
 }
 
-export default function MotorJourney() {
+function MotorJourneyInner() {
   const store = useMotorStore();
   const { updateState, resetJourney } = store;
-  const [screen, setScreen] = useState<Screen>('intro');
-  const [showWelcome, setShowWelcome] = useState(true);
+  const searchParams = useSearchParams();
+
+  const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
+  const [screen, setScreen] = useState<Screen>('explore');
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -173,8 +177,7 @@ export default function MotorJourney() {
     setHydrated(true);
   }, []);
 
-  const dismissWelcome = useCallback(() => setShowWelcome(false), []);
-
+  /* COMMENTED OUT: handleVehicleSelect — was used by MotorEntryScreen
   const handleVehicleSelect = (vehicleType: VehicleType) => {
     updateState({
       vehicleType,
@@ -183,25 +186,25 @@ export default function MotorJourney() {
     } as Partial<MotorJourneyState>);
     setScreen('chat');
   };
+  */
+
+  const handleStartJourney = (vehicleType: VehicleType) => {
+    resetJourney();
+    updateState({
+      vehicleType,
+      currentStepId: 'vehicle_type.select',
+      currentModule: 'vehicle_type',
+    } as Partial<MotorJourneyState>);
+    setScreen('chat');
+  };
 
   const handleJumpTo = (stepId: string, vehicleType: VehicleType) => {
     resetJourney();
-
     const isDashboardStep = stepId.startsWith('db.');
     const needsDemoState = stepId !== 'vehicle_type.select';
-
-    if (needsDemoState) {
-      seedDemoState(vehicleType);
-    }
-
+    if (needsDemoState) seedDemoState(vehicleType);
     if (isDashboardStep) {
-      updateState({
-        vehicleType,
-        paymentComplete: true,
-        journeyComplete: false,
-        currentStepId: stepId,
-        currentModule: 'dashboard',
-      } as Partial<MotorJourneyState>);
+      updateState({ vehicleType, paymentComplete: true, journeyComplete: false, currentStepId: stepId, currentModule: 'dashboard' } as Partial<MotorJourneyState>);
     } else {
       const moduleMap: Record<string, string> = {
         'vehicle_type.select': 'vehicle_type',
@@ -212,14 +215,8 @@ export default function MotorJourney() {
         'addons.out_of_pocket': 'addons',
         'review.premium_breakdown': 'review',
       };
-
-      updateState({
-        vehicleType,
-        currentStepId: stepId,
-        currentModule: moduleMap[stepId] || 'vehicle_type',
-      } as Partial<MotorJourneyState>);
+      updateState({ vehicleType, currentStepId: stepId, currentModule: moduleMap[stepId] || 'vehicle_type' } as Partial<MotorJourneyState>);
     }
-
     setScreen('chat');
   };
 
@@ -236,22 +233,30 @@ export default function MotorJourney() {
       <MotorExpertPanel />
       <MotorAIChatPanel />
 
+      {/* COMMENTED OUT: WelcomeOverlay, MotorPrototypeIntro, MotorEntryScreen
       <AnimatePresence>
         {showWelcome && screen === 'entry' && (
           <WelcomeOverlay key="welcome-overlay" onDone={dismissWelcome} />
         )}
       </AnimatePresence>
-
       <AnimatePresence mode="wait">
         {screen === 'intro' && (
-          <MotorPrototypeIntro
-            key="intro"
-            onDone={() => setScreen('entry')}
-            onJumpTo={handleJumpTo}
-          />
+          <MotorPrototypeIntro key="intro" onDone={() => setScreen('entry')} onJumpTo={handleJumpTo} />
         )}
         {screen === 'entry' && (
           <MotorEntryScreen key="entry" onSelect={handleVehicleSelect} />
+        )}
+      </AnimatePresence>
+      */}
+
+      <AnimatePresence mode="wait">
+        {screen === 'explore' && (
+          <AuraMotorEntryNav
+            key="explore"
+            initialVehicle={vehicleParam === 'bike' ? 'bike' : 'car'}
+            onStartJourney={handleStartJourney}
+            onJumpTo={handleJumpTo}
+          />
         )}
         {screen === 'chat' && (
           <div key="chat" className="h-screen bg-[#1C0B47] flex flex-col overflow-hidden">
@@ -261,5 +266,17 @@ export default function MotorJourney() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+export default function MotorJourney() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <MotorJourneyInner />
+    </Suspense>
   );
 }

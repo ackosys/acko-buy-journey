@@ -48,6 +48,7 @@ const BENEFIT_LABELS: Record<string, string> = {
   health: 'Protect your family\'s health',
   car: 'Cover your car',
   bike: 'Cover your bike',
+
   life: 'Secure your family\'s future',
 };
 

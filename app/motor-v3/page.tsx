@@ -1,18 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import { useMotorStore } from '../../lib/motor/store';
-import AuraMotorEntryScreen from '../../components/motor/aura/AuraMotorEntryScreen';
+// COMMENTED OUT: Old intro and entry screens
+// import AuraMotorEntryScreen from '../../components/motor/aura/AuraMotorEntryScreen';
+// import AuraMotorPrototypeIntro from '../../components/motor/aura/AuraMotorPrototypeIntro';
+import AuraMotorEntryNav from '../../components/motor/aura/AuraMotorEntryNav';
 import AuraMotorHeader from '../../components/motor/aura/AuraMotorHeader';
 import AuraMotorChatContainer from '../../components/motor/aura/AuraMotorChatContainer';
-import AuraMotorPrototypeIntro from '../../components/motor/aura/AuraMotorPrototypeIntro';
 import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
 import AckoLogo from '../../components/AckoLogo';
 import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
 
-type Screen = 'intro' | 'entry' | 'chat';
+type Screen = 'explore' | 'chat';
 
+/* COMMENTED OUT: AuraWelcomeOverlay — temporarily disabled, journey starts from home page
 function AuraWelcomeOverlay({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onDone, 2500);
@@ -89,6 +93,7 @@ function AuraWelcomeOverlay({ onDone }: { onDone: () => void }) {
     </motion.div>
   );
 }
+END COMMENTED OUT */
 
 function seedDemoState(vehicleType: VehicleType) {
   const isCar = vehicleType === 'car';
@@ -155,47 +160,49 @@ function seedDemoState(vehicleType: VehicleType) {
   } as Partial<MotorJourneyState>);
 }
 
-export default function MotorV3Journey() {
+function MotorV3JourneyInner() {
   const store = useMotorStore();
   const { updateState, resetJourney } = store;
-  const [screen, setScreen] = useState<Screen>('intro');
-  const [showWelcome, setShowWelcome] = useState(true);
+  const theme = useMotorStore(s => s.theme);
+  const searchParams = useSearchParams();
+
+  const mode = searchParams.get('mode');
+  const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
+  const initialScreen: Screen = mode === 'explore' ? 'explore' : 'chat';
+
+  const [screen, setScreen] = useState<Screen>(initialScreen);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     resetJourney();
+    if (initialScreen === 'chat') {
+      const vehicle: VehicleType = vehicleParam === 'bike' ? 'bike' : 'car';
+      updateState({
+        vehicleType: vehicle,
+        currentStepId: 'vehicle_type.select',
+        currentModule: 'vehicle_type',
+      } as Partial<MotorJourneyState>);
+    }
     setHydrated(true);
   }, []);
 
-  const dismissWelcome = useCallback(() => setShowWelcome(false), []);
-
-  const handleVehicleSelect = (vehicleType: VehicleType) => {
+  const handleStartJourney = (vehicleType: VehicleType) => {
+    resetJourney();
     updateState({
       vehicleType,
-      currentStepId: 'registration.has_number',
-      currentModule: 'registration',
+      currentStepId: 'vehicle_type.select',
+      currentModule: 'vehicle_type',
     } as Partial<MotorJourneyState>);
     setScreen('chat');
   };
 
   const handleJumpTo = (stepId: string, vehicleType: VehicleType) => {
     resetJourney();
-
     const isDashboardStep = stepId.startsWith('db.');
     const needsDemoState = stepId !== 'vehicle_type.select';
-
-    if (needsDemoState) {
-      seedDemoState(vehicleType);
-    }
-
+    if (needsDemoState) seedDemoState(vehicleType);
     if (isDashboardStep) {
-      updateState({
-        vehicleType,
-        paymentComplete: true,
-        journeyComplete: false,
-        currentStepId: stepId,
-        currentModule: 'dashboard',
-      } as Partial<MotorJourneyState>);
+      updateState({ vehicleType, paymentComplete: true, journeyComplete: false, currentStepId: stepId, currentModule: 'dashboard' } as Partial<MotorJourneyState>);
     } else {
       const moduleMap: Record<string, string> = {
         'vehicle_type.select': 'vehicle_type',
@@ -206,14 +213,8 @@ export default function MotorV3Journey() {
         'addons.out_of_pocket': 'addons',
         'review.premium_breakdown': 'review',
       };
-
-      updateState({
-        vehicleType,
-        currentStepId: stepId,
-        currentModule: moduleMap[stepId] || 'vehicle_type',
-      } as Partial<MotorJourneyState>);
+      updateState({ vehicleType, currentStepId: stepId, currentModule: moduleMap[stepId] || 'vehicle_type' } as Partial<MotorJourneyState>);
     }
-
     setScreen('chat');
   };
 
@@ -226,34 +227,38 @@ export default function MotorV3Journey() {
   }
 
   return (
-    <div className="aura-dark">
+    <div className={theme === 'light' ? 'aura-light' : 'aura-dark'}>
       <MotorExpertPanel />
       <MotorAIChatPanel />
 
-      <AnimatePresence>
-        {showWelcome && screen === 'entry' && (
-          <AuraWelcomeOverlay key="welcome-overlay" onDone={dismissWelcome} />
-        )}
-      </AnimatePresence>
-
       <AnimatePresence mode="wait">
-        {screen === 'intro' && (
-          <AuraMotorPrototypeIntro
-            key="intro"
-            onDone={() => setScreen('entry')}
+        {screen === 'explore' && (
+          <AuraMotorEntryNav
+            key="explore"
+            initialVehicle={vehicleParam === 'bike' ? 'bike' : 'car'}
+            onStartJourney={handleStartJourney}
             onJumpTo={handleJumpTo}
           />
         )}
-        {screen === 'entry' && (
-          <AuraMotorEntryScreen key="entry" onSelect={handleVehicleSelect} />
-        )}
         {screen === 'chat' && (
-          <div key="chat" className="h-screen flex flex-col overflow-hidden" style={{ background: '#121214' }}>
+          <div key="chat" className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--aura-bg)' }}>
             <AuraMotorHeader />
             <AuraMotorChatContainer />
           </div>
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function MotorV3Journey() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#121214' }}>
+        <div className="w-8 h-8 border-3 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#A855F7', borderTopColor: 'transparent' }} />
+      </div>
+    }>
+      <MotorV3JourneyInner />
+    </Suspense>
   );
 }

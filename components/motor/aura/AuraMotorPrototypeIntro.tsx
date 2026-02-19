@@ -118,7 +118,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
       className="fixed inset-0 z-50 overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #121214 0%, #18181B 35%, #1E1E22 65%, #121214 100%)' }}
+      style={{ background: 'linear-gradient(160deg, var(--aura-bg) 0%, var(--aura-bg) 35%, var(--aura-surface) 65%, var(--aura-bg) 100%)' }}
     >
       <AnimatePresence mode="wait">
         {/* ═══════ SLIDE 1: The Vision ═══════ */}
@@ -166,7 +166,8 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
-                className="text-[32px] sm:text-[38px] font-bold text-white leading-[1.15] mb-5 tracking-tight"
+                className="text-[32px] sm:text-[38px] font-bold leading-[1.15] mb-5 tracking-tight"
+                style={{ color: 'var(--aura-text)' }}
               >
                 Insuring your ride{' '}
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#C084FC] via-[#F472B6] to-[#FB923C]">
@@ -180,7 +181,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.55 }}
                 className="text-[15px] leading-relaxed mb-8 max-w-md"
-                style={{ color: '#94A3B8' }}
+                style={{ color: 'var(--aura-text-muted)' }}
               >
                 Motor insurance was always sold through agents who understood your vehicle, your driving habits, your budget. We&apos;re bringing that back, powered by AI.
               </motion.p>
@@ -190,7 +191,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.65 }}
                 className="rounded-2xl p-5 mb-6"
-                style={{ backgroundColor: '#1E1E22', border: '1px solid rgba(255,255,255,0.05)' }}
+                style={{ backgroundColor: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}
               >
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -200,7 +201,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                   </div>
                   <div>
                     <p className="text-[13px] font-semibold mb-1 text-white/80">Today&apos;s reality</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: '#64748B' }}>
+                    <p className="text-[13px] leading-relaxed" style={{ color: 'var(--aura-text-subtle)' }}>
                       Hundreds of screens. Quote comparison, plan selection, add-ons, payment, claims — all disconnected. Users drop off because the experience feels like paperwork.
                     </p>
                   </div>
@@ -213,7 +214,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                   </div>
                   <div>
                     <p className="text-[13px] font-semibold mb-1 text-white/80">This prototype</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: '#64748B' }}>
+                    <p className="text-[13px] leading-relaxed" style={{ color: 'var(--aura-text-subtle)' }}>
                       One unified conversation — from &ldquo;what would you like to insure?&rdquo; to your policy dashboard and claims. Car and Bike, new and existing.
                     </p>
                   </div>
@@ -227,7 +228,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                 className="flex items-center gap-2.5 mb-8"
               >
                 <div className="w-px h-8 bg-gradient-to-b from-transparent via-[#A855F7]/30 to-transparent" />
-                <p className="text-[12px] italic leading-relaxed" style={{ color: '#64748B' }}>
+                <p className="text-[12px] italic leading-relaxed" style={{ color: 'var(--aura-text-subtle)' }}>
                   &ldquo;The best insurance experience is a conversation, not a comparison table.&rdquo;
                 </p>
               </motion.div>
@@ -248,7 +249,8 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
               </button>
               <button
                 onClick={onDone}
-                className="w-full mt-3 py-2.5 text-[13px] text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                className="w-full mt-3 py-2.5 text-[13px] transition-colors"
+                style={{ color: 'var(--aura-text-subtle)' }}
               >
                 Skip intro
               </button>
@@ -278,7 +280,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
                   onClick={() => setSlide(0)}
-                  className="flex items-center gap-1.5 text-[13px] text-[#94A3B8] hover:text-[#C084FC] transition-colors mb-6"
+                  className="flex items-center gap-1.5 text-[13px] text-[var(--aura-text-muted)] hover:text-[#C084FC] transition-colors mb-6"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -304,7 +306,8 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-[26px] font-bold text-white leading-tight mb-2 tracking-tight"
+                  className="text-[26px] font-bold leading-tight mb-2 tracking-tight"
+                  style={{ color: 'var(--aura-text)' }}
                 >
                   Everything in one flow
                 </motion.h2>
@@ -314,7 +317,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25 }}
                   className="text-[13px] mb-5 leading-relaxed"
-                  style={{ color: '#64748B' }}
+                  style={{ color: 'var(--aura-text-subtle)' }}
                 >
                   Tap any section to jump directly into that part of the journey.
                 </motion.p>
@@ -326,14 +329,14 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                   transition={{ delay: 0.28 }}
                   className="flex items-center gap-2 mb-6"
                 >
-                  <span className="text-[12px] mr-1" style={{ color: '#64748B' }}>Experience as</span>
+                  <span className="text-[12px] mr-1" style={{ color: 'var(--aura-text-subtle)' }}>Experience as</span>
                   <button
                     onClick={() => setSelectedVehicle('car')}
                     className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all"
                     style={
                       selectedVehicle === 'car'
                         ? { background: 'rgba(168,85,247,0.15)', color: '#C084FC', border: '1px solid rgba(168,85,247,0.2)' }
-                        : { backgroundColor: '#1E1E22', color: '#64748B', border: '1px solid rgba(255,255,255,0.05)' }
+                        : { backgroundColor: 'var(--aura-surface)', color: 'var(--aura-text-subtle)', border: '1px solid var(--aura-border)' }
                     }
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -347,7 +350,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                     style={
                       selectedVehicle === 'bike'
                         ? { background: 'rgba(168,85,247,0.15)', color: '#C084FC', border: '1px solid rgba(168,85,247,0.2)' }
-                        : { backgroundColor: '#1E1E22', color: '#64748B', border: '1px solid rgba(255,255,255,0.05)' }
+                        : { backgroundColor: 'var(--aura-surface)', color: 'var(--aura-text-subtle)', border: '1px solid var(--aura-border)' }
                     }
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -376,9 +379,8 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                         ${f.entryStepId ? 'hover:border-[#A855F7]/20 active:scale-[0.98] cursor-pointer' : 'cursor-default'}
                       `}
                       style={{
-                        backgroundColor: '#1E1E22',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        ...(f.entryStepId ? {} : {}),
+                        backgroundColor: 'var(--aura-surface)',
+                        border: '1px solid var(--aura-border)',
                       }}
                     >
                       <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.1)', color: '#C084FC' }}>
@@ -393,7 +395,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                             </svg>
                           )}
                         </div>
-                        <p className="text-[12px] leading-relaxed" style={{ color: '#64748B' }}>{f.desc}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--aura-text-subtle)' }}>{f.desc}</p>
                       </div>
                     </motion.button>
                   ))}
@@ -418,7 +420,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className="px-7 pb-10 pt-4 relative z-10 max-w-lg mx-auto w-full"
-              style={{ background: 'linear-gradient(to top, #121214 60%, transparent)' }}
+              style={{ background: 'linear-gradient(to top, var(--aura-bg) 60%, transparent)' }}
             >
               <button
                 onClick={onDone}

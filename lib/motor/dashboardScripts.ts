@@ -459,19 +459,27 @@ const motorDashboardSteps: MotorConversationStep[] = [
       const v = state.vehicleType === 'bike' ? 'bike' : 'car';
       return {
         botMessages: [`Is your ${v} safe to drive?`],
-        subText: `Select "No" if you notice any of these: flat or damaged tyres, deployed airbags, engine will not start, fluid leakage, flood damage, or any other safety concern.`,
         options: [
           { id: 'yes', label: 'Yes, it is drivable', description: 'Minor damage, can be driven' },
-          { id: 'no', label: 'No, it is not safe', description: 'Vehicle should not be driven' },
+          { id: 'no', label: 'No, it is not safe', description: 'Needs towing or is unsafe to drive' },
         ],
       };
     },
     processResponse: (response) => ({ dashboardClaimSafeToDriver: response === 'yes' }),
-    getNextStep: (response, state) => {
-      const atAccidentSite = state.dashboardClaimVehicleLocation === 'accident_site';
-      if (response === 'no' || atAccidentSite) return 'db.claim_towing';
-      return 'db.claim_review';
-    },
+    getNextStep: (response) => response === 'no' ? 'db.claim_safety_conditions' : 'db.claim_towing',
+  },
+
+  /* Step 8a: Safety condition picker (conditional — if not safe) */
+  {
+    id: 'db.claim_safety_conditions',
+    module: 'claims',
+    widgetType: 'safety_condition_picker',
+    getScript: () => ({
+      botMessages: [`Which of these safety issues apply?`],
+      subText: `Select all that apply — this helps us prioritise your claim.`,
+    }),
+    processResponse: (response) => ({ dashboardClaimSafetyConditions: response as string[] }),
+    getNextStep: () => 'db.claim_towing',
   },
 
   /* Step 9: Towing help? (Q7 from PDF — conditional) */
@@ -529,6 +537,34 @@ const motorDashboardSteps: MotorConversationStep[] = [
       dashboardClaimDlUploaded: !!response?.dlUploaded,
       dashboardClaimPrevPolicyUploaded: !!response?.prevPolicyUploaded,
     }),
+    getNextStep: (_, state) => {
+      const isTheft = state.dashboardClaimType === 'own_damage_theft';
+      return isTheft ? 'db.claim_review' : 'db.claim_damage_photos_intro';
+    },
+  },
+
+  /* Step 11a: Damage photos intro (for non-theft claims) */
+  {
+    id: 'db.claim_damage_photos_intro',
+    module: 'claims',
+    widgetType: 'none',
+    getScript: () => ({
+      botMessages: [
+        `Almost there — one more thing.`,
+        `Please upload a few photos of the damage. This helps our team assess the extent of damage and speeds up your claim significantly.`,
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_damage_photos',
+  },
+
+  /* Step 11b: Damage photo capture widget */
+  {
+    id: 'db.claim_damage_photos',
+    module: 'claims',
+    widgetType: 'damage_photo_capture',
+    getScript: () => ({ botMessages: [] }),
+    processResponse: (response) => ({ dashboardClaimDamagePhotosUploaded: !!response?.photosUploaded }),
     getNextStep: () => 'db.claim_review',
   },
 
@@ -563,42 +599,27 @@ const motorDashboardSteps: MotorConversationStep[] = [
     getNextStep: (response) => response === 'confirm' ? 'db.claim_submitted' : 'db.actions',
   },
 
-  /* Step 14: Submission confirmation */
+  /* Step 14: Submission confirmation → triggers heartbeat + next steps */
   {
     id: 'db.claim_submitted',
     module: 'claims',
-    widgetType: 'selection_cards',
+    widgetType: 'none',
     getScript: (state) => {
-      const claimId = `MCL-${Math.floor(100000 + Math.random() * 900000)}`;
       const isTheft = state.dashboardClaimType === 'own_damage_theft';
-      const isTP = state.dashboardClaimType === 'third_party';
       const hasSerious = state.dashboardClaimSeriousInjuries === true;
       const needsTowing = state.dashboardClaimNeedsTowing === true;
-
-      let nextSteps = '';
-      if (isTheft) {
-        nextSteps = '1. Claim registered — Done\n2. Police verification — In progress\n3. Investigation & assessment — Pending\n4. Settlement — Pending';
-      } else if (isTP) {
-        nextSteps = '1. Claim registered — Done\n2. Third-party verification — In progress\n3. Liability assessment — Pending\n4. Settlement processed — Pending';
-      } else {
-        nextSteps = '1. Claim registered — Done\n2. Surveyor inspection — Scheduled within 24h\n3. Repair authorization — Pending\n4. Vehicle repaired — Pending\n5. Claim settled — Pending';
-      }
+      const claimId = `MCL-${Math.floor(100000 + Math.random() * 900000)}`;
 
       const notes: string[] = [];
       if (hasSerious) notes.push(`Your claim has been marked as high priority due to reported injuries.`);
-      if (needsTowing) notes.push(`Our towing team will call you within 15 minutes.`);
+      if (needsTowing) notes.push(`Our towing team will call you within 15 minutes. 🚛`);
 
       return {
         botMessages: [
           `Claim submitted successfully.`,
-          `Claim ID: ${claimId}\nExpected resolution: ${isTheft ? '7-10' : '3-5'} working days`,
+          `Claim ID: ${claimId}\nPolicy validated ✓\nCoverage confirmed ✓\nExpected resolution: ${isTheft ? '7–10' : '3–5'} working days`,
           ...notes,
-          `What happens next:\n\n${nextSteps}`,
-          `We will keep you updated via SMS and email at every step.`,
-        ],
-        options: [
-          { id: 'track', label: 'Track This Claim', icon: 'clock' },
-          { id: 'back', label: 'Back to Dashboard', icon: 'switch' },
+          `Here is your live claim status:`,
         ],
       };
     },
@@ -611,7 +632,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
       let status = 'Surveyor inspection scheduled';
       if (isTheft) status = 'Police verification in progress';
       if (hasSerious) status = 'High priority — Under review';
-      if (needsTowing) status = 'Towing arranged — Under review';
+      if (needsTowing) status = 'Towing arranged — Inspection pending';
 
       return {
         dashboardSubmittedClaims: [
@@ -647,9 +668,208 @@ const motorDashboardSteps: MotorConversationStep[] = [
         dashboardClaimRcUploaded: false,
         dashboardClaimDlUploaded: false,
         dashboardClaimPrevPolicyUploaded: false,
+        dashboardClaimDamagePhotosUploaded: false,
+        dashboardClaimDamagedParts: [],
+        dashboardClaimSafetyConditions: [],
       };
     },
-    getNextStep: (response) => response === 'track' ? 'db.track_overview' : 'db.actions',
+    getNextStep: (_, state) => {
+      const isTheft = state.dashboardClaimType === 'own_damage_theft';
+      return isTheft ? 'db.claim_heartbeat' : 'db.claim_heartbeat';
+    },
+  },
+
+  /* Step 15: Heartbeat — live status timeline */
+  {
+    id: 'db.claim_heartbeat',
+    module: 'claims',
+    widgetType: 'claim_heartbeat',
+    getScript: () => ({ botMessages: [] }),
+    processResponse: () => ({}),
+    getNextStep: (_, state) => {
+      const isTheft = state.dashboardSubmittedClaims[state.dashboardSubmittedClaims.length - 1]?.type === 'own_damage_theft';
+      return isTheft ? 'db.actions' : 'db.claim_inspection_type';
+    },
+  },
+
+  /* Step 16: Inspection type — self or surveyor? */
+  {
+    id: 'db.claim_inspection_type',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: [
+        `Next step: we need to assess the damage.`,
+        `You can do a quick self-inspection right now, or we can assign a surveyor to visit you.`,
+      ],
+      options: [
+        { id: 'self', label: 'Self Inspection', description: 'Guided photo capture — takes 3 minutes', icon: 'camera' },
+        { id: 'surveyor', label: 'Assign a Surveyor', description: 'We will visit you within 24–48 hours', icon: 'document' },
+      ],
+    }),
+    processResponse: (response) => ({ dashboardClaimInspectionType: response as 'self' | 'surveyor' }),
+    getNextStep: (response) => response === 'self' ? 'db.claim_self_inspection' : 'db.claim_surveyor_assigned',
+  },
+
+  /* Step 17a: Self inspection widget */
+  {
+    id: 'db.claim_self_inspection',
+    module: 'claims',
+    widgetType: 'self_inspection',
+    getScript: () => ({
+      botMessages: [`Great — let's start the self inspection. I'll guide you through each photo step.`],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_assessment_result',
+  },
+
+  /* Step 17b: Surveyor assigned */
+  {
+    id: 'db.claim_surveyor_assigned',
+    module: 'claims',
+    widgetType: 'surveyor_assigned',
+    getScript: () => ({
+      botMessages: [`A surveyor has been assigned to your claim.`],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_assessment_result',
+  },
+
+  /* Step 18: Assessment result → settlement path */
+  {
+    id: 'db.claim_assessment_result',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: (state) => {
+      const baseAmount = state.totalPremium ? Math.round(state.totalPremium * 0.6) : 18500;
+      const deductible = state.selectedPlan?.type === 'zero_dep' ? 0 : 2500;
+      const netAmount = baseAmount - deductible;
+      return {
+        botMessages: [
+          `Damage assessment complete.`,
+          `Estimated repair cost: ₹${baseAmount.toLocaleString('en-IN')}\nDeductible: ₹${deductible.toLocaleString('en-IN')}\nApproved amount: ₹${netAmount.toLocaleString('en-IN')}`,
+          `How would you like to proceed?`,
+        ],
+        options: [
+          { id: 'instant', label: 'Instant Settlement', description: `₹${netAmount.toLocaleString('en-IN')} direct bank transfer`, icon: 'check' },
+          { id: 'cashless', label: 'Cashless Repair', description: 'We pay the garage directly', icon: 'garage' },
+          { id: 'reimbursement', label: 'Reimbursement', description: 'Repair anywhere, claim later', icon: 'document' },
+        ],
+      };
+    },
+    processResponse: (response) => ({ dashboardClaimSettlementType: response as 'instant' | 'cashless' | 'reimbursement' }),
+    getNextStep: (response) => {
+      switch (response) {
+        case 'instant': return 'db.claim_instant_offer';
+        case 'cashless': return 'db.claim_garage_cashless';
+        case 'reimbursement': return 'db.claim_reimbursement';
+        default: return 'db.claim_assessment_result';
+      }
+    },
+  },
+
+  /* Step 19a: Instant settlement offer */
+  {
+    id: 'db.claim_instant_offer',
+    module: 'claims',
+    widgetType: 'settlement_offer',
+    getScript: () => ({
+      botMessages: [`Here is your instant settlement offer:`],
+    }),
+    processResponse: (response, state) => {
+      const netAmount = typeof response === 'number' ? response : state.dashboardClaimSettlementAmount || 18500;
+      return { dashboardClaimSettlementAmount: netAmount };
+    },
+    getNextStep: (response) => {
+      if (response === 'declined') return 'db.claim_assessment_result';
+      return 'db.claim_payment_initiated';
+    },
+  },
+
+  /* Step 19b: Cashless garage selection */
+  {
+    id: 'db.claim_garage_cashless',
+    module: 'claims',
+    widgetType: 'garage_selector_claim',
+    getScript: () => ({
+      botMessages: [`Choose a cashless garage near you:`],
+    }),
+    processResponse: (response) => ({ dashboardClaimSelectedGarage: response as string }),
+    getNextStep: () => 'db.claim_repair_progress',
+  },
+
+  /* Step 19c: Reimbursement invoice upload */
+  {
+    id: 'db.claim_reimbursement',
+    module: 'claims',
+    widgetType: 'reimbursement_upload',
+    getScript: () => ({
+      botMessages: [`Get your vehicle repaired at any garage of your choice.`],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_payment_initiated',
+  },
+
+  /* Step 20a: Repair in progress (cashless path) */
+  {
+    id: 'db.claim_repair_progress',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: (state) => {
+      const garage = state.dashboardClaimSelectedGarage || 'GoMechanic';
+      const GARAGE_NAMES: Record<string, string> = {
+        gomechanic: 'GoMechanic, Sector 29',
+        carnation: 'Carnation Auto, Cyber City',
+        pitstop: 'Pit Stop, MG Road',
+        autobahn: 'Autobahn Motors, DLF Phase 3',
+        outside_network: 'your selected garage',
+      };
+      const garageName = GARAGE_NAMES[garage] || garage;
+      return {
+        botMessages: [
+          `Repair approval sent to ${garageName}.`,
+          `Status: Repair in progress\nEstimated completion: 2–3 working days\nWe will notify you when your vehicle is ready for pickup.`,
+        ],
+        options: [
+          { id: 'done', label: 'Got it', icon: 'check' },
+        ],
+      };
+    },
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_closure',
+  },
+
+  /* Step 20b: Payment initiated (instant + reimbursement path) */
+  {
+    id: 'db.claim_payment_initiated',
+    module: 'claims',
+    widgetType: 'selection_cards',
+    getScript: (state) => {
+      const amount = state.dashboardClaimSettlementAmount || 18500;
+      return {
+        botMessages: [
+          `Payment initiated.`,
+          `₹${amount.toLocaleString('en-IN')} has been transferred to your bank account ending ····3845.\n\nTransfer reference: TXN${Math.floor(1000000 + Math.random() * 9000000)}\nExpected credit: within 24 hours`,
+        ],
+        options: [
+          { id: 'done', label: 'Continue', icon: 'check' },
+        ],
+      };
+    },
+    processResponse: () => ({}),
+    getNextStep: () => 'db.claim_closure',
+  },
+
+  /* Step 21: Claim Closure */
+  {
+    id: 'db.claim_closure',
+    module: 'claims',
+    widgetType: 'claim_closure',
+    getScript: () => ({
+      botMessages: [`Your claim has been fully resolved.`],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'db.actions',
   },
 
   /* ═════ GET ANSWERS ═════ */

@@ -188,25 +188,80 @@
 }
 
 /* ══════════════════════════════════════════════════
-   AURA DARK THEME — Glassmorphism + Gradient Accents
+   AURA THEME — Glassmorphism + Gradient Accents
    ══════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-.aura-dark {
+.aura-dark,
+.aura-light {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
+.aura-dark {
+  --aura-bg: #121214;
+  --aura-surface: #1E1E22;
+  --aura-surface-2: #2D2D35;
+  --aura-surface-hover: #3D3D45;
+  --aura-text: #FFFFFF;
+  --aura-text-muted: #94A3B8;
+  --aura-text-subtle: #64748B;
+  --aura-bot-text: #F8FAFC;
+  --aura-border: rgba(255,255,255,0.05);
+  --aura-border-strong: rgba(255,255,255,0.1);
+  --aura-shadow: rgba(0,0,0,0.3);
+  --aura-shadow-heavy: rgba(0,0,0,0.4);
+  --aura-icon-filter: brightness(0) invert(1);
+  --aura-icon-opacity: 0.85;
+  --aura-glass-bg: rgba(30, 30, 34, 0.92);
+  --aura-overlay-bg: rgba(255,255,255,0.08);
+  --aura-chat-gradient: linear-gradient(180deg, #121214 0%, #18181B 40%, #121214 100%);
+  --aura-progress-border: 2px solid #121214;
+  --aura-selected-bg: rgba(168,85,247,0.15);
+  --aura-selected-border: rgba(168,85,247,0.5);
+  --aura-input-bg: rgba(255,255,255,0.05);
+  --aura-input-border: rgba(255,255,255,0.1);
+  --aura-input-text: #FFFFFF;
+  --aura-input-placeholder: rgba(255,255,255,0.3);
+}
+
+.aura-light {
+  --aura-bg: #F5F3FF;
+  --aura-surface: #FFFFFF;
+  --aura-surface-2: #F0EEF9;
+  --aura-surface-hover: #E8E5F5;
+  --aura-text: #1C0B47;
+  --aura-text-muted: #64748B;
+  --aura-text-subtle: #94A3B8;
+  --aura-bot-text: #1C0B47;
+  --aura-border: rgba(0,0,0,0.06);
+  --aura-border-strong: rgba(0,0,0,0.1);
+  --aura-shadow: rgba(0,0,0,0.06);
+  --aura-shadow-heavy: rgba(0,0,0,0.08);
+  --aura-icon-filter: brightness(0);
+  --aura-icon-opacity: 0.7;
+  --aura-glass-bg: rgba(255,255,255,0.95);
+  --aura-overlay-bg: rgba(0,0,0,0.04);
+  --aura-chat-gradient: linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 40%, #F5F3FF 100%);
+  --aura-progress-border: 2px solid #F5F3FF;
+  --aura-selected-bg: rgba(168,85,247,0.1);
+  --aura-selected-border: rgba(168,85,247,0.4);
+  --aura-input-bg: rgba(0,0,0,0.03);
+  --aura-input-border: rgba(0,0,0,0.1);
+  --aura-input-text: #1C0B47;
+  --aura-input-placeholder: rgba(0,0,0,0.3);
+}
+
 .aura-chat-bg {
-  background: linear-gradient(180deg, #121214 0%, #18181B 40%, #121214 100%);
+  background: var(--aura-chat-gradient);
 }
 
 .aura-widget-glass {
-  background: rgba(30, 30, 34, 0.92);
+  background: var(--aura-glass-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid var(--aura-border);
+  box-shadow: 0 -4px 40px var(--aura-shadow-heavy);
 }
 
 @keyframes auraPopIn {
