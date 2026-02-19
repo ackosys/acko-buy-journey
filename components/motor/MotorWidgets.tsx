@@ -78,8 +78,12 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
                 {opt.badge}
               </span>
             )}
-            <div className="mb-2 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-              <MotorIcon icon={opt.icon!} className="w-6 h-6 text-purple-300" />
+            <div className="mb-2 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden">
+              {opt.logoUrl ? (
+                <img src={opt.logoUrl} alt={opt.label} className="w-7 h-7 object-contain" />
+              ) : (
+                <MotorIcon icon={opt.icon!} className="w-6 h-6 text-purple-300" />
+              )}
             </div>
             <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
             {opt.description && (
@@ -109,9 +113,13 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
           `}
         >
           <div className="flex items-center gap-3">
-            {opt.icon && (
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                <MotorIcon icon={opt.icon} className="w-4.5 h-4.5 text-purple-300" />
+            {(opt.logoUrl || opt.icon) && (
+              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {opt.logoUrl ? (
+                  <img src={opt.logoUrl} alt={opt.label} className="w-6 h-6 object-contain" />
+                ) : (
+                  <MotorIcon icon={opt.icon!} className="w-4.5 h-4.5 text-purple-300" />
+                )}
               </div>
             )}
             <div className="flex-1">
@@ -433,7 +441,7 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
 }
 
 /* ═══════════════════════════════════════════════
-   Brand Selector — Searchable brand list
+   Brand Selector — Logo grid (bottom sheet)
    ═══════════════════════════════════════════════ */
 
 const CAR_BRANDS = [
@@ -448,6 +456,40 @@ const BIKE_BRANDS = [
   'Revolt', 'Aprilia', 'Benelli', 'BMW Motorrad',
 ];
 
+const BRAND_LOGO_MAP: Record<string, string> = {
+  'Maruti Suzuki': '/logos/Suzuki.png',
+  'Hyundai': '/logos/Hyundai.png',
+  'Tata': '/logos/TATA.png',
+  'Kia': '/logos/Kia.png',
+  'Mahindra': '/logos/Mahindra.png',
+  'Toyota': '/logos/TATA.png',
+  'Honda': '/logos/Honda.png',
+  'MG': '/logos/MG.png',
+  'Volkswagen': '/logos/Volvo.png',
+  'Skoda': '/logos/Opel.png',
+  'Renault': '/logos/Renault.png',
+  'Nissan': '/logos/Mitsubishi.png',
+  'Jeep': '/logos/Jeep.png',
+  'Mercedes-Benz': '/logos/Mercedez.png',
+  'BMW': '/logos/BMW.png',
+  'Audi': '/logos/Audi.png',
+  'Hero': '/logos/Hero.png',
+  'Bajaj': '/logos/Bajaj.png',
+  'TVS': '/logos/TVS.png',
+  'Royal Enfield': '/logos/Royal Enfield.png',
+  'Yamaha': '/logos/Suzuki.png',
+  'Suzuki': '/logos/Suzuki.png',
+  'KTM': '/logos/BMW.png',
+  'Kawasaki': '/logos/Honda.png',
+  'Jawa': '/logos/Mahindra.png',
+  'Ola': '/logos/ola.png',
+  'Ather': '/logos/Ather.png',
+  'Revolt': '/logos/Revolt.png',
+  'Aprilia': '/logos/Ferrari.png',
+  'Benelli': '/logos/Ferrari.png',
+  'BMW Motorrad': '/logos/BMW.png',
+};
+
 export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void }) {
   const vehicleType = useMotorStore.getState().vehicleType;
   const brands = vehicleType === 'bike' ? BIKE_BRANDS : CAR_BRANDS;
@@ -460,36 +502,55 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
 
   const handleSelect = (brand: string) => {
     setSelected(brand);
-    setTimeout(() => onSelect(brand), 250);
+    setTimeout(() => onSelect(brand), 300);
   };
 
   return (
-    <div className="max-w-sm">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={`Search ${vehicleType === 'bike' ? 'bike' : 'car'} brand`}
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
-        autoFocus
-      />
-      <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto scrollbar-hide">
+    <div>
+      <div className="relative mb-3">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={`Search ${vehicleType === 'bike' ? 'bike' : 'car'} brand`}
+          className="w-full pl-9 pr-4 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/50 transition-colors"
+          autoFocus
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
         {filtered.map((brand, i) => (
           <motion.button
             key={brand}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.02 }}
             onClick={() => handleSelect(brand)}
             className={`
-              text-left px-3 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
+              flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
               ${selected === brand
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-purple-400 bg-purple-500/15 ring-1 ring-purple-400/30'
+                : 'border-white/10 bg-white/5 hover:bg-white/10'
               }
             `}
           >
-            <span className="text-[14px] font-medium text-white/90">{brand}</span>
+            <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+              {BRAND_LOGO_MAP[brand] ? (
+                <img src={BRAND_LOGO_MAP[brand]} alt={brand} className="w-7 h-7 object-contain" />
+              ) : (
+                <span className="text-[11px] font-bold text-white/60">{brand.slice(0, 2)}</span>
+              )}
+            </div>
+            <span className="text-[11px] font-medium text-white/80 text-center leading-tight">{brand}</span>
+            {selected === brand && (
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
+                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </motion.div>
+            )}
           </motion.button>
         ))}
       </div>
@@ -537,36 +598,50 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
 
   const handleSelect = (model: string) => {
     setSelected(model);
-    setTimeout(() => onSelect(model), 250);
+    setTimeout(() => onSelect(model), 300);
   };
 
   return (
-    <div className="max-w-sm">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={`Search ${brand} model`}
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
-        autoFocus
-      />
-      <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto scrollbar-hide">
+    <div>
+      <div className="relative mb-3">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={`Search ${brand} model`}
+          className="w-full pl-9 pr-4 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/50 transition-colors"
+          autoFocus
+        />
+      </div>
+      <div className="space-y-1">
         {filtered.map((model, i) => (
           <motion.button
             key={model}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.02 }}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.025 }}
             onClick={() => handleSelect(model)}
             className={`
-              text-left px-3 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
+              w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.98]
               ${selected === model
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-purple-400 bg-purple-500/12'
+                : 'border-transparent hover:bg-white/6'
               }
             `}
           >
             <span className="text-[14px] font-medium text-white/90">{model}</span>
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+              ${selected === model ? 'border-purple-400 bg-purple-500' : 'border-white/20'}
+            `}>
+              {selected === model && (
+                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </motion.svg>
+              )}
+            </div>
           </motion.button>
         ))}
       </div>
@@ -578,59 +653,74 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
    Variant Selector
    ═══════════════════════════════════════════════ */
 
-const COMMON_VARIANTS = ['LXI', 'VXI', 'ZXI', 'ZXI+', 'LDI', 'VDI', 'ZDI', 'ZDI+', 'Base', 'Mid', 'Top', 'HTE', 'HTK', 'HTK+', 'HTX', 'HTX+'];
+const FUEL_VARIANTS: Record<string, string[]> = {
+  'Petrol': ['Smart', 'Smart (O)', 'Pure', 'Pure (O)', 'Pure Plus', 'Pure Plus S', 'Pure Plus AT', 'Pure Plus S Dark'],
+  'Diesel': ['Smart', 'Smart (O)', 'Pure', 'Pure (O)', 'Pure Plus', 'Pure Plus S', 'Pure Plus AT'],
+  'Electric': ['Prime', 'Prime (O)', 'Creative', 'Creative Pro', 'Empowered', 'Empowered+'],
+  'CNG': ['Smart', 'Smart S-CNG', 'Pure', 'Pure S-CNG'],
+};
+
+const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'CNG'];
 
 export function VariantSelector({ onSelect }: { onSelect: (variant: string) => void }) {
-  const [search, setSearch] = useState('');
+  const state = useMotorStore.getState() as MotorJourneyState;
+  const existingFuel = state.vehicleData.fuelType;
+  const [activeFuel, setActiveFuel] = useState<string>(existingFuel || 'Petrol');
   const [selected, setSelected] = useState<string | null>(null);
+  const isBike = state.vehicleType === 'bike';
 
-  const filtered = search
-    ? COMMON_VARIANTS.filter(v => v.toLowerCase().includes(search.toLowerCase()))
-    : COMMON_VARIANTS;
+  const fuelTypes = isBike ? ['Petrol', 'Electric'] : FUEL_TYPES;
+  const variants = FUEL_VARIANTS[activeFuel] || FUEL_VARIANTS['Petrol'];
 
   const handleSelect = (variant: string) => {
     setSelected(variant);
-    setTimeout(() => onSelect(variant), 250);
+    setTimeout(() => onSelect(variant), 300);
   };
 
   return (
-    <div className="max-w-sm">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search or type variant"
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
-        autoFocus
-      />
-      <div className="grid grid-cols-3 gap-2 max-h-[250px] overflow-y-auto scrollbar-hide">
-        {filtered.map((variant, i) => (
-          <motion.button
-            key={variant}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: i * 0.02 }}
-            onClick={() => handleSelect(variant)}
-            className={`
-              px-3 py-2.5 rounded-lg border text-center transition-all duration-200 active:scale-[0.97]
-              ${selected === variant
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+    <div>
+      <div className="flex gap-1.5 mb-3 p-1 bg-white/5 rounded-xl">
+        {fuelTypes.map(fuel => (
+          <button
+            key={fuel}
+            onClick={() => { setActiveFuel(fuel); setSelected(null); }}
+            className={`flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all
+              ${activeFuel === fuel
+                ? 'bg-white text-[#1C0B47] shadow-sm'
+                : 'text-white/50 hover:text-white/70'
               }
             `}
           >
-            <span className="text-[13px] font-medium text-white/90">{variant}</span>
+            {fuel}
+          </button>
+        ))}
+      </div>
+      {!selected && (
+        <p className="text-[11px] text-white/30 mb-2 px-1">Select your {state.vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
+      )}
+      <div className="space-y-1">
+        {variants.map((variant, i) => (
+          <motion.button
+            key={variant}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.025 }}
+            onClick={() => handleSelect(variant)}
+            className={`
+              w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
+              ${selected === variant
+                ? 'bg-purple-500/12 border border-purple-400'
+                : 'border border-transparent hover:bg-white/6'
+              }
+            `}
+          >
+            <span className="text-[14px] font-medium text-white/90">{variant}</span>
+            <svg className="w-4 h-4 text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
           </motion.button>
         ))}
       </div>
-      {search && !filtered.length && (
-        <button
-          onClick={() => handleSelect(search)}
-          className="mt-2 w-full py-3 bg-purple-500/20 border border-purple-400/30 rounded-xl text-[14px] text-purple-300 font-medium"
-        >
-          Use "{search}"
-        </button>
-      )}
     </div>
   );
 }
@@ -639,38 +729,85 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
    Year Selector — Registration year
    ═══════════════════════════════════════════════ */
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 export function YearSelector({ onSelect }: { onSelect: (year: string) => void }) {
   const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
   const years = Array.from({ length: 20 }, (_, i) => currentYear - i);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
-  const handleSelect = (year: number) => {
-    setSelected(year);
-    setTimeout(() => onSelect(String(year)), 250);
+  const handleYearSelect = (year: number) => {
+    setSelectedYear(year);
   };
 
+  const handleSubmit = () => {
+    if (selectedYear) {
+      onSelect(String(selectedYear));
+    }
+  };
+
+  const availableMonths = selectedYear === currentYear
+    ? MONTHS.slice(0, currentMonth + 1)
+    : MONTHS;
+
   return (
-    <div className="max-w-sm">
-      <div className="grid grid-cols-4 gap-2 max-h-[250px] overflow-y-auto scrollbar-hide">
+    <div>
+      <div className="flex gap-2 mb-3">
+        <select
+          value={selectedYear ?? ''}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="flex-1 px-3 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white focus:outline-none focus:border-purple-400/50 appearance-none cursor-pointer"
+        >
+          <option value="" disabled className="bg-[#1C0B47]">Year</option>
+          {years.map(y => (
+            <option key={y} value={y} className="bg-[#1C0B47]">{y}</option>
+          ))}
+        </select>
+        <select
+          value={selectedMonth ?? ''}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="flex-1 px-3 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white focus:outline-none focus:border-purple-400/50 appearance-none cursor-pointer"
+        >
+          <option value="" disabled className="bg-[#1C0B47]">Month</option>
+          {availableMonths.map(m => (
+            <option key={m} value={m} className="bg-[#1C0B47]">{m}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-4 gap-1.5">
         {years.map((year, i) => (
           <motion.button
             key={year}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: i * 0.015 }}
-            onClick={() => handleSelect(year)}
+            transition={{ delay: i * 0.012 }}
+            onClick={() => handleYearSelect(year)}
             className={`
-              px-3 py-3 rounded-lg border text-center transition-all duration-200 active:scale-[0.97]
-              ${selected === year
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+              py-2.5 rounded-lg text-center transition-all duration-200 active:scale-[0.95]
+              ${selectedYear === year
+                ? 'bg-purple-500 text-white font-bold shadow-lg shadow-purple-500/25'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
               }
             `}
           >
-            <span className="text-[14px] font-medium text-white/90">{year}</span>
+            <span className="text-[13px]">{year}</span>
           </motion.button>
         ))}
       </div>
+
+      {selectedYear && (
+        <motion.button
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={handleSubmit}
+          className="mt-3 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-[14px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        >
+          Continue with {selectedYear}{selectedMonth ? ` · ${selectedMonth}` : ''}
+        </motion.button>
+      )}
     </div>
   );
 }
@@ -693,12 +830,12 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
 
   const handleSelect = (ncb: NcbPercentage) => {
     setSelected(ncb);
-    setTimeout(() => onSelect(String(ncb)), 250);
+    setTimeout(() => onSelect(String(ncb)), 300);
   };
 
   return (
-    <div className="max-w-sm">
-      <div className="space-y-2">
+    <div>
+      <div className="space-y-1.5">
         {NCB_OPTIONS.map((opt, i) => (
           <motion.button
             key={opt.value}
@@ -707,15 +844,15 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
             transition={{ delay: i * 0.04 }}
             onClick={() => handleSelect(opt.value)}
             className={`
-              w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
+              w-full flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === opt.value
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'border-purple-400 bg-purple-500/10'
+                : 'border-white/10 bg-white/5 hover:bg-white/10'
               }
             `}
           >
             <div className={`
-              w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[16px]
+              w-11 h-11 rounded-xl flex items-center justify-center font-bold text-[15px]
               ${selected === opt.value ? 'bg-purple-500/30 text-purple-300' : 'bg-white/10 text-white/70'}
             `}>
               {opt.label}
@@ -724,13 +861,15 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
               <span className="text-[14px] font-semibold text-white/90">{opt.label} NCB</span>
               <p className="text-[12px] text-white/40">{opt.description}</p>
             </div>
-            {selected === opt.value && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+              ${selected === opt.value ? 'border-purple-400 bg-purple-500' : 'border-white/20'}
+            `}>
+              {selected === opt.value && (
+                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              </motion.div>
-            )}
+                </motion.svg>
+              )}
+            </div>
           </motion.button>
         ))}
       </div>
@@ -805,42 +944,56 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
 
   const handleSelect = (insurer: string) => {
     setSelected(insurer);
-    setTimeout(() => onSelect(insurer), 250);
+    setTimeout(() => onSelect(insurer), 300);
   };
 
   return (
-    <div className="max-w-sm">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search insurer"
-        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 transition-colors mb-3"
-        autoFocus
-      />
-      <div className="space-y-2 max-h-[250px] overflow-y-auto scrollbar-hide">
+    <div>
+      <div className="relative mb-3">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search insurer"
+          className="w-full pl-9 pr-4 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/50 transition-colors"
+          autoFocus
+        />
+      </div>
+      <div className="space-y-1">
         {filtered.map((insurer, i) => (
           <motion.button
             key={insurer}
-            initial={{ opacity: 0, y: 3 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.02 }}
             onClick={() => handleSelect(insurer)}
             className={`
-              w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
+              w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
               ${selected === insurer
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/6 hover:bg-white/12'
+                ? 'bg-purple-500/12 border border-purple-400'
+                : 'border border-transparent hover:bg-white/6'
               }
             `}
           >
             <span className="text-[14px] font-medium text-white/90">{insurer}</span>
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+              ${selected === insurer ? 'border-purple-400 bg-purple-500' : 'border-white/20'}
+            `}>
+              {selected === insurer && (
+                <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </motion.svg>
+              )}
+            </div>
           </motion.button>
         ))}
       </div>
       <button
         onClick={() => onSelect('skip')}
-        className="mt-3 w-full py-2.5 text-[13px] text-white/50 hover:text-white/70 transition-colors"
+        className="mt-3 w-full py-2.5 text-[12px] text-white/40 hover:text-white/60 transition-colors"
       >
         Skip this step
       </button>

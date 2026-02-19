@@ -326,27 +326,27 @@ const manualEntrySelectYear: MotorConversationStep = {
    ═══════════════════════════════════════════════ */
 
 const POPULAR_CARS = [
-  { id: 'tata_nexon', label: 'TATA Nexon', description: '2020-2023' },
-  { id: 'tata_punch', label: 'TATA Punch' },
-  { id: 'mahindra_xuv700', label: 'Mahindra XUV 700' },
-  { id: 'honda_city', label: 'Honda City' },
-  { id: 'kia_carens', label: 'Kia Carens' },
-  { id: 'hyundai_creta', label: 'Hyundai Creta' },
-  { id: 'kia_seltos', label: 'Kia Seltos' },
-  { id: 'tata_tiago', label: 'Tata Tiago' },
-  { id: 'maruti_swift', label: 'Maruti Swift' },
+  { id: 'tata_nexon', label: 'TATA Nexon', description: '2020-2023', logoUrl: '/logos/TATA.png' },
+  { id: 'tata_punch', label: 'TATA Punch', logoUrl: '/logos/TATA.png' },
+  { id: 'mahindra_xuv700', label: 'Mahindra XUV 700', logoUrl: '/logos/Mahindra.png' },
+  { id: 'honda_city', label: 'Honda City', logoUrl: '/logos/Honda.png' },
+  { id: 'kia_carens', label: 'Kia Carens', logoUrl: '/logos/Kia.png' },
+  { id: 'hyundai_creta', label: 'Hyundai Creta', logoUrl: '/logos/Hyundai.png' },
+  { id: 'kia_seltos', label: 'Kia Seltos', logoUrl: '/logos/Kia.png' },
+  { id: 'tata_tiago', label: 'Tata Tiago', logoUrl: '/logos/TATA.png' },
+  { id: 'maruti_swift', label: 'Maruti Swift', logoUrl: '/logos/Suzuki.png' },
 ];
 
 const POPULAR_BIKES = [
-  { id: 'hero_splendor', label: 'Hero Splendor Plus', description: '100cc Commuter' },
-  { id: 'honda_activa', label: 'Honda Activa 6G', description: '110cc Scooter' },
-  { id: 'honda_shine', label: 'Honda Shine', description: '125cc Commuter' },
-  { id: 'tvs_jupiter', label: 'TVS Jupiter', description: '110cc Scooter' },
-  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar 150', description: '150cc Sports' },
-  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350', description: '350cc Cruiser' },
-  { id: 'tvs_apache', label: 'TVS Apache RTR 160', description: '160cc Sports' },
-  { id: 'hero_hf_deluxe', label: 'Hero HF Deluxe', description: '100cc Commuter' },
-  { id: 'suzuki_access', label: 'Suzuki Access 125', description: '125cc Scooter' },
+  { id: 'hero_splendor', label: 'Hero Splendor Plus', description: '100cc Commuter', logoUrl: '/logos/Hero.png' },
+  { id: 'honda_activa', label: 'Honda Activa 6G', description: '110cc Scooter', logoUrl: '/logos/Honda.png' },
+  { id: 'honda_shine', label: 'Honda Shine', description: '125cc Commuter', logoUrl: '/logos/Honda.png' },
+  { id: 'tvs_jupiter', label: 'TVS Jupiter', description: '110cc Scooter', logoUrl: '/logos/TVS.png' },
+  { id: 'bajaj_pulsar', label: 'Bajaj Pulsar 150', description: '150cc Sports', logoUrl: '/logos/Bajaj.png' },
+  { id: 'royal_enfield_classic', label: 'Royal Enfield Classic 350', description: '350cc Cruiser', logoUrl: '/logos/Royal Enfield.png' },
+  { id: 'tvs_apache', label: 'TVS Apache RTR 160', description: '160cc Sports', logoUrl: '/logos/TVS.png' },
+  { id: 'hero_hf_deluxe', label: 'Hero HF Deluxe', description: '100cc Commuter', logoUrl: '/logos/Hero.png' },
+  { id: 'suzuki_access', label: 'Suzuki Access 125', description: '125cc Scooter', logoUrl: '/logos/Suzuki.png' },
 ];
 
 /* Step 1: Popular vehicle suggestions (car or bike) */
@@ -364,7 +364,7 @@ const brandNewPopularCars: MotorConversationStep = {
       ],
       subText: `Select from popular models or search for yours.`,
       options: [
-        ...popularList.map(c => ({ ...c, icon: isBike ? 'bike' : 'car' })),
+        ...popularList.map(c => ({ ...c, icon: isBike ? 'bike' : 'car', logoUrl: (c as any).logoUrl })),
         { id: 'other', label: 'Other — Select make & model', icon: 'search' },
       ],
     };

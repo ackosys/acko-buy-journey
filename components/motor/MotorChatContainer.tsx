@@ -425,10 +425,8 @@ export default function MotorChatContainer() {
     const step = getMotorStep(currentStepId);
     if (!step) return false;
     return [
-      'progressive_loader', 'vehicle_details_card', 'brand_selector',
-      'model_selector', 'variant_selector', 'year_selector',
-      'ncb_selector', 'ncb_reward', 'insurer_selector',
-      'editable_summary', 'rejection_screen', 'plan_calculator',
+      'progressive_loader', 'vehicle_details_card',
+      'ncb_reward', 'editable_summary', 'rejection_screen', 'plan_calculator',
       'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons',
       'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
     ].includes(step.widgetType);

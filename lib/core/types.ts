@@ -10,6 +10,7 @@ export interface Option {
   label: string;
   description?: string;
   icon?: string;
+  logoUrl?: string;
   badge?: string;
   disabled?: boolean;
 }
