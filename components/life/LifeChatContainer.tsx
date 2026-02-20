@@ -27,6 +27,7 @@ import {
   LifeCoverageInput,
   LifePaymentScreen,
   LifeEkycScreen,
+  LifeFinancialScreen,
   LifeMedicalScreen,
   LifeUnderwritingStatus,
 } from './LifeChatWidgets';
@@ -201,6 +202,8 @@ export default function LifeChatContainer() {
       userLabel = 'Payment completed ✓';
     } else if (step.widgetType === 'ekyc_screen') {
       userLabel = 'e-KYC verified ✓';
+    } else if (step.widgetType === 'financial_screen') {
+      userLabel = 'Income verified ✓';
     } else if (step.widgetType === 'medical_screen') {
       userLabel = 'Medical evaluation scheduled ✓';
     } else if (step.widgetType === 'underwriting_status') {
@@ -245,7 +248,7 @@ export default function LifeChatContainer() {
   const isLargeWidget = () => {
     const step = getLifeStep(currentStepId);
     if (!step) return false;
-    return ['coverage_card', 'premium_summary', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
+    return ['coverage_card', 'premium_summary', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'financial_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
   };
 
   // Render edit widget
@@ -311,6 +314,8 @@ export default function LifeChatContainer() {
         return <LifePaymentScreen onContinue={() => handleResponse('continue')} />;
       case 'ekyc_screen':
         return <LifeEkycScreen onContinue={() => handleResponse('continue')} />;
+      case 'financial_screen':
+        return <LifeFinancialScreen onContinue={() => handleResponse('continue')} />;
       case 'medical_screen':
         return <LifeMedicalScreen onContinue={() => handleResponse('continue')} />;
       case 'underwriting_status':

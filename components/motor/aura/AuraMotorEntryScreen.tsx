@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import AckoLogo from '../../AckoLogo';
 import { VehicleType } from '../../../lib/motor/types';
 import { useMotorStore } from '../../../lib/motor/store';
+import Link from 'next/link';
 
 interface Props {
   onSelect: (vehicleType: VehicleType) => void;
@@ -37,7 +38,9 @@ export default function AuraMotorEntryScreen({ onSelect }: Props) {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-12 relative z-10">
-        <AckoLogo variant={isLight ? 'color' : 'white'} className="h-8" />
+        <Link href="/">
+          <AckoLogo variant={isLight ? 'color' : 'white'} className="h-8" />
+        </Link>
         <span
           className="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider"
           style={{ background: 'var(--aura-surface)', color: '#C084FC', border: '1px solid var(--aura-border)' }}

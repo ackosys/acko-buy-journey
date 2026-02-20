@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
 import { assetPath } from '../../lib/assetPath';
+import Link from 'next/link';
 
 interface LifeLandingPageProps {
   onGetStarted: () => void;
@@ -28,7 +29,9 @@ export default function LifeLandingPage({ onGetStarted }: LifeLandingPageProps) 
       {/* Sticky top bar — transparent, blends with gradient */}
       <div className="sticky top-0 z-50" style={{ background: 'linear-gradient(to bottom, rgba(26, 10, 62, 0.9) 0%, rgba(58, 29, 142, 0.7) 100%)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
         <div className="max-w-lg mx-auto px-6 py-4 flex items-center justify-between">
-          <AckoLogo variant="white" className="h-5" />
+          <Link href="/">
+            <AckoLogo variant="white" className="h-5" />
+          </Link>
           <span className="text-xs text-purple-200/60 font-medium">Life Insurance</span>
         </div>
       </div>

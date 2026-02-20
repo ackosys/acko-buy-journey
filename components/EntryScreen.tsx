@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import AckoLogo from './AckoLogo';
 import { useT } from '../lib/translations';
+import Link from 'next/link';
 
 interface EntryScreenProps {
   onSelect: (isExistingUser: boolean) => void;
@@ -29,7 +30,9 @@ export default function EntryScreen({ onSelect, onJumpToPostPayment, onJumpToDas
 
       {/* Header */}
       <div className="flex items-center justify-between mb-10 relative z-10">
-        <AckoLogo variant="white" className="h-8" />
+        <Link href="/">
+          <AckoLogo variant="white" className="h-8" />
+        </Link>
         <span className="text-[10px] bg-white/10 text-purple-200 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-white/10">{t.entry.prototype}</span>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
+import Link from 'next/link';
 
 interface GlobalHeroProps {
   userName?: string;
@@ -17,7 +18,9 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
         transition={{ delay: 0.1 }}
         className="mb-10"
       >
-        <AckoLogo variant="white" className="h-8 mx-auto" />
+        <Link href="/">
+          <AckoLogo variant="white" className="h-8 mx-auto" />
+        </Link>
       </motion.div>
 
       {/* Greeting */}

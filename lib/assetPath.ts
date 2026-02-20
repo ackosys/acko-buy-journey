@@ -1,4 +1,4 @@
-const basePath = process.env.NODE_ENV === 'production' ? '/acko-buy-journey' : '';
+const basePath = process.env.GITHUB_PAGES === 'true' ? '/acko-buy-journey' : '';
 
 export function assetPath(path: string): string {
   if (!path.startsWith('/')) return path;

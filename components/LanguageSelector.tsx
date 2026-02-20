@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useJourneyStore } from '../lib/store';
 import { Language } from '../lib/types';
 import AckoLogo from './AckoLogo';
+import Link from 'next/link';
 
 const LANGUAGES: { id: Language; label: string; sublabel: string; script: string }[] = [
   { id: 'en', label: 'English', sublabel: 'Continue in English', script: 'latin' },
@@ -39,7 +40,9 @@ export default function LanguageSelector({ onSelect }: LanguageSelectorProps) {
         transition={{ delay: 0.1 }}
         className="mb-10"
       >
-        <AckoLogo variant="white" className="h-8 mx-auto" />
+        <Link href="/">
+          <AckoLogo variant="white" className="h-8 mx-auto" />
+        </Link>
       </motion.div>
 
       {/* Title */}

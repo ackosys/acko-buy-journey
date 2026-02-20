@@ -94,7 +94,7 @@ export function DamagePhotoCapture({ onContinue }: { onContinue: (result: { phot
   const handleUpload = (id: string) => {
     setUploading(id);
     setTimeout(() => {
-      setUploaded(prev => new Set([...prev, id]));
+      setUploaded(prev => new Set([...Array.from(prev), id]));
       setUploading(null);
     }, 900);
   };
@@ -195,7 +195,7 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
   const handleCapture = () => {
     setCapturing(true);
     setTimeout(() => {
-      setCaptured(prev => new Set([...prev, currentStep]));
+      setCaptured(prev => new Set([...Array.from(prev), currentStep]));
       setCapturing(false);
       if (currentStep < INSPECTION_STEPS.length - 1) {
         setTimeout(() => setCurrentStep(s => s + 1), 400);

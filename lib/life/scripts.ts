@@ -1426,14 +1426,33 @@ const lifeEkyc: ConversationStep<LifeJourneyState> = {
   widgetType: 'ekyc_screen',
   getScript: (_persona, state) => ({
     botMessages: [
-      `Payment successful! 🎉`,
-      ``,
-      `Next step: e-KYC verification.`,
-      `We'll verify your identity using Aadhaar-based OTP — it takes less than 2 minutes.`,
+      `Payment received — your coverage of ₹${((state.selectedCoverage || 10000000) / 10000000).toFixed(1)} Cr is reserved for you. 🎉`,
+      `Now let's complete your e-KYC. It's mandatory for policy issuance and takes under 2 minutes.\n\nYou'll need your **Aadhaar number** and access to the **mobile linked with Aadhaar**.`,
     ],
   }),
   processResponse: (_response, _state) => ({
     ekycComplete: true,
+    currentModule: 'financial' as LifeModule,
+  }),
+  getNextStep: (_response, _state) => 'life_financial',
+};
+
+/* ═══════════════════════════════════════════════
+   MODULE: FINANCIAL — Income verification
+   ═══════════════════════════════════════════════ */
+
+const lifeFinancial: ConversationStep<LifeJourneyState> = {
+  id: 'life_financial',
+  module: 'financial',
+  widgetType: 'financial_screen',
+  getScript: (_persona, _state) => ({
+    botMessages: [
+      `e-KYC verified! ✅`,
+      `Next, we need to verify your income. This helps us confirm the coverage amount you've selected.\n\nYou can verify via **EPFO/PF**, **Account Aggregator** (bank statements), or by **uploading salary slips** — pick whichever works best for you.`,
+    ],
+  }),
+  processResponse: (_response, _state) => ({
+    financialComplete: true,
     currentModule: 'medical' as LifeModule,
   }),
   getNextStep: (_response, _state) => 'life_medical_eval',
@@ -1447,12 +1466,10 @@ const lifeMedicalEval: ConversationStep<LifeJourneyState> = {
   id: 'life_medical_eval',
   module: 'medical',
   widgetType: 'medical_screen',
-  getScript: (_persona, state) => ({
+  getScript: (_persona, _state) => ({
     botMessages: [
-      `e-KYC complete!`,
-      ``,
-      `Now let's schedule your medical evaluation.`,
-      `This includes a tele-medical call with a doctor, and lab tests if required based on your age and coverage.`,
+      `Income verified! ✅`,
+      `Now for your **Video Medical Evaluation (VMER)** — a 15–20 minute video call with a licensed doctor.\n\nAfter the call, you'll review and confirm your health & lifestyle responses. Additional home tests may be required based on your profile.`,
     ],
   }),
   processResponse: (_response, _state) => ({
@@ -1472,9 +1489,8 @@ const lifeUnderwriting: ConversationStep<LifeJourneyState> = {
   widgetType: 'underwriting_status',
   getScript: (_persona, state) => ({
     botMessages: [
-      `Medical evaluation scheduled!`,
-      ``,
-      `Your application is now in underwriting review. Here's what happens next:`,
+      `All done! 🎉 Your application is now with our underwriting team.`,
+      `They'll review your KYC, financial verification, and medical evaluation — typically takes **3–5 business days**.\n\nYou'll be notified by Email & WhatsApp the moment a decision is made.`,
     ],
   }),
   processResponse: (_response, _state) => ({
@@ -1559,6 +1575,7 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   lifeReview,
   lifePayment,
   lifeEkyc,
+  lifeFinancial,
   lifeMedicalEval,
   lifeUnderwriting,
   lifeComplete,

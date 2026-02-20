@@ -33,6 +33,7 @@ export type LifeModule =
   | 'review'                  // Final summary
   | 'payment'                 // Payment processing
   | 'ekyc'                    // e-KYC verification
+  | 'financial'               // Financial / income verification
   | 'medical'                 // Medical evaluation
   | 'underwriting';           // Underwriting decision
 
@@ -50,6 +51,7 @@ export type LifeWidgetType =
   | 'coverage_input'          // Direct-quote: user enters coverage + term
   | 'payment_screen'          // Payment CTA
   | 'ekyc_screen'             // e-KYC verification
+  | 'financial_screen'        // Financial / income verification
   | 'medical_screen'          // Medical evaluation scheduling
   | 'underwriting_status';    // Underwriting timeline
 
@@ -131,6 +133,7 @@ export interface LifeJourneyState extends BaseJourneyState {
   currentModule: LifeModule;
   moduleOrder: LifeModule[];
   ekycComplete: boolean;
+  financialComplete: boolean;
   medicalComplete: boolean;
   
   // Persona
@@ -214,8 +217,9 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
 
   userPath: '',
   
-  moduleOrder: ['basic_info', 'lifestyle', 'quote', 'addons', 'review', 'payment', 'ekyc', 'medical', 'underwriting'],
+  moduleOrder: ['basic_info', 'lifestyle', 'quote', 'addons', 'review', 'payment', 'ekyc', 'financial', 'medical', 'underwriting'],
   ekycComplete: false,
+  financialComplete: false,
   medicalComplete: false,
   
   intentSignals: {},
