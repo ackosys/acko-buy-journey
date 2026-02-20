@@ -49,7 +49,8 @@ const registrationHasNumber: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Great choice! Let's find the best insurance for your ${vLabel(state)}.\n\nDo you have your vehicle registration number?`,
+      `Hi there, welcome to ACKO! 😊`,
+      `Let's find the best insurance for your ${vLabel(state)}. Do you have your vehicle registration number?`,
     ],
     options: [
       { id: 'yes', label: 'I have it', description: 'Enter your registration number', icon: 'document' },

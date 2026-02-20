@@ -192,8 +192,8 @@ function MotorJourneyInner() {
     resetJourney();
     updateState({
       vehicleType,
-      currentStepId: 'vehicle_type.select',
-      currentModule: 'vehicle_type',
+      currentStepId: 'registration.has_number',
+      currentModule: 'registration',
     } as Partial<MotorJourneyState>);
     setScreen('chat');
   };

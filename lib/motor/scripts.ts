@@ -54,7 +54,7 @@ const registrationHasNumber: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Happy to help! 😊`,
+      `Hi there, welcome to ACKO! 😊`,
       `Are you looking to renew insurance for your current ${vLabel(state)}, or insure a brand-new one?`,
     ],
     options: [

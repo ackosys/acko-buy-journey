@@ -179,8 +179,8 @@ function MotorV3JourneyInner() {
       const vehicle: VehicleType = vehicleParam === 'bike' ? 'bike' : 'car';
       updateState({
         vehicleType: vehicle,
-        currentStepId: 'vehicle_type.select',
-        currentModule: 'vehicle_type',
+        currentStepId: 'registration.has_number',
+        currentModule: 'registration',
       } as Partial<MotorJourneyState>);
     }
     setHydrated(true);
@@ -190,8 +190,8 @@ function MotorV3JourneyInner() {
     resetJourney();
     updateState({
       vehicleType,
-      currentStepId: 'vehicle_type.select',
-      currentModule: 'vehicle_type',
+      currentStepId: 'registration.has_number',
+      currentModule: 'registration',
     } as Partial<MotorJourneyState>);
     setScreen('chat');
   };
