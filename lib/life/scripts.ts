@@ -1247,18 +1247,21 @@ const lifeQuoteDisplay: ConversationStep<LifeJourneyState> = {
 const lifeAddonsIntro: ConversationStep<LifeJourneyState> = {
   id: 'life_addons_intro',
   module: 'addons',
-  widgetType: 'none',
+  widgetType: 'rider_cards',
   getScript: (persona, state) => {
     const messages: string[] = [
-      `Now, would you like to add extra protection with riders?`,
-      `Riders enhance your coverage for specific situations.`,
-      `You can always add or remove them later.`,
+      `Would you like to strengthen your coverage with additional protection?`,
+      ``,
+      `**Accidental protection** — extra payout for accidental death or disability`,
+      `**Critical illness protection** — lump sum payment if diagnosed with major illnesses`,
+      ``,
+      `All add-ons are optional and can be modified later.`,
     ];
     
     return { botMessages: messages };
   },
   processResponse: (_response, _state) => ({}),
-  getNextStep: (_response, _state) => 'life_addons_accidental_death',
+  getNextStep: (_response, _state) => 'life_review',
 };
 
 const lifeAddonsAccidentalDeath: ConversationStep<LifeJourneyState> = {
