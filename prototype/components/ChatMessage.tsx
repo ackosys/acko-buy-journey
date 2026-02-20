@@ -3,17 +3,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-/* ── Heart Avatar — Red heart in white circle ── */
-function HeartAvatar() {
-  return (
-    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-lg shadow-purple-900/20 flex-shrink-0">
-      <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="#EF4444" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-      </svg>
-    </div>
-  );
-}
-
 interface ChatMessageProps {
   message: {
     id: string;
@@ -75,20 +64,14 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
     );
   }
 
-  // Bot message — glass card on dark with heart avatar
+  // Bot message — frosted glass on dark
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.215, 0.61, 0.355, 1] }}
-      className="flex gap-3 mb-4"
+      className="flex mb-4"
     >
-      {/* Heart Avatar */}
-      <div className="flex-shrink-0 mt-0.5">
-        <HeartAvatar />
-      </div>
-
-      {/* Message — frosted glass on dark */}
       <div className="max-w-[85%]">
         <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot border border-white/10">
           {message.content.split('\n\n').map((paragraph, i) => (
@@ -109,11 +92,8 @@ export function TypingIndicator() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex gap-3 mb-4"
+      className="flex mb-4"
     >
-      <div className="flex-shrink-0">
-        <HeartAvatar />
-      </div>
       <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5 border border-white/10">
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '0ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '200ms' }} />
