@@ -34,8 +34,8 @@ function AccidentalLimitProgressBar({
   limit: number; 
   percentage: number;
 }) {
-  const isNearLimit = (percentage >= 80);
-  const isOverLimit = (percentage >= 100);
+  const isNearLimit = percentage > 79 && percentage < 100;
+  const isOverLimit = percentage > 99;
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-4 mt-4">
