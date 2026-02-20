@@ -91,7 +91,7 @@ function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: 
         src={assetPath(`/icons/${encodeURIComponent(file)}`)}
         alt={icon}
         className={className}
-        style={{ filter: 'brightness(0) invert(1)', opacity: 0.85 }}
+        style={{ filter: 'var(--motor-icon-filter, brightness(0) invert(1))', opacity: 'var(--motor-icon-opacity, 0.85)' as unknown as number }}
       />
     );
   }
@@ -129,26 +129,30 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             className={`
               relative flex flex-col items-center text-center p-5 rounded-2xl border transition-all duration-200 active:scale-[0.96] min-h-[120px] justify-center
               ${selected === opt.id
-                ? 'border-purple-400 bg-white/15 shadow-lg shadow-purple-900/20'
-                : 'border-white/10 bg-white/6 hover:bg-white/12 hover:border-white/20'
+                ? 'border-purple-400 shadow-lg shadow-purple-900/20'
+                : 'hover:border-purple-300/30'
               }
             `}
+            style={{
+              background: selected === opt.id ? 'var(--motor-selected-bg)' : 'var(--motor-surface)',
+              borderColor: selected === opt.id ? undefined : 'var(--motor-border)',
+            }}
           >
             {opt.badge && (
               <span className="absolute -top-2 -right-2 text-[11px] bg-pink-500 text-white px-2.5 py-0.5 rounded-full font-semibold shadow-sm">
                 {opt.badge}
               </span>
             )}
-            <div className="mb-2 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden">
+            <div className="mb-2 w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
               {opt.logoUrl ? (
                 <img src={assetPath(opt.logoUrl)} alt={opt.label} className="w-7 h-7 object-contain" />
               ) : (
                 <MotorIcon icon={opt.icon!} className="w-6 h-6 text-purple-300" />
               )}
             </div>
-            <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
+            <span className="text-[15px] font-medium" style={{ color: 'var(--motor-text)' }}>{opt.label}</span>
             {opt.description && (
-              <p className="text-[12px] text-white/40 mt-1">{opt.description}</p>
+              <p className="text-[12px] mt-1" style={{ color: 'var(--motor-text-subtle)' }}>{opt.description}</p>
             )}
           </motion.button>
         ))}
@@ -172,17 +176,21 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
               className={`
                 relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
                 ${selected === opt.id
-                  ? 'border-purple-400 bg-purple-500/15 ring-1 ring-purple-400/30'
-                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  ? 'border-purple-400 ring-1 ring-purple-400/30'
+                  : ''
                 }
               `}
+              style={{
+                background: selected === opt.id ? 'var(--motor-selected-bg)' : 'var(--motor-surface)',
+                borderColor: selected === opt.id ? undefined : 'var(--motor-border)',
+              }}
             >
-              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
                 <img src={assetPath(opt.logoUrl!)} alt={opt.label} className="w-7 h-7 object-contain" />
               </div>
-              <span className="text-[11px] font-medium text-white/80 text-center leading-tight">{opt.label}</span>
+              <span className="text-[11px] font-medium text-center leading-tight" style={{ color: 'var(--motor-text)' }}>{opt.label}</span>
               {opt.description && (
-                <span className="text-[9px] text-white/35 text-center leading-tight">{opt.description}</span>
+                <span className="text-[9px] text-center leading-tight" style={{ color: 'var(--motor-text-subtle)' }}>{opt.description}</span>
               )}
               {selected === opt.id && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
@@ -204,18 +212,22 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             className={`
               w-full mt-2 text-left px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.97]
               ${selected === opt.id
-                ? 'border-purple-400 bg-white/15'
-                : 'border-white/10 bg-white/5 hover:bg-white/10'
+                ? 'border-purple-400'
+                : ''
               }
             `}
+            style={{
+              background: selected === opt.id ? 'var(--motor-selected-bg)' : 'var(--motor-surface)',
+              borderColor: selected === opt.id ? undefined : 'var(--motor-border)',
+            }}
           >
             <div className="flex items-center gap-3">
               {opt.icon && (
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--motor-surface-2)' }}>
                   <MotorIcon icon={opt.icon} className="w-4 h-4 text-purple-300" />
                 </div>
               )}
-              <span className="text-[13px] font-medium text-white/80">{opt.label}</span>
+              <span className="text-[13px] font-medium" style={{ color: 'var(--motor-text)' }}>{opt.label}</span>
             </div>
           </motion.button>
         ))}
@@ -235,14 +247,18 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
           className={`
             text-left px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
             ${selected === opt.id
-              ? 'border-purple-400 bg-white/15 shadow-md shadow-purple-900/20'
-              : 'border-white/10 bg-white/6 hover:bg-white/12 hover:border-white/20'
+              ? 'border-purple-400 shadow-md shadow-purple-900/20'
+              : ''
             }
           `}
+          style={{
+            background: selected === opt.id ? 'var(--motor-selected-bg)' : 'var(--motor-surface)',
+            borderColor: selected === opt.id ? undefined : 'var(--motor-border)',
+          }}
         >
           <div className="flex items-center gap-3">
             {(opt.logoUrl || opt.icon) && (
-              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
                 {opt.logoUrl ? (
                   <img src={assetPath(opt.logoUrl)} alt={opt.label} className="w-6 h-6 object-contain" />
                 ) : (
@@ -251,8 +267,8 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
               </div>
             )}
             <div className="flex-1">
-              <span className="text-[15px] font-medium text-white/90">{opt.label}</span>
-              {opt.description && <p className="text-[12px] text-white/40 mt-0.5">{opt.description}</p>}
+              <span className="text-[15px] font-medium" style={{ color: 'var(--motor-text)' }}>{opt.label}</span>
+              {opt.description && <p className="text-[12px] mt-0.5" style={{ color: 'var(--motor-text-subtle)' }}>{opt.description}</p>}
             </div>
           </div>
         </motion.button>
@@ -311,7 +327,8 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
           onChange={handleChange}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder={placeholder || 'MH 04 EQ 4392'}
-          className="w-full pl-16 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-[18px] font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors tracking-wider uppercase"
+          className="w-full pl-16 pr-4 py-4 rounded-xl text-[18px] font-semibold focus:outline-none focus:border-purple-400 transition-colors tracking-wider uppercase"
+          style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
           maxLength={16}
           autoComplete="off"
         />
@@ -319,7 +336,7 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        className="mt-4 w-full py-3.5 bg-purple-600 text-white rounded-xl text-[15px] font-semibold hover:bg-purple-500 transition-colors active:scale-[0.97]"
       >
         Find my {useMotorStore.getState().vehicleType === 'bike' ? 'bike' : 'car'}
       </button>
@@ -365,13 +382,14 @@ export function MotorTextInput({
         onChange={(e) => { setValue(e.target.value); setError(''); }}
         onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         placeholder={placeholder || 'Type here...'}
-        className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-[16px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors"
+        className="w-full px-4 py-4 rounded-xl text-[16px] focus:outline-none focus:border-purple-400 transition-colors"
+        style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
         autoComplete="off"
       />
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="mt-3 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        className="mt-3 w-full py-3.5 bg-purple-600 text-white rounded-xl text-[15px] font-semibold hover:bg-purple-500 transition-colors active:scale-[0.97]"
       >
         Continue
       </button>

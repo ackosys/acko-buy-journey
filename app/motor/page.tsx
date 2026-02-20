@@ -165,7 +165,7 @@ function seedDemoState(vehicleType: VehicleType) {
 
 function MotorJourneyInner() {
   const store = useMotorStore();
-  const { updateState, resetJourney } = store;
+  const { updateState, resetJourney, theme } = store;
   const searchParams = useSearchParams();
 
   const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
@@ -259,7 +259,7 @@ function MotorJourneyInner() {
           />
         )}
         {screen === 'chat' && (
-          <div key="chat" className="h-screen bg-[#1C0B47] flex flex-col overflow-hidden">
+          <div key="chat" className={`h-screen flex flex-col overflow-hidden motor-${theme}`} style={{ background: 'var(--motor-bg)' }}>
             <MotorHeader />
             <MotorChatContainer />
           </div>

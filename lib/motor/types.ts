@@ -133,7 +133,7 @@ export interface MotorEditRequest {
 
 export interface MotorJourneyState extends BaseJourneyState {
   /* ── Theme ── */
-  theme: 'dark' | 'light';
+  theme: 'midnight' | 'dark' | 'light';
 
   /* ── Vehicle Type ── */
   vehicleType: VehicleType | null;
@@ -261,7 +261,7 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   phone: '',
   currentStepId: 'vehicle_type.select',
   currentModule: 'vehicle_type',
-  theme: 'dark',
+  theme: 'midnight',
   conversationHistory: [],
   isTyping: false,
   showExpertPanel: false,

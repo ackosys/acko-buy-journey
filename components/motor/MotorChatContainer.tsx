@@ -433,7 +433,7 @@ export default function MotorChatContainer() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 chat-bg-dark">
+    <div className="flex-1 flex flex-col min-h-0" style={{ background: 'var(--motor-chat-gradient)' }}>
       {/* Scrollable chat messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-lg mx-auto">
@@ -476,7 +476,14 @@ export default function MotorChatContainer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)] max-h-[45vh] overflow-y-auto"
+            className="shrink-0 max-h-[45vh] overflow-y-auto"
+            style={{
+              background: 'var(--motor-glass-bg)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              borderTop: '1px solid var(--motor-border)',
+              boxShadow: '0 -4px 40px var(--motor-shadow)',
+            }}
           >
             <div className="max-w-lg mx-auto px-5 py-5 pb-8">
               {renderWidget()}
@@ -500,28 +507,30 @@ export default function MotorChatContainer() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto bg-[#2A1463] border border-white/15 rounded-2xl shadow-2xl z-50 p-6"
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto rounded-2xl shadow-2xl z-50 p-6"
+              style={{ background: 'var(--motor-glass-bg)', border: '1px solid var(--motor-border-strong)' }}
             >
               <div className="text-center">
-                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--motor-surface-2)' }}>
+                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </div>
-                <h3 className="text-[16px] font-semibold text-white mb-2">Edit this answer?</h3>
-                <p className="text-[13px] text-white/50 mb-6">
+                <h3 className="text-[16px] font-semibold mb-2" style={{ color: 'var(--motor-text)' }}>Edit this answer?</h3>
+                <p className="text-[13px] mb-6" style={{ color: 'var(--motor-text-muted)' }}>
                   The conversation will continue from this point with your updated answer.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setEditModal({ stepId: '', visible: false })}
-                    className="flex-1 py-2.5 border border-white/20 text-white/70 rounded-xl text-[14px] font-medium hover:bg-white/10 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl text-[14px] font-medium transition-colors"
+                    style={{ border: '1px solid var(--motor-border-strong)', color: 'var(--motor-text-muted)' }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmEdit}
-                    className="flex-1 py-2.5 bg-white text-[#1C0B47] rounded-xl text-[14px] font-medium hover:bg-white/90 transition-colors"
+                    className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl text-[14px] font-medium hover:bg-purple-500 transition-colors"
                   >
                     Edit answer
                   </button>

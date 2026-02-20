@@ -25,7 +25,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
         animate={{ opacity: 1 }}
         className="flex justify-center my-4"
       >
-        <span className="text-label-md text-purple-300/60 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
+        <span className="text-label-md px-4 py-1.5 rounded-full" style={{ color: 'var(--motor-text-muted)', background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
           {message.content}
         </span>
       </motion.div>
@@ -43,7 +43,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
         onMouseLeave={() => setShowEdit(false)}
       >
         <div className="relative max-w-[85%]">
-          <div className="bg-white text-[#1C0B47] px-4 py-2.5 chat-bubble-user shadow-lg shadow-purple-900/10">
+          <div className="px-4 py-2.5 chat-bubble-user shadow-lg" style={{ background: 'var(--motor-user-bubble-bg, #FFFFFF)', color: 'var(--motor-user-bubble-text, #1C0B47)' }}>
             <p className="text-body-md font-medium">{message.content}</p>
           </div>
           {message.editable && showEdit && onEdit && message.stepId && (
@@ -51,7 +51,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => onEdit(message.stepId!)}
-              className="absolute -left-8 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-md hover:bg-white/20 transition-colors"
+              className="absolute -left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-colors"
+              style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border-strong)' }}
               title="Edit this answer"
             >
               <svg className="w-3 h-3 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,9 +74,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       className="flex mb-4"
     >
       <div className="max-w-[85%]">
-        <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot border border-white/10">
+        <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
           {message.content.split('\n\n').map((paragraph, i) => (
-            <p key={i} className={`text-body-md text-white/90 ${i > 0 ? 'mt-2' : ''}`}>
+            <p key={i} className={`text-body-md ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--motor-bot-text)' }}>
               {paragraph}
             </p>
           ))}
@@ -94,7 +95,7 @@ export function TypingIndicator() {
       exit={{ opacity: 0, y: -10 }}
       className="flex mb-4"
     >
-      <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5 border border-white/10">
+      <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '0ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '200ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '400ms' }} />

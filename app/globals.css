@@ -188,6 +188,103 @@
 }
 
 /* ══════════════════════════════════════════════════
+   MOTOR THEME — 3-way: midnight (purple), dark, light
+   ══════════════════════════════════════════════════ */
+
+.motor-midnight,
+.motor-dark,
+.motor-light {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+.motor-midnight {
+  --motor-bg: #1C0B47;
+  --motor-surface: rgba(255,255,255,0.06);
+  --motor-surface-2: rgba(255,255,255,0.1);
+  --motor-surface-hover: rgba(255,255,255,0.15);
+  --motor-text: #FFFFFF;
+  --motor-text-muted: rgba(255,255,255,0.6);
+  --motor-text-subtle: rgba(255,255,255,0.4);
+  --motor-bot-text: rgba(255,255,255,0.9);
+  --motor-border: rgba(255,255,255,0.1);
+  --motor-border-strong: rgba(255,255,255,0.2);
+  --motor-shadow: rgba(0,0,0,0.3);
+  --motor-icon-filter: brightness(0) invert(1);
+  --motor-icon-opacity: 0.85;
+  --motor-glass-bg: rgba(30,15,70,0.85);
+  --motor-overlay-bg: rgba(255,255,255,0.08);
+  --motor-chat-gradient: linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%);
+  --motor-progress-border: 2px solid #1C0B47;
+  --motor-selected-bg: rgba(168,85,247,0.15);
+  --motor-selected-border: rgba(168,85,247,0.5);
+  --motor-input-bg: rgba(255,255,255,0.1);
+  --motor-input-border: rgba(255,255,255,0.2);
+  --motor-input-text: #FFFFFF;
+  --motor-input-placeholder: rgba(255,255,255,0.3);
+  --motor-user-bubble-bg: #FFFFFF;
+  --motor-user-bubble-text: #1C0B47;
+  --motor-progress-gradient: linear-gradient(90deg, #A855F7, #C084FC);
+}
+
+.motor-dark {
+  --motor-bg: #121214;
+  --motor-surface: #1E1E22;
+  --motor-surface-2: #2D2D35;
+  --motor-surface-hover: #3D3D45;
+  --motor-text: #FFFFFF;
+  --motor-text-muted: #94A3B8;
+  --motor-text-subtle: #64748B;
+  --motor-bot-text: #F8FAFC;
+  --motor-border: rgba(255,255,255,0.05);
+  --motor-border-strong: rgba(255,255,255,0.1);
+  --motor-shadow: rgba(0,0,0,0.3);
+  --motor-icon-filter: brightness(0) invert(1);
+  --motor-icon-opacity: 0.85;
+  --motor-glass-bg: rgba(30,30,34,0.92);
+  --motor-overlay-bg: rgba(255,255,255,0.08);
+  --motor-chat-gradient: linear-gradient(180deg, #121214 0%, #18181B 40%, #121214 100%);
+  --motor-progress-border: 2px solid #121214;
+  --motor-selected-bg: rgba(168,85,247,0.15);
+  --motor-selected-border: rgba(168,85,247,0.5);
+  --motor-input-bg: rgba(255,255,255,0.05);
+  --motor-input-border: rgba(255,255,255,0.1);
+  --motor-input-text: #FFFFFF;
+  --motor-input-placeholder: rgba(255,255,255,0.3);
+  --motor-user-bubble-bg: #FFFFFF;
+  --motor-user-bubble-text: #1C0B47;
+  --motor-progress-gradient: linear-gradient(90deg, #A855F7, #C084FC);
+}
+
+.motor-light {
+  --motor-bg: #F5F3FF;
+  --motor-surface: #FFFFFF;
+  --motor-surface-2: #F0EEF9;
+  --motor-surface-hover: #E8E5F5;
+  --motor-text: #1C0B47;
+  --motor-text-muted: #64748B;
+  --motor-text-subtle: #94A3B8;
+  --motor-bot-text: #1C0B47;
+  --motor-border: rgba(0,0,0,0.06);
+  --motor-border-strong: rgba(0,0,0,0.1);
+  --motor-shadow: rgba(0,0,0,0.06);
+  --motor-icon-filter: brightness(0);
+  --motor-icon-opacity: 0.7;
+  --motor-glass-bg: rgba(255,255,255,0.95);
+  --motor-overlay-bg: rgba(0,0,0,0.04);
+  --motor-chat-gradient: linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 40%, #F5F3FF 100%);
+  --motor-progress-border: 2px solid #F5F3FF;
+  --motor-selected-bg: rgba(168,85,247,0.1);
+  --motor-selected-border: rgba(168,85,247,0.4);
+  --motor-input-bg: rgba(0,0,0,0.03);
+  --motor-input-border: rgba(0,0,0,0.1);
+  --motor-input-text: #1C0B47;
+  --motor-input-placeholder: rgba(0,0,0,0.3);
+  --motor-user-bubble-bg: linear-gradient(0deg, #5920C5 0%, #7C47E1 100%);
+  --motor-user-bubble-text: #FFFFFF;
+  --motor-progress-gradient: linear-gradient(90deg, #7C3AED, #A855F7);
+}
+
+/* ══════════════════════════════════════════════════
    AURA THEME — Glassmorphism + Gradient Accents
    ══════════════════════════════════════════════════ */
 
