@@ -1506,6 +1506,18 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
         />
       )}
 
+      {/* Help me choose CTA */}
+      <button
+        onClick={() => onSelect('help_choose')}
+        className="w-full py-3 rounded-xl text-[14px] font-medium transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2"
+        style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)', color: 'var(--aura-text-muted)' }}
+      >
+        <svg className="w-4 h-4" style={{ color: '#A855F7' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+        </svg>
+        I need help choosing
+      </button>
+
       {/* Garage Tier Bottom Sheet for Comprehensive */}
       <AnimatePresence>
         {showGarageTier && selectedPlan && (() => {
@@ -2088,6 +2100,81 @@ function GarageNetworkExplorer({ visible, onClose }: { visible: boolean; onClose
           </p>
         </div>
       </motion.div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   Plan Recommendation — result of "Help me choose"
+   ═══════════════════════════════════════════════ */
+
+export function PlanRecommendation({ onSelect }: { onSelect: (response: any) => void }) {
+  const { availablePlans, recommendedPlanType, vehicleEntryType } = useMotorStore();
+  const isBrandNew = vehicleEntryType === 'brand_new';
+
+  const planType = recommendedPlanType || 'comprehensive';
+  const planLabel = planType === 'zero_dep' ? 'Zero Depreciation' : planType === 'comprehensive' ? 'Comprehensive' : 'Third-party';
+
+  const matchedPlan = availablePlans.find((p: any) => p.type === planType)
+    || availablePlans[0];
+
+  const formatPrice = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+
+  const handleSelect = () => {
+    if (matchedPlan?.type === 'comprehensive') {
+      onSelect({ planType: matchedPlan.type, garageTier: 'network', plan: matchedPlan });
+    } else {
+      onSelect({ planType: matchedPlan?.type || planType, garageTier: null, plan: matchedPlan });
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm space-y-3">
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}>
+        <div className="px-4 py-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05))' }}>
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            <span className="text-[12px] font-semibold text-purple-400">Recommended for you</span>
+          </div>
+          <h3 className="text-[18px] font-bold" style={{ color: 'var(--aura-text)' }}>{planLabel} Plan</h3>
+          {matchedPlan && (
+            <p className="text-[22px] font-bold mt-1" style={{ color: 'var(--aura-text)' }}>
+              {formatPrice(matchedPlan.totalPrice)}
+              <span className="text-[12px] font-normal ml-1" style={{ color: 'var(--aura-text-muted)' }}>/ year</span>
+            </p>
+          )}
+        </div>
+
+        <div className="px-4 py-3 space-y-2">
+          {matchedPlan?.features?.slice(0, 4).map((f: any, i: number) => (
+            <div key={i} className="flex items-start gap-2">
+              <svg className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span className="text-[13px]" style={{ color: 'var(--aura-text)' }}>{f.label || f}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-4 pb-4 space-y-2">
+          <button
+            onClick={handleSelect}
+            className="w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-all active:scale-[0.97]"
+            style={{ background: 'linear-gradient(135deg, #7C3AED, #A855F7)' }}
+          >
+            Select {planLabel} Plan
+          </button>
+          <button
+            onClick={() => onSelect('back_to_plans')}
+            className="w-full py-2.5 rounded-xl text-[13px] font-medium transition-all"
+            style={{ color: 'var(--aura-text-muted)' }}
+          >
+            View all plans instead
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 }

@@ -998,13 +998,188 @@ const quotePlanSelection: MotorConversationStep = {
       subText: `All plans include 1 year Own Damage and 3 years Third-party coverage. You can add more protection with add-ons in the next step.`,
     };
   },
-  processResponse: (response, state) => ({
-    selectedPlanType: response.planType,
-    selectedGarageTier: response.garageTier,
-    selectedPlan: response.plan,
-  }),
+  processResponse: (response, state) => {
+    if (response === 'help_choose') return {};
+    return {
+      selectedPlanType: response.planType,
+      selectedGarageTier: response.garageTier,
+      selectedPlan: response.plan,
+    };
+  },
   getNextStep: (response) => {
-    // After plan selection, go to add-ons
+    if (response === 'help_choose') return 'help.usage_pattern';
+    return 'quote.plan_selected';
+  },
+};
+
+/* ═══════════════════════════════════════════════
+   "Help Me Choose" — Guided plan recommendation
+   ═══════════════════════════════════════════════ */
+
+const helpUsagePattern: MotorConversationStep = {
+  id: 'help.usage_pattern',
+  module: 'quote',
+  widgetType: 'selection_cards',
+  getScript: (state) => {
+    const v = state.vehicleType === 'bike' ? 'bike' : 'car';
+    return {
+      botMessages: [
+        `Let me help you pick the right plan! A few quick questions.`,
+        `How do you primarily use your ${v}?`,
+      ],
+      options: [
+        { id: 'daily_commute', label: 'Daily commute', description: 'Office, school, errands' },
+        { id: 'weekend_only', label: 'Weekends & trips', description: 'Occasional drives and road trips' },
+        { id: 'commercial', label: 'Business / commercial', description: 'Deliveries, rideshare, etc.' },
+      ],
+    };
+  },
+  processResponse: (response) => ({
+    helpAnswers: { usage: response },
+  }),
+  getNextStep: () => 'help.vehicle_age',
+};
+
+const helpVehicleAge: MotorConversationStep = {
+  id: 'help.vehicle_age',
+  module: 'quote',
+  widgetType: 'selection_cards',
+  getScript: (state) => {
+    const v = state.vehicleType === 'bike' ? 'bike' : 'car';
+    return {
+      botMessages: [
+        `How old is your ${v}?`,
+      ],
+      options: [
+        { id: 'new', label: 'Brand new / under 1 year' },
+        { id: 'young', label: '1 – 3 years old' },
+        { id: 'mid', label: '3 – 5 years old' },
+        { id: 'old', label: 'More than 5 years' },
+      ],
+    };
+  },
+  processResponse: (response, state) => ({
+    helpAnswers: { ...state.helpAnswers, vehicleAge: response },
+  }),
+  getNextStep: () => 'help.budget_priority',
+};
+
+const helpBudgetPriority: MotorConversationStep = {
+  id: 'help.budget_priority',
+  module: 'quote',
+  widgetType: 'selection_cards',
+  getScript: () => ({
+    botMessages: [
+      `What matters most to you?`,
+    ],
+    options: [
+      { id: 'full_coverage', label: 'Maximum coverage', description: 'I want the best protection, cost is secondary' },
+      { id: 'balanced', label: 'Balanced', description: 'Good coverage at a reasonable price' },
+      { id: 'budget', label: 'Keep it affordable', description: 'Basic protection within budget' },
+    ],
+  }),
+  processResponse: (response, state) => ({
+    helpAnswers: { ...state.helpAnswers, priority: response },
+  }),
+  getNextStep: () => 'help.repair_preference',
+};
+
+const helpRepairPreference: MotorConversationStep = {
+  id: 'help.repair_preference',
+  module: 'quote',
+  widgetType: 'selection_cards',
+  getScript: (state) => {
+    const v = state.vehicleType === 'bike' ? 'bike' : 'car';
+    return {
+      botMessages: [
+        `If your ${v} needs repairs after an accident, which matters more?`,
+      ],
+      options: [
+        { id: 'full_parts', label: 'Full cost of new parts', description: 'No depreciation deductions on parts' },
+        { id: 'any_garage', label: 'Freedom to pick any garage', description: 'Not limited to network garages' },
+        { id: 'low_premium', label: 'Lower premium is fine', description: 'Okay with some out-of-pocket costs' },
+      ],
+    };
+  },
+  processResponse: (response, state) => ({
+    helpAnswers: { ...state.helpAnswers, repair: response },
+  }),
+  getNextStep: () => 'help.recommendation',
+};
+
+function deriveRecommendation(answers: Record<string, string>, isBrandNew: boolean): {
+  planType: 'zero_dep' | 'comprehensive' | 'third_party';
+  reason: string;
+} {
+  const { usage, vehicleAge, priority, repair } = answers;
+  let score = 0; // higher = more coverage needed
+
+  if (usage === 'daily_commute') score += 3;
+  else if (usage === 'commercial') score += 3;
+  else score += 1;
+
+  if (vehicleAge === 'new') score += 3;
+  else if (vehicleAge === 'young') score += 2;
+  else if (vehicleAge === 'mid') score += 1;
+  else score += 0;
+
+  if (priority === 'full_coverage') score += 3;
+  else if (priority === 'balanced') score += 2;
+  else score += 0;
+
+  if (repair === 'full_parts') score += 3;
+  else if (repair === 'any_garage') score += 1;
+  else score += 0;
+
+  if (isBrandNew) score += 2;
+
+  if (score >= 8) {
+    return {
+      planType: 'zero_dep',
+      reason: 'Based on your usage and preferences, Zero Depreciation gives you the best protection — you won\'t pay for part depreciation during claims, which saves significantly on newer vehicles.',
+    };
+  } else if (score >= 4) {
+    return {
+      planType: 'comprehensive',
+      reason: 'A Comprehensive plan gives you solid all-round coverage for damage, theft, and third-party liability at a balanced price point.',
+    };
+  } else {
+    return {
+      planType: 'third_party',
+      reason: 'Given your preferences and vehicle age, a Third-party plan covers the legal essentials at the most affordable price.',
+    };
+  }
+}
+
+const helpRecommendation: MotorConversationStep = {
+  id: 'help.recommendation',
+  module: 'quote',
+  widgetType: 'plan_recommendation',
+  getScript: (state) => {
+    const isBrandNew = state.vehicleEntryType === 'brand_new';
+    const { planType, reason } = deriveRecommendation(state.helpAnswers, isBrandNew);
+    const planLabel = planType === 'zero_dep' ? 'Zero Depreciation' : planType === 'comprehensive' ? 'Comprehensive' : 'Third-party';
+    return {
+      botMessages: [
+        `Based on your answers, I'd recommend the **${planLabel}** plan for you.`,
+        reason,
+      ],
+    };
+  },
+  processResponse: (response, state) => {
+    if (response === 'back_to_plans') return {};
+    const isBrandNew = state.vehicleEntryType === 'brand_new';
+    const { planType, reason } = deriveRecommendation(state.helpAnswers, isBrandNew);
+    return {
+      recommendedPlanType: planType,
+      recommendedPlanReason: reason,
+      selectedPlanType: response.planType || planType,
+      selectedGarageTier: response.garageTier || null,
+      selectedPlan: response.plan || null,
+    };
+  },
+  getNextStep: (response) => {
+    if (response === 'back_to_plans') return 'quote.plan_selection';
     return 'quote.plan_selected';
   },
 };
@@ -1243,6 +1418,11 @@ const MOTOR_STEPS: Record<string, MotorConversationStep> = {
   'quote.calculating': quoteCalculating,
   'quote.plans_ready': quotePlansReady,
   'quote.plan_selection': quotePlanSelection,
+  'help.usage_pattern': helpUsagePattern,
+  'help.vehicle_age': helpVehicleAge,
+  'help.budget_priority': helpBudgetPriority,
+  'help.repair_preference': helpRepairPreference,
+  'help.recommendation': helpRecommendation,
   'quote.plan_selected': quotePlanSelected,
   'addons.out_of_pocket': addonsOutOfPocket,
   'addons.protect_everyone': addonsProtectEveryone,

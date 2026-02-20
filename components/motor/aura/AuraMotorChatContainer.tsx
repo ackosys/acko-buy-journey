@@ -23,6 +23,7 @@ import {
   RejectionScreen,
   PlanCalculator,
   PlanSelector,
+  PlanRecommendation,
   OutOfPocketAddons,
   ProtectEveryoneAddons,
   MotorTextInput,
@@ -306,8 +307,19 @@ export default function AuraMotorChatContainer() {
     } else if (step.widgetType === 'plan_calculator') {
       userLabel = '';
     } else if (step.widgetType === 'plan_selector') {
-      const planName = response.plan?.name || 'plan';
-      userLabel = `Selected: ${planName}`;
+      if (response === 'help_choose') {
+        userLabel = 'Help me choose a plan';
+      } else {
+        const planName = response.plan?.name || 'plan';
+        userLabel = `Selected: ${planName}`;
+      }
+    } else if (step.widgetType === 'plan_recommendation') {
+      if (response === 'back_to_plans') {
+        userLabel = 'View all plans';
+      } else {
+        const planName = response.plan?.name || 'plan';
+        userLabel = `Selected: ${planName}`;
+      }
     } else if (step.widgetType === 'out_of_pocket_addons') {
       const count = response.addons?.length || 0;
       userLabel = count > 0 ? `Added ${count} add-on${count > 1 ? 's' : ''}` : 'Continue without add-ons';
@@ -415,6 +427,8 @@ export default function AuraMotorChatContainer() {
         return <PlanCalculator onComplete={handleResponse} />;
       case 'plan_selector':
         return <PlanSelector onSelect={handleResponse} />;
+      case 'plan_recommendation':
+        return <PlanRecommendation onSelect={handleResponse} />;
       case 'out_of_pocket_addons':
         return <OutOfPocketAddons onContinue={(addons) => handleResponse({ addons })} />;
       case 'protect_everyone_addons':
@@ -459,7 +473,7 @@ export default function AuraMotorChatContainer() {
     return [
       'progressive_loader', 'vehicle_details_card',
       'ncb_reward', 'editable_summary', 'rejection_screen', 'plan_calculator',
-      'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons',
+      'plan_selector', 'plan_recommendation', 'out_of_pocket_addons', 'protect_everyone_addons',
       'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
       'self_inspection', 'surveyor_assigned', 'claim_heartbeat', 'settlement_offer',
       'claim_closure',

@@ -55,6 +55,7 @@ export type MotorWidgetType =
   | 'rejection_screen'
   | 'plan_calculator'
   | 'plan_selector'
+  | 'plan_recommendation'
   | 'garage_tier_selector'
   | 'addon_selector'
   | 'out_of_pocket_addons'
@@ -188,6 +189,11 @@ export interface MotorJourneyState extends BaseJourneyState {
   selectedGarageTier: 'network' | 'all' | null;
   selectedPlan: any | null; // MotorPlanDetails
   selectedAddOns: string[];
+
+  /* ── Help Me Choose ── */
+  helpAnswers: Record<string, string>;
+  recommendedPlanType: 'comprehensive' | 'zero_dep' | 'third_party' | null;
+  recommendedPlanReason: string;
   
   /* ── Pricing ── */
   idv: number;
@@ -326,6 +332,11 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   selectedGarageTier: null,
   selectedPlan: null,
   selectedAddOns: [],
+
+  /* Help Me Choose */
+  helpAnswers: {},
+  recommendedPlanType: null,
+  recommendedPlanReason: '',
   
   /* Pricing */
   idv: 0,
