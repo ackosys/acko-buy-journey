@@ -40,21 +40,14 @@ export default function LifeHeader() {
             className="group relative flex items-center gap-1.5 pl-1 pr-3 py-1 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 transition-all active:scale-95"
             title={t.header.talkToExpert}
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/30">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/30 overflow-hidden">
               <img
-                src="/brand-ambassador.png"
-                alt={t.header.expert}
-                className="w-7 h-7 rounded-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                }}
+                src="/life-expert.png"
+                alt="Expert"
+                className="w-full h-full object-cover"
               />
-              <svg className="hidden w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-              </svg>
             </div>
-            <span className="text-white/90 text-xs font-medium">{t.header.expert}</span>
+            <span className="text-white/90 text-xs font-medium">Expert</span>
           </button>
         </div>
       </div>
