@@ -2,6 +2,7 @@
 
 import { useMotorStore } from '../../lib/motor/store';
 import { MotorJourneyState } from '../../lib/motor/types';
+import { assetPath } from '../../lib/assetPath';
 import AckoLogo from '../AckoLogo';
 
 const MODULE_ORDER = ['vehicle_type', 'registration', 'vehicle_fetch', 'manual_entry', 'pre_quote', 'quote', 'customization', 'review', 'payment'];
@@ -30,7 +31,7 @@ export default function MotorHeader() {
             className="group relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center transition-all active:scale-95 overflow-hidden"
             title="AI Assistant"
           >
-            <img src="/ai-assistant.png" alt="AI" className="w-9 h-9 object-cover" />
+            <img src={assetPath('/ai-assistant.png')} alt="AI" className="w-9 h-9 object-cover" />
             <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-[#1C0B47]" />
           </button>
 
@@ -41,7 +42,7 @@ export default function MotorHeader() {
             title="Talk to Expert"
           >
             <div className="w-7 h-7 rounded-full overflow-hidden shadow-lg shadow-purple-900/30">
-              <img src="/motor-expert.png" alt="Expert" className="w-7 h-7 object-cover" />
+              <img src={assetPath('/motor-expert.png')} alt="Expert" className="w-7 h-7 object-cover" />
             </div>
             <span className="text-white/90 text-xs font-medium">Expert</span>
           </button>

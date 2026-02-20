@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
+import { assetPath } from '../../lib/assetPath';
 import Link from 'next/link';
 
 interface LifeLandingPageProps {
@@ -62,7 +63,7 @@ export default function LifeLandingPage({ onGetStarted }: LifeLandingPageProps) 
         <FadeIn className="px-6 pb-4">
           <div className="relative flex justify-center">
             <img
-              src="/life-family-umbrella.png"
+              src={assetPath('/life-family-umbrella.png')}
               alt="Family protected under umbrella"
               className="w-[85%] h-auto object-contain"
             />

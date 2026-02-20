@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import { useMotorStore } from '../../lib/motor/store';
+import { assetPath } from '../../lib/assetPath';
 import { MotorModule, MotorJourneyState } from '../../lib/motor/types';
 
 /* ═══════════════════════════════════════════════════════
@@ -529,7 +530,7 @@ export function MotorAIChatPanel() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full overflow-hidden">
-                  <img src="/ai-assistant.png" alt="AI Assistant" className="w-9 h-9 object-cover" />
+                  <img src={assetPath('/ai-assistant.png')} alt="AI Assistant" className="w-9 h-9 object-cover" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">AI Assistant</h3>
@@ -549,7 +550,7 @@ export function MotorAIChatPanel() {
                 <div>
                   <div className="flex gap-3 mb-6">
                     <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 shadow-lg shadow-purple-900/20">
-                      <img src="/ai-assistant.png" alt="AI" className="w-8 h-8 object-cover" />
+                      <img src={assetPath('/ai-assistant.png')} alt="AI" className="w-8 h-8 object-cover" />
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%]">
                       <p className="text-sm text-white/90">Hey there! I&apos;m your ACKO motor insurance assistant. Ask me anything — plans, coverage, claims, add-ons, or pricing. I&apos;m here to help you make the best choice for your vehicle. 🚗</p>
@@ -578,7 +579,7 @@ export function MotorAIChatPanel() {
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start gap-3'}`}>
                   {msg.role === 'bot' && (
                     <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 mt-1 shadow-lg shadow-purple-900/20">
-                      <img src="/ai-assistant.png" alt="AI" className="w-7 h-7 object-cover" />
+                      <img src={assetPath('/ai-assistant.png')} alt="AI" className="w-7 h-7 object-cover" />
                     </div>
                   )}
                   <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm whitespace-pre-line ${
@@ -595,7 +596,7 @@ export function MotorAIChatPanel() {
             {/* Expert nudge */}
             <div className="px-6 pb-2">
               <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                <img src="/motor-expert.png" alt="Expert" className="w-7 h-7 rounded-full object-cover" />
+                <img src={assetPath('/motor-expert.png')} alt="Expert" className="w-7 h-7 rounded-full object-cover" />
                 <p className="text-[11px] text-white/50 flex-1">Need to talk to a real person?</p>
                 <button onClick={() => { updateState({ showAIChat: false, showExpertPanel: true } as Partial<MotorJourneyState>); }} className="text-[11px] text-purple-300 font-semibold hover:text-white transition-colors">Connect</button>
               </div>

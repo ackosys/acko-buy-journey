@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import AckoLogo from './AckoLogo';
 import { useT } from '../lib/translations';
+import { assetPath } from '../lib/assetPath';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -195,7 +196,7 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
           <div className="relative rounded-2xl overflow-hidden shadow-lg" style={{ background: 'linear-gradient(180deg, #3B1A7E 0%, #2A1263 60%, #1C0B47 100%)' }}>
             <div className="flex justify-center pt-4">
               <img
-                src="/indian-family.svg"
+                src={assetPath('/indian-family.svg')}
                 alt="Indian family health"
                 className="w-[85%] h-auto max-h-56 object-contain object-bottom"
               />
@@ -263,7 +264,7 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
           <p className="text-body-sm text-white/50 mb-4">{t.landing.walkthrough}</p>
           <div className="relative rounded-2xl overflow-hidden shadow-md cursor-pointer group">
             <img
-              src="/brand-ambassador.png"
+              src={assetPath('/brand-ambassador.png')}
               alt="ACKO Brand Ambassador"
               className="w-full h-48 object-cover object-top group-hover:scale-105 transition-transform duration-500"
             />
@@ -351,7 +352,7 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
                 style={{ boxShadow: 'inset 1px 1px 2px 0px white, inset -1px -1px 2px 0px rgba(0,0,0,0.04), 0px 2px 4px -1px rgba(0,0,0,0.02), 0px 6px 6px -2px rgba(0,0,0,0.02)' }}
               >
                 <img
-                  src={h.logo}
+                  src={assetPath(h.logo)}
                   alt={h.name}
                   className="w-8 h-8 object-contain"
                 />

@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react';
 import { useJourneyStore } from '../lib/store';
 import { Module } from '../lib/types';
 import { useT, type TranslationSet } from '../lib/translations';
+import { assetPath } from '../lib/assetPath';
 
 /* ═══════════════════════════════════════════════════════
    Expert Panel — Dynamic questions based on journey position
@@ -462,7 +463,7 @@ export function AIChatPanel() {
             {/* Brand ambassador nudge */}
             <div className="px-6 pb-2">
               <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                <img src="/brand-ambassador.png" alt="ACKO" className="w-7 h-7 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <img src={assetPath('/brand-ambassador.png')} alt="ACKO" className="w-7 h-7 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 <p className="text-[11px] text-white/50 flex-1">{t.panels.needHumanHelp}</p>
                 <button onClick={() => { updateState({ showAIChat: false, showExpertPanel: true }); }} className="text-[11px] text-purple-300 font-semibold hover:text-white transition-colors">{t.panels.connect}</button>
               </div>

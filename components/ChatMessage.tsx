@@ -2,12 +2,13 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { assetPath } from '../lib/assetPath';
 
 /* ── Bot Avatar — ACKO chatbot icon ── */
 function BotAvatar() {
   return (
     <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 shadow-lg shadow-purple-900/20">
-      <img src="/chatbot-avatar.png" alt="ACKO" className="w-full h-full object-cover" />
+      <img src={assetPath('/chatbot-avatar.png')} alt="ACKO" className="w-full h-full object-cover" />
     </div>
   );
 }
