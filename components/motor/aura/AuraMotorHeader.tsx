@@ -2,6 +2,7 @@
 
 import { useMotorStore } from '../../../lib/motor/store';
 import { MotorJourneyState } from '../../../lib/motor/types';
+import { assetPath } from '../../../lib/assetPath';
 import AckoLogo from '../../AckoLogo';
 
 const MODULE_ORDER = ['vehicle_type', 'registration', 'vehicle_fetch', 'manual_entry', 'pre_quote', 'quote', 'customization', 'review', 'payment'];
@@ -34,7 +35,7 @@ export default function AuraMotorHeader() {
             className="group relative w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 overflow-hidden"
             style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}
           >
-            <img src="/ai-assistant.png" alt="AI" className="w-9 h-9 object-cover" />
+            <img src={assetPath('/ai-assistant.png')} alt="AI" className="w-9 h-9 object-cover" />
             <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full" style={{ border: 'var(--aura-progress-border)' }} />
           </button>
 
@@ -45,7 +46,7 @@ export default function AuraMotorHeader() {
             style={{ background: 'var(--aura-overlay-bg)', border: '1px solid var(--aura-overlay-bg)' }}
           >
             <div className="w-7 h-7 rounded-full overflow-hidden">
-              <img src="/motor-expert.png" alt="Expert" className="w-7 h-7 object-cover" />
+              <img src={assetPath('/motor-expert.png')} alt="Expert" className="w-7 h-7 object-cover" />
             </div>
             <span className="text-xs font-medium" style={{ color: 'var(--aura-bot-text)', opacity: 0.9 }}>Expert</span>
           </button>

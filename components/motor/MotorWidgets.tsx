@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { Option } from '../../lib/core/types';
+import { assetPath } from '../../lib/assetPath';
 import { useMotorStore } from '../../lib/motor/store';
 import { MotorJourneyState, NcbPercentage } from '../../lib/motor/types';
 import { getMotorAddOns } from '../../lib/motor/plans';
@@ -87,7 +88,7 @@ function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: 
   if (file) {
     return (
       <img
-        src={`/icons/${encodeURIComponent(file)}`}
+        src={assetPath(`/icons/${encodeURIComponent(file)}`)}
         alt={icon}
         className={className}
         style={{ filter: 'brightness(0) invert(1)', opacity: 0.85 }}
@@ -527,7 +528,7 @@ const BIKE_IMAGE_MAP: Record<string, string> = {
 
 function getVehicleImage(make: string, vehicleType: string): string {
   const map = vehicleType === 'bike' ? BIKE_IMAGE_MAP : VEHICLE_IMAGE_MAP;
-  return map[make] || (vehicleType === 'bike' ? '/car-images/Splendor.png' : '/car-images/Swift.png');
+  return assetPath(map[make] || (vehicleType === 'bike' ? '/car-images/Splendor.png' : '/car-images/Swift.png'));
 }
 
 export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
@@ -708,7 +709,7 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
           >
             <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
               {BRAND_LOGO_MAP[brand] ? (
-                <img src={BRAND_LOGO_MAP[brand]} alt={brand} className="w-7 h-7 object-contain" />
+                <img src={assetPath(BRAND_LOGO_MAP[brand])} alt={brand} className="w-7 h-7 object-contain" />
               ) : (
                 <span className="text-[11px] font-bold text-white/60">{brand.slice(0, 2)}</span>
               )}

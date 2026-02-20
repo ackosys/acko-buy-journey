@@ -3,6 +3,7 @@
 import { useLifeJourneyStore } from '../../lib/life/store';
 import AckoLogo from '../AckoLogo';
 import { useT } from '../../lib/translations';
+import { assetPath } from '../../lib/assetPath';
 import type { LifeModule } from '../../lib/life/types';
 
 const LIFE_MODULE_ORDER: LifeModule[] = ['basic_info', 'lifestyle', 'quote', 'addons', 'review'];
@@ -39,7 +40,7 @@ export default function LifeHeader() {
           >
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/30">
               <img
-                src="/brand-ambassador.png"
+                src={assetPath('/brand-ambassador.png')}
                 alt={t.header.expert}
                 className="w-7 h-7 rounded-full object-cover"
                 onError={(e) => {

@@ -6,6 +6,7 @@ import { Option, JourneyState, PlanTier } from '../lib/types';
 import { formatCurrency, getPlanDetails, NEARBY_LABS, FEATURE_EXPLANATIONS } from '../lib/plans';
 import { useJourneyStore } from '../lib/store';
 import { useT } from '../lib/translations';
+import { assetPath } from '../lib/assetPath';
 
 /* ═══════════════════════════════════════════════════════
    SVG Icon System — replaces emojis with clean icons
@@ -1194,7 +1195,7 @@ export function UspCards({ onContinue }: { onContinue: () => void }) {
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full">
       {/* Brand ambassador banner */}
       <div className="relative rounded-2xl overflow-hidden mb-4">
-        <img src="/brand-ambassador.png" alt="ACKO Brand Ambassador" className="w-full h-36 object-cover object-top" />
+        <img src={assetPath('/brand-ambassador.png')} alt="ACKO Brand Ambassador" className="w-full h-36 object-cover object-top" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C0B47] via-[#1C0B47]/40 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4">
           <p className="text-white font-semibold text-sm">{t.widgets.whyFamiliesChoose}</p>

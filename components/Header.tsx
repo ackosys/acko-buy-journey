@@ -3,6 +3,7 @@
 import { useJourneyStore } from '../lib/store';
 import AckoLogo from './AckoLogo';
 import { useT } from '../lib/translations';
+import { assetPath } from '../lib/assetPath';
 
 const MODULE_ORDER = ['entry', 'intent', 'family', 'coverage', 'health', 'customization', 'recommendation', 'review', 'payment', 'health_eval', 'completion'];
 
@@ -42,7 +43,7 @@ export default function Header() {
           >
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/30">
               <img
-                src="/brand-ambassador.png"
+                src={assetPath('/brand-ambassador.png')}
                 alt={t.header.expert}
                 className="w-7 h-7 rounded-full object-cover"
                 onError={(e) => {
