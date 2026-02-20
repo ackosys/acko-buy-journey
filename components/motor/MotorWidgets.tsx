@@ -389,7 +389,8 @@ export function MotorTextInput({
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="mt-3 w-full py-3.5 bg-purple-600 text-white rounded-xl text-[15px] font-semibold hover:bg-purple-500 transition-colors active:scale-[0.97]"
+        className="mt-3 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #7C3AED, #A855F7)', color: '#FFFFFF' }}
       >
         Continue
       </button>

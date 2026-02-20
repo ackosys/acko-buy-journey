@@ -362,6 +362,21 @@
 /* ── Select element color scheme ── */
 .motor-light select { color-scheme: light !important; }
 
+/* ── Purple/colored Tailwind bg buttons always keep white text ── */
+.motor-light [class*="bg-purple-"],
+.motor-light [class*="bg-violet-"],
+.motor-light [class*="bg-green-"],
+.motor-light [class*="bg-red-"],
+.motor-light [class*="bg-blue-"] {
+  color: #FFFFFF !important;
+}
+
+/* ── Inline gradient buttons always keep white text ── */
+.motor-light [style*="linear-gradient"],
+.motor-light [style*="linear-gradient"] * {
+  color: #FFFFFF !important;
+}
+
 /* ══════════════════════════════════════════════════
    AURA THEME — Glassmorphism + Gradient Accents
    ══════════════════════════════════════════════════ */
@@ -501,6 +516,21 @@
 }
 
 .aura-light select { color-scheme: light !important; }
+
+/* ── Purple/colored Tailwind bg buttons always keep white text ── */
+.aura-light [class*="bg-purple-"],
+.aura-light [class*="bg-violet-"],
+.aura-light [class*="bg-green-"],
+.aura-light [class*="bg-red-"],
+.aura-light [class*="bg-blue-"] {
+  color: #FFFFFF !important;
+}
+
+/* ── Inline gradient buttons always keep white text ── */
+.aura-light [style*="linear-gradient"],
+.aura-light [style*="linear-gradient"] * {
+  color: #FFFFFF !important;
+}
 
 .aura-chat-bg {
   background: var(--aura-chat-gradient);
