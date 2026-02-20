@@ -34,6 +34,7 @@ import {
   LifeMedicalScreen,
   LifeUnderwritingStatus,
 } from './LifeChatWidgets';
+import { LifeRiderCards } from './LifeRiderCards';
 import type { LifeJourneyState } from '../../lib/life/types';
 
 export default function LifeChatContainer() {
@@ -251,7 +252,7 @@ export default function LifeChatContainer() {
   const isLargeWidget = () => {
     const step = getLifeStep(currentStepId);
     if (!step) return false;
-    return ['coverage_card', 'premium_summary', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'financial_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
+    return ['coverage_card', 'premium_summary', 'rider_cards', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'ekyc_screen', 'financial_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
   };
 
   // Render edit widget
@@ -305,6 +306,8 @@ export default function LifeChatContainer() {
         return <LifeDatePicker placeholder={script.placeholder} onSubmit={handleResponse} />;
       case 'rider_toggle':
         return <LifeRiderToggle options={script.options || []} onSelect={handleResponse} />;
+      case 'rider_cards':
+        return <LifeRiderCards onContinue={() => handleResponse('continue')} />;
       case 'coverage_card':
         return <LifeCoverageCard coverageAmount={script.coverageAmount || ''} policyTerm={script.policyTerm || ''} coversTillAge={script.coversTillAge || 0} breakdownItems={script.breakdownItems} onContinue={() => handleResponse('continue')} />;
       case 'premium_summary':

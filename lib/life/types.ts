@@ -47,8 +47,10 @@ export type LifeWidgetType =
   | 'coverage_slider'         // Coverage amount selector
   | 'term_selector'           // Policy term selector
   | 'rider_toggle'            // Add-on riders with premium impact
+  | 'rider_cards'             // NEW: Card-based modular rider selection
   | 'premium_summary'         // Quote display with breakdown
   | 'coverage_input'          // Direct-quote: user enters coverage + term
+  | 'coverage_card'           // Coverage breakdown card
   | 'payment_screen'          // Payment CTA
   | 'ekyc_screen'             // e-KYC verification
   | 'financial_screen'        // Financial / income verification
@@ -69,6 +71,13 @@ export interface LifeRider {
   coverageMultiplier: number; // e.g., 3x base sum assured for accidental death
   premiumImpact: number;      // Additional premium per ₹1L coverage
   selected: boolean;
+  // New fields for card-based UI
+  coverageAmount?: number;     // Selected coverage amount for this rider
+  premium?: number;            // Premium for this specific rider
+  isAccidental?: boolean;      // Whether this is an accidental-related rider (for 30% cap)
+  category?: 'accidental' | 'critical_illness'; // Rider category
+  maxCoverageMultiplier?: number; // Maximum coverage multiplier allowed
+  recommended?: boolean;       // Whether this is recommended
 }
 
 // Life Insurance Plan/Quote
@@ -125,6 +134,10 @@ export interface LifeJourneyState extends BaseJourneyState {
   
   // Add-ons
   selectedRiders: LifeRider[];
+  accidentalRidersPremium: number; // Total premium from accidental riders
+  accidentalPremiumLimit: number;  // 30% of base premium
+  accidentalLimitUsedPercent: number; // % of accidental limit used
+  criticalIllnessPremiumLimit: number; // 100% of base premium
   
   // User path selection
   userPath: 'direct' | 'guided' | '';
@@ -214,6 +227,10 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
   quote: null,
   
   selectedRiders: [],
+  accidentalRidersPremium: 0,
+  accidentalPremiumLimit: 0,
+  accidentalLimitUsedPercent: 0,
+  criticalIllnessPremiumLimit: 0,
 
   userPath: '',
   
