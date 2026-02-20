@@ -337,13 +337,16 @@
 /* ── Ring colors ── */
 .motor-light .ring-white\/10 { --tw-ring-color: var(--motor-border) !important; }
 
-/* ── SVG icon filter (global) ── */
-.motor-light img[src*="/icons/"] {
+/* ── SVG icon & logo filter (global) ── */
+.motor-light img[src*="/icons/"],
+.motor-light img[src*="/logos/"] {
   filter: brightness(0) !important;
   opacity: 0.7 !important;
 }
 .motor-midnight img[src*="/icons/"],
-.motor-dark img[src*="/icons/"] {
+.motor-midnight img[src*="/logos/"],
+.motor-dark img[src*="/icons/"],
+.motor-dark img[src*="/logos/"] {
   filter: brightness(0) invert(1) !important;
   opacity: 0.85 !important;
 }
@@ -480,11 +483,13 @@
 .aura-light .border-white\/15,
 .aura-light .border-white\/20 { border-color: var(--aura-border-strong) !important; }
 
-.aura-light img[src*="/icons/"] {
+.aura-light img[src*="/icons/"],
+.aura-light img[src*="/logos/"] {
   filter: brightness(0) !important;
   opacity: 0.7 !important;
 }
-.aura-dark img[src*="/icons/"] {
+.aura-dark img[src*="/icons/"],
+.aura-dark img[src*="/logos/"] {
   filter: brightness(0) invert(1) !important;
   opacity: 0.85 !important;
 }
