@@ -6,6 +6,9 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'export',
   images: { unoptimized: true },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   ...(isGhPages && {
     basePath,
     assetPrefix: '/acko-buy-journey/',
