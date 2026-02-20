@@ -293,10 +293,10 @@ const motorDashboardSteps: MotorConversationStep[] = [
     widgetType: 'selection_cards',
     getScript: () => ({
       botMessages: [`Did the incident result in any deaths or serious injuries?`],
-      subText: `If yes, your claim will be immediately escalated for urgent assistance.`,
+      subText: `If so, your claim will be immediately escalated for urgent assistance.`,
       options: [
-        { id: 'yes', label: 'Yes', description: 'Someone was seriously hurt or killed' },
-        { id: 'no', label: 'No', description: 'No deaths or serious injuries' },
+        { id: 'yes', label: 'Someone was hurt', description: 'Serious injury or fatality' },
+        { id: 'no', label: 'No injuries', description: 'No deaths or serious injuries' },
       ],
     }),
     processResponse: (response) => ({ dashboardClaimSeriousInjuries: response === 'yes' }),
@@ -460,8 +460,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
       return {
         botMessages: [`Is your ${v} safe to drive?`],
         options: [
-          { id: 'yes', label: 'Yes, it is drivable', description: 'Minor damage, can be driven' },
-          { id: 'no', label: 'No, it is not safe', description: 'Needs towing or is unsafe to drive' },
+          { id: 'yes', label: 'It\'s drivable', description: 'Minor damage, can be driven' },
+          { id: 'no', label: 'Not safe to drive', description: 'Needs towing or is unsafe to drive' },
         ],
       };
     },
@@ -491,8 +491,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
       botMessages: [`Do you need help with towing?`],
       subText: `Our towing team will contact you within 15 minutes of your claim being filed.`,
       options: [
-        { id: 'yes', label: 'Yes, I need towing', description: 'Our team will call you shortly', icon: 'towing' },
-        { id: 'no', label: 'No, I will manage', description: 'I have arranged transport', icon: 'check' },
+        { id: 'yes', label: 'Send a tow truck', description: 'Our team will call you shortly', icon: 'towing' },
+        { id: 'no', label: 'I\'m sorted, thanks', description: 'I have arranged transport', icon: 'check' },
       ],
     }),
     processResponse: (response) => ({ dashboardClaimNeedsTowing: response === 'yes' }),

@@ -405,8 +405,8 @@ const brandNewCommercialCheck: MotorConversationStep = {
     botMessages: ['Is this a commercial vehicle?'],
     subText: 'Vehicle used as a taxi, to deliver goods, etc.',
     options: [
-      { id: 'no', label: 'No, personal use', icon: 'user' },
-      { id: 'yes', label: 'Yes, commercial', icon: 'commercial_car' },
+      { id: 'no', label: 'Personal use', icon: 'user' },
+      { id: 'yes', label: 'Commercial / taxi', icon: 'commercial_car' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -425,7 +425,7 @@ const brandNewDeliveryDate: MotorConversationStep = {
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
-      `Got it, personal use.`,
+      `Got it.`,
       `When do you expect your ${state.vehicleData.make} ${state.vehicleData.model} to be delivered?`,
     ],
     subText: `This helps us time your policy start date correctly.`,
@@ -608,8 +608,8 @@ const ownerDetailsGst: MotorConversationStep = {
     ],
     subText: `This is optional. If you are GST-registered, you can claim input tax credit on the premium.`,
     options: [
-      { id: 'skip', label: 'Skip — No GST number' },
-      { id: 'enter', label: 'Yes, I have one' },
+      { id: 'skip', label: 'Skip for now' },
+      { id: 'enter', label: 'I have a GST number' },
     ],
   }),
   processResponse: () => ({}),
@@ -637,10 +637,10 @@ const ownerDetailsLoanCheck: MotorConversationStep = {
     botMessages: [
       `Have you taken a ${vLabel(state)} loan for this vehicle?`,
     ],
-    subText: `If yes, your lender will be added as a beneficiary on the policy. This is required by most banks and NBFCs.`,
+    subText: `Your lender will be added as a beneficiary on the policy. This is required by most banks and NBFCs.`,
     options: [
-      { id: 'no', label: 'No', icon: 'forward' },
-      { id: 'yes', label: 'Yes', icon: 'document' },
+      { id: 'no', label: 'I own it outright', icon: 'forward' },
+      { id: 'yes', label: 'It\'s financed', icon: 'document' },
     ],
   }),
   processResponse: (response) => ({ hasCarLoan: response === 'yes' }),
@@ -676,8 +676,8 @@ const preQuoteCngCheck: MotorConversationStep = {
     ],
     subText: `An external CNG kit needs to be covered separately in your insurance.`,
     options: [
-      { id: 'yes', label: 'Yes', icon: 'check' },
-      { id: 'no', label: 'No', icon: 'forward' },
+      { id: 'yes', label: 'Yes, CNG fitted', icon: 'check' },
+      { id: 'no', label: 'No CNG kit', icon: 'forward' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -699,8 +699,8 @@ const preQuoteCommercialCheck: MotorConversationStep = {
     ],
     subText: `Commercial vehicles (taxis, delivery, etc.) have different insurance requirements.`,
     options: [
-      { id: 'no', label: 'No, personal use', icon: 'user' },
-      { id: 'yes', label: 'Yes, commercial', icon: 'commercial_car' },
+      { id: 'no', label: 'Personal use', icon: 'user' },
+      { id: 'yes', label: 'Commercial / taxi', icon: 'commercial_car' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -738,8 +738,8 @@ const preQuotePolicyStatus: MotorConversationStep = {
     ],
     subText: `This determines which plans and No Claim Bonus discounts are available to you.`,
     options: [
-      { id: 'no', label: 'No, it\'s still active', icon: 'shield' },
-      { id: 'yes', label: 'Yes, it has expired', icon: 'policy' },
+      { id: 'no', label: 'Still active', icon: 'shield' },
+      { id: 'yes', label: 'Expired', icon: 'policy' },
       { id: 'not_sure', label: 'Not sure', icon: 'help' },
     ],
   }),
@@ -770,8 +770,8 @@ const preQuoteClaimHistory: MotorConversationStep = {
       botMessages: msgs,
       subText: `Your claim history affects the No Claim Bonus discount on your new policy.`,
       options: [
-        { id: 'no', label: 'No', description: 'No claims made', icon: 'check' },
-        { id: 'yes', label: 'Yes', description: 'I made a claim', icon: 'document' },
+        { id: 'no', label: 'No claims made', icon: 'check' },
+        { id: 'yes', label: 'I made a claim', icon: 'document' },
       ],
     };
   },
@@ -884,8 +884,8 @@ const preQuoteExpiredClaimHistory: MotorConversationStep = {
     ],
     subText: `Your claim history determines your No Claim Bonus eligibility.`,
     options: [
-      { id: 'no', label: 'No', icon: 'check' },
-      { id: 'yes', label: 'Yes', icon: 'document' },
+      { id: 'no', label: 'No claims made', icon: 'check' },
+      { id: 'yes', label: 'I made a claim', icon: 'document' },
     ],
   }),
   processResponse: (response, state) => ({
