@@ -141,7 +141,7 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             )}
             <div className="mb-2 w-10 h-10 rounded-xl bg-[var(--aura-surface-2)] flex items-center justify-center overflow-hidden">
               {opt.logoUrl ? (
-                <img src={opt.logoUrl} alt={opt.label} className="w-7 h-7 object-contain" />
+                <img src={assetPath(opt.logoUrl)} alt={opt.label} className="w-7 h-7 object-contain" />
               ) : (
                 <MotorIcon icon={opt.icon!} className="w-6 h-6 text-[#C084FC]" />
               )}
@@ -178,7 +178,7 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
               `}
             >
               <div className="w-10 h-10 rounded-lg bg-[var(--aura-surface-2)] flex items-center justify-center overflow-hidden">
-                <img src={opt.logoUrl!} alt={opt.label} className="w-7 h-7 object-contain" />
+                <img src={assetPath(opt.logoUrl!)} alt={opt.label} className="w-7 h-7 object-contain" />
               </div>
               <span className="text-[11px] font-medium text-[var(--aura-text)] text-center leading-tight">{opt.label}</span>
               {opt.description && (
@@ -244,7 +244,7 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
             {(opt.logoUrl || opt.icon) && (
               <div className="w-9 h-9 rounded-lg bg-[var(--aura-surface-2)] flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {opt.logoUrl ? (
-                  <img src={opt.logoUrl} alt={opt.label} className="w-6 h-6 object-contain" />
+                  <img src={assetPath(opt.logoUrl)} alt={opt.label} className="w-6 h-6 object-contain" />
                 ) : (
                   <MotorIcon icon={opt.icon!} className="w-4.5 h-4.5 text-[#C084FC]" />
                 )}
