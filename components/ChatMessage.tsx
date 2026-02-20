@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 interface ChatMessageProps {
   message: {
@@ -13,9 +13,10 @@ interface ChatMessageProps {
     stepId?: string;
   };
   onEdit?: (stepId: string) => void;
+  animate?: boolean;
 }
 
-export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
+export default function ChatMessage({ message, onEdit, animate = false }: ChatMessageProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   if (message.type === 'system') {
@@ -65,7 +66,38 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
     );
   }
 
-  // Bot message — frosted glass on dark
+  // Bot message — word-by-word typewriter when animate=true
+  const wordList = useMemo(() => {
+    const result: { text: string; para: number }[] = [];
+    message.content.split('\n\n').forEach((para, pi) => {
+      para.split(' ').forEach(word => {
+        if (word) result.push({ text: word, para: pi });
+      });
+    });
+    return result;
+  }, [message.content]);
+
+  const [visibleCount, setVisibleCount] = useState(animate ? 0 : wordList.length);
+
+  // Reveal words one by one while animating
+  useEffect(() => {
+    if (!animate || visibleCount >= wordList.length) return;
+    const t = setTimeout(() => setVisibleCount(c => c + 1), 55);
+    return () => clearTimeout(t);
+  }, [animate, visibleCount, wordList.length]);
+
+  // When this message is no longer the latest, show all words immediately
+  useEffect(() => {
+    if (!animate) setVisibleCount(wordList.length);
+  }, [animate, wordList.length]);
+
+  // Reconstruct paragraphs from visible words
+  const paragraphCount = message.content.split('\n\n').length;
+  const visibleByPara: string[][] = Array.from({ length: paragraphCount }, () => []);
+  wordList.slice(0, visibleCount).forEach(w => visibleByPara[w.para].push(w.text));
+  const visibleParagraphs = visibleByPara.filter(p => p.length > 0);
+  const isTypingOut = animate && visibleCount < wordList.length;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -75,9 +107,12 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
     >
       <div className="max-w-[85%]">
         <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
-          {message.content.split('\n\n').map((paragraph, i) => (
+          {visibleParagraphs.map((words, i) => (
             <p key={i} className={`text-body-md ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--motor-bot-text)' }}>
-              {paragraph}
+              {words.join(' ')}
+              {isTypingOut && i === visibleParagraphs.length - 1 && (
+                <span className="inline-block w-[2px] h-[1em] align-middle ml-[2px] rounded-full bg-purple-400 animate-pulse" />
+              )}
             </p>
           ))}
         </div>

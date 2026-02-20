@@ -189,10 +189,16 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
   const [phase, setPhase] = useState<'capture' | 'analysis' | 'result'>('capture');
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [admissibilityScore] = useState(87);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const DAMAGED_PANELS = ['Front bumper', 'Left door', 'Windshield'];
 
   const handleCapture = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
     setCapturing(true);
     setTimeout(() => {
       setCaptured(prev => new Set([...Array.from(prev), currentStep]));
@@ -200,7 +206,8 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
       if (currentStep < INSPECTION_STEPS.length - 1) {
         setTimeout(() => setCurrentStep(s => s + 1), 400);
       }
-    }, 1200);
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
+    }, 800);
   };
 
   const handleAnalyse = () => {
@@ -221,7 +228,7 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-sm py-6 text-center">
         <div className="relative w-20 h-20 mx-auto mb-5">
           <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="var(--aura-border)" strokeWidth="6" />
+            <circle cx="40" cy="40" r="34" fill="none" stroke="var(--motor-border)" strokeWidth="6" />
             <circle
               cx="40" cy="40" r="34"
               fill="none"
@@ -234,11 +241,11 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[18px] font-bold text-[var(--aura-text)]">{analysisProgress}%</span>
+            <span className="text-[18px] font-bold" style={{ color: 'var(--motor-text)' }}>{analysisProgress}%</span>
           </div>
         </div>
-        <p className="text-[15px] font-semibold text-[var(--aura-text)] mb-1">Analysing damage</p>
-        <p className="text-[13px] text-[var(--aura-text-subtle)]">
+        <p className="text-[15px] font-semibold mb-1" style={{ color: 'var(--motor-text)' }}>Analysing damage</p>
+        <p className="text-[13px]" style={{ color: 'var(--motor-text-muted)' }}>
           {analysisProgress < 40 ? 'Processing images...' : analysisProgress < 70 ? 'Mapping damage panels...' : analysisProgress < 90 ? 'Calculating admissibility...' : 'Almost done...'}
         </p>
       </motion.div>
@@ -249,7 +256,7 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
     const scoreColor = admissibilityScore >= 80 ? '#22C55E' : admissibilityScore >= 60 ? '#F59E0B' : '#EF4444';
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
-        <div className="rounded-2xl border border-[var(--aura-border)] bg-[var(--aura-surface)] p-4 mb-4">
+        <div className="rounded-2xl p-4 mb-4" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center">
               <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -257,8 +264,8 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
               </svg>
             </div>
             <div>
-              <p className="text-[14px] font-bold text-[var(--aura-text)]">Inspection Complete</p>
-              <p className="text-[12px] text-[var(--aura-text-subtle)]">{captured.size} photos analysed</p>
+              <p className="text-[14px] font-bold" style={{ color: 'var(--motor-text)' }}>Inspection Complete</p>
+              <p className="text-[12px]" style={{ color: 'var(--motor-text-muted)' }}>{captured.size} photos analysed</p>
             </div>
             <div className="ml-auto text-right">
               <p className="text-[22px] font-bold" style={{ color: scoreColor }}>{admissibilityScore}%</p>
@@ -267,7 +274,7 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
           </div>
 
           <div className="mb-3">
-            <div className="h-2 rounded-full bg-[var(--aura-surface-2)] overflow-hidden">
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${admissibilityScore}%` }}
@@ -279,11 +286,11 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-[12px] font-semibold text-[var(--aura-text-muted)] uppercase tracking-wide mb-2">Damaged panels detected</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--motor-text-muted)' }}>Damaged panels detected</p>
             {DAMAGED_PANELS.map((panel) => (
               <div key={panel} className="flex items-center gap-2 text-[13px]">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
-                <span className="text-[var(--aura-text)]">{panel}</span>
+                <span style={{ color: 'var(--motor-text)' }}>{panel}</span>
               </div>
             ))}
           </div>
@@ -302,14 +309,23 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
+      {/* Hidden camera input */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
       {/* Progress bar */}
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] uppercase tracking-wide">
+        <p className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--motor-text-muted)' }}>
           360° Inspection
         </p>
-        <span className="text-[12px] text-[#A855F7] font-medium">{captured.size}/{INSPECTION_STEPS.length} captured</span>
+        <span className="text-[12px] font-medium text-[#A855F7]">{captured.size}/{INSPECTION_STEPS.length} captured</span>
       </div>
-      <div className="h-1.5 rounded-full bg-[var(--aura-surface-2)] overflow-hidden mb-4">
+      <div className="h-1.5 rounded-full overflow-hidden mb-4" style={{ background: 'var(--motor-surface-2)' }}>
         <motion.div
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4 }}
@@ -323,9 +339,10 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
         {INSPECTION_STEPS.map((_, i) => (
           <div
             key={i}
-            className={`flex-1 h-1 rounded-full transition-all duration-300 ${
-              captured.has(i) ? 'bg-[#A855F7]' : i === currentStep ? 'bg-[#A855F7]/40' : 'bg-[var(--aura-border)]'
-            }`}
+            className="flex-1 h-1 rounded-full transition-all duration-300"
+            style={{
+              background: captured.has(i) ? '#A855F7' : i === currentStep ? 'rgba(168,85,247,0.4)' : 'var(--motor-border)',
+            }}
           />
         ))}
       </div>
@@ -337,10 +354,14 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
           initial={{ opacity: 0, x: 15 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -15 }}
-          className="rounded-2xl border border-[var(--aura-border)] bg-[var(--aura-surface)] p-4 mb-4"
+          className="rounded-2xl p-4 mb-4"
+          style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}
         >
           <div className="flex items-start gap-3">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${captured.has(currentStep) ? 'bg-green-500/15' : 'bg-[var(--aura-surface-2)]'}`}>
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+              style={{ background: captured.has(currentStep) ? 'rgba(34,197,94,0.15)' : 'var(--motor-surface-2)' }}
+            >
               {capturing ? (
                 <div className="w-6 h-6 border-2 border-[#A855F7] border-t-transparent rounded-full animate-spin" />
               ) : captured.has(currentStep) ? (
@@ -352,10 +373,10 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
               )}
             </div>
             <div className="flex-1">
-              <p className="text-[14px] font-bold text-[var(--aura-text)] mb-0.5">
+              <p className="text-[14px] font-bold mb-0.5" style={{ color: 'var(--motor-text)' }}>
                 Step {currentStep + 1}: {INSPECTION_STEPS[currentStep]?.label}
               </p>
-              <p className="text-[12px] text-[var(--aura-text-subtle)] leading-relaxed">
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--motor-text-muted)' }}>
                 {INSPECTION_STEPS[currentStep]?.instruction}
               </p>
             </div>
@@ -413,11 +434,16 @@ export function SelfInspectionWidget({ onComplete }: { onComplete: (result: any)
    ═══════════════════════════════════════════════ */
 
 export function SurveyorAssigned({ onContinue }: { onContinue: () => void }) {
-  const SURVEYOR = { name: 'Rajesh Nair', id: 'SRV-4821', eta: '24–48 hours', phone: '98XX XXXX 34', rating: 4.8 };
+  const SURVEYOR = { name: 'Rajesh Nair', id: 'SRV-4821', eta: '~90 mins', phone: '98XX XXXX 34', rating: 4.8 };
+
+  useEffect(() => {
+    const timer = setTimeout(() => onContinue(), 2500);
+    return () => clearTimeout(timer);
+  }, [onContinue]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
-      <div className="rounded-2xl border border-[var(--aura-border)] bg-[var(--aura-surface)] p-4 mb-4">
+      <div className="rounded-2xl border border-[var(--aura-border)] bg-[var(--aura-surface)] p-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C47E1] to-[#A855F7] flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
             {SURVEYOR.name.charAt(0)}
@@ -444,7 +470,12 @@ export function SurveyorAssigned({ onContinue }: { onContinue: () => void }) {
           </div>
           <div className="bg-[var(--aura-surface-2)] rounded-xl p-3">
             <p className="text-[11px] text-[var(--aura-text-subtle)] mb-0.5">Contact</p>
-            <p className="text-[13px] font-bold text-[var(--aura-text)]">{SURVEYOR.phone}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[13px] font-bold text-[var(--aura-text)]">{SURVEYOR.phone}</p>
+              <svg className="w-3.5 h-3.5 text-[#A855F7] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -454,13 +485,6 @@ export function SurveyorAssigned({ onContinue }: { onContinue: () => void }) {
           </p>
         </div>
       </div>
-      <button
-        onClick={onContinue}
-        className="w-full py-3.5 rounded-xl font-semibold text-[15px] text-white transition-all active:scale-[0.97]"
-        style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
-      >
-        Got it
-      </button>
     </motion.div>
   );
 }

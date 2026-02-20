@@ -158,7 +158,7 @@ export default function AuraMotorChatContainer() {
       updateState({ isTyping: true } as Partial<MotorJourneyState>);
 
       const mergedContent = script.botMessages.join('\n\n');
-      const delay = 400 + Math.min(mergedContent.length * 8, 1800);
+      const delay = 600 + Math.min(mergedContent.length * 12, 2000);
       await new Promise(r => setTimeout(r, delay));
 
       addMessage({
@@ -472,9 +472,19 @@ export default function AuraMotorChatContainer() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-lg mx-auto">
           <AnimatePresence initial={false}>
-            {conversationHistory.map((msg) => (
-              <AuraChatMessage key={msg.id} message={msg as ChatMessageType} onEdit={handleEditRequest} />
-            ))}
+            {conversationHistory.map((msg, index) => {
+              const isLatestBot = msg.type === 'bot' &&
+                index === conversationHistory.length - 1 &&
+                !isTyping;
+              return (
+                <AuraChatMessage
+                  key={msg.id}
+                  message={msg as ChatMessageType}
+                  onEdit={handleEditRequest}
+                  animate={isLatestBot}
+                />
+              );
+            })}
           </AnimatePresence>
 
           {isTyping && (

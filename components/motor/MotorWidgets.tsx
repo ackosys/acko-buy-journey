@@ -697,7 +697,7 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
   return (
     <div>
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--motor-text-subtle)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input
@@ -705,7 +705,8 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={`Search ${vehicleType === 'bike' ? 'bike' : 'car'} brand`}
-          className="w-full pl-9 pr-4 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-[14px] focus:outline-none focus:border-purple-400/50 transition-colors"
+          style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
           autoFocus
         />
       </div>
@@ -717,22 +718,20 @@ export function BrandSelector({ onSelect }: { onSelect: (brand: string) => void 
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.02 }}
             onClick={() => handleSelect(brand)}
-            className={`
-              flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
-              ${selected === brand
-                ? 'border-purple-400 bg-purple-500/15 ring-1 ring-purple-400/30'
-                : 'border-white/10 bg-white/5 hover:bg-white/10'
-              }
-            `}
+            className="relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl transition-all duration-200 active:scale-[0.95]"
+            style={selected === brand
+              ? { background: 'var(--motor-selected-bg)', border: '1px solid var(--motor-selected-border, #A855F7)' }
+              : { background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }
+            }
           >
-            <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
               {BRAND_LOGO_MAP[brand] ? (
                 <img src={assetPath(BRAND_LOGO_MAP[brand])} alt={brand} className="w-7 h-7 object-contain" />
               ) : (
-                <span className="text-[11px] font-bold text-white/60">{brand.slice(0, 2)}</span>
+                <span className="text-[11px] font-bold" style={{ color: 'var(--motor-text-muted)' }}>{brand.slice(0, 2)}</span>
               )}
             </div>
-            <span className="text-[11px] font-medium text-white/80 text-center leading-tight">{brand}</span>
+            <span className="text-[11px] font-medium text-center leading-tight" style={{ color: 'var(--motor-text)' }}>{brand}</span>
             {selected === brand && (
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
                 <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
@@ -793,7 +792,7 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
   return (
     <div>
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--motor-text-subtle)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input
@@ -801,7 +800,8 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={`Search ${brand} model`}
-          className="w-full pl-9 pr-4 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-[14px] focus:outline-none focus:border-purple-400/50 transition-colors"
+          style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
           autoFocus
         />
       </div>
@@ -813,18 +813,20 @@ export function ModelSelector({ onSelect }: { onSelect: (model: string) => void 
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.025 }}
             onClick={() => handleSelect(model)}
-            className={`
-              w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 active:scale-[0.98]
-              ${selected === model
-                ? 'border-purple-400 bg-purple-500/12'
-                : 'border-transparent hover:bg-white/6'
-              }
-            `}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]"
+            style={selected === model
+              ? { background: 'var(--motor-selected-bg)', border: '1px solid var(--motor-selected-border, #A855F7)' }
+              : { border: '1px solid transparent' }
+            }
           >
-            <span className="text-[14px] font-medium text-white/90">{model}</span>
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-              ${selected === model ? 'border-purple-400 bg-purple-500' : 'border-white/20'}
-            `}>
+            <span className="text-[14px] font-medium" style={{ color: 'var(--motor-text)' }}>{model}</span>
+            <div
+              className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+              style={selected === model
+                ? { borderColor: '#A855F7', background: '#A855F7' }
+                : { borderColor: 'var(--motor-border-strong)' }
+              }
+            >
               {selected === model && (
                 <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -868,24 +870,23 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
 
   return (
     <div>
-      <div className="flex gap-1.5 mb-3 p-1 bg-white/5 rounded-xl">
+      <div className="flex gap-1.5 mb-3 p-1 rounded-xl" style={{ background: 'var(--motor-surface-2)' }}>
         {fuelTypes.map(fuel => (
           <button
             key={fuel}
             onClick={() => { setActiveFuel(fuel); setSelected(null); }}
-            className={`flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all
-              ${activeFuel === fuel
-                ? 'bg-white text-[#1C0B47] shadow-sm'
-                : 'text-white/50 hover:text-white/70'
-              }
-            `}
+            className="flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all"
+            style={activeFuel === fuel
+              ? { background: 'linear-gradient(135deg, #7C47E1, #A855F7)', color: '#FFFFFF' }
+              : { color: 'var(--motor-text-muted)' }
+            }
           >
             {fuel}
           </button>
         ))}
       </div>
       {!selected && (
-        <p className="text-[11px] text-white/30 mb-2 px-1">Select your {state.vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
+        <p className="text-[11px] mb-2 px-1" style={{ color: 'var(--motor-text-subtle)' }}>Select your {state.vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
       )}
       <div className="space-y-1">
         {variants.map((variant, i) => (
@@ -895,16 +896,14 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.025 }}
             onClick={() => handleSelect(variant)}
-            className={`
-              w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
-              ${selected === variant
-                ? 'bg-purple-500/12 border border-purple-400'
-                : 'border border-transparent hover:bg-white/6'
-              }
-            `}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]"
+            style={selected === variant
+              ? { background: 'var(--motor-selected-bg)', border: '1px solid var(--motor-selected-border, #A855F7)' }
+              : { border: '1px solid transparent' }
+            }
           >
-            <span className="text-[14px] font-medium text-white/90">{variant}</span>
-            <svg className="w-4 h-4 text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <span className="text-[14px] font-medium" style={{ color: 'var(--motor-text)' }}>{variant}</span>
+            <svg className="w-4 h-4" style={{ color: 'var(--motor-text-subtle)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </motion.button>
@@ -948,15 +947,15 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           <select
             value={selectedYear ?? ''}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="w-full px-3 py-2.5 bg-[#2a1a5e] border border-purple-400/30 rounded-xl text-[14px] text-white focus:outline-none focus:border-purple-400 cursor-pointer pr-8 appearance-none"
-            style={{ colorScheme: 'dark' }}
+            className="w-full px-3 py-2.5 rounded-xl text-[14px] focus:outline-none cursor-pointer pr-8 appearance-none"
+            style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
           >
             <option value="" disabled>Year</option>
             {years.map(y => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--motor-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
@@ -964,15 +963,15 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           <select
             value={selectedMonth ?? ''}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="w-full px-3 py-2.5 bg-[#2a1a5e] border border-purple-400/30 rounded-xl text-[14px] text-white focus:outline-none focus:border-purple-400 cursor-pointer pr-8 appearance-none"
-            style={{ colorScheme: 'dark' }}
+            className="w-full px-3 py-2.5 rounded-xl text-[14px] focus:outline-none cursor-pointer pr-8 appearance-none"
+            style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
           >
             <option value="" disabled>Month</option>
             {availableMonths.map(m => (
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
-          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--motor-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
@@ -986,13 +985,11 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
             animate={{ opacity: 1 }}
             transition={{ delay: i * 0.012 }}
             onClick={() => handleYearSelect(year)}
-            className={`
-              py-2.5 rounded-lg text-center transition-all duration-200 active:scale-[0.95]
-              ${selectedYear === year
-                ? 'bg-purple-500 text-white font-bold shadow-lg shadow-purple-500/25'
-                : 'bg-white/8 text-white/70 hover:bg-white/15 border border-white/10'
-              }
-            `}
+            className="py-2.5 rounded-lg text-center transition-all duration-200 active:scale-[0.95]"
+            style={selectedYear === year
+              ? { background: 'linear-gradient(135deg, #7C47E1, #A855F7)', color: '#FFFFFF', fontWeight: 700 }
+              : { background: 'var(--motor-surface)', border: '1px solid var(--motor-border)', color: 'var(--motor-text-muted)' }
+            }
           >
             <span className="text-[13px]">{year}</span>
           </motion.button>
@@ -1004,7 +1001,8 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={handleSubmit}
-          className="mt-3 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-[14px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+          className="mt-3 w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-colors active:scale-[0.97]"
+          style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
         >
           Continue with {selectedYear}{selectedMonth ? ` · ${selectedMonth}` : ''}
         </motion.button>
@@ -1043,13 +1041,11 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.04 }}
           onClick={() => handleSelect(opt.value)}
-          className={`
-            relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-200 active:scale-[0.95]
-            ${selected === opt.value
-              ? 'border-purple-400 bg-purple-500/20'
-              : 'border-white/10 bg-white/5 hover:bg-white/10'
-            }
-          `}
+          className="relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl transition-all duration-200 active:scale-[0.95]"
+          style={selected === opt.value
+            ? { background: 'var(--motor-selected-bg)', border: '1px solid var(--motor-selected-border, #A855F7)' }
+            : { background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }
+          }
         >
           {selected === opt.value && (
             <motion.div
@@ -1062,10 +1058,10 @@ export function NcbSelector({ onSelect }: { onSelect: (ncb: string) => void }) {
               </svg>
             </motion.div>
           )}
-          <span className={`text-[20px] font-bold leading-none ${selected === opt.value ? 'text-purple-300' : 'text-white'}`}>
+          <span className="text-[20px] font-bold leading-none" style={{ color: selected === opt.value ? '#A855F7' : 'var(--motor-text)' }}>
             {opt.label}
           </span>
-          <span className="text-[10px] text-white/50 text-center leading-tight">{opt.description}</span>
+          <span className="text-[10px] text-center leading-tight" style={{ color: 'var(--motor-text-muted)' }}>{opt.description}</span>
         </motion.button>
       ))}
     </div>
@@ -1099,18 +1095,19 @@ export function NcbReward({ onContinue }: { onContinue: () => void }) {
         >
           <span className="text-3xl">🎉</span>
         </motion.div>
-        <h3 className="text-[18px] font-bold text-white mb-1">NCB Reward Applied!</h3>
-        <p className="text-[14px] text-white/60 mb-3">
+        <h3 className="text-[18px] font-bold mb-1" style={{ color: 'var(--motor-text)' }}>NCB Reward Applied!</h3>
+        <p className="text-[14px] mb-3" style={{ color: 'var(--motor-text-muted)' }}>
           {state.newNcbPercentage}% discount on your Own Damage premium
         </p>
-        <div className="bg-white/10 rounded-xl p-3">
-          <p className="text-[12px] text-white/40">For staying claim-free</p>
+        <div className="rounded-xl p-3" style={{ background: 'var(--motor-surface-2)' }}>
+          <p className="text-[12px]" style={{ color: 'var(--motor-text-subtle)' }}>For staying claim-free</p>
           <p className="text-[20px] font-bold text-green-400">{state.newNcbPercentage}% OFF</p>
         </div>
       </div>
       <button
         onClick={onContinue}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold text-white transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
       >
         Continue
       </button>
@@ -1145,7 +1142,7 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
   return (
     <div>
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--motor-text-subtle)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input
@@ -1153,7 +1150,8 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search insurer"
-          className="w-full pl-9 pr-4 py-2.5 bg-white/8 border border-white/15 rounded-xl text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-[14px] focus:outline-none focus:border-purple-400/50 transition-colors"
+          style={{ background: 'var(--motor-input-bg)', border: '1px solid var(--motor-input-border)', color: 'var(--motor-input-text)' }}
           autoFocus
         />
       </div>
@@ -1165,18 +1163,20 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.02 }}
             onClick={() => handleSelect(insurer)}
-            className={`
-              w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
-              ${selected === insurer
-                ? 'bg-purple-500/12 border border-purple-400'
-                : 'border border-transparent hover:bg-white/6'
-              }
-            `}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]"
+            style={selected === insurer
+              ? { background: 'var(--motor-selected-bg)', border: '1px solid var(--motor-selected-border, #A855F7)' }
+              : { border: '1px solid transparent' }
+            }
           >
-            <span className="text-[14px] font-medium text-white/90">{insurer}</span>
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-              ${selected === insurer ? 'border-purple-400 bg-purple-500' : 'border-white/20'}
-            `}>
+            <span className="text-[14px] font-medium" style={{ color: 'var(--motor-text)' }}>{insurer}</span>
+            <div
+              className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+              style={selected === insurer
+                ? { borderColor: '#A855F7', background: '#A855F7' }
+                : { borderColor: 'var(--motor-border-strong)' }
+              }
+            >
               {selected === insurer && (
                 <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -1188,7 +1188,8 @@ export function InsurerSelector({ onSelect }: { onSelect: (insurer: string) => v
       </div>
       <button
         onClick={() => onSelect('skip')}
-        className="mt-3 w-full py-2.5 text-[12px] text-white/40 hover:text-white/60 transition-colors"
+        className="mt-3 w-full py-2.5 text-[12px] transition-colors"
+        style={{ color: 'var(--motor-text-subtle)' }}
       >
         Skip this step
       </button>
@@ -1211,9 +1212,9 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-sm"
     >
-      <div className="bg-white/8 border border-white/15 rounded-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/10 px-5 py-3 border-b border-white/10">
-          <h3 className="text-[14px] font-semibold text-white/80">Vehicle Summary</h3>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
+        <div className="px-5 py-3" style={{ background: 'var(--motor-selected-bg)', borderBottom: '1px solid var(--motor-border)' }}>
+          <h3 className="text-[14px] font-semibold" style={{ color: 'var(--motor-text)' }}>Vehicle Summary</h3>
         </div>
         <div className="px-5 py-4 space-y-3">
           <SummaryRow label="Vehicle Type" value={vType} />
@@ -1230,7 +1231,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 
       <button
         onClick={onConfirm}
-        className="mt-4 w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-[15px] font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]"
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold text-white transition-colors active:scale-[0.97]"
+        style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
       >
         View prices
       </button>
@@ -1241,8 +1243,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 function SummaryRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-[12px] text-white/40">{label}</span>
-      <span className={`text-[13px] font-medium ${highlight ? 'text-green-400' : 'text-white/80'}`}>{value}</span>
+      <span className="text-[12px]" style={{ color: 'var(--motor-text-subtle)' }}>{label}</span>
+      <span className="text-[13px] font-medium" style={{ color: highlight ? '#22C55E' : 'var(--motor-text)' }}>{value}</span>
     </div>
   );
 }
@@ -2424,11 +2426,11 @@ interface DocUploadResult {
   prevPolicyUploaded: boolean;
 }
 
-const DOC_SOURCE_OPTIONS: { id: DocSource; label: string; icon: string }[] = [
-  { id: 'camera', label: 'Click photos with camera', icon: '📷' },
-  { id: 'gallery', label: 'Upload both sides from gallery', icon: '🖼️' },
-  { id: 'pdf', label: 'Upload PDF / Zip file', icon: '📄' },
-  { id: 'digilocker', label: 'Fetch from Digilocker', icon: '🔒' },
+const DOC_SOURCE_OPTIONS: { id: DocSource; label: string; iconFile: string; accept: string; capture?: 'environment' | 'user' }[] = [
+  { id: 'camera', label: 'Click photos with camera', iconFile: 'doc-camera.svg', accept: 'image/*', capture: 'environment' },
+  { id: 'gallery', label: 'Upload both sides from gallery', iconFile: 'doc-gallery.svg', accept: 'image/*' },
+  { id: 'pdf', label: 'Upload PDF / Zip file', iconFile: 'doc-pdf.svg', accept: 'application/pdf,application/zip,.pdf,.zip' },
+  { id: 'digilocker', label: 'Fetch from Digilocker', iconFile: 'doc-digilocker.svg', accept: '' },
 ];
 
 export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocUploadResult) => void }) {
@@ -2441,26 +2443,71 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
   const [sourceSheet, setSourceSheet] = useState<'rc' | 'dl' | 'prev' | null>(null);
   const [uploadingFor, setUploadingFor] = useState<'rc' | 'dl' | 'prev' | null>(null);
 
+  // One hidden file input per source option (camera, gallery, pdf)
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
   const ownerName = state.ownerName || 'You';
   const regNo = state.registrationNumber || 'your vehicle';
   const chassisNo = state.chassisNumber || 'XXXXXXXXXXXX';
 
-  const handleSourceSelect = (_source: DocSource) => {
-    const target = sourceSheet;
+  const triggerUpload = (target: 'rc' | 'dl' | 'prev', source: DocSource) => {
     setSourceSheet(null);
-    setUploadingFor(target);
+    if (source === 'digilocker') {
+      setUploadingFor(target);
+      setTimeout(() => {
+        if (target === 'rc') setRcUploaded(true);
+        if (target === 'dl') setDlUploaded(true);
+        if (target === 'prev') setPrevPolicyUploaded(true);
+        setUploadingFor(null);
+      }, 1200);
+      return;
+    }
+    pendingSourceTarget.current = target;
     setTimeout(() => {
-      if (target === 'rc') setRcUploaded(true);
-      if (target === 'dl') setDlUploaded(true);
-      if (target === 'prev') setPrevPolicyUploaded(true);
+      if (source === 'camera') cameraInputRef.current?.click();
+      else if (source === 'gallery') galleryInputRef.current?.click();
+      else if (source === 'pdf') pdfInputRef.current?.click();
+    }, 100);
+  };
+
+  // Track which doc card triggered the upload so file-input onChange can use it
+  const pendingSourceTarget = useRef<'rc' | 'dl' | 'prev' | null>(null);
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) { pendingSourceTarget.current = null; return; }
+    const uploadTarget = pendingSourceTarget.current;
+    pendingSourceTarget.current = null;
+    if (!uploadTarget) return;
+    setUploadingFor(uploadTarget);
+    e.target.value = '';
+    setTimeout(() => {
+      if (uploadTarget === 'rc') setRcUploaded(true);
+      if (uploadTarget === 'dl') setDlUploaded(true);
+      if (uploadTarget === 'prev') setPrevPolicyUploaded(true);
       setUploadingFor(null);
     }, 900);
+  };
+
+  const handleSourceSelect = (source: DocSource) => {
+    triggerUpload(pendingSourceTarget.current!, source);
+  };
+
+  const openSourceSheet = (target: 'rc' | 'dl' | 'prev') => {
+    pendingSourceTarget.current = target;
+    setSourceSheet(target);
   };
 
   const canProceed = rcUploaded && dlUploaded;
 
   return (
     <>
+      {/* Hidden file inputs — triggered programmatically per source type */}
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelected} />
+      <input ref={galleryInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelected} />
+      <input ref={pdfInputRef} type="file" accept="application/pdf,application/zip,.pdf,.zip" className="hidden" onChange={handleFileSelected} />
+
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2517,7 +2564,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
               </div>
             ) : (
               <button
-                onClick={() => setSourceSheet('rc')}
+                onClick={() => openSourceSheet('rc')}
                 className="text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
               >
                 {rcUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
@@ -2553,7 +2600,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
               </div>
             ) : (
               <button
-                onClick={() => setSourceSheet('dl')}
+                onClick={() => openSourceSheet('dl')}
                 className="text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
               >
                 {dlUploaded ? 'Re-upload ↗' : 'Upload file ↑'}
@@ -2590,7 +2637,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
               </div>
             ) : (
               <button
-                onClick={() => setSourceSheet('prev')}
+                onClick={() => openSourceSheet('prev')}
                 className="mt-3 text-[13px] text-purple-400 hover:text-purple-300 font-medium transition-colors"
               >
                 {prevPolicyUploaded ? 'Replace ↗' : '+ Add more'}
@@ -2654,7 +2701,15 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
                     onClick={() => handleSourceSelect(opt.id)}
                     className="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/8 hover:border-purple-400/30 rounded-xl transition-all text-left"
                   >
-                    <span className="text-2xl">{opt.icon}</span>
+                    <div className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                      <img
+                        src={assetPath(`/icons/${opt.iconFile}`)}
+                        alt={opt.label}
+                        width={22}
+                        height={22}
+                        style={{ filter: 'brightness(0) invert(1)', opacity: 0.85 }}
+                      />
+                    </div>
                     <span className="text-[14px] font-medium text-white">{opt.label}</span>
                     <svg className="w-4 h-4 text-white/30 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -2667,5 +2722,69 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   Surveyor Details Card
+   Shown when a surveyor is assigned during claims
+   ═══════════════════════════════════════════════ */
+
+const SURVEYOR = { name: 'Rajesh Nair', id: 'SRV-4821', eta: '~90 mins', phone: '98XX XXXX 34', rating: 4.8 };
+
+export function SurveyorDetailsCard({ onContinue }: { onContinue: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(() => onContinue(), 2500);
+    return () => clearTimeout(timer);
+  }, [onContinue]);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
+      <div
+        className="rounded-2xl p-4"
+        style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C47E1] to-[#A855F7] flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+            {SURVEYOR.name.charAt(0)}
+          </div>
+          <div className="flex-1">
+            <p className="text-[14px] font-bold" style={{ color: 'var(--motor-text)' }}>{SURVEYOR.name}</p>
+            <p className="text-[12px]" style={{ color: 'var(--motor-text-muted)' }}>Assigned Surveyor · {SURVEYOR.id}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-yellow-400 text-[11px]">★</span>
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--motor-text)' }}>{SURVEYOR.rating}</span>
+              <span className="text-[11px]" style={{ color: 'var(--motor-text-muted)' }}>· 200+ inspections</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="w-2 h-2 rounded-full bg-green-400 ml-auto mb-1 animate-pulse" />
+            <p className="text-[10px] text-green-400 font-semibold uppercase tracking-wide">On duty</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-xl p-3" style={{ background: 'var(--motor-surface-2, var(--motor-surface))' }}>
+            <p className="text-[11px] mb-0.5" style={{ color: 'var(--motor-text-muted)' }}>Expected visit</p>
+            <p className="text-[13px] font-bold" style={{ color: 'var(--motor-text)' }}>{SURVEYOR.eta}</p>
+          </div>
+          <div className="rounded-xl p-3" style={{ background: 'var(--motor-surface-2, var(--motor-surface))' }}>
+            <p className="text-[11px] mb-0.5" style={{ color: 'var(--motor-text-muted)' }}>Contact</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[13px] font-bold" style={{ color: 'var(--motor-text)' }}>{SURVEYOR.phone}</p>
+              <svg className="w-3.5 h-3.5 text-[#A855F7] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 p-3 rounded-xl bg-[#A855F7]/10 border border-[#A855F7]/20">
+          <p className="text-[12px] text-[#C084FC] leading-relaxed">
+            You will get an SMS once the surveyor is on the way. Please keep the vehicle accessible.
+          </p>
+        </div>
+      </div>
+    </motion.div>
   );
 }

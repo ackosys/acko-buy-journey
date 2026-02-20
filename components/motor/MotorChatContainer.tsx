@@ -27,8 +27,10 @@ import {
   ProtectEveryoneAddons,
   MotorTextInput,
   DocumentUploadWidget,
+  SurveyorDetailsCard,
 } from './MotorWidgets';
 import { PremiumBreakdown, DashboardCTA } from './MotorFinalWidgets';
+import { SelfInspectionWidget } from './aura/AuraClaimsWidgets';
 
 // Add MotorCelebration locally since it needs to be inline
 function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
@@ -150,7 +152,7 @@ export default function MotorChatContainer() {
       updateState({ isTyping: true } as Partial<MotorJourneyState>);
 
       const mergedContent = script.botMessages.join('\n\n');
-      const delay = 400 + Math.min(mergedContent.length * 8, 1800);
+      const delay = 600 + Math.min(mergedContent.length * 12, 2000);
       await new Promise(r => setTimeout(r, delay));
 
       addMessage({
@@ -332,6 +334,10 @@ export default function MotorChatContainer() {
         response?.prevPolicyUploaded && 'Previous Policy',
       ].filter(Boolean).join(', ');
       userLabel = `Documents uploaded: ${docsUploaded}`;
+    } else if (step.widgetType === 'surveyor_assigned') {
+      userLabel = '';
+    } else if (step.widgetType === 'self_inspection') {
+      userLabel = 'Self inspection completed';
     }
 
     // Add user message (skip for loading states)
@@ -415,6 +421,10 @@ export default function MotorChatContainer() {
         return <DashboardCTA onSelect={(choice) => handleResponse({ choice })} />;
       case 'document_upload':
         return <DocumentUploadWidget onContinue={(result) => handleResponse(result)} />;
+      case 'surveyor_assigned':
+        return <SurveyorDetailsCard onContinue={() => handleResponse('acknowledged')} />;
+      case 'self_inspection':
+        return <SelfInspectionWidget onComplete={(result) => handleResponse(result)} />;
       default:
         return null;
     }
@@ -429,6 +439,7 @@ export default function MotorChatContainer() {
       'ncb_reward', 'editable_summary', 'rejection_screen', 'plan_calculator',
       'plan_selector', 'out_of_pocket_addons', 'protect_everyone_addons',
       'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
+      'surveyor_assigned', 'self_inspection',
     ].includes(step.widgetType);
   };
 
@@ -438,9 +449,19 @@ export default function MotorChatContainer() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-lg mx-auto">
           <AnimatePresence initial={false}>
-            {conversationHistory.map((msg) => (
-              <ChatMessage key={msg.id} message={msg as ChatMessageType} onEdit={handleEditRequest} />
-            ))}
+            {conversationHistory.map((msg, index) => {
+              const isLatestBot = msg.type === 'bot' &&
+                index === conversationHistory.length - 1 &&
+                !isTyping;
+              return (
+                <ChatMessage
+                  key={msg.id}
+                  message={msg as ChatMessageType}
+                  onEdit={handleEditRequest}
+                  animate={isLatestBot}
+                />
+              );
+            })}
           </AnimatePresence>
 
           {isTyping && (
@@ -457,7 +478,7 @@ export default function MotorChatContainer() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="mt-2 mb-4 ml-11"
+                className="mt-2 mb-4"
               >
                 {renderWidget()}
               </motion.div>

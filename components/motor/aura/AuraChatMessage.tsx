@@ -1,16 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ChatMessage as ChatMessageType } from '@/lib/types';
 
 
 interface AuraChatMessageProps {
   message: ChatMessageType;
   onEdit?: (stepId: string) => void;
+  animate?: boolean;
 }
 
-export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProps) {
+export default function AuraChatMessage({ message, onEdit, animate = false }: AuraChatMessageProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   if (message.type === 'system') {
@@ -70,6 +71,34 @@ export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProp
     );
   }
 
+  const wordList = useMemo(() => {
+    const result: { text: string; para: number }[] = [];
+    message.content.split('\n\n').forEach((para, pi) => {
+      para.split(' ').forEach(word => {
+        if (word) result.push({ text: word, para: pi });
+      });
+    });
+    return result;
+  }, [message.content]);
+
+  const [visibleCount, setVisibleCount] = useState(animate ? 0 : wordList.length);
+
+  useEffect(() => {
+    if (!animate || visibleCount >= wordList.length) return;
+    const t = setTimeout(() => setVisibleCount(c => c + 1), 55);
+    return () => clearTimeout(t);
+  }, [animate, visibleCount, wordList.length]);
+
+  useEffect(() => {
+    if (!animate) setVisibleCount(wordList.length);
+  }, [animate, wordList.length]);
+
+  const paragraphCount = message.content.split('\n\n').length;
+  const visibleByPara: string[][] = Array.from({ length: paragraphCount }, () => []);
+  wordList.slice(0, visibleCount).forEach(w => visibleByPara[w.para].push(w.text));
+  const visibleParagraphs = visibleByPara.filter(p => p.length > 0);
+  const isTypingOut = animate && visibleCount < wordList.length;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -88,9 +117,12 @@ export default function AuraChatMessage({ message, onEdit }: AuraChatMessageProp
             padding: '12px 16px',
           }}
         >
-          {message.content.split('\n\n').map((paragraph, i) => (
+          {visibleParagraphs.map((words, i) => (
             <p key={i} className={`text-[15px] leading-relaxed ${i > 0 ? 'mt-2' : ''}`}>
-              {paragraph}
+              {words.join(' ')}
+              {isTypingOut && i === visibleParagraphs.length - 1 && (
+                <span className="inline-block w-[2px] h-[1em] align-middle ml-[2px] rounded-full bg-[#A855F7] animate-pulse" />
+              )}
             </p>
           ))}
         </div>
