@@ -21,7 +21,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col px-6 pt-10 pb-8 relative overflow-auto"
+      className="min-h-screen flex flex-col relative overflow-hidden"
       style={{ background: 'linear-gradient(160deg, #0D0521 0%, #1C0B47 35%, #2A1463 65%, #1C0B47 100%)' }}
     >
       {/* Background orbs */}
@@ -29,6 +29,9 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
         <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-500/10 blur-3xl" />
         <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-purple-400/10 blur-3xl" />
       </div>
+
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-6 pt-10 pb-28">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8 relative z-10">
@@ -80,7 +83,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
           <p className="text-purple-300/80 text-sm mb-4 ml-10">Start a conversational journey to get the right plan</p>
           <div className="flex gap-3 ml-10">
             <button
-              onClick={() => onStartJourney(vehicle)}
+              onClick={() => jump('registration.enter_number')}
               className="flex-1 group bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-4 text-left transition-all active:scale-[0.97]"
             >
               <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center mb-2.5">
@@ -92,7 +95,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
               <p className="text-purple-300/60 text-xs">Have a {vehicle} with an active or expired policy</p>
             </button>
             <button
-              onClick={() => { jump('vehicle_type.select'); }}
+              onClick={() => jump('manual_entry.congratulations')}
               className="flex-1 group bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-4 text-left transition-all active:scale-[0.97]"
             >
               <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center mb-2.5">
@@ -211,6 +214,29 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
           </span>
         </motion.div>
       </div>
+      </div>
+
+      {/* Sticky bottom CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, type: 'spring', damping: 25, stiffness: 300 }}
+        className="absolute bottom-0 left-0 right-0 z-20"
+        style={{ background: 'linear-gradient(to top, #0D0521 60%, transparent)' }}
+      >
+        <div className="max-w-lg mx-auto px-6 pb-6 pt-8">
+          <button
+            onClick={() => onStartJourney(vehicle)}
+            className="w-full py-3.5 rounded-2xl text-white font-semibold text-[15px] transition-all active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)',
+              boxShadow: '0 8px 32px rgba(168,85,247,0.4)',
+            }}
+          >
+            Start the journey
+          </button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -2,16 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { assetPath } from '../lib/assetPath';
-
-/* ── Bot Avatar — ACKO chatbot icon ── */
-function BotAvatar() {
-  return (
-    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 shadow-lg shadow-purple-900/20">
-      <img src={assetPath('/chatbot-avatar.png')} alt="ACKO" className="w-full h-full object-cover" />
-    </div>
-  );
-}
 
 interface ChatMessageProps {
   message: {
@@ -74,20 +64,14 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
     );
   }
 
-  // Bot message — glass card on dark with heart avatar
+  // Bot message — frosted glass on dark
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.215, 0.61, 0.355, 1] }}
-      className="flex gap-3 mb-4"
+      className="flex mb-4"
     >
-      {/* Heart Avatar */}
-      <div className="flex-shrink-0 mt-0.5">
-        <BotAvatar />
-      </div>
-
-      {/* Message — frosted glass on dark */}
       <div className="max-w-[85%]">
         <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot border border-white/10">
           {message.content.split('\n\n').map((paragraph, i) => (
@@ -108,11 +92,8 @@ export function TypingIndicator() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex gap-3 mb-4"
+      className="flex mb-4"
     >
-      <div className="flex-shrink-0">
-        <BotAvatar />
-      </div>
       <div className="bg-white/10 backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5 border border-white/10">
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '0ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '200ms' }} />
