@@ -676,7 +676,7 @@ const preQuoteCngCheck: MotorConversationStep = {
     ],
     subText: `An external CNG kit needs to be covered separately in your insurance.`,
     options: [
-      { id: 'yes', label: 'Yes, CNG fitted', icon: 'check' },
+      { id: 'yes', label: 'CNG kit fitted', icon: 'check' },
       { id: 'no', label: 'No CNG kit', icon: 'forward' },
     ],
   }),

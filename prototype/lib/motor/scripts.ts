@@ -345,7 +345,7 @@ const brandNewCngCheck: MotorConversationStep = {
     ],
     subText: 'Factory-fitted CNG is already covered. External kits need separate coverage.',
     options: [
-      { id: 'yes', label: 'Yes, CNG fitted', icon: 'check' },
+      { id: 'yes', label: 'CNG kit fitted', icon: 'check' },
       { id: 'no', label: 'No CNG kit', icon: 'forward' },
     ],
   }),
