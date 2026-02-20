@@ -412,8 +412,8 @@ const motorDashboardSteps: MotorConversationStep[] = [
       return {
         botMessages: [msg],
         options: [
-          { id: 'yes', label: 'Yes, FIR filed' },
-          { id: 'no', label: 'No, not yet' },
+          { id: 'yes', label: 'FIR filed' },
+          { id: 'no', label: 'Not yet' },
         ],
       };
     },
@@ -445,7 +445,7 @@ const motorDashboardSteps: MotorConversationStep[] = [
         'Do you have photos of the damage? Clear photos speed up claim processing significantly.',
       ],
       options: [
-        { id: 'yes', label: 'Yes, I have photos', description: 'Upload now or share later' },
+        { id: 'yes', label: 'I have photos', description: 'Upload now or share later' },
         { id: 'later', label: 'I\'ll share later', description: 'Our team will follow up' },
         { id: 'no', label: 'No photos available' },
       ],

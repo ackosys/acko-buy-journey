@@ -52,8 +52,8 @@ const registrationHasNumber: MotorConversationStep = {
       `Great choice! Let's find the best insurance for your ${vLabel(state)}.\n\nDo you have your vehicle registration number?`,
     ],
     options: [
-      { id: 'yes', label: 'Yes, I have it', description: 'Enter your registration number', icon: 'document' },
-      { id: 'no', label: 'No, brand new vehicle', description: `Just bought a new ${vLabel(state)}`, icon: 'star' },
+      { id: 'yes', label: 'I have it', description: 'Enter your registration number', icon: 'document' },
+      { id: 'no', label: 'Brand new vehicle', description: `Just bought a new ${vLabel(state)}`, icon: 'star' },
     ],
   }),
   processResponse: (response) => ({
@@ -345,8 +345,8 @@ const brandNewCngCheck: MotorConversationStep = {
     ],
     subText: 'Factory-fitted CNG is already covered. External kits need separate coverage.',
     options: [
-      { id: 'yes', label: 'Yes, external kit', icon: 'check' },
-      { id: 'no', label: 'No', icon: 'forward' },
+      { id: 'yes', label: 'Yes, CNG fitted', icon: 'check' },
+      { id: 'no', label: 'No CNG kit', icon: 'forward' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -442,8 +442,8 @@ const preQuoteCommercialCheck: MotorConversationStep = {
     ],
     subText: 'Vehicle used as a taxi, to deliver goods, etc.',
     options: [
-      { id: 'no', label: 'No, personal use', icon: 'user' },
-      { id: 'yes', label: 'Yes, commercial', icon: 'building' },
+      { id: 'no', label: 'Personal use', icon: 'user' },
+      { id: 'yes', label: 'Commercial / taxi', icon: 'building' },
     ],
   }),
   processResponse: (response, state) => ({
@@ -484,8 +484,8 @@ const preQuotePolicyStatus: MotorConversationStep = {
       `Has your ${vLabel(state)} insurance policy expired?`,
     ],
     options: [
-      { id: 'no', label: 'No, it\'s still active', icon: 'shield' },
-      { id: 'yes', label: 'Yes, it has expired', icon: 'clock' },
+      { id: 'no', label: 'Still active', icon: 'shield' },
+      { id: 'yes', label: 'Expired', icon: 'clock' },
       { id: 'not_sure', label: 'Not sure', icon: 'help' },
     ],
   }),
