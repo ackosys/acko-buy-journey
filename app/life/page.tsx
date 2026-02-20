@@ -97,13 +97,6 @@ export default function LifeJourneyPage() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
 
-  const completedStep = paymentComplete
-    ? (ekycComplete
-      ? (financialComplete
-        ? (medicalComplete ? 4 : 3)
-        : 2)
-      : 2)
-    : (journeyComplete ? 1 : 0);
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -160,7 +153,6 @@ export default function LifeJourneyPage() {
         {screen === 'entry' && !showSplash && (
           <LifeEntryScreen
             key="entry"
-            completedStep={completedStep}
             onBuyJourney={() => setScreen('landing')}
             onJumpToEkyc={() => jumpToStep('life_ekyc')}
             onJumpToFinancial={() => jumpToStep('life_financial')}
