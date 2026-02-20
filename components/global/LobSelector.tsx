@@ -53,17 +53,54 @@ const BENEFIT_LABELS: Record<string, string> = {
 };
 
 export default function LobSelector({ lobs, onSelect }: LobSelectorProps) {
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      {lobs.map((lob, i) => {
-        const isLarge = lob.id === 'health';
-        const isWide = lob.id === 'life';
-        const cardSize = isLarge
-          ? 'col-span-2 row-span-2'
-          : isWide
-            ? 'col-span-2 row-span-1'
-            : 'col-span-1 row-span-1';
+  // Bento grid layout configuration
+  const getBentoLayout = (id: string) => {
+    switch (id) {
+      case 'car':
+        return {
+          gridArea: 'car',
+          layout: 'vertical' as const,
+        };
+      case 'bike':
+        return {
+          gridArea: 'bike',
+          layout: 'vertical' as const,
+        };
+      case 'health':
+        return {
+          gridArea: 'health',
+          layout: 'horizontal' as const,
+        };
+      case 'life':
+        return {
+          gridArea: 'life',
+          layout: 'horizontal' as const,
+        };
+      default:
+        return {
+          gridArea: 'auto',
+          layout: 'vertical' as const,
+        };
+    }
+  };
 
+  return (
+    <div 
+      className="grid gap-3"
+      style={{
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateRows: 'auto auto auto',
+        gridTemplateAreas: `
+          "car bike"
+          "health health"
+          "life life"
+        `,
+      }}
+    >
+      {lobs.map((lob, i) => {
+        const { gridArea, layout } = getBentoLayout(lob.id);
+        const isVertical = layout === 'vertical';
+        
         return (
           <motion.button
             key={lob.id}
@@ -72,48 +109,59 @@ export default function LobSelector({ lobs, onSelect }: LobSelectorProps) {
             transition={{ delay: 0.3 + i * 0.08, type: 'spring', stiffness: 300, damping: 25 }}
             onClick={() => lob.active && onSelect(lob)}
             disabled={!lob.active}
-            className={`${cardSize} relative rounded-2xl overflow-hidden transition-all duration-200 group text-left ${
+            className={`relative rounded-2xl overflow-hidden transition-all duration-200 group text-left ${
               lob.active
                 ? 'bg-white/10 backdrop-blur-sm border border-white/15 hover:bg-white/20 hover:border-white/30 cursor-pointer active:scale-[0.98]'
                 : 'bg-white/5 border border-white/10 opacity-60 cursor-not-allowed'
             }`}
             style={{
-              minHeight: isLarge ? '260px' : isWide ? '120px' : '140px',
+              gridArea,
+              minHeight: isVertical ? '180px' : '140px',
             }}
           >
             {/* Content */}
             <div className={`h-full flex ${
-              isWide ? 'flex-row items-center gap-4 p-4' : 'flex-col justify-between p-5'
+              isVertical ? 'flex-col justify-between p-5' : 'flex-row items-end gap-4 p-5'
             }`}>
-              {/* Top / Left */}
-              <div className={isWide ? 'flex-1' : ''}>
+              {/* Icon & Text Section */}
+              <div className={isVertical ? '' : 'flex-1'}>
                 {/* Icon */}
                 <div className={`${
-                  isLarge ? 'w-14 h-14 mb-4' : 'w-12 h-12 mb-3'
+                  isVertical ? 'w-14 h-14 mb-4' : 'w-12 h-12 mb-3'
                 } rounded-full bg-white/15 flex items-center justify-center text-white group-hover:bg-white/25 transition-colors`}>
-                  <LobIcon icon={lob.icon} className={isLarge ? 'w-7 h-7' : 'w-6 h-6'} />
+                  <LobIcon icon={lob.icon} className={isVertical ? 'w-7 h-7' : 'w-6 h-6'} />
                 </div>
 
                 {/* Title */}
                 <h3 className={`${
-                  isLarge ? 'text-xl' : 'text-lg'
+                  isVertical ? 'text-xl' : 'text-lg'
                 } font-bold text-white leading-tight`}>
                   {lob.label}
                 </h3>
 
                 {/* Tagline */}
                 <p className={`${
-                  isLarge ? 'text-sm mt-1.5' : 'text-xs mt-1'
+                  isVertical ? 'text-sm mt-2' : 'text-xs mt-1'
                 } text-purple-200`}>
                   {BENEFIT_LABELS[lob.id] || lob.tagline}
                 </p>
               </div>
 
-              {/* Bottom / Right */}
-              <div className={isWide ? 'shrink-0' : 'mt-auto pt-3'}>
+              {/* Description Section */}
+              <div className={isVertical ? 'mt-auto' : 'shrink-0 text-right self-end pb-1'}>
                 {lob.active && (
-                  <p className={`${isLarge ? 'text-xs' : 'text-[11px]'} text-purple-200/70 mb-2`}>
-                    {lob.description}
+                  <p className={`${
+                    isVertical ? 'text-xs' : 'text-[11px]'
+                  } text-purple-200/70 mb-2`}>
+                    {lob.id === 'health' ? (
+                      <>
+                        Plans from ₹436/month.
+                        <br />
+                        14,000+ cashless hospitals.
+                      </>
+                    ) : (
+                      lob.description
+                    )}
                   </p>
                 )}
                 {!lob.active && (
