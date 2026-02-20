@@ -221,7 +221,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, type: 'spring', damping: 25, stiffness: 300 }}
-        className="absolute bottom-0 left-0 right-0 z-20"
+        className="fixed bottom-0 left-0 right-0 z-20"
         style={{ background: 'linear-gradient(to top, #0D0521 60%, transparent)' }}
       >
         <div className="max-w-lg mx-auto px-6 pb-6 pt-8">
