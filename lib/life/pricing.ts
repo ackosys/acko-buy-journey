@@ -212,8 +212,8 @@ export function calculateRiderPremium(
   // Use exact ACKO pricing if available
   const pricingMap = ACKO_RIDER_PRICING_MAP[riderId];
   
-  if (pricingMap && pricingMap[coverageAmount]) {
-    return pricingMap[coverageAmount];
+  if (pricingMap && pricingMap[coverageAmount as keyof typeof pricingMap]) {
+    return pricingMap[coverageAmount as keyof typeof pricingMap];
   }
   
   // Fallback: Calculate based on closest available coverage amount
@@ -225,7 +225,7 @@ export function calculateRiderPremium(
       Math.abs(curr - coverageAmount) < Math.abs(prev - coverageAmount) ? curr : prev
     );
     
-    const closestPremium = pricingMap[closest];
+    const closestPremium = pricingMap[closest as keyof typeof pricingMap];
     const ratio = coverageAmount / closest;
     return Math.round(closestPremium * ratio);
   }
