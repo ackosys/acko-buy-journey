@@ -1400,6 +1400,234 @@ function EkycTimer({
   );
 }
 
+/* ═══════════════════════════════════════════════════════
+   Inline e-KYC Widgets (conversational, dark/glass theme)
+   ═══════════════════════════════════════════════════════ */
+
+export function EkycAadhaarInput({ onSubmit }: { onSubmit: (aadhaar: string) => void }) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+
+  const formatAadhaar = (raw: string) => {
+    const digits = raw.replace(/\D/g, '').slice(0, 12);
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+  };
+
+  const validateAadhaar = (val: string): string => {
+    const digits = val.replace(/\s/g, '');
+    if (digits.length < 12) return 'Please enter a valid 12-digit Aadhaar number';
+    if (/^0/.test(digits)) return 'Aadhaar number cannot start with 0';
+    if (/^1/.test(digits)) return 'Aadhaar number cannot start with 1';
+    return '';
+  };
+
+  const handleSubmit = () => {
+    const err = validateAadhaar(value);
+    if (err) {
+      setError(err);
+      return;
+    }
+    onSubmit(value.replace(/\s/g, ''));
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm space-y-3">
+      <input
+        type="tel"
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => {
+          const formatted = formatAadhaar(e.target.value);
+          setValue(formatted);
+          setError('');
+        }}
+        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+        placeholder="1234 5678 9012"
+        className="w-full px-4 py-3.5 bg-white/10 border border-white/20 rounded-xl text-body-md text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-colors backdrop-blur-sm"
+        autoFocus
+      />
+      <div className="flex items-start gap-2 bg-white/5 rounded-xl px-3 py-2.5 border border-white/10">
+        <svg className="w-4 h-4 text-purple-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+        <p className="text-caption text-white/60 leading-relaxed">
+          Your Aadhaar details are encrypted and securely verified via UIDAI. We never store your Aadhaar number.
+        </p>
+      </div>
+      {error && <p className="text-caption text-red-400">{error}</p>}
+      <button
+        onClick={handleSubmit}
+        className="w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-all active:scale-[0.97]"
+      >
+        Send OTP
+      </button>
+    </motion.div>
+  );
+}
+
+export function EkycOtpInput({ maskedMobile, onSubmit, onResend }: { maskedMobile: string; onSubmit: (otp: string) => void; onResend: () => void }) {
+  const [otp, setOtp] = useState('');
+  const [error, setError] = useState('');
+  const [timer, setTimer] = useState(60);
+  const refs = Array.from({ length: 6 }, () => useRef<HTMLInputElement>(null));
+
+  useEffect(() => {
+    refs[0].current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (timer <= 0) return;
+    const t = setTimeout(() => setTimer(timer - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timer]);
+
+  const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[i] && i > 0) {
+      refs[i - 1].current?.focus();
+    }
+  };
+
+  const handleChange = (i: number, raw: string) => {
+    const digit = raw.replace(/\D/g, '').slice(-1);
+    const arr = otp.split('').concat(Array(6).fill('')).slice(0, 6);
+    arr[i] = digit;
+    const next = arr.join('');
+    setOtp(next);
+    setError('');
+    if (digit && i < 5) {
+      refs[i + 1].current?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    setOtp(pasted.padEnd(6, '').slice(0, 6));
+    const focusIdx = Math.min(pasted.length, 5);
+    refs[focusIdx].current?.focus();
+  };
+
+  const handleSubmit = () => {
+    if (otp.length < 6) {
+      setError('Please enter the complete 6-digit OTP');
+      return;
+    }
+    onSubmit(otp);
+  };
+
+  const handleResendClick = () => {
+    setOtp('');
+    setError('');
+    setTimer(60);
+    refs[0].current?.focus();
+    onResend();
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm space-y-4">
+      <div className="flex gap-2 justify-center">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <input
+            key={i}
+            ref={refs[i]}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={otp[i] || ''}
+            onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKey(i, e)}
+            onPaste={handlePaste}
+            className={`w-10 h-12 rounded-xl border text-center text-lg font-bold transition-colors backdrop-blur-sm
+              ${error
+                ? 'border-red-400 bg-red-500/20 text-red-300'
+                : otp[i]
+                  ? 'border-purple-400 bg-purple-500/20 text-white'
+                  : 'border-white/20 bg-white/10 text-white focus:border-purple-400 focus:bg-white/15 focus:outline-none'
+              }`}
+          />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-center gap-2 text-caption text-white/60">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>OTP sent to {maskedMobile}</span>
+        {timer > 0 && <span className="text-purple-300">· {timer}s</span>}
+      </div>
+
+      {error && <p className="text-caption text-red-400 text-center">{error}</p>}
+
+      <button
+        onClick={handleSubmit}
+        disabled={otp.length < 6}
+        className="w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-all active:scale-[0.97] disabled:opacity-40"
+      >
+        Verify OTP
+      </button>
+
+      {timer === 0 && (
+        <button
+          onClick={handleResendClick}
+          className="w-full py-2.5 bg-white/10 border border-white/20 text-white rounded-xl text-label-sm font-medium hover:bg-white/15 transition-all active:scale-[0.97]"
+        >
+          Resend OTP
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
+export function EkycAlternativeOptions({ onSelect }: { onSelect: (method: string) => void }) {
+  const options = [
+    {
+      id: 'digilocker',
+      icon: '🔐',
+      label: 'DigiLocker',
+      desc: 'Link your DigiLocker account',
+    },
+    {
+      id: 'video_kyc',
+      icon: '📹',
+      label: 'Video KYC',
+      desc: '5-min video call with our team',
+    },
+    {
+      id: 'upload',
+      icon: '📄',
+      label: 'Upload Documents',
+      desc: 'PAN + Aadhaar + selfie',
+    },
+  ];
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-md space-y-2.5">
+      {options.map((opt, i) => (
+        <motion.button
+          key={opt.id}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.05 }}
+          onClick={() => onSelect(opt.id)}
+          className="w-full flex items-center gap-3 px-4 py-3.5 bg-white/6 border border-white/10 hover:bg-white/12 hover:border-white/20 rounded-xl transition-all active:scale-[0.97] text-left"
+        >
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-2xl flex-shrink-0">
+            {opt.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-body-md font-semibold text-white">{opt.label}</p>
+            <p className="text-caption text-white/60">{opt.desc}</p>
+          </div>
+          <svg className="w-4 h-4 text-white/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </motion.button>
+      ))}
+    </motion.div>
+  );
+}
+
+// Legacy full-screen component (deprecated - use inline widgets above)
 export function LifeEkycScreen({ onContinue }: { onContinue: () => void }) {
   const [stage, setStage] = useState<EkycStage>('start');
   const [aadhaar, setAadhaar] = useState('');

@@ -12,10 +12,10 @@ export function LifeExpertPanel() {
   const [selectedConcern, setSelectedConcern] = useState<string | null>(null);
 
   const lifeConcerns = [
-    t.panels.concernNotSure ?? 'Not sure which coverage I need',
-    t.panels.concernUnderstandCovered ?? 'Want to understand what\'s covered',
-    t.panels.concernClaimProcess ?? 'How does the claim process work?',
-    t.panels.concernSomethingElse ?? 'Something else',
+    "I'm not sure if I need term insurance",
+    "I want to understand what's covered",
+    "I need help with the claim process",
+    "Something else",
   ];
 
   return (
@@ -46,13 +46,13 @@ export function LifeExpertPanel() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <h2 className="text-heading-lg text-white mb-1">{t.panels.talkToExpert}</h2>
-              <p className="text-body-sm text-purple-300">{t.panels.expertIntro}</p>
+              <h2 className="text-heading-lg text-white mb-1">Talk to an expert</h2>
+              <p className="text-body-sm text-purple-300">Real term life insurance experts who'll guide you through everything.</p>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
-              <h3 className="text-label-md text-white font-semibold mb-3">{t.panels.whatsOnMind}</h3>
-              <div className="space-y-2">
+              <h3 className="text-label-md text-white font-semibold mb-3 uppercase">What's on your mind?</h3>
+              <div className="space-y-2 mb-6">
                 {lifeConcerns.map((concern, i) => (
                   <button
                     key={i}
@@ -62,6 +62,88 @@ export function LifeExpertPanel() {
                     {concern}
                   </button>
                 ))}
+              </div>
+
+              {/* Expert Profiles Section */}
+              <h3 className="text-label-md text-white font-semibold mb-3 uppercase">Our Life Insurance Experts</h3>
+              <div className="space-y-3">
+                {/* Expert 1 */}
+                <div className="bg-white/5 border border-white/15 rounded-xl p-4 hover:bg-white/10 transition-all">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+                      RK
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold text-sm mb-0.5">Rajesh Kumar</h4>
+                      <p className="text-purple-300 text-xs mb-2">Term Life Insurance Specialist</p>
+                      <div className="flex items-center gap-3 text-[10px] text-white/50">
+                        <span>3,800+ families helped</span>
+                        <span>•</span>
+                        <span>9+ years in life insurance</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/70 leading-relaxed mb-3">
+                    Expert in coverage calculation, income replacement planning, and helping families understand the right protection amount. Specializes in first-time term insurance buyers.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Coverage Planning</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Income Replacement</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">First-time Buyers</span>
+                  </div>
+                </div>
+
+                {/* Expert 2 */}
+                <div className="bg-white/5 border border-white/15 rounded-xl p-4 hover:bg-white/10 transition-all">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+                      PS
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold text-sm mb-0.5">Priya Sharma</h4>
+                      <p className="text-purple-300 text-xs mb-2">Claims & Nominee Support Advisor</p>
+                      <div className="flex items-center gap-3 text-[10px] text-white/50">
+                        <span>2,500+ claims guided</span>
+                        <span>•</span>
+                        <span>7+ years in life claims</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/70 leading-relaxed mb-3">
+                    Specialist in claim process for nominees, documentation support, and settlement guidance. Helps families navigate the claim journey during difficult times with care and clarity.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Claims Process</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Nominee Support</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Documentation</span>
+                  </div>
+                </div>
+
+                {/* Expert 3 */}
+                <div className="bg-white/5 border border-white/15 rounded-xl p-4 hover:bg-white/10 transition-all">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+                      AM
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold text-sm mb-0.5">Anil Mehta</h4>
+                      <p className="text-purple-300 text-xs mb-2">Financial Planning & Tax Advisor</p>
+                      <div className="flex items-center gap-3 text-[10px] text-white/50">
+                        <span>4,200+ customers helped</span>
+                        <span>•</span>
+                        <span>11+ years in financial planning</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/70 leading-relaxed mb-3">
+                    Expert in premium affordability, tax benefits under Section 80C & 10(10D), and integrating term insurance with overall financial planning. Helps optimize coverage within your budget.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Tax Benefits</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Premium Planning</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-md text-[10px] text-white/80">Budget Optimization</span>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -121,8 +203,8 @@ export function LifeAIChatPanel() {
                   <svg className="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
                 </div>
                 <div>
-                  <h3 className="text-heading-sm text-white">{t.panels.aiAssistant}</h3>
-                  <p className="text-caption text-white/50">{t.panels.askAnything}</p>
+                  <h3 className="text-heading-sm text-white">ACKO AI Assistant</h3>
+                  <p className="text-caption text-white/50">Ask anything about term life insurance</p>
                 </div>
               </div>
               <button onClick={() => updateState({ showAIChat: false })} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all">
@@ -140,10 +222,10 @@ export function LifeAIChatPanel() {
                       <svg className="w-4 h-4" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12h4a6 6 0 0 1 12 0h4c0-5.523-4.477-10-10-10Z" fill="#7C3AED"/><path d="M12 12v8c0 1.105-.895 2-2 2s-2-.895-2-2" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round"/><line x1="12" y1="2" x2="12" y2="4" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round"/></svg>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%]">
-                      <p className="text-body-sm text-white/90">{t.panels.aiIntro}</p>
+                      <p className="text-body-sm text-white/90">Hi! I'm your ACKO AI assistant. I can help you understand term life insurance, calculate the right coverage, and guide you through the buying process.</p>
                     </div>
                   </div>
-                  <p className="text-body-sm text-white/50 mb-3">{t.panels.basedOnWhere}</p>
+                  <p className="text-body-sm text-white/50 mb-3">Based on where you are, you might want to ask:</p>
                   <div className="space-y-2">
                     {lifeStarters.map((s, i) => (
                       <button
@@ -183,7 +265,7 @@ export function LifeAIChatPanel() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend(input)}
-                  placeholder={t.panels.askPlaceholder}
+                  placeholder="Ask anything about term life insurance..."
                   className="flex-1 px-4 py-3 bg-white/10 border border-white/15 rounded-xl text-body-sm text-white placeholder:text-white/30 focus:border-purple-400 focus:outline-none"
                 />
                 <button

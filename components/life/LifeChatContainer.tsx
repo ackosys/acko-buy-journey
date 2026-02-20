@@ -26,7 +26,10 @@ import {
   LifeCelebration,
   LifeCoverageInput,
   LifePaymentScreen,
-  LifeEkycScreen,
+  EkycAadhaarInput,
+  EkycOtpInput,
+  EkycAlternativeOptions,
+  LifeEkycScreen, // Legacy full-screen - use inline widgets above
   LifeFinancialScreen,
   LifeMedicalScreen,
   LifeUnderwritingStatus,
