@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AckoLogo from '../../AckoLogo';
 import { VehicleType } from '../../../lib/motor/types';
-import { useMotorStore } from '../../../lib/motor/store';
+import { useThemeStore } from '../../../lib/themeStore';
 
 interface AuraMotorEntryNavProps {
   initialVehicle?: VehicleType;
@@ -14,7 +14,7 @@ interface AuraMotorEntryNavProps {
 
 export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourney, onJumpTo }: AuraMotorEntryNavProps) {
   const [vehicle, setVehicle] = useState<VehicleType>(initialVehicle);
-  const { theme } = useMotorStore();
+  const theme = useThemeStore((s) => s.theme);
 
   const jump = (stepId: string) => onJumpTo(stepId, vehicle);
 
