@@ -21,7 +21,7 @@ export default function AuraMotorHeader() {
     <header className="sticky top-0 z-30" style={{ background: 'var(--aura-bg)', borderBottom: '1px solid var(--aura-border)' }}>
       <div className="max-w-lg mx-auto px-6 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
-          <AckoLogo variant={isLight ? 'color' : 'white'} className="h-5" />
+          <AckoLogo variant={isLight ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-5" />
           {vehicleType && (
             <span
               className="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider"

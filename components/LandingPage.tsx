@@ -123,11 +123,11 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
     { stat: t.landing.claimStat3, text: t.landing.claimStat3Sub, icon: CLAIM_STATS_ICONS[2] },
   ];
   return (
-    <div className="min-h-screen pb-20" style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%)' }}>
+    <div className="min-h-screen pb-20" style={{ background: 'var(--app-chat-gradient)' }}>
       {/* Top bar with chat/call */}
-      <div className="sticky top-0 z-20 border-b border-white/10" style={{ background: 'rgba(28, 11, 71, 0.85)', backdropFilter: 'blur(12px)' }}>
+      <div className="sticky top-0 z-20 border-b border-white/10" style={{ background: 'var(--app-glass-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <AckoLogo variant="white" className="h-6" />
+          <AckoLogo variant="full-white" className="h-6" />
           <div className="flex items-center gap-2">
             <button
               onClick={onChat}
@@ -193,7 +193,7 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
       {/* Visual hero image */}
       <div className="px-6 -mt-6 relative z-10">
         <div className="max-w-lg mx-auto">
-          <div className="relative rounded-2xl overflow-hidden shadow-lg" style={{ background: 'linear-gradient(180deg, #3B1A7E 0%, #2A1263 60%, #1C0B47 100%)' }}>
+          <div className="relative rounded-2xl overflow-hidden shadow-lg" style={{ background: 'var(--app-chat-gradient)' }}>
             <div className="flex justify-center pt-4">
               <img
                 src={assetPath('/indian-family.svg')}
@@ -201,7 +201,7 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
                 className="w-[85%] h-auto max-h-56 object-contain object-bottom"
               />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1C0B47]/80 via-transparent to-transparent flex items-end p-4">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2">
                   {[33, 57, 68].map(n => (
@@ -374,7 +374,7 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
       </div>
 
       {/* Bottom CTA — simplified */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-white/10 px-6 py-4 z-10" style={{ background: 'rgba(28, 11, 71, 0.9)', backdropFilter: 'blur(12px)' }}>
+      <div className="fixed bottom-0 left-0 right-0 border-t border-white/10 px-6 py-4 z-10" style={{ background: 'var(--app-glass-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <div className="max-w-lg mx-auto">
           <button
             onClick={onGetStarted}

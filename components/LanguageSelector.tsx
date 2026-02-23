@@ -31,7 +31,7 @@ export default function LanguageSelector({ onSelect }: LanguageSelectorProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #3a1d8e 30%, #6C4DE8 60%, #9b7bf7 100%)' }}
+      style={{ background: 'var(--app-home-gradient)' }}
     >
       {/* Logo */}
       <motion.div
@@ -41,7 +41,7 @@ export default function LanguageSelector({ onSelect }: LanguageSelectorProps) {
         className="mb-10"
       >
         <Link href="/">
-          <AckoLogo variant="white" className="h-8 mx-auto" />
+          <AckoLogo variant="full-white" className="h-8 mx-auto" />
         </Link>
       </motion.div>
 

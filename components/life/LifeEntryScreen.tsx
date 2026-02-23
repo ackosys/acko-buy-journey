@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
 import Link from 'next/link';
+import { useThemeStore } from '../../lib/themeStore';
 
 interface LifeEntryScreenProps {
   onBuyJourney: () => void;
@@ -45,6 +46,7 @@ export default function LifeEntryScreen({
   onJumpToMedical,
   onJumpToUnderwriting,
 }: LifeEntryScreenProps) {
+  const { theme } = useThemeStore();
   const steps = [
     {
       number: 1,
@@ -149,7 +151,7 @@ export default function LifeEntryScreen({
       {/* Header */}
       <div className="flex items-center justify-between mb-10 relative z-10">
         <Link href="/">
-          <AckoLogo variant="white" className="h-8" />
+          <AckoLogo variant={theme === 'light' ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-8" />
         </Link>
         <span className="text-[10px] bg-white/10 text-purple-200 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-white/10">
           Life Insurance

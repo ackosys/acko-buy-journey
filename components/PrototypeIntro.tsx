@@ -103,7 +103,7 @@ export default function PrototypeIntro({ onDone }: { onDone: () => void }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
       className="fixed inset-0 z-50 overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #0D0521 0%, #1C0B47 35%, #2A1463 65%, #1C0B47 100%)' }}
+      style={{ background: 'var(--app-home-gradient)' }}
     >
       <AnimatePresence mode="wait">
         {/* ═══════ SLIDE 1: The Vision ═══════ */}
@@ -131,7 +131,7 @@ export default function PrototypeIntro({ onDone }: { onDone: () => void }) {
                 transition={{ delay: 0.2 }}
                 className="mb-10"
               >
-                <AckoLogo variant="white" className="h-7" />
+                <AckoLogo variant="full-white" className="h-7" />
               </motion.div>
 
               {/* Badge */}
@@ -347,7 +347,7 @@ export default function PrototypeIntro({ onDone }: { onDone: () => void }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className="px-7 pb-10 pt-4 relative z-10 max-w-lg mx-auto w-full"
-              style={{ background: 'linear-gradient(to top, #1C0B47 60%, transparent)' }}
+              style={{ background: 'linear-gradient(to top, var(--app-bg, #1C0B47) 60%, transparent)' }}
             >
               <button
                 onClick={onDone}

@@ -24,7 +24,7 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
         className="mb-10 flex items-center justify-center relative"
       >
         <Link href="/">
-          <AckoLogo variant={isLight ? 'color' : 'white'} className="h-8" />
+          <AckoLogo variant={isLight ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-8" />
         </Link>
         <div className="absolute right-0 top-1/2 -translate-y-1/2">
           <ThemeToggle />

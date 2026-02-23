@@ -144,7 +144,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
                 transition={{ delay: 0.2 }}
                 className="mb-10"
               >
-                <AckoLogo variant="white" className="h-7" />
+                <AckoLogo variant="full-white" className="h-7" />
               </motion.div>
 
               <motion.div

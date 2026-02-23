@@ -1,30 +1,33 @@
 'use client';
 
 /**
- * ACKO logo — uses official brand files from /public/brand-logo/.
+ * ACKO logo — serves official brand SVGs from /public/brand-logo/.
  *
- * Variants:
- *  - "color"         → gradient purple icon + dark #2C2067 text  (light backgrounds)
- *  - "color-on-dark" → gradient purple icon + white text          (dark transparent/overlay)
- *  - "white"         → all-white icon + text                      (dark / midnight backgrounds)
- *  - "black"         → all-black icon + text                      (pure-white backgrounds)
- *  - "icon"          → isolated icon mark, no wordmark            (chat avatar etc.)
+ * Variants (map to theme):
+ *  - "color"  → ACKO Logo Master: color icon + dark #2C2067 text   → light theme
+ *  - "white"  → ACKO Logo with white text: color icon + white text → dark theme
+ *  - "full-white" → ACKO Logo Full White: all white                → midnight theme
+ *  - "black"  → ACKO Logo Full Black: all black                    → (utility)
+ *  - "icon"   → inline purple icon mark, no wordmark               → chat avatar
  *
- * Theme mapping guide:
- *  midnight / dark  →  "white"
- *  light            →  "color"
+ * Usage with themes:
+ *  midnight  →  "full-white"
+ *  dark      →  "white"
+ *  light     →  "color"
  */
 
 interface AckoLogoProps {
-  variant?: 'color' | 'color-on-dark' | 'white' | 'black' | 'icon';
+  variant?: 'color' | 'white' | 'full-white' | 'black' | 'icon';
   className?: string;
 }
 
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 const LOGO_SRC: Record<Exclude<NonNullable<AckoLogoProps['variant']>, 'icon'>, string> = {
-  'color':         '/brand-logo/acko-color.svg',
-  'color-on-dark': '/brand-logo/acko-color-on-dark.svg',
-  'white':         '/brand-logo/acko-white.svg',
-  'black':         '/brand-logo/acko-black.svg',
+  'color':      `${BASE}/brand-logo/acko-master.svg`,
+  'white':      `${BASE}/brand-logo/acko-white-text.svg`,
+  'full-white': `${BASE}/brand-logo/acko-full-white.svg`,
+  'black':      `${BASE}/brand-logo/acko-full-black.svg`,
 };
 
 export default function AckoLogo({ variant = 'color', className = 'h-8' }: AckoLogoProps) {

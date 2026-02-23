@@ -454,7 +454,7 @@ function SchedulePickerWidget({ onSubmit, showLang = true }: { onSubmit: (data: 
         const dateLabel = dates.find(d => d.value === date)?.label || date;
         const timeLabel = timeSlots.find(s => s.id === time)?.label || time;
         onSubmit(`Scheduled: ${dateLabel} at ${timeLabel}`);
-      }} disabled={!date || !time} className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold disabled:opacity-40 hover:bg-white/90 transition-all">
+      }} disabled={!date || !time} className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all">
         {t.postPayment.confirmSchedule}
       </button>
     </div>
@@ -823,7 +823,7 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
                 setShowVoiceCall(true);
                 setVoiceCallResolve(() => onResponse);
               }}
-              className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-all"
+              className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-all"
             >
               {t.postPayment.startCallDrRiya}
             </button>
@@ -898,7 +898,7 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
   const header = (
     <div className="border-b border-white/10 px-5 py-3 flex items-center justify-between shrink-0">
       <div className="flex items-center gap-3">
-        <AckoLogo variant="white" className="h-5" />
+        <AckoLogo variant="full-white" className="h-5" />
         <span className="text-label-sm text-white/60">{t.postPayment.healthEvaluation}</span>
       </div>
       <div className="flex items-center gap-1.5">
@@ -913,7 +913,7 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
   );
 
   return (
-    <div className="motor-midnight h-screen flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%)' }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--app-chat-gradient)' }}>
       <ConversationalFlow
         getStep={getPostPaymentStep}
         initialStepId={getInitialStep()}

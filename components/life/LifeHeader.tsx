@@ -24,7 +24,7 @@ export default function LifeHeader() {
       <div className="max-w-lg mx-auto px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/">
-            <AckoLogo variant={isLight ? 'color' : 'white'} className="h-5" />
+            <AckoLogo variant={isLight ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-5" />
           </Link>
         </div>
 

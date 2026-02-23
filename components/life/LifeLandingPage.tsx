@@ -25,12 +25,12 @@ function FadeIn({ children, delay = 0, className = '' }: { children: React.React
 
 export default function LifeLandingPage({ onGetStarted }: LifeLandingPageProps) {
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #3a1d8e 30%, #6C4DE8 60%, #9b7bf7 100%)' }}>
+    <div className="min-h-screen pb-24" style={{ background: 'var(--app-home-gradient)' }}>
       {/* Sticky top bar — transparent, blends with gradient */}
-      <div className="sticky top-0 z-50" style={{ background: 'linear-gradient(to bottom, rgba(26, 10, 62, 0.9) 0%, rgba(58, 29, 142, 0.7) 100%)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-0 z-50" style={{ background: 'var(--app-glass-bg)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
         <div className="max-w-lg mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
-            <AckoLogo variant="white" className="h-5" />
+            <AckoLogo variant="full-white" className="h-5" />
           </Link>
           <span className="text-xs text-purple-200/60 font-medium">Life Insurance</span>
         </div>
@@ -199,7 +199,7 @@ export default function LifeLandingPage({ onGetStarted }: LifeLandingPageProps) 
                   transition={{ delay: i * 0.08 }}
                   className="relative mb-4 last:mb-0"
                 >
-                  <div className={`absolute -left-[22px] top-1 w-2.5 h-2.5 rounded-full ${item.dot} border-2 border-[#5B3CC4]`} />
+                  <div className={`absolute -left-[22px] top-1 w-2.5 h-2.5 rounded-full ${item.dot} border-2 border-purple-500`} />
                   <div className="flex items-baseline gap-2">
                     <span className="text-[11px] text-purple-200 font-semibold min-w-[48px]">{item.year}</span>
                     <span className="text-sm text-white/90">{item.event}</span>
@@ -305,15 +305,15 @@ export default function LifeLandingPage({ onGetStarted }: LifeLandingPageProps) 
 
       {/* Fixed bottom CTA — seamless gradient fade */}
       <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-        <div className="h-8" style={{ background: 'linear-gradient(to bottom, transparent, rgba(108, 77, 232, 0.8))' }} />
-        <div className="px-6 pb-6 pt-2 pointer-events-auto" style={{ background: 'rgba(108, 77, 232, 0.8)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+        <div className="h-8" style={{ background: 'linear-gradient(to bottom, transparent, var(--app-glass-bg))' }} />
+        <div className="px-6 pb-6 pt-2 pointer-events-auto" style={{ background: 'var(--app-glass-bg)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <div className="max-w-lg mx-auto">
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               onClick={onGetStarted}
-              className="w-full py-4 bg-white text-[#3a1d8e] rounded-2xl text-base font-bold transition-all active:scale-[0.97] hover:bg-white/90"
+              className="w-full py-4 bg-purple-700 text-white hover:bg-purple-600 rounded-2xl text-base font-bold transition-all active:scale-[0.97]"
             >
               Check quote
             </motion.button>
