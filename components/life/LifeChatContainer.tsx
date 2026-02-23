@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import { getLifeStep } from '../../lib/life/scripts';
+import { saveSnapshot, LIFE_SAVE_STEPS } from '../../lib/journeyPersist';
 import LifeChatMessage, { LifeTypingIndicator } from './LifeChatMessage';
 import {
   LifeSelectionCards,
@@ -53,6 +54,28 @@ export default function LifeChatContainer() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const processedRef = useRef<Set<string>>(new Set());
   const [showWidget, setShowWidget] = useState(false);
+
+  // Save drop-off snapshot at key steps
+  useEffect(() => {
+    if (!LIFE_SAVE_STEPS.has(currentStepId)) return;
+    const s = useLifeJourneyStore.getState();
+    saveSnapshot({
+      product: 'life',
+      currentStepId,
+      savedAt: new Date().toISOString(),
+      name: (s as any).name ?? '',
+      gender: (s as any).gender ?? '',
+      dob: (s as any).dob ?? '',
+      coverAmount: (s as any).coverAmount ?? 0,
+      annualPremium: (s as any).annualPremium ?? 0,
+      monthlyPremium: (s as any).monthlyPremium ?? 0,
+      paymentComplete: s.paymentComplete,
+      ekycComplete: (s as any).ekycComplete ?? false,
+      financialComplete: (s as any).financialComplete ?? false,
+      medicalComplete: (s as any).medicalComplete ?? false,
+      userPath: (s as any).userPath ?? '',
+    });
+  }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [editModal, setEditModal] = useState<{ stepId: string; visible: boolean }>({ stepId: '', visible: false });
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
 

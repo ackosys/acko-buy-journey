@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { useMotorStore } from '../../lib/motor/store';
+import { loadSnapshot } from '../../lib/journeyPersist';
 // COMMENTED OUT: Intro and entry screens — replaced by AuraMotorEntryNav
 // import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
 // import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
@@ -169,11 +170,43 @@ function MotorJourneyInner() {
   const searchParams = useSearchParams();
 
   const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
+  const resumeParam = searchParams.get('resume') === '1';
   const [screen, setScreen] = useState<Screen>('explore');
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    const product = vehicleParam ?? 'car';
+    const snap = resumeParam ? loadSnapshot(product) : null;
+
     resetJourney();
+
+    if (snap && snap.vehicleType) {
+      seedDemoState(snap.vehicleType);
+      updateState({
+        vehicleType: snap.vehicleType,
+        registrationNumber: snap.registrationNumber ?? '',
+        ownerName: snap.ownerName ?? '',
+        totalPremium: snap.totalPremium ?? 0,
+        selectedPlanType: (snap.selectedPlanType as any) ?? null,
+        paymentComplete: snap.paymentComplete ?? false,
+        ...(snap.vehicleData ? {
+          vehicleData: {
+            make: snap.vehicleData.make ?? '',
+            model: snap.vehicleData.model ?? '',
+            variant: snap.vehicleData.variant ?? '',
+            fuelType: (snap.vehicleData.fuelType as any) ?? '',
+            registrationYear: snap.vehicleData.registrationYear ?? null,
+            registrationMonth: '',
+            hasCngKit: null,
+            isCommercialVehicle: null,
+          },
+        } : {}),
+        currentStepId: snap.currentStepId,
+        currentModule: snap.currentStepId.split('.')[0].replace('_', '_') as any,
+      } as Partial<MotorJourneyState>);
+      setScreen('chat');
+    }
+
     setHydrated(true);
   }, []);
 

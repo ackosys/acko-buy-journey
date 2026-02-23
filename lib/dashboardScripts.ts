@@ -37,6 +37,22 @@ const SI_OPTIONS = [
   { id: '1Cr', label: '₹1 Cr — ₹28,999/yr' },
 ];
 
+const SI_VALUES: Record<string, number> = {
+  '10L': 1_000_000,
+  '15L': 1_500_000,
+  '25L': 2_500_000,
+  '50L': 5_000_000,
+  '1Cr': 10_000_000,
+};
+
+const SI_LABELS: Record<string, string> = {
+  '10L': '₹10 Lakh',
+  '15L': '₹15 Lakh',
+  '25L': '₹25 Lakh',
+  '50L': '₹50 Lakh',
+  '1Cr': '₹1 Crore',
+};
+
 /* ── Helper: build policy summary string ── */
 function buildPolicySummary(state: JourneyState): string {
   const plan = state.selectedPlan;
@@ -902,13 +918,135 @@ const dashboardSteps: ConversationStep[] = [
     widgetType: 'selection_cards',
     getScript: (_p, state) => {
       const t = getT(state.language);
+      const currentLabel = state.selectedPlan?.sumInsuredLabel || '₹25L';
       return {
-        botMessages: [t.db.currentSI(state.selectedPlan?.sumInsuredLabel || '₹25L')],
-        options: SI_OPTIONS.map(o => ({ id: o.id, label: o.label })),
+        botMessages: [
+          t.db.currentSI(currentLabel),
+          `Heads up: upgrading to a higher amount will require a brief medical evaluation (IRDAI guideline). Reducing cover takes effect immediately.`,
+        ],
+        options: SI_OPTIONS.map(o => {
+          const isCurrentPlan = SI_VALUES[o.id] === (state.selectedPlan?.sumInsured ?? 2_500_000);
+          return {
+            id: o.id,
+            label: o.label,
+            badge: isCurrentPlan ? 'Current' : undefined,
+            disabled: isCurrentPlan,
+          };
+        }),
       };
     },
     processResponse: (response) => ({ dashboardNewSumInsured: response }),
-    getNextStep: () => 'db.change_si_confirm',
+    getNextStep: (response, state) => {
+      const newSI = SI_VALUES[response] ?? 0;
+      const currentSI = state.selectedPlan?.sumInsured ?? 2_500_000;
+      return newSI > currentSI ? 'db.si_medical_required' : 'db.change_si_confirm';
+    },
+  },
+
+  /* ── SI Upgrade: Medical evaluation required ── */
+  {
+    id: 'db.si_medical_required',
+    module: 'edit_policy',
+    widgetType: 'selection_cards',
+    getScript: (_p, state) => {
+      const currentLabel = state.selectedPlan?.sumInsuredLabel || '₹25L';
+      const newLabel = SI_LABELS[state.dashboardNewSumInsured] || state.dashboardNewSumInsured;
+      return {
+        botMessages: [
+          `Great choice! Upgrading your cover from ${currentLabel} → ${newLabel} gives your family much stronger protection.`,
+          `Since you're increasing your sum insured, IRDAI guidelines require a brief medical evaluation. It's a simple 20-minute check — blood pressure, BMI, and a few basic tests.\n\nYou can choose a home visit (free sample collection) or visit a nearby diagnostic centre. No special preparation needed.`,
+        ],
+        options: [
+          { id: 'schedule', label: 'Schedule medical evaluation', icon: 'health', description: 'Home visit or lab · Takes 20 mins' },
+          { id: 'cancel', label: 'Cancel upgrade', icon: 'switch' },
+        ],
+      };
+    },
+    processResponse: () => ({}),
+    getNextStep: (response) => response === 'schedule' ? 'db.si_medical_schedule' : 'db.edit_options',
+  },
+
+  /* ── SI Upgrade: Schedule the evaluation ── */
+  {
+    id: 'db.si_medical_schedule',
+    module: 'edit_policy',
+    widgetType: 'selection_cards',
+    getScript: () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dayAfter = new Date();
+      dayAfter.setDate(dayAfter.getDate() + 2);
+      const fmt = (d: Date) => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+      return {
+        botMessages: [
+          `When would you like the medical evaluation? Pick a slot that works for you:`,
+        ],
+        options: [
+          { id: 'home_tom_am',  label: `${fmt(tomorrow)}, 8–11 AM`,  description: 'Home visit · Free sample collection' },
+          { id: 'home_tom_pm',  label: `${fmt(tomorrow)}, 1–4 PM`,   description: 'Home visit · Free sample collection' },
+          { id: 'lab_tom',      label: `${fmt(tomorrow)}, Any time`, description: 'Lab visit · Nearest diagnostic centre' },
+          { id: 'home_da_am',   label: `${fmt(dayAfter)}, 8–11 AM`, description: 'Home visit · Free sample collection' },
+          { id: 'lab_da',       label: `${fmt(dayAfter)}, Any time`, description: 'Lab visit · Nearest diagnostic centre' },
+        ],
+      };
+    },
+    processResponse: (response) => {
+      const slotLabels: Record<string, string> = {
+        home_tom_am: 'Home visit · Tomorrow 8–11 AM',
+        home_tom_pm: 'Home visit · Tomorrow 1–4 PM',
+        lab_tom:     'Lab visit · Tomorrow',
+        home_da_am:  'Home visit · Day after tomorrow 8–11 AM',
+        lab_da:      'Lab visit · Day after tomorrow',
+      };
+      return { dashboardEditType: `si_eval_${response}__slot:${slotLabels[response] || response}` };
+    },
+    getNextStep: () => 'db.si_medical_booked',
+  },
+
+  /* ── SI Upgrade: Evaluation booked confirmation ── */
+  {
+    id: 'db.si_medical_booked',
+    module: 'edit_policy',
+    widgetType: 'selection_cards',
+    getScript: (_p, state) => {
+      const newLabel = SI_LABELS[state.dashboardNewSumInsured] || state.dashboardNewSumInsured;
+      const rawSlot = state.dashboardEditType.split('__slot:')[1] || '';
+      const slotStr = rawSlot ? `\nSlot: ${rawSlot}` : '';
+      return {
+        botMessages: [
+          `✓ Medical evaluation scheduled!${slotStr}\n\nA confirmation SMS and email has been sent to you. Our team will reach out 30 mins before your slot.`,
+          `Once results are reviewed (usually 2–3 working days), your sum insured will be upgraded to ${newLabel} and we'll send you the revised policy document. The new premium applies from your next renewal.`,
+        ],
+        options: [
+          { id: 'track', label: 'Track this request', icon: 'clock' },
+          { id: 'more',  label: 'Make another change', icon: 'refresh' },
+          { id: 'back',  label: 'Back to dashboard', icon: 'switch' },
+        ],
+      };
+    },
+    processResponse: (response, state) => {
+      const newLabel = SI_LABELS[state.dashboardNewSumInsured] || state.dashboardNewSumInsured;
+      const rawSlot = state.dashboardEditType.split('__slot:')[1] || '';
+      return {
+        dashboardSubmittedEdits: [
+          ...state.dashboardSubmittedEdits,
+          {
+            id: `EDT-${Math.floor(100000 + Math.random() * 900000)}`,
+            type: 'Change sum insured',
+            summary: `Upgrade to ${newLabel}${rawSlot ? ' · ' + rawSlot : ''} · Medical eval scheduled`,
+            status: 'Medical eval pending',
+            submittedAt: Date.now(),
+          },
+        ],
+        dashboardNewSumInsured: '',
+        dashboardEditType: '',
+      };
+    },
+    getNextStep: (response) => {
+      if (response === 'track') return 'db.track_overview';
+      if (response === 'more') return 'db.edit_options';
+      return 'db.actions';
+    },
   },
 
   {

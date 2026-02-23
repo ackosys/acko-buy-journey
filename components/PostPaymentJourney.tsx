@@ -9,6 +9,7 @@ import { getPostPaymentStep, getScenarioMembers, SCENARIOS } from '../lib/postPa
 import { getT, getLocaleTag, useT } from '../lib/translations';
 import ConversationalFlow from './ConversationalFlow';
 import AckoLogo from './AckoLogo';
+import { saveSnapshot } from '../lib/journeyPersist';
 
 /* ═══════════════════════════════════════════════════════
    Post-Payment Journey — Conversational P2I Experience
@@ -745,6 +746,48 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
   const [showVoiceCall, setShowVoiceCall] = useState(false);
   const [voiceCallResolve, setVoiceCallResolve] = useState<((v: any) => void) | null>(null);
 
+  // ── Snapshot saving: watch key post-payment state changes ────────────────
+  const callScheduledDate = useJourneyStore(s => s.callScheduledDate);
+  const testScheduledDate  = useJourneyStore(s => s.testScheduledDate);
+  const testScheduledLab   = useJourneyStore(s => s.testScheduledLab);
+
+  useEffect(() => {
+    if (!callScheduledDate) return;
+    const s = useJourneyStore.getState();
+    saveSnapshot({
+      product: 'health',
+      currentStepId: 'health_eval.schedule',
+      savedAt: new Date().toISOString(),
+      userName: s.userName,
+      members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+      pincode: s.pincode,
+      selectedPlan: s.selectedPlan ? { name: s.selectedPlan.name, monthlyPremium: s.selectedPlan.monthlyPremium, yearlyPremium: s.selectedPlan.yearlyPremium, sumInsured: s.selectedPlan.sumInsured, tier: s.selectedPlan.tier } : null,
+      paymentComplete: true,
+      paymentFrequency: s.paymentFrequency,
+      currentPremium: s.currentPremium,
+      callScheduledDate,
+      testScheduledDate: s.testScheduledDate,
+      testScheduledLab: s.testScheduledLab,
+    });
+  }, [callScheduledDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!testScheduledDate) return;
+    const s = useJourneyStore.getState();
+    saveSnapshot({
+      product: 'health',
+      currentStepId: 'health_eval.lab_schedule',
+      savedAt: new Date().toISOString(),
+      userName: s.userName,
+      members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+      pincode: s.pincode,
+      paymentComplete: true,
+      callScheduledDate: s.callScheduledDate,
+      testScheduledDate,
+      testScheduledLab,
+    });
+  }, [testScheduledDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Determine initial step based on initialPhase
   const getInitialStep = () => {
     if (initialPhase === 'voice_call') return 'pp.voice_call';
@@ -807,15 +850,31 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
     }
   };
 
-  // Intercept step responses for navigation
+  // Intercept step responses for navigation + snapshot saving
   const handleStepResponse = (stepId: string, response: any): boolean => {
     if (stepId === 'pp.dashboard_cta' && response === 'dashboard') {
       onDashboard();
-      return true; // prevent default handling
+      return true;
     }
     if (stepId === 'pp.cancelled' && response === 'home') {
       onDashboard();
       return true;
+    }
+    // Save "policy active" snapshot when health summary or policy issued is reached
+    if (stepId === 'pp.health_summary' || stepId === 'pp.policy_issued' || stepId === 'pp.no_test_result') {
+      setTimeout(() => {
+        const s = useJourneyStore.getState();
+        saveSnapshot({
+          product: 'health',
+          currentStepId: 'completion.celebration',
+          savedAt: new Date().toISOString(),
+          userName: s.userName,
+          members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+          paymentComplete: true,
+          paymentFrequency: s.paymentFrequency,
+          currentPremium: s.currentPremium,
+        });
+      }, 0);
     }
     return false;
   };
@@ -854,7 +913,7 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
   );
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%)' }}>
+    <div className="motor-midnight h-screen flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%)' }}>
       <ConversationalFlow
         getStep={getPostPaymentStep}
         initialStepId={getInitialStep()}

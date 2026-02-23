@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMotorStore } from '../../lib/motor/store';
 import { getMotorStep } from '../../lib/motor/scripts';
 import { MotorJourneyState } from '../../lib/motor/types';
+import { saveSnapshot, MOTOR_SAVE_STEPS } from '../../lib/journeyPersist';
 import ChatMessage, { TypingIndicator } from '../ChatMessage';
 import { ChatMessage as ChatMessageType } from '@/lib/types';
 import {
@@ -113,6 +114,30 @@ export default function MotorChatContainer() {
   const [showWidget, setShowWidget] = useState(false);
   const [editModal, setEditModal] = useState<{ stepId: string; visible: boolean }>({ stepId: '', visible: false });
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
+
+  // Save drop-off snapshot at key steps
+  useEffect(() => {
+    if (!MOTOR_SAVE_STEPS.has(currentStepId)) return;
+    const s = useMotorStore.getState();
+    saveSnapshot({
+      product: s.vehicleType ?? 'car',
+      currentStepId,
+      savedAt: new Date().toISOString(),
+      vehicleType: s.vehicleType,
+      vehicleData: {
+        make: s.vehicleData.make,
+        model: s.vehicleData.model,
+        variant: s.vehicleData.variant,
+        fuelType: s.vehicleData.fuelType,
+        registrationYear: s.vehicleData.registrationYear,
+      },
+      registrationNumber: s.registrationNumber,
+      totalPremium: s.totalPremium,
+      selectedPlanType: s.selectedPlanType,
+      ownerName: s.ownerName,
+      paymentComplete: s.paymentComplete,
+    });
+  }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to bottom
   useEffect(() => {

@@ -9,6 +9,7 @@ import GlobalHero from '../components/global/GlobalHero';
 import LobSelector from '../components/global/LobSelector';
 import TrustBadges from '../components/global/TrustBadges';
 import ValueProps from '../components/global/ValueProps';
+import DropOffBanner from '../components/global/DropOffBanner';
 import { LobConfig } from '../lib/core/types';
 
 /* ── LOB Configuration ── */
@@ -105,6 +106,9 @@ export default function GlobalHomepage() {
           <div className="relative z-10 max-w-lg mx-auto pb-16">
             {/* Hero Section */}
             <GlobalHero userName={userName || undefined} />
+
+            {/* Drop-off / Continue journey banner */}
+            <DropOffBanner />
 
             {/* LOB Selector */}
             <div className="px-6 mb-8">

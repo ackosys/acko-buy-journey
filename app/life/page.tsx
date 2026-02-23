@@ -5,9 +5,11 @@
  * Flows: splash → landing → chat (with optional expert/AI panels)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
+import { loadSnapshot } from '../../lib/journeyPersist';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
 import LifeEntryScreen from '../../components/life/LifeEntryScreen';
 import LifeLandingPage from '../../components/life/LifeLandingPage';
@@ -93,27 +95,54 @@ function LifeSplashScreen({ onDone }: { onDone: () => void }) {
   );
 }
 
-export default function LifeJourneyPage() {
+function LifeJourneyInner() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
 
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const resume = searchParams.get('resume') === '1';
+    const snap = resume ? loadSnapshot('life') : null;
+
+    if (snap) {
+      store.updateState({
+        currentStepId: snap.currentStepId,
+        conversationHistory: [],
+        paymentComplete: snap.paymentComplete ?? false,
+        ekycComplete: snap.ekycComplete ?? false,
+        financialComplete: snap.financialComplete ?? false,
+        medicalComplete: snap.medicalComplete ?? false,
+        // Life-specific fields stored as `any` since LifeJourneyState has them
+        ...(snap.name ? { name: snap.name } : {}),
+        ...(snap.gender ? { gender: snap.gender } : {}),
+        ...(snap.dob ? { dob: snap.dob } : {}),
+        ...(snap.coverAmount ? { coverAmount: snap.coverAmount } : {}),
+        ...(snap.annualPremium ? { annualPremium: snap.annualPremium } : {}),
+        ...(snap.monthlyPremium ? { monthlyPremium: snap.monthlyPremium } : {}),
+        ...(snap.userPath ? { userPath: snap.userPath } : {}),
+        currentModule: 'basic_info',
+      } as any);
+      setScreen('chat');
+      setShowSplash(false);
+    } else {
+      store.updateState({
+        currentStepId: 'life_intro',
+        conversationHistory: [],
+        journeyComplete: false,
+        paymentComplete: false,
+        ekycComplete: false,
+        financialComplete: false,
+        medicalComplete: false,
+        userPath: '',
+        currentModule: 'basic_info',
+      });
+    }
+
     setHydrated(true);
-    store.updateState({
-      currentStepId: 'life_intro',
-      conversationHistory: [],
-      journeyComplete: false,
-      paymentComplete: false,
-      ekycComplete: false,
-      financialComplete: false,
-      medicalComplete: false,
-      userPath: '',
-      currentModule: 'basic_info',
-    });
   }, []);
 
   const dismissSplash = useCallback(() => setShowSplash(false), []);
@@ -205,5 +234,17 @@ export default function LifeJourneyPage() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+export default function LifeJourneyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #2A1463 50%, #1C0B47 100%)' }}>
+        <div className="w-8 h-8 border-3 border-purple-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LifeJourneyInner />
+    </Suspense>
   );
 }

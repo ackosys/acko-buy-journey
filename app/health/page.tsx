@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useJourneyStore } from '../../lib/store';
+import { loadSnapshot, clearSnapshot } from '../../lib/journeyPersist';
 import LandingPage from '../../components/LandingPage';
 import EntryScreen from '../../components/EntryScreen';
 import Header from '../../components/Header';
@@ -75,16 +77,44 @@ function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   );
 }
 
-export default function HealthJourney() {
+function HealthJourneyInner() {
   const { updateState, resetJourney } = useJourneyStore();
   const paymentComplete = useJourneyStore(s => s.paymentComplete);
   const isExistingUser = useJourneyStore(s => s.isExistingAckoUser);
   const [screen, setScreen] = useState<Screen>('entry');
   const [showWelcome, setShowWelcome] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const resume = searchParams.get('resume') === '1';
+    const snap = resume ? loadSnapshot('health') : null;
+
     resetJourney();
+
+    if (snap) {
+      // Restore saved state fields and jump directly to chat
+      updateState({
+        userName: snap.userName ?? '',
+        members: (snap.members ?? []).map((m, i) => ({
+          id: `${m.relation}-${i}`,
+          relation: m.relation as any,
+          name: m.name ?? '',
+          age: m.age,
+          conditions: [],
+        })),
+        pincode: snap.pincode ?? '',
+        selectedPlan: snap.selectedPlan as any ?? null,
+        paymentComplete: snap.paymentComplete ?? false,
+        paymentFrequency: snap.paymentFrequency ?? 'monthly',
+        currentPremium: snap.currentPremium ?? 0,
+        currentStepId: snap.currentStepId,
+        isExistingAckoUser: true,
+      });
+      setScreen(snap.paymentComplete ? 'post_payment' : 'chat');
+      setShowWelcome(false);
+    }
+
     setHydrated(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -160,11 +190,19 @@ export default function HealthJourney() {
           </motion.div>
         )}
         {screen === 'chat' && (
-          <div key="chat" className="h-screen bg-[#1C0B47] flex flex-col overflow-hidden">
+          <div key="chat" className="motor-midnight h-screen bg-[#1C0B47] flex flex-col overflow-hidden">
             <Header /><ChatContainer />
           </div>
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+export default function HealthJourney() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin" /></div>}>
+      <HealthJourneyInner />
+    </Suspense>
   );
 }

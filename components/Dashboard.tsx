@@ -37,7 +37,7 @@ export default function Dashboard({ onTalkToExpert }: { onTalkToExpert?: (contex
   );
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%)' }}>
+    <div className="motor-midnight h-screen flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 40%, #1C0B47 100%)' }}>
       <ConversationalFlow
         getStep={getDashboardStep}
         initialStepId="db.welcome"

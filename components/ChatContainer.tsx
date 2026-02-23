@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useJourneyStore } from '../lib/store';
 import { getStep } from '../lib/scripts';
+import { saveSnapshot, HEALTH_SAVE_STEPS } from '../lib/journeyPersist';
 import ChatMessage, { TypingIndicator } from './ChatMessage';
 import {
   SelectionCards,
@@ -42,6 +43,27 @@ export default function ChatContainer() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const processedRef = useRef<Set<string>>(new Set());
   const [showWidget, setShowWidget] = useState(false);
+
+  // Save drop-off snapshot at key steps
+  useEffect(() => {
+    if (!HEALTH_SAVE_STEPS.has(currentStepId)) return;
+    const s = useJourneyStore.getState();
+    saveSnapshot({
+      product: 'health',
+      currentStepId,
+      savedAt: new Date().toISOString(),
+      userName: s.userName,
+      members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+      pincode: s.pincode,
+      selectedPlan: s.selectedPlan ? { name: s.selectedPlan.name, monthlyPremium: s.selectedPlan.monthlyPremium, yearlyPremium: s.selectedPlan.yearlyPremium, sumInsured: s.selectedPlan.sumInsured, tier: s.selectedPlan.tier } : null,
+      paymentComplete: s.paymentComplete,
+      paymentFrequency: s.paymentFrequency,
+      currentPremium: s.currentPremium,
+      testScheduledDate: s.testScheduledDate,
+      testScheduledLab: s.testScheduledLab,
+      postPaymentPhase: s.postPaymentPhase,
+    });
+  }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [editModal, setEditModal] = useState<{ stepId: string; visible: boolean }>({ stepId: '', visible: false });
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
 
