@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { useMotorStore } from '../../lib/motor/store';
+import { useThemeStore } from '../../lib/themeStore';
 // COMMENTED OUT: Old intro and entry screens
 // import AuraMotorEntryScreen from '../../components/motor/aura/AuraMotorEntryScreen';
 // import AuraMotorPrototypeIntro from '../../components/motor/aura/AuraMotorPrototypeIntro';
@@ -163,7 +164,7 @@ function seedDemoState(vehicleType: VehicleType) {
 function MotorV3JourneyInner() {
   const store = useMotorStore();
   const { updateState, resetJourney } = store;
-  const theme = useMotorStore(s => s.theme);
+  const theme = useThemeStore(s => s.theme);
   const searchParams = useSearchParams();
 
   const mode = searchParams.get('mode');

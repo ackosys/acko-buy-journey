@@ -2,28 +2,20 @@
 
 import { useMotorStore } from '../../lib/motor/store';
 import { MotorJourneyState } from '../../lib/motor/types';
+import { useThemeStore } from '../../lib/themeStore';
 import { assetPath } from '../../lib/assetPath';
 import AckoLogo from '../AckoLogo';
+import ThemeToggle from '../global/ThemeToggle';
 import Link from 'next/link';
 
 const MODULE_ORDER = ['vehicle_type', 'registration', 'vehicle_fetch', 'manual_entry', 'pre_quote', 'quote', 'customization', 'review', 'payment'];
-const THEMES = ['midnight', 'dark', 'light'] as const;
-const THEME_ICONS: Record<string, string> = {
-  midnight: '/icons/Midnight.svg',
-  dark: '/icons/Dark.svg',
-  light: '/icons/light.svg',
-};
 
 export default function MotorHeader() {
-  const { currentModule, vehicleType, updateState, theme } = useMotorStore();
+  const { currentModule, vehicleType, updateState } = useMotorStore();
+  const { theme } = useThemeStore();
   const currentIndex = MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((Math.max(0, currentIndex) / (MODULE_ORDER.length - 1)) * 100);
   const isLight = theme === 'light';
-
-  const cycleTheme = () => {
-    const nextTheme = THEMES[(THEMES.indexOf(theme as typeof THEMES[number]) + 1) % 3];
-    updateState({ theme: nextTheme } as Partial<MotorJourneyState>);
-  };
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--motor-bg)', borderBottom: '1px solid var(--motor-border)' }}>
@@ -66,19 +58,7 @@ export default function MotorHeader() {
           </button>
 
           {/* Theme Toggle — cycles midnight → dark → light */}
-          <button
-            onClick={cycleTheme}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
-            style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}
-            title={`Switch theme (${theme})`}
-          >
-            <img
-              src={assetPath(THEME_ICONS[theme] || THEME_ICONS.midnight)}
-              alt={theme}
-              className="w-4.5 h-4.5"
-              style={{ filter: isLight ? 'brightness(0)' : 'brightness(0) invert(1)', opacity: 0.9, width: 18, height: 18 }}
-            />
-          </button>
+          <ThemeToggle />
         </div>
       </div>
 

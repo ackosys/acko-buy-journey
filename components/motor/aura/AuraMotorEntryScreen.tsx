@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AckoLogo from '../../AckoLogo';
 import { VehicleType } from '../../../lib/motor/types';
-import { useMotorStore } from '../../../lib/motor/store';
+import { useThemeStore } from '../../../lib/themeStore';
 import Link from 'next/link';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 
 export default function AuraMotorEntryScreen({ onSelect }: Props) {
   const [selected, setSelected] = useState<VehicleType | null>(null);
-  const theme = useMotorStore(s => s.theme);
+  const theme = useThemeStore(s => s.theme);
   const isLight = theme === 'light';
 
   const handleSelect = (type: VehicleType) => {

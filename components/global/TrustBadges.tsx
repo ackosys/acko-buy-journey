@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useThemeStore } from '../../lib/themeStore';
 
 const BADGES = [
   { label: 'IRDAI Licensed', sublabel: 'Reg. No. 157' },
@@ -12,11 +13,14 @@ const BADGES = [
 ];
 
 export default function TrustBadges() {
+  const theme = useThemeStore((s) => s.theme);
+  const fadeColor = theme === 'light' ? '#FFFFFF' : '#6C4DE8';
+
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 py-4">
       {/* Gradient overlays for fade effect */}
-      <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#6C4DE8] to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#6C4DE8] to-transparent z-10 pointer-events-none" />
+      <div className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style={{ background: `linear-gradient(to right, ${fadeColor}, transparent)` }} />
+      <div className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style={{ background: `linear-gradient(to left, ${fadeColor}, transparent)` }} />
       
       {/* Scrolling container */}
       <motion.div
@@ -42,7 +46,7 @@ export default function TrustBadges() {
                 <p className="text-xs text-purple-200/70 leading-tight mt-0.5">{badge.sublabel}</p>
               </div>
             </div>
-            {i < BADGES.length - 1 && <span className="w-px h-8 bg-white/15" />}
+            {i < BADGES.length - 1 && <span className="w-px h-8" style={{ background: theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)' }} />}
           </div>
         ))}
         
@@ -55,7 +59,7 @@ export default function TrustBadges() {
                 <p className="text-xs text-purple-200/70 leading-tight mt-0.5">{badge.sublabel}</p>
               </div>
             </div>
-            {i < BADGES.length - 1 && <span className="w-px h-8 bg-white/15" />}
+            {i < BADGES.length - 1 && <span className="w-px h-8" style={{ background: theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)' }} />}
           </div>
         ))}
         
@@ -68,7 +72,7 @@ export default function TrustBadges() {
                 <p className="text-xs text-purple-200/70 leading-tight mt-0.5">{badge.sublabel}</p>
               </div>
             </div>
-            {i < BADGES.length - 1 && <span className="w-px h-8 bg-white/15" />}
+            {i < BADGES.length - 1 && <span className="w-px h-8" style={{ background: theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)' }} />}
           </div>
         ))}
       </motion.div>

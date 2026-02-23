@@ -10,6 +10,7 @@ import {
   type ProductKey,
   type JourneySnapshot,
 } from '../../lib/journeyPersist';
+import { useThemeStore } from '../../lib/themeStore';
 
 const PRODUCT_CONFIG: Record<ProductKey, {
   label: string;
@@ -102,9 +103,13 @@ interface CardProps {
 
 function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
   const display = getDropOffDisplay(snap);
+  const theme = useThemeStore((s) => s.theme);
   if (!display) return null;
 
   const config = PRODUCT_CONFIG[snap.product];
+  const shadow = theme === 'light'
+    ? '0 2px 12px rgba(0,0,0,0.08)'
+    : '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)';
 
   return (
     <motion.div
@@ -116,16 +121,17 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
       className={`relative flex-shrink-0 rounded-2xl overflow-hidden ${isOnly ? 'w-full' : 'w-[85vw] max-w-[320px]'}`}
       style={{
         background: config.gradient,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)`,
+        boxShadow: shadow,
       }}
     >
       {/* Dismiss */}
       <button
         onClick={(e) => { e.stopPropagation(); onDismiss(snap.product); }}
-        className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+        className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors"
+        style={{ background: 'rgba(255,255,255,0.1)' }}
         aria-label="Dismiss"
       >
-        <svg className="w-3.5 h-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="w-3.5 h-3.5" style={{ color: 'rgba(255,255,255,0.6)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -145,13 +151,13 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
           </div>
 
           {/* Title */}
-          <p className="text-white font-bold text-[15px] leading-[1.3] pr-6">
+          <p className="font-bold text-[15px] leading-[1.3] pr-6" style={{ color: '#FFFFFF' }}>
             {display.title}
           </p>
 
           {/* Subtitle */}
           {display.subtitle && (
-            <p className="text-white/45 text-[11px] leading-relaxed">{display.subtitle}</p>
+            <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{display.subtitle}</p>
           )}
 
           {/* CTA + timestamp */}
@@ -165,7 +171,7 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
-            <span className="text-white/25 text-[10px]">{relativeTime(snap.savedAt)}</span>
+            <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{relativeTime(snap.savedAt)}</span>
           </div>
         </div>
 
@@ -319,7 +325,7 @@ export default function DropOffBanner() {
         <div
           ref={scrollRef}
           className="flex gap-3 px-6 overflow-x-auto scrollbar-hide pb-1"
-          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+          style={{ scrollSnapType: 'x mandatory', scrollPaddingInlineStart: '24px', WebkitOverflowScrolling: 'touch' }}
         >
           <AnimatePresence mode="popLayout">
             {snapshots.map(snap => (
@@ -347,7 +353,7 @@ export default function DropOffBanner() {
                   width: i === activeIndex ? '20px' : '6px',
                   background: i === activeIndex
                     ? PRODUCT_CONFIG[snap.product].accentColor
-                    : 'rgba(255,255,255,0.2)',
+                    : 'var(--app-text-subtle, rgba(255,255,255,0.2))',
                 }}
                 aria-label={`Scroll to ${PRODUCT_CONFIG[snap.product].label}`}
               />

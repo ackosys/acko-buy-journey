@@ -2,14 +2,17 @@
 
 import { useMotorStore } from '../../../lib/motor/store';
 import { MotorJourneyState } from '../../../lib/motor/types';
+import { useThemeStore } from '../../../lib/themeStore';
 import { assetPath } from '../../../lib/assetPath';
 import AckoLogo from '../../AckoLogo';
+import ThemeToggle from '../../global/ThemeToggle';
 import Link from 'next/link';
 
 const MODULE_ORDER = ['vehicle_type', 'registration', 'vehicle_fetch', 'manual_entry', 'pre_quote', 'quote', 'customization', 'review', 'payment'];
 
 export default function AuraMotorHeader() {
-  const { currentModule, vehicleType, updateState, theme } = useMotorStore();
+  const { currentModule, vehicleType, updateState } = useMotorStore();
+  const theme = useThemeStore((s) => s.theme);
   const currentIndex = MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((Math.max(0, currentIndex) / (MODULE_ORDER.length - 1)) * 100);
   const isLight = theme === 'light';
@@ -53,23 +56,7 @@ export default function AuraMotorHeader() {
           </button>
 
           {/* Theme Toggle */}
-          <button
-            onClick={() => updateState({ theme: isLight ? 'dark' : 'light' } as Partial<MotorJourneyState>)}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
-            style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}
-            title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            {isLight ? (
-              <svg className="w-4 h-4" style={{ color: '#7C47E1' }} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" style={{ color: '#C084FC' }} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="5" />
-                <path strokeLinecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-              </svg>
-            )}
-          </button>
+          <ThemeToggle />
         </div>
       </div>
 

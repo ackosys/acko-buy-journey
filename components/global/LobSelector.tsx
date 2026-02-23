@@ -140,9 +140,10 @@ export default function LobSelector({ lobs, onSelect }: LobSelectorProps) {
                 </h3>
 
                 {/* Tagline */}
-                <p className={`${
-                  isVertical ? 'text-sm mt-2' : 'text-xs mt-1'
-                } text-purple-200`}>
+                <p
+                  className={isVertical ? 'text-sm mt-2' : 'text-xs mt-1'}
+                  style={{ color: 'var(--app-input-text)' }}
+                >
                   {BENEFIT_LABELS[lob.id] || lob.tagline}
                 </p>
               </div>

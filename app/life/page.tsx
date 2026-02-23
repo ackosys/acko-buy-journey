@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
+import { useThemeStore } from '../../lib/themeStore';
 import { loadSnapshot } from '../../lib/journeyPersist';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
 import LifeEntryScreen from '../../components/life/LifeEntryScreen';
@@ -98,6 +99,8 @@ function LifeSplashScreen({ onDone }: { onDone: () => void }) {
 function LifeJourneyInner() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
+  const theme = useThemeStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
@@ -203,7 +206,7 @@ function LifeJourneyInner() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="min-h-screen flex flex-col"
-            style={{ background: 'linear-gradient(180deg, #1a0a3e 0%, #2A1463 40%, #1C0B47 100%)' }}
+            style={{ background: 'var(--app-chat-gradient)' }}
           >
             <LifeHeader />
 

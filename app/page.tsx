@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
+import { useThemeStore } from '../lib/themeStore';
 import LanguageSelector from '../components/LanguageSelector';
 import GlobalHero from '../components/global/GlobalHero';
 import LobSelector from '../components/global/LobSelector';
@@ -101,7 +102,7 @@ export default function GlobalHomepage() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="min-h-screen"
-          style={{ background: 'linear-gradient(135deg, #1a0a3e 0%, #3a1d8e 30%, #6C4DE8 60%, #9b7bf7 100%)' }}
+          style={{ background: 'var(--app-home-gradient)' }}
         >
           <div className="relative z-10 max-w-lg mx-auto pb-16">
             {/* Hero Section */}

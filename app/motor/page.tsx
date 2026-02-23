@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { useMotorStore } from '../../lib/motor/store';
+import { useThemeStore } from '../../lib/themeStore';
 import { loadSnapshot } from '../../lib/journeyPersist';
 // COMMENTED OUT: Intro and entry screens — replaced by AuraMotorEntryNav
 // import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
@@ -166,7 +167,8 @@ function seedDemoState(vehicleType: VehicleType) {
 
 function MotorJourneyInner() {
   const store = useMotorStore();
-  const { updateState, resetJourney, theme } = store;
+  const { updateState, resetJourney } = store;
+  const theme = useThemeStore((s) => s.theme);
   const searchParams = useSearchParams();
 
   const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
