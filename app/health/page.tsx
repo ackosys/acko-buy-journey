@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useJourneyStore } from '../../lib/store';
+import { useThemeStore } from '../../lib/themeStore';
 import { loadSnapshot, clearSnapshot } from '../../lib/journeyPersist';
 import LandingPage from '../../components/LandingPage';
 import EntryScreen from '../../components/EntryScreen';
@@ -190,7 +191,7 @@ function HealthJourneyInner() {
           </motion.div>
         )}
         {screen === 'chat' && (
-          <div key="chat" className="motor-midnight h-screen bg-[#1C0B47] flex flex-col overflow-hidden">
+          <div key="chat" className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--app-chat-gradient)' }}>
             <Header /><ChatContainer />
           </div>
         )}

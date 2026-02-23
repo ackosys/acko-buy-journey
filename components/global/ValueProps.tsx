@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useThemeStore } from '../../lib/themeStore';
 
 const PROPS = [
   {
@@ -53,6 +54,9 @@ function PropIcon({ icon }: { icon: string }) {
 }
 
 export default function ValueProps() {
+  const theme = useThemeStore((s) => s.theme);
+  const isLight = theme === 'light';
+
   return (
     <div className="space-y-5">
       <motion.div
@@ -73,9 +77,19 @@ export default function ValueProps() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.9 + i * 0.1, type: 'spring', stiffness: 120 }}
           >
-            <div className="relative rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] overflow-hidden">
-              {/* Left accent bar - monochromatic */}
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/20" />
+            <div
+              className="relative rounded-2xl backdrop-blur-sm overflow-hidden"
+              style={{
+                background: isLight ? 'var(--app-surface)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isLight ? 'var(--app-border)' : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: isLight ? '0 1px 4px rgba(0,0,0,0.04)' : 'none',
+              }}
+            >
+              {/* Left accent bar */}
+              <div
+                className="absolute left-0 top-0 bottom-0 w-1"
+                style={{ background: isLight ? '#7C3AED' : 'rgba(255,255,255,0.2)' }}
+              />
               
               {/* Content */}
               <div className="flex items-start justify-between gap-4 p-5 pl-6">
@@ -89,8 +103,14 @@ export default function ValueProps() {
                   </p>
                 </div>
                 
-                {/* Icon on the right - monochromatic */}
-                <div className="shrink-0 w-14 h-14 rounded-full flex items-center justify-center bg-white/[0.06] text-white/60">
+                {/* Icon on the right */}
+                <div
+                  className="shrink-0 w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{
+                    background: isLight ? 'var(--app-surface-2)' : 'rgba(255,255,255,0.06)',
+                    color: isLight ? '#7C3AED' : 'rgba(255,255,255,0.6)',
+                  }}
+                >
                   <PropIcon icon={prop.icon} />
                 </div>
               </div>
