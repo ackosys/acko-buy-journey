@@ -205,13 +205,13 @@ function LifeJourneyInner() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen flex flex-col"
+            className="h-[100dvh] flex flex-col overflow-hidden"
             style={{ background: 'var(--app-chat-gradient)' }}
           >
             <LifeHeader />
 
-            <div className="flex-1 flex relative overflow-hidden">
-              <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex relative overflow-hidden min-h-0">
+              <div className="flex-1 flex flex-col min-h-0">
                 <LifeChatContainer />
               </div>
 
@@ -225,7 +225,7 @@ function LifeJourneyInner() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-6 text-center border-t border-white/10"
+                className="shrink-0 p-6 text-center border-t border-white/10"
               >
                 <AckoLogo variant="white" className="h-5 mx-auto mb-2 opacity-40" />
                 <p className="text-[11px] text-white/30">

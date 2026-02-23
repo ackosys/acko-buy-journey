@@ -120,6 +120,7 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
       transition={{ duration: 0.3 }}
       className={`relative flex-shrink-0 rounded-2xl overflow-hidden ${isOnly ? 'w-full' : 'w-[85vw] max-w-[320px]'}`}
       style={{
+        height: 180,
         background: config.gradient,
         boxShadow: shadow,
       }}
@@ -137,10 +138,9 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
       </button>
 
       {/* Tap area */}
-      <button onClick={() => onClick(display.route)} className="w-full text-left p-4 pb-4 flex gap-3 items-start">
-        {/* Left: text */}
-        <div className="flex-1 flex flex-col gap-2 min-w-0">
-          {/* Product + badge */}
+      <button onClick={() => onClick(display.route)} className="w-full h-full text-left p-4 flex flex-col">
+        {/* Top: product + badge + illustration */}
+        <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: config.accentColor }}>
               {config.label}
@@ -149,35 +149,33 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
               {display.badge}
             </span>
           </div>
-
-          {/* Title */}
-          <p className="font-bold text-[15px] leading-[1.3] pr-6" style={{ color: '#FFFFFF' }}>
-            {display.title}
-          </p>
-
-          {/* Subtitle */}
-          {display.subtitle && (
-            <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{display.subtitle}</p>
-          )}
-
-          {/* CTA + timestamp */}
-          <div className="flex items-center gap-2.5 mt-1">
-            <div
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-bold transition-transform active:scale-[0.97]"
-              style={{ background: config.accentColor, color: '#0a0a0a' }}
-            >
-              {display.ctaLabel}
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{relativeTime(snap.savedAt)}</span>
+          <div className="flex-shrink-0 w-[56px] h-[56px] opacity-60">
+            {config.illustration}
           </div>
         </div>
 
-        {/* Right: illustration */}
-        <div className="flex-shrink-0 w-[72px] h-[72px] mt-1 opacity-80">
-          {config.illustration}
+        {/* Middle: title + subtitle */}
+        <div className="flex-1 min-w-0 mt-1">
+          <p className="font-bold text-[15px] leading-[1.3] line-clamp-2" style={{ color: '#FFFFFF' }}>
+            {display.title}
+          </p>
+          {display.subtitle && (
+            <p className="text-[11px] leading-snug mt-1 line-clamp-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{display.subtitle}</p>
+          )}
+        </div>
+
+        {/* Bottom: CTA + timestamp */}
+        <div className="flex items-center gap-2.5 mt-auto pt-2">
+          <div
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-bold transition-transform active:scale-[0.97]"
+            style={{ background: config.accentColor, color: '#0a0a0a' }}
+          >
+            {display.ctaLabel}
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{relativeTime(snap.savedAt)}</span>
         </div>
       </button>
     </motion.div>
