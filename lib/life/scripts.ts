@@ -514,8 +514,8 @@ const lifeDqGender: ConversationStep<LifeJourneyState> = {
       `What's your gender?`,
     ],
     options: [
-      { id: 'male', label: 'Male', icon: '👨' },
-      { id: 'female', label: 'Female', icon: '👩' },
+      { id: 'male', label: 'Male' },
+      { id: 'female', label: 'Female' },
     ],
   }),
   processResponse: (response, _state) => ({ gender: response as 'male' | 'female' }),
@@ -665,8 +665,8 @@ const lifeBasicGender: ConversationStep<LifeJourneyState> = {
       `What's your gender? This helps us calculate accurate premiums.`,
     ],
     options: [
-      { id: 'male', label: 'Male', icon: '👨' },
-      { id: 'female', label: 'Female', icon: '👩' },
+      { id: 'male', label: 'Male' },
+      { id: 'female', label: 'Female' },
     ],
   }),
   processResponse: (response, _state) => ({ gender: response as 'male' | 'female' }),
