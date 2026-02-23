@@ -209,6 +209,15 @@ const DEMO_SNAPSHOTS: JourneySnapshot[] = [
     totalPremium: 12500,
     selectedPlanType: 'comprehensive',
   },
+  {
+    product: 'bike',
+    currentStepId: 'quote.plans_ready',
+    savedAt: new Date(Date.now() - 10800000).toISOString(),
+    vehicleType: 'bike',
+    vehicleData: { make: 'Royal Enfield', model: 'Classic 350' },
+    registrationNumber: 'MH02CD5678',
+    totalPremium: 4500,
+  },
 ];
 
 export default function DropOffBanner() {
@@ -219,21 +228,25 @@ export default function DropOffBanner() {
 
   useEffect(() => {
     const found: JourneySnapshot[] = [];
+    const realProducts = new Set<ProductKey>();
+
     for (const product of ALL_PRODUCTS) {
       const snap = loadSnapshot(product);
       if (snap && getDropOffDisplay(snap)) {
         found.push(snap);
+        realProducts.add(product);
       }
     }
 
-    if (found.length === 0) {
-      const demoFound = DEMO_SNAPSHOTS.filter(s => getDropOffDisplay(s));
-      demoFound.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
-      setSnapshots(demoFound);
-    } else {
-      found.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
-      setSnapshots(found);
+    // Fill in demo snapshots for LOBs that don't have real ones
+    for (const demo of DEMO_SNAPSHOTS) {
+      if (!realProducts.has(demo.product) && getDropOffDisplay(demo)) {
+        found.push(demo);
+      }
     }
+
+    found.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+    setSnapshots(found);
   }, []);
 
   const handleScroll = useCallback(() => {
