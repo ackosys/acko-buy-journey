@@ -420,7 +420,7 @@ export function UnderwritingInputWidget({ state, actions }: UseUnderwritingFlowR
           </div>
         </div>
         <button onClick={actions.checkStatus}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
           Check Status
         </button>
         <button onClick={actions.viewTasks}
@@ -442,7 +442,7 @@ export function UnderwritingInputWidget({ state, actions }: UseUnderwritingFlowR
           Download Policy Document
         </button>
         <button onClick={actions.done}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
           Done
         </button>
       </div>
@@ -464,7 +464,7 @@ export function UnderwritingInputWidget({ state, actions }: UseUnderwritingFlowR
           {state.uploadedInfo ? 'Documents uploaded ✓' : 'Upload requested documents'}
         </button>
         <button disabled={!state.uploadedInfo} onClick={actions.submitInfo}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Submit & Continue
         </button>
       </div>
@@ -474,7 +474,7 @@ export function UnderwritingInputWidget({ state, actions }: UseUnderwritingFlowR
   if (state.step === 'not_approved') {
     return (
       <div className="space-y-2">
-        <button className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+        <button className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
           Talk to us · 1800 266 5433
         </button>
         <button onClick={actions.done}

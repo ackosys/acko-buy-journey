@@ -35,7 +35,7 @@ export function LifeExpertPanel() {
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 flex flex-col shadow-2xl"
-            style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 50%, #1C0B47 100%)' }}
+            style={{ background: 'var(--app-chat-gradient)' }}
           >
             <div className="bg-gradient-to-r from-purple-700/50 to-purple-900/50 px-6 pt-14 pb-6">
               <button
@@ -195,7 +195,7 @@ export function LifeAIChatPanel() {
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 flex flex-col shadow-2xl"
-            style={{ background: 'linear-gradient(180deg, #1C0B47 0%, #2A1463 50%, #1C0B47 100%)' }}
+            style={{ background: 'var(--app-chat-gradient)' }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-3">
@@ -249,7 +249,7 @@ export function LifeAIChatPanel() {
                   )}
                   <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-body-sm ${
                     msg.role === 'user'
-                      ? 'bg-white text-[#1C0B47] rounded-br-md shadow-lg shadow-purple-900/10'
+                      ? 'bg-purple-700 text-white rounded-br-md shadow-lg shadow-purple-900/10'
                       : 'bg-white/10 backdrop-blur-sm text-white/90 rounded-bl-md border border-white/10'
                   }`}>
                     {msg.content}
@@ -258,7 +258,7 @@ export function LifeAIChatPanel() {
               ))}
             </div>
 
-            <div className="px-6 py-4 border-t border-white/10" style={{ background: 'rgba(30, 15, 70, 0.85)', backdropFilter: 'blur(24px)' }}>
+            <div className="px-6 py-4 border-t border-white/10" style={{ background: 'var(--app-glass-bg)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
               <div className="flex gap-2">
                 <input
                   type="text"

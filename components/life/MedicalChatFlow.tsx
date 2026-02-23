@@ -150,7 +150,7 @@ export function useMedicalFlow(onComplete: () => void): UseMedicalFlowReturn {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
               </svg>
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#1C0B47]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-purple-900" />
           </div>
           <div>
             <p className="text-white font-semibold text-sm">Dr. Meera Krishnan</p>
@@ -195,7 +195,7 @@ export function useMedicalFlow(onComplete: () => void): UseMedicalFlowReturn {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
               </svg>
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#1C0B47]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-purple-900" />
           </div>
           <div>
             <p className="text-white font-semibold text-sm">Dr. Meera Krishnan</p>
@@ -316,7 +316,7 @@ export function MedicalInputWidget({ state, actions }: UseMedicalFlowReturn) {
   if (state.step === 'check_availability') {
     return (
       <button onClick={actions.checkAvailability}
-        className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+        className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
         Check Doctor Availability
       </button>
     );
@@ -368,7 +368,7 @@ export function MedicalInputWidget({ state, actions }: UseMedicalFlowReturn) {
           ))}
         </div>
         <button disabled={!state.selectedSlot} onClick={actions.confirmSlot}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Confirm Slot
         </button>
       </div>
@@ -379,7 +379,7 @@ export function MedicalInputWidget({ state, actions }: UseMedicalFlowReturn) {
     return (
       <div className="space-y-2">
         <button onClick={actions.joinCall}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
           Join Call (Demo)
         </button>
         <button onClick={actions.scheduleLater}
@@ -460,7 +460,7 @@ export function MedicalInputWidget({ state, actions }: UseMedicalFlowReturn) {
         <button
           disabled={state.tobaccoAnswer === null || state.alcoholAnswer === null || !state.conditionsAnswer || !state.reviewConfirmed}
           onClick={actions.submitReview}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Submit & Confirm
         </button>
       </div>

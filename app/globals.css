@@ -413,23 +413,23 @@
 }
 
 .motor-light {
-  --motor-bg: #F5F3FF;
+  --motor-bg: #F8F7FC;
   --motor-surface: #FFFFFF;
-  --motor-surface-2: #F0EEF9;
-  --motor-surface-hover: #E8E5F5;
+  --motor-surface-2: #FFFFFF;
+  --motor-surface-hover: #F3F1FA;
   --motor-text: #1C0B47;
-  --motor-text-muted: #64748B;
-  --motor-text-subtle: #94A3B8;
+  --motor-text-muted: #4B5563;
+  --motor-text-subtle: #6B7280;
   --motor-bot-text: #1C0B47;
-  --motor-border: rgba(0,0,0,0.06);
-  --motor-border-strong: rgba(0,0,0,0.1);
-  --motor-shadow: rgba(0,0,0,0.06);
+  --motor-border: rgba(0,0,0,0.08);
+  --motor-border-strong: rgba(0,0,0,0.14);
+  --motor-shadow: rgba(0,0,0,0.08);
   --motor-icon-filter: brightness(0);
   --motor-icon-opacity: 0.7;
   --motor-glass-bg: rgba(255,255,255,0.95);
   --motor-overlay-bg: rgba(0,0,0,0.04);
-  --motor-chat-gradient: linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 40%, #F5F3FF 100%);
-  --motor-progress-border: 2px solid #F5F3FF;
+  --motor-chat-gradient: linear-gradient(180deg, #F8F7FC 0%, #F0EEFA 40%, #F8F7FC 100%);
+  --motor-progress-border: 2px solid #F8F7FC;
   --motor-selected-bg: rgba(168,85,247,0.1);
   --motor-selected-border: rgba(168,85,247,0.4);
   --motor-input-bg: rgba(0,0,0,0.03);
@@ -468,16 +468,23 @@
 .motor-light .bg-white\/4,
 .motor-light .bg-white\/5 { background-color: var(--motor-surface) !important; }
 .motor-light .bg-white\/6,
-.motor-light .bg-white\/8 { background-color: var(--motor-surface-2) !important; }
-.motor-light .bg-white\/10 { background-color: rgba(207,207,207,1) !important; }
+.motor-light .bg-white\/8,
+.motor-light .bg-white\/10 {
+  background-color: var(--motor-surface) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04) !important;
+}
 .motor-light .bg-white\/15,
 .motor-light .bg-white\/20 { background-color: var(--motor-surface-hover) !important; }
 
 /* ── Hover backgrounds ── */
 .motor-light .hover\:bg-white\/6:hover,
-.motor-light .hover\:bg-white\/10:hover { background-color: var(--motor-surface-hover) !important; }
+.motor-light .hover\:bg-white\/10:hover,
+.motor-light .hover\:bg-white\/12:hover {
+  background-color: var(--motor-surface-hover) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06) !important;
+}
 .motor-light .hover\:bg-white\/15:hover,
-.motor-light .hover\:bg-white\/20:hover { background-color: #DDD8F0 !important; }
+.motor-light .hover\:bg-white\/20:hover { background-color: #E8E3F5 !important; }
 
 /* ── Hover text ── */
 .motor-light .hover\:text-white\/60:hover,
@@ -485,11 +492,15 @@
 
 /* ── Border colors ── */
 .motor-light .border-white\/8,
-.motor-light .border-white\/10 { border-color: var(--motor-border) !important; }
+.motor-light .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
 .motor-light .border-white\/15,
-.motor-light .border-white\/20 { border-color: var(--motor-border-strong) !important; }
+.motor-light .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }
+.motor-light .border-white\/25 { border-color: rgba(0,0,0,0.15) !important; }
+.motor-light .border-white\/30 { border-color: rgba(0,0,0,0.18) !important; }
 
-.motor-light .hover\:border-white\/20:hover { border-color: var(--motor-border-strong) !important; }
+.motor-light .hover\:border-white\/20:hover,
+.motor-light .hover\:border-white\/25:hover { border-color: rgba(0,0,0,0.15) !important; }
+.motor-light .hover\:border-white\/30:hover { border-color: rgba(0,0,0,0.2) !important; }
 
 /* ── Divide colors ── */
 .motor-light .divide-white\/10 > :not(:first-child) { border-color: var(--motor-border) !important; }
@@ -534,8 +545,19 @@
 /* ── Select element color scheme ── */
 .motor-light select { color-scheme: light !important; }
 
-/* ── NavButton color-variant icon backgrounds → neutral gray in light mode ── */
-.motor-light .bg-amber-500\/20 { background-color: rgba(207,207,207,0.2) !important; }
+/* ── Hide dark-mode background orbs on light ── */
+.motor-light .bg-purple-500\/10,
+.motor-light .bg-purple-400\/10 { background-color: transparent !important; }
+
+/* ── NavButton color-variant icon backgrounds → softer tints in light mode ── */
+.motor-light .bg-amber-500\/20 { background-color: rgba(245,158,11,0.12) !important; }
+.motor-light .bg-cyan-500\/20 { background-color: rgba(6,182,212,0.12) !important; }
+.motor-light .bg-pink-500\/20 { background-color: rgba(236,72,153,0.12) !important; }
+.motor-light .bg-emerald-500\/20 { background-color: rgba(16,185,129,0.12) !important; }
+.motor-light .bg-red-500\/20 { background-color: rgba(239,68,68,0.12) !important; }
+.motor-light .bg-orange-500\/20 { background-color: rgba(249,115,22,0.12) !important; }
+.motor-light .bg-violet-500\/20 { background-color: rgba(139,92,246,0.12) !important; }
+.motor-light .bg-green-500\/20 { background-color: rgba(34,197,94,0.12) !important; }
 
 /* ── Purple/colored Tailwind bg buttons always keep white text ── */
 .motor-light [class*="bg-purple-"],
@@ -546,8 +568,15 @@
   color: #FFFFFF !important;
 }
 
-/* ── NavButton icon text colors → dark in light mode (overrides bg-* white rule above) ── */
-.motor-light .text-violet-300 { color: rgba(0,0,0,1) !important; }
+/* ── NavButton icon text → keep brand colors in light mode (after bg-* rule) ── */
+.motor-light .text-amber-300 { color: #D97706 !important; }
+.motor-light .text-cyan-300 { color: #0891B2 !important; }
+.motor-light .text-pink-300 { color: #DB2777 !important; }
+.motor-light .text-emerald-300 { color: #059669 !important; }
+.motor-light .text-red-300 { color: #DC2626 !important; }
+.motor-light .text-orange-300 { color: #EA580C !important; }
+.motor-light .text-violet-300 { color: #7C3AED !important; }
+.motor-light .text-green-300 { color: #16A34A !important; }
 
 /* ── Inline gradient buttons always keep white text ── */
 .motor-light [style*="linear-gradient"],

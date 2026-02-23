@@ -64,7 +64,7 @@ export default function LifeChatMessage({ message, onEdit }: LifeChatMessageProp
         onMouseLeave={() => setShowEdit(false)}
       >
         <div className="relative max-w-[85%]">
-          <div className="px-4 py-2.5 chat-bubble-user shadow-lg" style={{ background: 'var(--motor-user-bubble-bg, #FFFFFF)', color: 'var(--motor-user-bubble-text, #1C0B47)' }}>
+          <div className="px-4 py-2.5 chat-bubble-user shadow-lg" style={{ background: 'var(--app-user-bubble-bg, var(--motor-user-bubble-bg, #FFFFFF))', color: 'var(--app-user-bubble-text, var(--motor-user-bubble-text, #1C0B47))' }}>
             <p className="text-body-md font-medium">{message.content}</p>
           </div>
           {message.editable && showEdit && onEdit && message.stepId && (
@@ -98,9 +98,9 @@ export default function LifeChatMessage({ message, onEdit }: LifeChatMessageProp
       </div>
 
       <div className="max-w-[85%]">
-        <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
+        <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--app-surface, var(--motor-surface))', border: '1px solid var(--app-border, var(--motor-border))' }}>
           {message.content.split('\n\n').map((paragraph, i) => (
-            <p key={i} className={`text-body-md text-white/90 ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--motor-bot-text)' }}>
+            <p key={i} className={`text-body-md text-white/90 ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--app-bot-text, var(--motor-bot-text))' }}>
               {paragraph}
             </p>
           ))}
@@ -122,7 +122,7 @@ export function LifeTypingIndicator() {
       <div className="flex-shrink-0">
         <UmbrellaAvatar />
       </div>
-      <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
+      <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5" style={{ background: 'var(--app-surface, var(--motor-surface))', border: '1px solid var(--app-border, var(--motor-border))' }}>
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '0ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '200ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '400ms' }} />

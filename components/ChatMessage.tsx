@@ -44,7 +44,7 @@ export default function ChatMessage({ message, onEdit, animate = false }: ChatMe
         onMouseLeave={() => setShowEdit(false)}
       >
         <div className="relative max-w-[85%]">
-          <div className="px-4 py-2.5 chat-bubble-user shadow-lg" style={{ background: 'var(--motor-user-bubble-bg, #FFFFFF)', color: 'var(--motor-user-bubble-text, #1C0B47)' }}>
+          <div className="px-4 py-2.5 chat-bubble-user shadow-lg" style={{ background: 'var(--app-user-bubble-bg, var(--motor-user-bubble-bg, #FFFFFF))', color: 'var(--app-user-bubble-text, var(--motor-user-bubble-text, #1C0B47))' }}>
             <p className="text-body-md font-medium">{message.content}</p>
           </div>
           {message.editable && showEdit && onEdit && message.stepId && (
@@ -53,7 +53,7 @@ export default function ChatMessage({ message, onEdit, animate = false }: ChatMe
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => onEdit(message.stepId!)}
               className="absolute -left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-colors"
-              style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border-strong)' }}
+              style={{ background: 'var(--app-surface, var(--motor-surface))', border: '1px solid var(--app-border-strong, var(--motor-border-strong))' }}
               title="Edit this answer"
             >
               <svg className="w-3 h-3 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,9 +106,9 @@ export default function ChatMessage({ message, onEdit, animate = false }: ChatMe
       className="flex mb-4"
     >
       <div className="max-w-[85%]">
-        <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
+        <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--app-surface, var(--motor-surface))', border: '1px solid var(--app-border, var(--motor-border))' }}>
           {visibleParagraphs.map((words, i) => (
-            <p key={i} className={`text-body-md ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--motor-bot-text)' }}>
+            <p key={i} className={`text-body-md ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--app-bot-text, var(--motor-bot-text))' }}>
               {words.join(' ')}
               {isTypingOut && i === visibleParagraphs.length - 1 && (
                 <span className="inline-block w-[2px] h-[1em] align-middle ml-[2px] rounded-full bg-purple-400 animate-pulse" />
@@ -130,7 +130,7 @@ export function TypingIndicator() {
       exit={{ opacity: 0, y: -10 }}
       className="flex mb-4"
     >
-      <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
+      <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot flex items-center gap-1.5" style={{ background: 'var(--app-surface, var(--motor-surface))', border: '1px solid var(--app-border, var(--motor-border))' }}>
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '0ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '200ms' }} />
         <span className="w-2 h-2 bg-purple-400 rounded-full animate-typing" style={{ animationDelay: '400ms' }} />

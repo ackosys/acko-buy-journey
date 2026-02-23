@@ -481,7 +481,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
             className="flex-1 px-3 py-3 text-sm text-white bg-transparent outline-none placeholder:text-white/30" autoFocus />
         </div>
         <button disabled={state.mobile.length < 10} onClick={actions.submitMobile}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Send OTP
         </button>
       </div>
@@ -509,7 +509,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
         </div>
         <p className="text-[10px] text-center text-purple-200/50">Demo: 000000 = failure, anything else = success</p>
         <button disabled={state.otp.join('').length < 6} onClick={actions.submitOtp}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Verify OTP
         </button>
       </div>
@@ -520,7 +520,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
     return (
       <div className="space-y-3">
         <button onClick={actions.consentAA}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
           I consent — proceed
         </button>
         <button onClick={actions.goBack}
@@ -548,7 +548,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
           ))}
         </div>
         <button disabled={!state.selectedBank} onClick={actions.submitBank}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Proceed to bank
         </button>
       </div>
@@ -566,7 +566,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
           autoFocus />
         <p className="text-[10px] text-center text-purple-200/50">Demo: 15 chars = success, less = failure</p>
         <button disabled={state.gstNumber.length < 5} onClick={actions.submitGst}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           Verify GST
         </button>
       </div>
@@ -592,7 +592,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
   if (['epfo_success', 'aa_success', 'gst_success', 'verified'].includes(state.step)) {
     return (
       <button onClick={actions.continueAfterSuccess}
-        className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+        className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
         Continue to medical evaluation →
       </button>
     );
@@ -602,7 +602,7 @@ export function FinancialInputWidget({ state, actions }: UseFinancialFlowReturn)
     return (
       <div className="space-y-2">
         <button onClick={actions.goBack}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98]">
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]">
           Try again
         </button>
         <button onClick={() => {

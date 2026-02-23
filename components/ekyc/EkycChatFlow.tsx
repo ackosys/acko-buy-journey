@@ -357,7 +357,7 @@ export function EkycInputWidget({ state, actions }: UseEkycFlowReturn) {
         <button
           onClick={actions.handleAadhaarSubmit}
           disabled={state.aadhaar.replace(/\s/g, '').length !== 12}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Start e-KYC
         </button>
@@ -445,7 +445,7 @@ export function EkycInputWidget({ state, actions }: UseEkycFlowReturn) {
         <button
           onClick={actions.handleOtpSubmit}
           disabled={state.otp.length !== 6 || state.otpExpired}
-          className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-sm font-semibold hover:bg-white/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Verify OTP
         </button>
@@ -513,7 +513,7 @@ export default function EkycChatFlow({ onComplete }: EkycChatFlowProps) {
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
             className="shrink-0 shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
-              style={{ background: 'var(--motor-glass-bg)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderTop: '1px solid var(--motor-border)' }}
+              style={{ background: 'var(--app-glass-bg, var(--motor-glass-bg))', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderTop: '1px solid var(--app-border, var(--motor-border))' }}
           >
             <div className="max-w-lg mx-auto px-5 py-5 pb-8">
               <EkycInputWidget {...ekyc} />

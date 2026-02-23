@@ -286,12 +286,13 @@ function MotorJourneyInner() {
 
       <AnimatePresence mode="wait">
         {screen === 'explore' && (
-          <AuraMotorEntryNav
-            key="explore"
-            initialVehicle={vehicleParam === 'bike' ? 'bike' : 'car'}
-            onStartJourney={handleStartJourney}
-            onJumpTo={handleJumpTo}
-          />
+          <div key="explore" className={`motor-${theme} min-h-screen`} style={{ background: 'var(--motor-bg)' }}>
+            <AuraMotorEntryNav
+              initialVehicle={vehicleParam === 'bike' ? 'bike' : 'car'}
+              onStartJourney={handleStartJourney}
+              onJumpTo={handleJumpTo}
+            />
+          </div>
         )}
         {screen === 'chat' && (
           <div key="chat" className={`h-screen flex flex-col overflow-hidden motor-${theme}`} style={{ background: 'var(--motor-bg)' }}>

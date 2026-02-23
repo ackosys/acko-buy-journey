@@ -895,7 +895,7 @@ export function HospitalList({ onContinue }: { onContinue: () => void }) {
       {/* Visual hospital banner */}
       <div className="relative rounded-2xl overflow-hidden mb-3">
         <img src="https://images.unsplash.com/photo-1551190822-a9ce113ac100?w=600&h=160&fit=crop" alt="Hospitals" className="w-full h-28 object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1C0B47] via-[#1C0B47]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4">
           <p className="text-white font-semibold text-sm">{t.widgets.cashlessHospitalsNear(nearbyHospitals || 0)}</p>
           <p className="text-white/60 text-xs">{t.widgets.walkInGetTreated}</p>
@@ -1196,7 +1196,7 @@ export function UspCards({ onContinue }: { onContinue: () => void }) {
       {/* Brand ambassador banner */}
       <div className="relative rounded-2xl overflow-hidden mb-4">
         <img src={assetPath('/brand-ambassador.png')} alt="ACKO Brand Ambassador" className="w-full h-36 object-cover object-top" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1C0B47] via-[#1C0B47]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4">
           <p className="text-white font-semibold text-sm">{t.widgets.whyFamiliesChoose}</p>
         </div>

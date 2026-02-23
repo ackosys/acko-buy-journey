@@ -224,13 +224,10 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, type: 'spring', damping: 25, stiffness: 300 }}
         className="fixed bottom-0 left-0 right-0 z-20"
-        style={theme === 'light' ? {
-          backgroundImage: 'linear-gradient(90deg, rgba(222,222,222,1) 45%, rgba(255,255,255,1) 100%)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          color: 'transparent',
-        } : {
-          background: 'linear-gradient(to top, #0D0521 60%, transparent)',
+        style={{
+          background: theme === 'light'
+            ? 'linear-gradient(to top, var(--motor-bg, #F8F7FC) 60%, transparent)'
+            : 'linear-gradient(to top, #0D0521 60%, transparent)',
         }}
       >
         <div className="max-w-lg mx-auto px-6 pb-6 pt-8">

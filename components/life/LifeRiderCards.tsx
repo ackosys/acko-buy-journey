@@ -191,7 +191,7 @@ function RiderCard({ rider, isSelected, onToggle, onCoverageChange, baseCoverage
             disabled
               ? 'bg-white/5 text-white/30 cursor-not-allowed'
               : isSelected
-                ? 'bg-emerald-400 text-[#1C0B47]'
+                ? 'bg-emerald-400 text-gray-900'
                 : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >
@@ -449,7 +449,7 @@ export function LifeRiderCards({
           className={`w-full py-4 rounded-2xl text-base font-bold transition-all ${
             isAccidentalOverLimit
               ? 'bg-white/10 text-white/30 cursor-not-allowed'
-              : 'bg-white text-[#1C0B47] hover:bg-white/90'
+              : 'bg-purple-700 text-white hover:bg-purple-600'
           }`}
         >
           {riders.some(r => r.selected) ? 'Continue with selected add-ons' : 'Continue without add-ons'}
