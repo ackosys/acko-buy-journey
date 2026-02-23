@@ -20,7 +20,7 @@ interface AckoLogoProps {
   className?: string;
 }
 
-const LOGO_SRC: Record<Exclude<AckoLogoProps['variant'], 'icon'>, string> = {
+const LOGO_SRC: Record<Exclude<NonNullable<AckoLogoProps['variant']>, 'icon'>, string> = {
   'color':         '/brand-logo/acko-color.svg',
   'color-on-dark': '/brand-logo/acko-color-on-dark.svg',
   'white':         '/brand-logo/acko-white.svg',
