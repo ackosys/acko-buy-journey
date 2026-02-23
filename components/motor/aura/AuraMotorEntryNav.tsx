@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AckoLogo from '../../AckoLogo';
 import { VehicleType } from '../../../lib/motor/types';
+import { useMotorStore } from '../../../lib/motor/store';
 
 interface AuraMotorEntryNavProps {
   initialVehicle?: VehicleType;
@@ -13,6 +14,7 @@ interface AuraMotorEntryNavProps {
 
 export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourney, onJumpTo }: AuraMotorEntryNavProps) {
   const [vehicle, setVehicle] = useState<VehicleType>(initialVehicle);
+  const { theme } = useMotorStore();
 
   const jump = (stepId: string) => onJumpTo(stepId, vehicle);
 
@@ -22,7 +24,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #0D0521 0%, #1C0B47 35%, #2A1463 65%, #1C0B47 100%)' }}
+      style={{ background: 'var(--motor-chat-gradient)' }}
     >
       {/* Background orbs */}
       <div className="absolute inset-0 pointer-events-none select-none">
@@ -35,7 +37,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8 relative z-10">
-        <AckoLogo variant="white" className="h-8" />
+        <AckoLogo variant={theme === 'light' ? 'color' : 'white'} className="h-8" />
         <span className="text-[10px] bg-white/10 text-purple-200 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-white/10">
           Prototype
         </span>
@@ -222,7 +224,11 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, type: 'spring', damping: 25, stiffness: 300 }}
         className="fixed bottom-0 left-0 right-0 z-20"
-        style={{ background: 'linear-gradient(to top, #0D0521 60%, transparent)' }}
+        style={{
+          background: theme === 'light'
+            ? 'linear-gradient(to top, #F5F3FF 60%, transparent)'
+            : 'linear-gradient(to top, #0D0521 60%, transparent)',
+        }}
       >
         <div className="max-w-lg mx-auto px-6 pb-6 pt-8">
           <button
@@ -230,7 +236,9 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
             className="w-full py-3.5 rounded-2xl text-white font-semibold text-[15px] transition-all active:scale-[0.98]"
             style={{
               background: 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)',
-              boxShadow: '0 8px 32px rgba(168,85,247,0.4)',
+              boxShadow: theme === 'light'
+                ? '0 4px 16px rgba(124,58,237,0.25)'
+                : '0 8px 32px rgba(168,85,247,0.4)',
             }}
           >
             Start the journey

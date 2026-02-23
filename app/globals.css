@@ -88,7 +88,7 @@
   }
 
   .gradient-purple {
-    background: linear-gradient(135deg, #4E29BB 0%, #2E1773 50%, #18084A 100%);
+    background: var(--app-home-gradient, linear-gradient(135deg, #4E29BB 0%, #2E1773 50%, #18084A 100%));
   }
 
   .gradient-purple-light {
@@ -250,8 +250,11 @@
 .app-light .text-purple-200\/70 { color: var(--app-text-muted) !important; }
 .app-light .text-purple-200\/80 { color: var(--app-text-muted) !important; }
 .app-light .text-purple-200\/60 { color: var(--app-text-subtle) !important; }
-.app-light .text-purple-300 { color: #7C3AED !important; }
-.app-light .text-purple-300\/60 { color: rgba(124,58,237,0.6) !important; }
+.app-light .text-purple-300 { color: #6D28D9 !important; }
+.app-light .text-purple-300\/80 { color: rgba(64,64,64,0.9) !important; }
+.app-light .text-purple-300\/60 { color: rgba(51,50,52,0.75) !important; }
+.app-light .text-purple-300\/50 { color: rgba(38,38,38,0.5) !important; }
+.app-light .text-purple-400\/40 { color: rgba(109,40,217,0.55) !important; }
 .app-light .border-\[\#1C0B47\] { border-color: var(--app-header-bg) !important; }
 
 /* Light-mode: fractional alpha backgrounds that vanish on light bg */
@@ -287,6 +290,37 @@
 
 .animate-pulse-ring {
   animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* ── IDV Range Slider ── */
+.idv-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+}
+.idv-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2.5px solid #4ade80;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.idv-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2.5px solid #4ade80;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  border: none;
 }
 
 /* ── Reduced Motion ── */
@@ -341,6 +375,9 @@
   --motor-user-bubble-bg: #FFFFFF;
   --motor-user-bubble-text: #1C0B47;
   --motor-progress-gradient: linear-gradient(90deg, #A855F7, #C084FC);
+  --motor-plan-rec-header-bg: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.06));
+  --motor-plan-rec-badge: #C084FC;
+  --motor-plan-rec-check: #34D399;
 }
 
 .motor-dark {
@@ -370,6 +407,9 @@
   --motor-user-bubble-bg: #FFFFFF;
   --motor-user-bubble-text: #1C0B47;
   --motor-progress-gradient: linear-gradient(90deg, #A855F7, #C084FC);
+  --motor-plan-rec-header-bg: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.06));
+  --motor-plan-rec-badge: #C084FC;
+  --motor-plan-rec-check: #34D399;
 }
 
 .motor-light {
@@ -399,6 +439,9 @@
   --motor-user-bubble-bg: linear-gradient(0deg, #5920C5 0%, #7C47E1 100%);
   --motor-user-bubble-text: #FFFFFF;
   --motor-progress-gradient: linear-gradient(90deg, #7C3AED, #A855F7);
+  --motor-plan-rec-header-bg: linear-gradient(135deg, #EDE9FE 0%, #F3E8FF 50%, #F5F3FF 100%);
+  --motor-plan-rec-badge: #6D28D9;
+  --motor-plan-rec-check: #059669;
 }
 
 /* ══════════════════════════════════════════════════
@@ -467,6 +510,17 @@
   filter: brightness(0) invert(1) !important;
   opacity: 0.85 !important;
 }
+
+/* ── Purple text variants ── */
+.motor-light .text-purple-200 { color: #5B21B6 !important; }
+.motor-light .text-purple-200\/70,
+.motor-light .text-purple-200\/80 { color: var(--motor-text-muted) !important; }
+.motor-light .text-purple-200\/60 { color: var(--motor-text-subtle) !important; }
+.motor-light .text-purple-300 { color: #6D28D9 !important; }
+.motor-light .text-purple-300\/80 { color: rgba(64,64,64,0.9) !important; }
+.motor-light .text-purple-300\/60 { color: rgba(51,50,52,0.75) !important; }
+.motor-light .text-purple-300\/50 { color: rgba(38,38,38,0.5) !important; }
+.motor-light .text-purple-400\/40 { color: rgba(109,40,217,0.55) !important; }
 
 /* ── Hardcoded dark-only backgrounds ── */
 .motor-light .bg-\[\#2a1a5e\],
@@ -541,6 +595,9 @@
   --aura-input-border: rgba(255,255,255,0.1);
   --aura-input-text: #FFFFFF;
   --aura-input-placeholder: rgba(255,255,255,0.3);
+  --motor-plan-rec-header-bg: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.06));
+  --motor-plan-rec-badge: #C084FC;
+  --motor-plan-rec-check: #34D399;
 }
 
 .aura-light {
@@ -579,6 +636,9 @@
   --aura-input-border: rgba(0,0,0,0.1);
   --aura-input-text: #1C0B47;
   --aura-input-placeholder: rgba(0,0,0,0.3);
+  --motor-plan-rec-header-bg: linear-gradient(135deg, #EDE9FE 0%, #F3E8FF 50%, #F5F3FF 100%);
+  --motor-plan-rec-badge: #6D28D9;
+  --motor-plan-rec-check: #059669;
 }
 
 /* ── Aura light — same Tailwind utility overrides ── */

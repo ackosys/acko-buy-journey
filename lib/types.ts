@@ -271,6 +271,9 @@ export interface JourneyState {
   /* ── Dashboard Tracking State ── */
   dashboardSubmittedClaims: { id: string; type: string; hospital: string; member: string; reason: string; amount: string; date: string; status: string; submittedAt: number }[];
   dashboardSubmittedEdits: { id: string; type: string; summary: string; status: string; submittedAt: number }[];
+
+  /* ── Theme ── */
+  theme: 'midnight' | 'dark' | 'light';
 }
 
 export interface ChatMessage {
@@ -353,4 +356,5 @@ export const INITIAL_STATE: JourneyState = {
   dashboardNewSumInsured: '',
   dashboardSubmittedClaims: [],
   dashboardSubmittedEdits: [],
+  theme: 'midnight',
 };

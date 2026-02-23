@@ -192,7 +192,7 @@ export function LifeMultiSelect({ options, onSelect }: { options: Option[]; onSe
       <button
         onClick={() => selected.length > 0 && onSelect(selected.join(','))}
         disabled={selected.length === 0}
-        className="mt-4 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all hover:bg-white/90 active:scale-[0.97]"
+        className="mt-4 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all active:scale-[0.97]"
       >
         Continue
       </button>
@@ -275,7 +275,7 @@ export function LifeNumberInput({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         onClick={handleSubmit}
-        className="w-full mt-3 py-3 rounded-xl bg-white text-[#1C0B47] text-label-lg font-semibold active:scale-[0.97] transition-transform"
+        className="w-full mt-3 py-3 rounded-xl bg-purple-700 text-white hover:bg-purple-600 text-label-lg font-semibold active:scale-[0.97] transition-transform"
       >
         Continue
       </motion.button>
@@ -336,7 +336,7 @@ export function LifeTextInput({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         onClick={handleSubmit}
-        className="w-full mt-3 py-3 rounded-xl bg-white text-[#1C0B47] text-label-lg font-semibold active:scale-[0.97] transition-transform"
+        className="w-full mt-3 py-3 rounded-xl bg-purple-700 text-white hover:bg-purple-600 text-label-lg font-semibold active:scale-[0.97] transition-transform"
       >
         Continue
       </motion.button>
@@ -438,7 +438,7 @@ export function LifeDatePicker({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         onClick={handleSubmit}
-        className="w-full mt-3 py-3 rounded-xl bg-white text-[#1C0B47] text-label-lg font-semibold active:scale-[0.97] transition-transform"
+        className="w-full mt-3 py-3 rounded-xl bg-purple-700 text-white hover:bg-purple-600 text-label-lg font-semibold active:scale-[0.97] transition-transform"
       >
         Continue
       </motion.button>
@@ -600,7 +600,7 @@ export function LifeCoverageCard({ coverageAmount, policyTerm, coversTillAge, br
 
       <button
         onClick={onContinue}
-        className="mt-4 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold transition-all hover:bg-white/90 active:scale-[0.97]"
+        className="mt-4 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-all active:scale-[0.97]"
       >
         Continue
       </button>
@@ -1468,7 +1468,7 @@ export function EkycAadhaarInput({ onSubmit }: { onSubmit: (aadhaar: string) => 
       {error && <p className="text-caption text-red-400">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-all active:scale-[0.97]"
+        className="w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-all active:scale-[0.97]"
       >
         Send OTP
       </button>
@@ -1572,7 +1572,7 @@ export function EkycOtpInput({ maskedMobile, onSubmit, onResend }: { maskedMobil
       <button
         onClick={handleSubmit}
         disabled={otp.length < 6}
-        className="w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-all active:scale-[0.97] disabled:opacity-40"
+        className="w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-all active:scale-[0.97] disabled:opacity-40"
       >
         Verify OTP
       </button>

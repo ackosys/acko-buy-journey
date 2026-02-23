@@ -345,7 +345,7 @@ export default function ChatContainer() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 chat-bg-dark">
+    <div className="flex-1 flex flex-col min-h-0" style={{ background: 'var(--motor-chat-gradient)' }}>
       {/* Scrollable chat messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-lg mx-auto">
@@ -388,7 +388,8 @@ export default function ChatContainer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+            className="shrink-0 shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+              style={{ background: 'var(--motor-glass-bg)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderTop: '1px solid var(--motor-border)' }}
           >
             <div className="max-w-lg mx-auto px-5 py-5 pb-8">
               {renderWidget()}
@@ -412,7 +413,8 @@ export default function ChatContainer() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto bg-[#2A1463] border border-white/15 rounded-2xl shadow-2xl z-50 p-6"
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto border border-white/15 rounded-2xl shadow-2xl z-50 p-6"
+              style={{ background: 'var(--motor-glass-bg)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
             >
               <div className="text-center">
                 <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -433,7 +435,7 @@ export default function ChatContainer() {
                   </button>
                   <button
                     onClick={confirmEdit}
-                    className="flex-1 py-2.5 bg-white text-[#1C0B47] rounded-xl text-label-md font-medium hover:bg-white/90 transition-colors"
+                    className="flex-1 py-2.5 bg-purple-700 text-white rounded-xl text-label-md font-medium hover:bg-purple-600 transition-colors"
                   >
                     Edit answer
                   </button>
@@ -460,11 +462,12 @@ export default function ChatContainer() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 60 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className={`fixed inset-x-0 z-50 bg-[#1E0F46] border-t border-white/10 shadow-2xl px-5 py-6 max-w-lg mx-auto ${
+              className={`fixed inset-x-0 z-50 border-t border-white/10 shadow-2xl px-5 py-6 max-w-lg mx-auto ${
                 isLargeEditWidget()
                   ? 'bottom-0 top-16 rounded-t-2xl overflow-y-auto pb-10'
                   : 'bottom-0 rounded-t-2xl pb-10'
               }`}
+              style={{ background: 'var(--motor-glass-bg)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
             >
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-label-md font-semibold text-white/80">Update your answer</h4>

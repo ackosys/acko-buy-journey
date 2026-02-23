@@ -99,8 +99,6 @@ function LifeSplashScreen({ onDone }: { onDone: () => void }) {
 function LifeJourneyInner() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
-  const theme = useThemeStore((s) => s.theme);
-  const isLight = theme === 'light';
 
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);

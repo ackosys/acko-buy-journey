@@ -512,7 +512,8 @@ export default function EkycChatFlow({ onComplete }: EkycChatFlowProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+            className="shrink-0 shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+              style={{ background: 'var(--motor-glass-bg)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderTop: '1px solid var(--motor-border)' }}
           >
             <div className="max-w-lg mx-auto px-5 py-5 pb-8">
               <EkycInputWidget {...ekyc} />

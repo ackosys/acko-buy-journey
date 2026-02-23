@@ -240,7 +240,7 @@ export function MultiSelect({ options, onSelect }: { options: Option[]; onSelect
       <button
         onClick={() => selected.length > 0 && onSelect(selected)}
         disabled={selected.length === 0}
-        className="mt-4 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all hover:bg-white/90 active:scale-[0.97]"
+        className="mt-4 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all active:scale-[0.97]"
       >
         {t.common.continue}
       </button>
@@ -284,7 +284,7 @@ export function NumberInput({ placeholder, subText, inputType = 'number', min, m
       />
       {subText && <p className="text-caption text-white/40 mt-1.5">{subText}</p>}
       {error && <p className="text-caption text-red-400 mt-1">{error}</p>}
-      <button onClick={handleSubmit} className="mt-3 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]">
+      <button onClick={handleSubmit} className="mt-3 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-colors active:scale-[0.97]">
         {t.common.continue}
       </button>
     </div>
@@ -323,7 +323,7 @@ export function PincodeInput({ placeholder, onSubmit }: { placeholder: string; o
       </div>
       {error && <p className="text-caption text-red-400 mt-1.5">{error}</p>}
       <button onClick={handleSubmit} disabled={value.length !== 6}
-        className="mt-3 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 disabled:opacity-40 transition-all active:scale-[0.97]">
+        className="mt-3 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all active:scale-[0.97]">
         {t.widgets.findHospitals}
       </button>
     </div>
@@ -924,7 +924,7 @@ export function HospitalList({ onContinue }: { onContinue: () => void }) {
           </button>
         )}
       </div>
-      <button onClick={onContinue} className="mt-3 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-colors active:scale-[0.97]">
+      <button onClick={onContinue} className="mt-3 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-colors active:scale-[0.97]">
         {t.common.continue}
       </button>
     </div>
@@ -1225,7 +1225,7 @@ export function UspCards({ onContinue }: { onContinue: () => void }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
         onClick={onContinue}
-        className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold hover:bg-white/90 transition-colors active:scale-[0.97] flex items-center justify-center gap-2"
+        className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold transition-colors active:scale-[0.97] flex items-center justify-center gap-2"
       >
         {t.widgets.letsFindPlan}
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -1383,7 +1383,7 @@ export function ConsentWidget({ onConfirm }: { onConfirm: () => void }) {
         </span>
       </label>
       <button onClick={onConfirm} disabled={!agreed}
-        className="mt-4 w-full py-3 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold disabled:opacity-40 hover:bg-white/90 transition-all active:scale-[0.97]">
+        className="mt-4 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all active:scale-[0.97]">
         {t.widgets.confirmAndProceed}
       </button>
     </div>
@@ -1671,7 +1671,7 @@ export function LabScheduleWidget({ onComplete }: { onComplete: () => void }) {
         </div>
       </div>
       <button onClick={onComplete} disabled={!selectedDate || !selectedTime || !selectedLab}
-        className="w-full py-3.5 bg-white text-[#1C0B47] rounded-xl text-label-lg font-semibold disabled:opacity-40 hover:bg-white/90 transition-all active:scale-[0.97]">
+        className="w-full py-3.5 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all active:scale-[0.97]">
         {t.widgets.confirmBooking}
       </button>
     </motion.div>
@@ -1701,7 +1701,7 @@ export function Celebration() {
       <p className="text-body-md text-white/60 mb-6">{t.widgets.healthJourneyInMotion}</p>
       <div className="flex gap-3">
         <button className="flex-1 py-3 border border-white/20 text-white/90 rounded-xl text-label-md font-medium hover:bg-white/10 transition-colors">{t.widgets.viewDashboard}</button>
-        <button className="flex-1 py-3 bg-white text-[#1C0B47] rounded-xl text-label-md font-medium hover:bg-white/90 transition-colors">{t.widgets.downloadApp}</button>
+        <button className="flex-1 py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-md font-medium transition-colors">{t.widgets.downloadApp}</button>
       </div>
     </motion.div>
   );

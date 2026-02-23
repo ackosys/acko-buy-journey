@@ -171,7 +171,8 @@ export function calculateZeroDepPremium(
 export function getMotorPlanDetails(
   state: MotorJourneyState,
   planType: MotorPlanType,
-  garageTier?: GarageTier
+  garageTier?: GarageTier,
+  idvOverride?: number
 ): MotorPlanDetails {
   const { vehicleType, vehicleData, previousPolicy } = state;
   
@@ -181,7 +182,7 @@ export function getMotorPlanDetails(
   const vehicleAge = vehicleData.registrationYear ? new Date().getFullYear() - vehicleData.registrationYear : 3;
   
   const idvData = calculateIDV(makePrice, vehicleAge);
-  const idv = idvData.recommended;
+  const idv = idvOverride !== undefined ? idvOverride : idvData.recommended;
   const ncb = previousPolicy.ncbPercentage || 0;
   
   const tpPremium = calculateTPPremium(vehicleType || 'car', engineCC);

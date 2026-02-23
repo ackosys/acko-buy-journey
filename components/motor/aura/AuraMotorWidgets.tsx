@@ -2131,12 +2131,12 @@ export function PlanRecommendation({ onSelect }: { onSelect: (response: any) => 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm space-y-3">
       <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)' }}>
-        <div className="px-4 py-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05))' }}>
+        <div className="px-4 py-3" style={{ background: 'var(--motor-plan-rec-header-bg)' }}>
           <div className="flex items-center gap-2 mb-1">
-            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--motor-plan-rec-badge)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
-            <span className="text-[12px] font-semibold text-purple-400">Recommended for you</span>
+            <span className="text-[12px] font-semibold" style={{ color: 'var(--motor-plan-rec-badge)' }}>Recommended for you</span>
           </div>
           <h3 className="text-[18px] font-bold" style={{ color: 'var(--aura-text)' }}>{planLabel} Plan</h3>
           {matchedPlan && (
@@ -2150,7 +2150,7 @@ export function PlanRecommendation({ onSelect }: { onSelect: (response: any) => 
         <div className="px-4 py-3 space-y-2">
           {matchedPlan?.features?.slice(0, 4).map((f: any, i: number) => (
             <div key={i} className="flex items-start gap-2">
-              <svg className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: 'var(--motor-plan-rec-check)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span className="text-[13px]" style={{ color: 'var(--aura-text)' }}>{f.label || f}</span>
@@ -2244,42 +2244,80 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
           <p className="text-[12px] text-[var(--aura-text-muted)]">Recommended for you</p>
         </div>
 
-        {addons.map((addon: any) => {
+        {addons.map((addon: any, index: number) => {
           const selected = isSelected(addon.id);
           const selectedItem = selectedItems.get(addon.id);
           const displayPrice = selectedItem?.price || addon.price;
           const variantName = selectedItem?.variantId ? addon.variants?.find((v: any) => v.id === selectedItem.variantId)?.name : null;
 
           return (
-            <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[var(--aura-surface-2)] border-[#A855F7]/30' : 'bg-[var(--aura-surface)] border-[var(--aura-border)] hover:border-[var(--aura-border-strong)]'}`}>
+            <motion.div
+              key={addon.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, scale: selected ? 1.02 : 1 }}
+              transition={{
+                opacity: { delay: index * 0.05, duration: 0.3 },
+                y: { delay: index * 0.05, type: 'spring', stiffness: 300, damping: 24 },
+                scale: { type: 'spring', stiffness: 400, damping: 30 },
+              }}
+              className={`p-4 rounded-xl border ${selected ? 'bg-[var(--aura-surface-2)] border-[#A855F7]/30' : 'bg-[var(--aura-surface)] border-[var(--aura-border)] hover:border-[var(--aura-border-strong)]'}`}
+              style={{ transition: 'background 0.25s ease, border-color 0.25s ease' }}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-[14px] font-semibold text-[var(--aura-text)]">{addon.name}</h4>
                     {addon.hasVariants && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/15 px-2 py-0.5 rounded-full">2 options</span>}
                     {addon.recommended && <span className="text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">Recommended</span>}
+                    {selected && (
+                      <motion.span
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                        className="text-[10px] text-green-300 bg-green-500/25 px-2 py-0.5 rounded-full flex items-center gap-1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        Added
+                      </motion.span>
+                    )}
                   </div>
                   <p className="text-[12px] text-[var(--aura-text-muted)] leading-relaxed">{addon.description}</p>
                   {selected && variantName && <p className="text-[11px] text-[#C084FC] mt-1">Selected: {variantName}</p>}
                 </div>
                 <div className="flex flex-col items-end gap-2 ml-4">
                   <p className="text-[14px] font-bold text-[var(--aura-text)] whitespace-nowrap">₹{displayPrice}</p>
-                  <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'}`}>
-                    {selected ? '−' : '+'}
-                  </button>
+                  <motion.button
+                    onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)}
+                    whileTap={{ scale: 0.92 }}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'}`}
+                  >
+                    {selected ? (
+                      <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 25 }}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </motion.span>
+                    ) : (
+                      <span>+</span>
+                    )}
+                  </motion.button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
 
-        <div className="mt-6 p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)]">
+        <motion.div
+          key={`total-${totals.addonTotal}`}
+          initial={{ scale: 0.98, opacity: 0.9 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="mt-6 p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)]"
+        >
           <div className="space-y-2 text-[13px]">
             <div className="flex justify-between text-[var(--aura-text-muted)]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
             {totals.addonTotal > 0 && (<><div className="flex justify-between text-[var(--aura-text-muted)]"><span>Add-ons</span><span>₹{totals.addonTotal.toLocaleString()}</span></div><div className="flex justify-between text-[var(--aura-text-muted)]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
             <div className="border-t border-[var(--aura-border)] pt-2 flex justify-between font-bold text-[var(--aura-text)] text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
@@ -2291,10 +2329,11 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[var(--aura-border)]">
               <div className="p-5">
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
                 <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-1">Select {showVariantModal.addon.name} variant</h3>
-                <p className="text-[12px] text-[var(--aura-text-muted)] mb-4">{showVariantModal.addon.description}</p>
+                <p className="text-[12px] text-[var(--aura-text-muted)] mb-5">{showVariantModal.addon.description}</p>
                 <div className="space-y-3">
                   {showVariantModal.addon.variants?.map((variant: any) => (
                     <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
@@ -2384,32 +2423,64 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
 
   const totals = calculateTotal();
 
-  const renderAddonCard = (addon: any) => {
+  const renderAddonCard = (addon: any, index: number) => {
     const selected = isSelected(addon.id);
     const selectedItem = selectedItems.get(addon.id);
     const displayPrice = selectedItem?.price || addon.price;
     const variantName = selectedItem?.variantId ? addon.variants?.find((v: any) => v.id === selectedItem.variantId)?.name : null;
 
     return (
-      <div key={addon.id} className={`p-4 rounded-xl border transition-all ${selected ? 'bg-[var(--aura-surface-2)] border-[#A855F7]/30' : 'bg-[var(--aura-surface)] border-[var(--aura-border)] hover:border-[var(--aura-border-strong)]'}`}>
+      <motion.div
+        key={addon.id}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0, scale: selected ? 1.02 : 1 }}
+        transition={{
+          opacity: { delay: index * 0.05, duration: 0.3 },
+          y: { delay: index * 0.05, type: 'spring', stiffness: 300, damping: 24 },
+          scale: { type: 'spring', stiffness: 400, damping: 30 },
+        }}
+        className={`p-4 rounded-xl border ${selected ? 'bg-[var(--aura-surface-2)] border-[#A855F7]/30' : 'bg-[var(--aura-surface)] border-[var(--aura-border)] hover:border-[var(--aura-border-strong)]'}`}
+        style={{ transition: 'background 0.25s ease, border-color 0.25s ease' }}
+      >
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h4 className="text-[14px] font-semibold text-[var(--aura-text)]">{addon.name}</h4>
               {addon.hasVariants && <span className="text-[10px] text-[#C084FC] bg-[#A855F7]/15 px-2 py-0.5 rounded-full">2 options</span>}
               {addon.mandatory && <span className="text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-full">Mandatory by law</span>}
+              {selected && (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  className="text-[10px] text-green-300 bg-green-500/25 px-2 py-0.5 rounded-full flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  Added
+                </motion.span>
+              )}
             </div>
             <p className="text-[12px] text-[var(--aura-text-muted)] leading-relaxed">{addon.description}</p>
             {selected && variantName && <p className="text-[11px] text-[#C084FC] mt-1">Selected: {variantName}</p>}
           </div>
           <div className="flex flex-col items-end gap-2 ml-4">
             <p className="text-[14px] font-bold text-[var(--aura-text)] whitespace-nowrap">{addon.hasVariants ? 'from ' : ''}₹{displayPrice}</p>
-            <button onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'}`}>
-              {selected ? '−' : '+'}
-            </button>
+            <motion.button
+              onClick={() => selected ? removeAddon(addon.id) : toggleAddon(addon)}
+              whileTap={{ scale: 0.92 }}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${selected ? 'bg-[#A855F7] text-white hover:bg-[#7E22CE]' : 'bg-[var(--aura-surface-2)] text-[var(--aura-text-muted)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)]'}`}
+            >
+              {selected ? (
+                <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 25 }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </motion.span>
+              ) : (
+                <span>+</span>
+              )}
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
@@ -2420,28 +2491,34 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
           <h3 className="text-[16px] font-bold text-[var(--aura-text)] mb-1">Protect everyone in your {vType}</h3>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 space-y-3">
           <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">For you</p>
-          {addons.filter((a: any) => a.id === 'personal_accident').map(renderAddonCard)}
+          {addons.filter((a: any) => a.id === 'personal_accident').map((a, i) => renderAddonCard(a, i))}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 space-y-3">
           <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">For your loved ones</p>
-          {addons.filter((a: any) => a.id === 'passenger_protection').map(renderAddonCard)}
+          {addons.filter((a: any) => a.id === 'passenger_protection').map((a, i) => renderAddonCard(a, i))}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 space-y-3">
           <p className="text-[13px] font-semibold text-[var(--aura-text-muted)] mb-3">For your driver</p>
-          {addons.filter((a: any) => a.id === 'paid_driver').map(renderAddonCard)}
+          {addons.filter((a: any) => a.id === 'paid_driver').map((a, i) => renderAddonCard(a, i))}
         </div>
 
-        <div className="mt-6 p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)]">
+        <motion.div
+          key={`total-${totals.totalAddons}`}
+          initial={{ scale: 0.98, opacity: 0.9 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="mt-6 p-4 bg-[var(--aura-surface)] rounded-xl border border-[var(--aura-border)]"
+        >
           <div className="space-y-2 text-[13px]">
             <div className="flex justify-between text-[var(--aura-text-muted)]"><span>Base Premium</span><span>₹{totals.basePremium.toLocaleString()}</span></div>
             {totals.totalAddons > 0 && (<><div className="flex justify-between text-[var(--aura-text-muted)]"><span>Add-ons</span><span>₹{totals.totalAddons.toLocaleString()}</span></div><div className="flex justify-between text-[var(--aura-text-muted)]"><span>GST (18%)</span><span>₹{totals.gst.toLocaleString()}</span></div></>)}
             <div className="border-t border-[var(--aura-border)] pt-2 flex justify-between font-bold text-[var(--aura-text)] text-[15px]"><span>Total</span><span>₹{totals.total.toLocaleString()}</span></div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
@@ -2452,10 +2529,11 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
       <AnimatePresence>
         {showVariantModal.show && showVariantModal.addon && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowVariantModal({ addon: null, show: false })}>
-            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl">
+            <motion.div initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[var(--aura-border)]">
               <div className="p-5">
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
                 <h3 className="text-[18px] font-bold text-[var(--aura-text)] mb-1">Select Personal Accident coverage amount</h3>
-                <p className="text-[12px] text-[var(--aura-text-muted)] mb-4">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
+                <p className="text-[12px] text-[var(--aura-text-muted)] mb-5">Accidents can result in death or permanent disability. A Personal Accident Cover protects the owner-driver in such situations.</p>
                 <div className="space-y-3">
                   {showVariantModal.addon.variants?.map((variant: any) => (
                     <button key={variant.id} onClick={() => selectVariant(showVariantModal.addon, variant)} className="w-full p-4 bg-[var(--aura-surface)] hover:bg-[var(--aura-surface-2)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl text-left transition-all group">
@@ -2686,44 +2764,44 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         </button>
       </motion.div>
 
-      {/* Source selector bottom sheet */}
+      {/* Source selector bottom sheet — same pattern as Garage Tier / variant modals */}
       <AnimatePresence>
         {sourceSheet && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-end"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
             onClick={() => setSourceSheet(null)}
           >
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-h-[45vh] flex flex-col"
-              style={{ background: 'var(--aura-surface)', borderRadius: '20px 20px 0 0', border: '1px solid var(--aura-border)' }}
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md max-h-[45vh] overflow-y-auto bg-[var(--aura-surface)] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[var(--aura-border)]"
             >
-              <div className="flex-shrink-0 pt-3 pb-2 px-5">
-                <div className="w-10 h-1 bg-white/10 rounded-full mx-auto mb-4" />
+              <div className="p-5">
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
                 <p className="text-[16px] font-semibold text-[var(--aura-text)] mb-1">Select a source</p>
-                <p className="text-[12px] text-[var(--aura-text-subtle)]">in PNG, JPEG, or PDF format (Max 10 MB)</p>
-              </div>
-              <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-2">
+                <p className="text-[12px] text-[var(--aura-text-subtle)] mb-5">in PNG, JPEG, or PDF format (Max 10 MB)</p>
+              <div className="space-y-2">
                 {DOC_SOURCE_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     onClick={() => handleSourceSelect(opt.id)}
-                    className="w-full flex items-center gap-4 p-4 bg-[var(--aura-surface-2)] hover:bg-[#383842] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl transition-all text-left"
+                    className="w-full flex items-center gap-4 p-4 bg-[var(--aura-surface-2)] hover:bg-[var(--aura-surface-hover)] border border-[var(--aura-border)] hover:border-[#A855F7]/30 rounded-xl transition-all text-left"
                   >
-                    <span className="text-2xl">{opt.icon}</span>
+                    <span className="text-2xl w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-[var(--aura-surface-2)]">{opt.icon}</span>
                     <span className="text-[14px] font-medium text-[var(--aura-text)]">{opt.label}</span>
                     <svg className="w-4 h-4 text-[var(--aura-text-subtle)] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </button>
                 ))}
+              </div>
+              <button onClick={() => setSourceSheet(null)} className="w-full mt-4 py-3 text-[14px] text-[var(--aura-text-muted)] hover:text-[var(--aura-text)] transition-colors">Cancel</button>
               </div>
             </motion.div>
           </motion.div>

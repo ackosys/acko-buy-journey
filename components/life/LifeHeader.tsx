@@ -48,11 +48,7 @@ export default function LifeHeader() {
             title={t.header.talkToExpert}
           >
             <div className="w-7 h-7 rounded-full overflow-hidden">
-              <img
-                src={assetPath('/life-expert.png')}
-                alt="Expert"
-                className="w-full h-full object-cover"
-              />
+              <img src={assetPath('/life-expert.png')} alt="Expert" className="w-full h-full object-cover" />
             </div>
             <span className="text-xs font-medium" style={{ color: 'var(--app-text)', opacity: 0.9 }}>Expert</span>
           </button>
