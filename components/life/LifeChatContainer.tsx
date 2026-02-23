@@ -26,12 +26,12 @@ import {
   LifeCelebration,
   LifeCoverageInput,
   LifePaymentScreen,
-  LifeFinancialScreen,
-  LifeMedicalScreen,
   LifeUnderwritingStatus,
 } from './LifeChatWidgets';
 import { LifeRiderCards } from './LifeRiderCards';
 import { useEkycFlow, EkycInlineMessages, EkycInputWidget } from '../ekyc/EkycChatFlow';
+import { useFinancialFlow, FinancialInlineMessages, FinancialInputWidget } from './FinancialChatFlow';
+import { useMedicalFlow, MedicalInlineMessages, MedicalInputWidget } from './MedicalChatFlow';
 import type { LifeJourneyState } from '../../lib/life/types';
 
 export default function LifeChatContainer() {
@@ -54,7 +54,13 @@ export default function LifeChatContainer() {
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
 
   const isEkycStep = currentStepId === 'life_ekyc';
+  const isFinancialStep = currentStepId === 'life_financial';
+  const isMedicalStep = currentStepId === 'life_medical_eval';
+  const isChatFlowStep = isEkycStep || isFinancialStep || isMedicalStep;
+
   const ekyc = useEkycFlow(() => handleResponse('continue'), { skipIntro: true });
+  const financial = useFinancialFlow(() => handleResponse('continue'));
+  const medical = useMedicalFlow(() => handleResponse('continue'));
 
   // Scroll to bottom on new content
   useEffect(() => {
@@ -64,7 +70,7 @@ export default function LifeChatContainer() {
         behavior: 'smooth',
       });
     }, 100);
-  }, [conversationHistory, isTyping, showWidget, ekyc.state.messages]);
+  }, [conversationHistory, isTyping, showWidget, ekyc.state.messages, financial.state.messages, medical.state.messages]);
 
   // Process current step — bot messages + auto-advance for 'none' widgets
   useEffect(() => {
@@ -252,7 +258,7 @@ export default function LifeChatContainer() {
   const isLargeWidget = () => {
     const step = getLifeStep(currentStepId);
     if (!step) return false;
-    return ['coverage_card', 'premium_summary', 'rider_cards', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'financial_screen', 'medical_screen', 'underwriting_status'].includes(step.widgetType);
+    return ['coverage_card', 'premium_summary', 'rider_cards', 'review_summary', 'post_payment_timeline', 'celebration', 'coverage_input', 'payment_screen', 'underwriting_status'].includes(step.widgetType);
   };
 
   // Render edit widget
@@ -319,13 +325,9 @@ export default function LifeChatContainer() {
       case 'payment_screen':
         return <LifePaymentScreen onContinue={() => handleResponse('continue')} />;
       case 'ekyc_screen':
-        // e-KYC is special - messages inline, input at bottom
-        // This case is handled specially in the render section
-        return null;
       case 'financial_screen':
-        return <LifeFinancialScreen onContinue={() => handleResponse('continue')} />;
       case 'medical_screen':
-        return <LifeMedicalScreen onContinue={() => handleResponse('continue')} />;
+        return null;
       case 'underwriting_status':
         return <LifeUnderwritingStatus onContinue={() => handleResponse('continue')} />;
       default:
@@ -365,9 +367,15 @@ export default function LifeChatContainer() {
             )}
           </AnimatePresence>
 
-          {/* e-KYC messages render inline in the chat */}
+          {/* Chat flow messages render inline */}
           {showWidget && isEkycStep && (
             <EkycInlineMessages messages={ekyc.state.messages} />
+          )}
+          {showWidget && isFinancialStep && (
+            <FinancialInlineMessages messages={financial.state.messages} />
+          )}
+          {showWidget && isMedicalStep && (
+            <MedicalInlineMessages messages={medical.state.messages} />
           )}
 
           <div className="h-4" />
@@ -376,7 +384,7 @@ export default function LifeChatContainer() {
 
       {/* Sticky bottom widget for input-type widgets */}
       <AnimatePresence>
-        {showWidget && !isLargeWidget() && !isEkycStep && (
+        {showWidget && !isLargeWidget() && !isChatFlowStep && (
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -401,6 +409,36 @@ export default function LifeChatContainer() {
           >
             <div className="max-w-lg mx-auto px-5 py-5 pb-8">
               <EkycInputWidget {...ekyc} />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Financial input widget at bottom */}
+        {showWidget && isFinancialStep && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+          >
+            <div className="max-w-lg mx-auto px-5 py-5 pb-8">
+              <FinancialInputWidget {...financial} />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Medical input widget at bottom */}
+        {showWidget && isMedicalStep && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+            className="shrink-0 widget-glass-dark shadow-[0_-4px_40px_rgba(0,0,0,0.3)]"
+          >
+            <div className="max-w-lg mx-auto px-5 py-5 pb-8">
+              <MedicalInputWidget {...medical} />
             </div>
           </motion.div>
         )}
