@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AckoLogo from '../../AckoLogo';
+import ThemeToggle from '../../global/ThemeToggle';
 import { VehicleType } from '../../../lib/motor/types';
 import { useThemeStore } from '../../../lib/themeStore';
 
@@ -38,9 +39,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
       {/* Header */}
       <div className="flex items-center justify-between mb-8 relative z-10">
         <AckoLogo variant={theme === 'light' ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-8" />
-        <span className="text-[10px] bg-white/10 text-purple-200 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-white/10">
-          Prototype
-        </span>
+        <ThemeToggle />
       </div>
 
       <div className="max-w-lg mx-auto w-full relative z-10 flex-1 flex flex-col">
