@@ -89,7 +89,7 @@ export interface BaseJourneyActions<TState extends BaseJourneyState> {
 }
 
 /** LOB identifier for global routing */
-export type LobType = 'health' | 'motor' | 'life' | 'car' | 'bike';
+export type LobType = 'health' | 'motor' | 'life' | 'car' | 'bike' | 'travel';
 
 export interface LobConfig {
   id: LobType;
