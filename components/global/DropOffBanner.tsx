@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
@@ -11,7 +11,6 @@ import {
   type JourneySnapshot,
 } from '../../lib/journeyPersist';
 
-// ── Product theme config ──────────────────────────────────────────────────────
 const PRODUCT_CONFIG: Record<ProductKey, {
   label: string;
   gradient: string;
@@ -94,14 +93,14 @@ function relativeTime(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-// ── Card ──────────────────────────────────────────────────────────────────────
 interface CardProps {
   snap: JourneySnapshot;
   onDismiss: (product: ProductKey) => void;
   onClick: (route: string) => void;
+  isOnly: boolean;
 }
 
-function DropOffCard({ snap, onDismiss, onClick }: CardProps) {
+function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
   const display = getDropOffDisplay(snap);
   if (!display) return null;
 
@@ -109,10 +108,12 @@ function DropOffCard({ snap, onDismiss, onClick }: CardProps) {
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9, x: -20 }}
-      className="relative flex-shrink-0 w-[300px] rounded-2xl overflow-hidden"
+      transition={{ duration: 0.3 }}
+      className={`relative flex-shrink-0 rounded-2xl overflow-hidden ${isOnly ? 'w-full' : 'w-[85vw] max-w-[320px]'}`}
       style={{
         background: config.gradient,
         boxShadow: `0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)`,
@@ -121,21 +122,21 @@ function DropOffCard({ snap, onDismiss, onClick }: CardProps) {
       {/* Dismiss */}
       <button
         onClick={(e) => { e.stopPropagation(); onDismiss(snap.product); }}
-        className="absolute top-3 right-3 z-10 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+        className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
         aria-label="Dismiss"
       >
-        <svg className="w-3 h-3 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="w-3.5 h-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
 
       {/* Tap area */}
-      <button onClick={() => onClick(display.route)} className="w-full text-left p-4 flex gap-3 items-start">
+      <button onClick={() => onClick(display.route)} className="w-full text-left p-4 pb-4 flex gap-3 items-start">
         {/* Left: text */}
-        <div className="flex-1 flex flex-col gap-2.5 min-w-0">
+        <div className="flex-1 flex flex-col gap-2 min-w-0">
           {/* Product + badge */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: config.accentColor }}>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: config.accentColor }}>
               {config.label}
             </span>
             <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${URGENCY_COLORS[display.urgency]}`}>
@@ -144,32 +145,32 @@ function DropOffCard({ snap, onDismiss, onClick }: CardProps) {
           </div>
 
           {/* Title */}
-          <p className="text-white font-semibold text-[14px] leading-[1.35] pr-5">
+          <p className="text-white font-bold text-[15px] leading-[1.3] pr-6">
             {display.title}
           </p>
 
           {/* Subtitle */}
           {display.subtitle && (
-            <p className="text-white/50 text-[11px] leading-relaxed">{display.subtitle}</p>
+            <p className="text-white/45 text-[11px] leading-relaxed">{display.subtitle}</p>
           )}
 
           {/* CTA + timestamp */}
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2.5 mt-1">
             <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-bold transition-transform active:scale-[0.97]"
               style={{ background: config.accentColor, color: '#0a0a0a' }}
             >
               {display.ctaLabel}
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
-            <span className="text-white/30 text-[10px]">{relativeTime(snap.savedAt)}</span>
+            <span className="text-white/25 text-[10px]">{relativeTime(snap.savedAt)}</span>
           </div>
         </div>
 
         {/* Right: illustration */}
-        <div className="flex-shrink-0 w-[72px] h-[72px] mt-1 opacity-90">
+        <div className="flex-shrink-0 w-[72px] h-[72px] mt-1 opacity-80">
           {config.illustration}
         </div>
       </button>
@@ -177,16 +178,46 @@ function DropOffCard({ snap, onDismiss, onClick }: CardProps) {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 const ALL_PRODUCTS: ProductKey[] = ['health', 'life', 'car', 'bike'];
+
+const DEMO_SNAPSHOTS: JourneySnapshot[] = [
+  {
+    product: 'life',
+    currentStepId: 'life_ekyc',
+    savedAt: new Date(Date.now() - 120000).toISOString(),
+    name: 'Chirag',
+    coverAmount: 10000000,
+    annualPremium: 8900,
+    ekycComplete: false,
+  },
+  {
+    product: 'health',
+    currentStepId: 'recommendation.result',
+    savedAt: new Date(Date.now() - 3600000).toISOString(),
+    userName: 'Chirag',
+    members: [{ relation: 'self', age: 28 }, { relation: 'spouse', age: 26 }],
+    currentPremium: 890,
+    paymentFrequency: 'monthly',
+  },
+  {
+    product: 'car',
+    currentStepId: 'quote.plan_selected',
+    savedAt: new Date(Date.now() - 7200000).toISOString(),
+    vehicleType: 'car',
+    vehicleData: { make: 'Hyundai', model: 'Venue' },
+    registrationNumber: 'KA01AB1234',
+    totalPremium: 12500,
+    selectedPlanType: 'comprehensive',
+  },
+];
 
 export default function DropOffBanner() {
   const router = useRouter();
   const [snapshots, setSnapshots] = useState<JourneySnapshot[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Load real snapshots from localStorage
     const found: JourneySnapshot[] = [];
     for (const product of ALL_PRODUCTS) {
       const snap = loadSnapshot(product);
@@ -194,14 +225,50 @@ export default function DropOffBanner() {
         found.push(snap);
       }
     }
-    // Sort by most recent first
-    found.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
-    setSnapshots(found);
+
+    if (found.length === 0) {
+      const demoFound = DEMO_SNAPSHOTS.filter(s => getDropOffDisplay(s));
+      demoFound.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+      setSnapshots(demoFound);
+    } else {
+      found.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+      setSnapshots(found);
+    }
   }, []);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || snapshots.length <= 1) return;
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.querySelector('[data-card]')?.clientWidth || 300;
+    const gap = 12;
+    const idx = Math.round(scrollLeft / (cardWidth + gap));
+    setActiveIndex(Math.min(idx, snapshots.length - 1));
+  }, [snapshots.length]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  const scrollToIndex = (idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.querySelectorAll('[data-card]')[idx] as HTMLElement | undefined;
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    }
+  };
 
   const handleDismiss = (product: ProductKey) => {
     clearSnapshot(product);
-    setSnapshots(prev => prev.filter(s => s.product !== product));
+    setSnapshots(prev => {
+      const next = prev.filter(s => s.product !== product);
+      if (activeIndex >= next.length) setActiveIndex(Math.max(0, next.length - 1));
+      return next;
+    });
   };
 
   const handleClick = (route: string) => {
@@ -209,6 +276,8 @@ export default function DropOffBanner() {
   };
 
   if (snapshots.length === 0) return null;
+
+  const isOnly = snapshots.length === 1;
 
   return (
     <AnimatePresence>
@@ -226,11 +295,11 @@ export default function DropOffBanner() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
             </span>
-            <p className="text-[12px] font-semibold text-white/80 tracking-wide uppercase">
+            <p className="text-[11px] font-bold text-white/80 tracking-wider uppercase">
               Continue where you left off
             </p>
           </div>
-          <span className="text-[11px] text-white/40">{snapshots.length} pending</span>
+          <span className="text-[11px] text-white/40 font-medium">{snapshots.length} pending</span>
         </div>
 
         {/* Horizontal scroll */}
@@ -239,30 +308,35 @@ export default function DropOffBanner() {
           className="flex gap-3 px-6 overflow-x-auto scrollbar-hide pb-1"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {snapshots.map(snap => (
-              <div key={snap.product} style={{ scrollSnapAlign: 'start' }}>
+              <div key={snap.product} data-card style={{ scrollSnapAlign: 'start' }}>
                 <DropOffCard
                   snap={snap}
                   onDismiss={handleDismiss}
                   onClick={handleClick}
+                  isOnly={isOnly}
                 />
               </div>
             ))}
           </AnimatePresence>
         </div>
 
-        {/* Scroll dots */}
+        {/* Scroll indicators */}
         {snapshots.length > 1 && (
           <div className="flex justify-center gap-1.5 mt-3">
             {snapshots.map((snap, i) => (
-              <div
+              <button
                 key={snap.product}
-                className="h-1 rounded-full transition-all duration-300"
+                onClick={() => scrollToIndex(i)}
+                className="h-1.5 rounded-full transition-all duration-300 hover:opacity-80"
                 style={{
-                  width: i === 0 ? '16px' : '6px',
-                  background: i === 0 ? PRODUCT_CONFIG[snap.product].accentColor : 'rgba(255,255,255,0.2)',
+                  width: i === activeIndex ? '20px' : '6px',
+                  background: i === activeIndex
+                    ? PRODUCT_CONFIG[snap.product].accentColor
+                    : 'rgba(255,255,255,0.2)',
                 }}
+                aria-label={`Scroll to ${PRODUCT_CONFIG[snap.product].label}`}
               />
             ))}
           </div>
