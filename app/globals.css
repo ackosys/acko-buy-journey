@@ -468,8 +468,8 @@
 .motor-light .bg-white\/4,
 .motor-light .bg-white\/5 { background-color: var(--motor-surface) !important; }
 .motor-light .bg-white\/6,
-.motor-light .bg-white\/8,
-.motor-light .bg-white\/10 { background-color: var(--motor-surface-2) !important; }
+.motor-light .bg-white\/8 { background-color: var(--motor-surface-2) !important; }
+.motor-light .bg-white\/10 { background-color: rgba(207,207,207,1) !important; }
 .motor-light .bg-white\/15,
 .motor-light .bg-white\/20 { background-color: var(--motor-surface-hover) !important; }
 
@@ -520,6 +520,7 @@
 .motor-light .text-purple-300\/80 { color: rgba(64,64,64,0.9) !important; }
 .motor-light .text-purple-300\/60 { color: rgba(51,50,52,0.75) !important; }
 .motor-light .text-purple-300\/50 { color: rgba(38,38,38,0.5) !important; }
+.motor-light .text-purple-400\/70 { color: rgba(0,0,0,0.7) !important; }
 .motor-light .text-purple-400\/40 { color: rgba(109,40,217,0.55) !important; }
 
 /* ── Hardcoded dark-only backgrounds ── */
@@ -533,6 +534,9 @@
 /* ── Select element color scheme ── */
 .motor-light select { color-scheme: light !important; }
 
+/* ── NavButton color-variant icon backgrounds → neutral gray in light mode ── */
+.motor-light .bg-amber-500\/20 { background-color: rgba(207,207,207,0.2) !important; }
+
 /* ── Purple/colored Tailwind bg buttons always keep white text ── */
 .motor-light [class*="bg-purple-"],
 .motor-light [class*="bg-violet-"],
@@ -541,6 +545,9 @@
 .motor-light [class*="bg-blue-"] {
   color: #FFFFFF !important;
 }
+
+/* ── NavButton icon text colors → dark in light mode (overrides bg-* white rule above) ── */
+.motor-light .text-violet-300 { color: rgba(0,0,0,1) !important; }
 
 /* ── Inline gradient buttons always keep white text ── */
 .motor-light [style*="linear-gradient"],
