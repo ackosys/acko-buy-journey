@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Option, LifeRider, LifeJourneyState } from '../../lib/life/types';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import { calculateBasePremium } from '../../lib/life/scripts';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 
 /* ═══════════════════════════════════════════════════════
    SVG Icon System — Life-specific icons
@@ -382,9 +383,9 @@ export function LifeDatePicker({
   };
 
   return (
-    <div className="max-w-sm">
+    <div className="w-full">
       <p className="text-body-sm text-white/60 mb-3">{placeholder}</p>
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <input
           ref={dayRef}
           type="number"
@@ -396,7 +397,7 @@ export function LifeDatePicker({
             if (e.target.value.length >= 2) monthRef.current?.focus();
           }}
           maxLength={2}
-          className="flex-1 px-3 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 text-center text-label-lg font-medium transition-colors"
+          className="flex-1 min-w-0 px-2 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 text-center text-sm font-medium transition-colors"
         />
         <input
           ref={monthRef}
@@ -409,7 +410,7 @@ export function LifeDatePicker({
             if (e.target.value.length >= 2) yearRef.current?.focus();
           }}
           maxLength={2}
-          className="flex-1 px-3 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 text-center text-label-lg font-medium transition-colors"
+          className="flex-1 min-w-0 px-2 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 text-center text-sm font-medium transition-colors"
         />
         <input
           ref={yearRef}
@@ -420,7 +421,7 @@ export function LifeDatePicker({
           onChange={(e) => setYear(e.target.value)}
           maxLength={4}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          className="flex-[1.5] px-3 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 text-center text-label-lg font-medium transition-colors"
+          className="flex-[1.3] min-w-0 px-2 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 text-center text-sm font-medium transition-colors"
         />
       </div>
       {error && (
@@ -438,7 +439,7 @@ export function LifeDatePicker({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         onClick={handleSubmit}
-        className="w-full mt-3 py-3 rounded-xl bg-purple-700 text-white hover:bg-purple-600 text-label-lg font-semibold active:scale-[0.97] transition-transform"
+        className="w-full mt-3 py-2.5 rounded-xl bg-purple-700 text-white hover:bg-purple-600 text-sm font-semibold active:scale-[0.97] transition-transform"
       >
         Continue
       </motion.button>
@@ -951,7 +952,26 @@ export function LifePostPaymentTimeline({ onContinue }: { onContinue: () => void
    Celebration — Journey complete animation
    ═══════════════════════════════════════════════════════ */
 
-export function LifeCelebration() {
+export function LifeCelebration({ onDashboard, onContinue }: { onDashboard?: () => void; onContinue?: () => void }) {
+  useEffect(() => {
+    const store = useUserProfileStore.getState();
+    const hasLifePolicy = store.policies.some((p) => p.lob === 'life' && p.active);
+    if (!hasLifePolicy) {
+      const lifeState = useLifeJourneyStore.getState() as LifeJourneyState;
+      store.addPolicy({
+        id: `life_${Date.now()}`,
+        lob: 'life',
+        policyNumber: `ACKO-L-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+        label: 'Term Life Plan',
+        active: true,
+        purchasedAt: new Date().toISOString(),
+        premium: (lifeState as any).monthlyPremium || (lifeState as any).annualPremium || 0,
+        premiumFrequency: (lifeState as any).monthlyPremium ? 'monthly' : 'yearly',
+        details: `₹${((lifeState as any).selectedCoverage ? ((lifeState as any).selectedCoverage / 100000).toFixed(0) + 'L' : '1Cr')} cover`,
+      });
+    }
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -1005,6 +1025,21 @@ export function LifeCelebration() {
           ))}
         </div>
       </motion.div>
+
+      {(onContinue || onDashboard) && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          onClick={onContinue || onDashboard}
+          className="w-full mt-5 py-3.5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-500 active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+        >
+          <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+          Go to Policy Dashboard
+        </motion.button>
+      )}
     </motion.div>
   );
 }

@@ -19,6 +19,7 @@ import LifeHeader from '../../components/life/LifeHeader';
 import { LifeExpertPanel, LifeAIChatPanel } from '../../components/life/LifePanels';
 import AckoLogo from '../../components/AckoLogo';
 
+
 type Screen = 'entry' | 'landing' | 'chat';
 
 /* ═══════════════════════════════════════════════
@@ -112,9 +113,20 @@ function LifeJourneyInner() {
 
   useEffect(() => {
     const resume = searchParams.get('resume') === '1';
+    const screenParam = searchParams.get('screen');
     const snap = resume ? loadSnapshot('life') : null;
 
-    if (snap) {
+    if (screenParam === 'dashboard') {
+      store.updateState({
+        currentStepId: 'life_db.welcome',
+        conversationHistory: [],
+        currentModule: 'dashboard',
+        journeyComplete: true,
+        paymentComplete: true,
+      } as any);
+      setScreen('chat');
+      setShowSplash(false);
+    } else if (snap) {
       store.updateState({
         currentStepId: snap.currentStepId,
         conversationHistory: [],

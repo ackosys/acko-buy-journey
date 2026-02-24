@@ -344,7 +344,7 @@ export default function LifeChatContainer() {
       case 'premium_summary':
         return <LifePremiumSummary onContinue={() => handleResponse('continue')} />;
       case 'celebration':
-        return <LifeCelebration />;
+        return <LifeCelebration onContinue={() => handleResponse('continue')} />;
       case 'coverage_input':
         return <LifeCoverageInput onContinue={() => handleResponse('continue')} />;
       case 'payment_screen':

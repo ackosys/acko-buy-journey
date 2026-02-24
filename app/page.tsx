@@ -12,6 +12,8 @@ import LobSelector from '../components/global/LobSelector';
 import TrustBadges from '../components/global/TrustBadges';
 import ValueProps from '../components/global/ValueProps';
 import DropOffBanner from '../components/global/DropOffBanner';
+import PolicyActionScreen from '../components/global/PolicyActionScreen';
+import { useUserProfileStore, type PolicyLob } from '../lib/userProfileStore';
 import { LobConfig } from '../lib/core/types';
 
 /* ── LOB Configuration ── */
@@ -63,7 +65,21 @@ const LOBS: LobConfig[] = [
   },
 ];
 
-type Screen = 'language' | 'home';
+type Screen = 'language' | 'home' | 'policy_action';
+
+const LOB_ROUTE_MAP: Record<string, string> = {
+  car: '/motor?vehicle=car',
+  bike: '/motor?vehicle=bike',
+  health: '/health',
+  life: '/life',
+};
+
+const LOB_LABEL_MAP: Record<string, string> = {
+  car: 'Car Insurance',
+  bike: 'Bike Insurance',
+  health: 'Health Insurance',
+  life: 'Life Insurance',
+};
 
 export default function GlobalHomepage() {
   const router = useRouter();
@@ -72,6 +88,7 @@ export default function GlobalHomepage() {
   const t = useT();
   const [screen, setScreen] = useState<Screen>('language');
   const [hydrated, setHydrated] = useState(false);
+  const [selectedLob, setSelectedLob] = useState<LobConfig | null>(null);
 
   useEffect(() => {
     setHydrated(true);
@@ -82,7 +99,14 @@ export default function GlobalHomepage() {
   }, []);
 
   const handleLobSelect = (lob: LobConfig) => {
-    if (lob.active) {
+    if (!lob.active) return;
+
+    const lobKey = lob.id as PolicyLob;
+    const profileStore = useUserProfileStore.getState();
+    if (profileStore.isLoggedIn && profileStore.hasActivePolicyInLob(lobKey)) {
+      setSelectedLob(lob);
+      setScreen('policy_action');
+    } else {
       router.push(lob.route);
     }
   };
@@ -186,6 +210,28 @@ export default function GlobalHomepage() {
             </motion.div>
           </div>
         </motion.div>
+      )}
+      {/* Policy Action — intermediate routing screen */}
+      {screen === 'policy_action' && selectedLob && (
+        <PolicyActionScreen
+          key="policy_action"
+          lobId={selectedLob.id}
+          lobLabel={LOB_LABEL_MAP[selectedLob.id] || selectedLob.label}
+          onBuyNew={() => router.push(selectedLob.route)}
+          onManagePolicy={() => {
+            const dashboardRoutes: Record<string, string> = {
+              health: '/health?screen=dashboard',
+              car: '/motor?vehicle=car&screen=dashboard',
+              bike: '/motor?vehicle=bike&screen=dashboard',
+              life: '/life?screen=dashboard',
+            };
+            router.push(dashboardRoutes[selectedLob.id] || selectedLob.route);
+          }}
+          onBack={() => {
+            setSelectedLob(null);
+            setScreen('home');
+          }}
+        />
       )}
     </AnimatePresence>
   );

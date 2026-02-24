@@ -7,6 +7,7 @@ import type { ConversationStep, Option } from '../core/types';
 import type { LifeJourneyState, LifeModule, LifePersonaType, LifeRider } from './types';
 import { LIFE_PERSONA_CONFIG } from './personas';
 import { getT } from '../translations';
+import { useUserProfileStore } from '../userProfileStore';
 
 // Helper to get user name
 function userName(state: LifeJourneyState): string {
@@ -130,7 +131,14 @@ const lifeIntro: ConversationStep<LifeJourneyState> = {
   widgetType: 'none',
   getScript: (persona, state) => {
     const t = getT(state.language).lifeScripts;
-    const messages: string[] = [t.hiGreeting];
+    const messages: string[] = [];
+
+    const crossLobGreeting = useUserProfileStore.getState().getCrossLobGreeting('life');
+    if (crossLobGreeting) {
+      messages.push(crossLobGreeting);
+    } else {
+      messages.push(t.hiGreeting);
+    }
     
     if (persona === 'protector') {
       messages.push(t.introProtector, t.introProtectorQ, t.introProtectorSub);
@@ -1485,14 +1493,14 @@ const lifeComplete: ConversationStep<LifeJourneyState> = {
   id: 'life_complete',
   module: 'underwriting',
   widgetType: 'celebration',
-  getScript: (_persona, state) => ({
+  getScript: (_persona, _state) => ({
     botMessages: [
       `You're all set! 🎉`,
       `Your application has been submitted. We'll keep you updated at every step.`,
     ],
   }),
   processResponse: (_response, _state) => ({}),
-  getNextStep: (_response, _state) => 'life_complete',
+  getNextStep: (_response, _state) => 'life_db.welcome',
 };
 
 /* ═══════════════════════════════════════════════
@@ -1563,6 +1571,257 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   lifeComplete,
 ];
 
+/* ═══════════════════════════════════════════════
+   Life Dashboard — Conversational post-policy flow
+   ═══════════════════════════════════════════════ */
+
+function buildLifePolicySummary(state: LifeJourneyState): string {
+  const name = (state as any).name || 'User';
+  const coverage = (state as any).selectedCoverage;
+  const coverageLabel = coverage
+    ? coverage >= 10000000 ? `₹${(coverage / 10000000).toFixed(1)} Cr` : `₹${(coverage / 100000).toFixed(0)}L`
+    : '₹1 Cr';
+  const premium = (state as any).monthlyPremium
+    ? `₹${((state as any).monthlyPremium).toLocaleString('en-IN')}/mo`
+    : (state as any).annualPremium
+      ? `₹${((state as any).annualPremium).toLocaleString('en-IN')}/yr`
+      : '₹890/mo';
+  const term = (state as any).selectedTerm || 30;
+
+  return `Plan: Term Life Plan\nCoverage: ${coverageLabel}\nPremium: ${premium}\nTerm: ${term} years\nLife Assured: ${name}\nStatus: Active\nPolicy start: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+}
+
+const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
+  {
+    id: 'life_db.welcome',
+    module: 'dashboard',
+    widgetType: 'none',
+    getScript: (_p, state) => ({
+      botMessages: [
+        `Welcome back, ${(state as any).name || 'there'}! Here's your policy at a glance:`,
+        buildLifePolicySummary(state),
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'life_db.actions',
+  },
+  {
+    id: 'life_db.actions',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['What would you like to do?'],
+      options: [
+        { label: '❓  Get answers', value: 'get_answers' },
+        { label: '📄  Download documents', value: 'download_doc' },
+        { label: '👤  Update personal info', value: 'update_personal' },
+        { label: '💛  Update nominee', value: 'update_nominee' },
+        { label: '🛡️  Update policy coverage', value: 'update_coverage' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      switch (response) {
+        case 'get_answers': return 'life_db.answers';
+        case 'download_doc': return 'life_db.docs';
+        case 'update_personal': return 'life_db.update_personal';
+        case 'update_nominee': return 'life_db.update_nominee';
+        case 'update_coverage': return 'life_db.update_coverage';
+        default: return 'life_db.actions';
+      }
+    },
+  },
+  {
+    id: 'life_db.answers',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['What would you like to know about your Life policy?'],
+      options: [
+        { label: 'What\'s covered?', value: 'covered' },
+        { label: 'What\'s not covered?', value: 'not_covered' },
+        { label: 'How do claims work?', value: 'claims_process' },
+        { label: 'Can I increase coverage?', value: 'increase_cover' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'back') return 'life_db.actions';
+      return 'life_db.answer_detail';
+    },
+  },
+  {
+    id: 'life_db.answer_detail',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: (_p, _s, response) => {
+      const answers: Record<string, string> = {
+        covered: '✅ **What\'s covered:**\n\n• Death due to any cause (after waiting period)\n• Accidental death — immediate coverage\n• Terminal illness — advance payout\n• Critical illness (if rider added)\n• Waiver of premium on disability (if rider added)',
+        not_covered: '❌ **What\'s NOT covered:**\n\n• Suicide within first 12 months\n• Death due to self-inflicted injury\n• Misrepresentation of health history\n• Death while engaged in criminal activity\n• War, terrorism, or nuclear hazard (some plans)',
+        claims_process: '📋 **How claims work:**\n\n1. Nominee contacts ACKO within 3 months of the event\n2. Submit death certificate + policy documents\n3. ACKO investigates (typically 15-30 days)\n4. Claim approved → payout within 7 working days\n\nAll claims are 100% digital. No physical visits needed.',
+        increase_cover: '📈 **Increasing coverage:**\n\nYou can purchase an additional term plan at current rates. Your existing policy remains unchanged.\n\nAlternatively, some riders can be added within the first year.',
+      };
+      return {
+        botMessages: [answers[response as string] || 'Here\'s what you need to know about your policy.'],
+        options: [
+          { label: 'Ask something else', value: 'more' },
+          { label: '← Back to menu', value: 'back' },
+        ],
+      };
+    },
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'more') return 'life_db.answers';
+      return 'life_db.actions';
+    },
+  },
+  {
+    id: 'life_db.docs',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['Here are your available documents:'],
+      options: [
+        { label: '📄 Policy Document (2.1 MB)', value: 'policy' },
+        { label: '📋 Premium Receipt (156 KB)', value: 'receipt' },
+        { label: '🧾 Tax Certificate 80C (312 KB)', value: 'tax_cert' },
+        { label: '📑 Nominee Declaration (89 KB)', value: 'nominee' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'back') return 'life_db.actions';
+      return 'life_db.doc_downloaded';
+    },
+  },
+  {
+    id: 'life_db.doc_downloaded',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['✅ Your document has been sent to your registered email. You can also find it in your ACKO app under "My Documents".'],
+      options: [
+        { label: 'Download another', value: 'more' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'more') return 'life_db.docs';
+      return 'life_db.actions';
+    },
+  },
+  /* ═════ UPDATE PERSONAL INFO ═════ */
+  {
+    id: 'life_db.update_personal',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['What personal information would you like to update?'],
+      options: [
+        { label: 'Name', value: 'name' },
+        { label: 'Address', value: 'address' },
+        { label: 'Contact details', value: 'contact' },
+        { label: 'Bank details', value: 'bank' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'back') return 'life_db.actions';
+      return 'life_db.update_submitted';
+    },
+  },
+
+  /* ═════ UPDATE NOMINEE ═════ */
+  {
+    id: 'life_db.update_nominee',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['What would you like to do with your nominee details?'],
+      options: [
+        { label: 'Change existing nominee', value: 'change' },
+        { label: 'Add a new nominee', value: 'add' },
+        { label: 'Update payout split', value: 'payout' },
+        { label: 'Update appointee (for minor nominee)', value: 'appointee' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'back') return 'life_db.actions';
+      return 'life_db.update_submitted';
+    },
+  },
+
+  /* ═════ UPDATE POLICY COVERAGE ═════ */
+  {
+    id: 'life_db.update_coverage',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: ['What coverage change are you looking for?'],
+      options: [
+        { label: 'Increase sum assured', value: 'increase_sa' },
+        { label: 'Change policy term', value: 'change_term' },
+        { label: 'Add/modify riders', value: 'riders' },
+        { label: 'View current coverage details', value: 'view' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'back') return 'life_db.actions';
+      if (response === 'view') return 'life_db.coverage_detail';
+      return 'life_db.update_submitted';
+    },
+  },
+  {
+    id: 'life_db.coverage_detail',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: (_p, state) => ({
+      botMessages: [
+        `📋 **Your current coverage:**\n\n• Sum Assured: ${(state as any).selectedCoverage ? `₹${((state as any).selectedCoverage / 100000).toFixed(0)}L` : '₹1 Cr'}\n• Policy Term: ${(state as any).selectedTerm || 30} years\n• Premium frequency: ${(state as any).premiumFrequency || 'Monthly'}\n• Riders: ${(state as any).selectedRiders?.length ? (state as any).selectedRiders.join(', ') : 'None'}\n\nUpdates can be made only once a year.`,
+      ],
+      options: [
+        { label: 'Request a change', value: 'change' },
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: (response) => {
+      if (response === 'change') return 'life_db.update_coverage';
+      return 'life_db.actions';
+    },
+  },
+
+  /* ═════ GENERIC UPDATE SUBMITTED ═════ */
+  {
+    id: 'life_db.update_submitted',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: [
+        '✅ Your request has been submitted.',
+        'Our team will process this within 2-3 working days. You\'ll receive a confirmation on your registered email and phone.',
+        'ℹ️ Updates can be made only once a year.',
+      ],
+      options: [
+        { label: '← Back to menu', value: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'life_db.actions',
+  },
+];
+
 export function getLifeStep(stepId: string): ConversationStep<LifeJourneyState> | undefined {
+  if (stepId.startsWith('life_db.')) {
+    return LIFE_DASHBOARD_STEPS.find((s) => s.id === stepId);
+  }
   return LIFE_STEPS.find((s) => s.id === stepId);
 }

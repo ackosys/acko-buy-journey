@@ -1,6 +1,7 @@
 import { MotorConversationStep, MotorJourneyState } from './types';
 import { getMotorDashboardStep } from './dashboardScripts';
 import { getT, getCurrentLang } from '../translations';
+import { useUserProfileStore, type PolicyLob } from '../userProfileStore';
 
 /* ═══════════════════════════════════════════════════════════════════
    ACKO Motor Insurance — Conversational Scripts
@@ -56,8 +57,11 @@ const registrationHasNumber: MotorConversationStep = {
   getScript: (state) => {
     const t = getT(state.language).motorScripts;
     const v = vLabel(state);
+    const motorLob: PolicyLob = state.vehicleType === 'bike' ? 'bike' : 'car';
+    const crossLobGreeting = useUserProfileStore.getState().getCrossLobGreeting(motorLob);
+    const greeting = crossLobGreeting || t.welcomeHi;
     return {
-      botMessages: [t.welcomeHi, t.renewOrNew(v)],
+      botMessages: [greeting, t.renewOrNew(v)],
       options: [
         { id: 'yes', label: t.renewOption, description: t.renewOptionDesc(v), icon: 'renew' },
         { id: 'no', label: t.newOption(v), description: t.newOptionDesc(v), icon: state.vehicleType === 'bike' ? 'new_bike' : 'new_car' },
