@@ -202,21 +202,21 @@
 }
 
 .app-light {
-  --app-bg: #F5F3FF;
+  --app-bg: #EDE9FA;
   --app-surface: #FFFFFF;
-  --app-surface-2: #F0EEF9;
-  --app-surface-hover: #E8E5F5;
-  --app-text: #1C0B47;
-  --app-text-muted: #64748B;
-  --app-text-subtle: #94A3B8;
+  --app-surface-2: #F3F0FC;
+  --app-surface-hover: #E8E3F5;
+  --app-text: #111827;
+  --app-text-muted: #6B7280;
+  --app-text-subtle: #9CA3AF;
   --app-border: rgba(0,0,0,0.06);
   --app-border-strong: rgba(0,0,0,0.1);
   --app-shadow: rgba(0,0,0,0.06);
   --app-glass-bg: rgba(255,255,255,0.95);
   --app-overlay-bg: rgba(0,0,0,0.04);
-  --app-chat-gradient: linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 40%, #F5F3FF 100%);
-  --app-home-gradient: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 30%, #E0DBFF 60%, #F5F3FF 100%);
-  --app-header-bg: #F5F3FF;
+  --app-chat-gradient: linear-gradient(180deg, #EDE9FA 0%, #E4DEFF 40%, #EDE9FA 100%);
+  --app-home-gradient: #EDE9FA;
+  --app-header-bg: #EDE9FA;
   --app-user-bubble-bg: linear-gradient(0deg, #5920C5 0%, #7C47E1 100%);
   --app-user-bubble-text: #FFFFFF;
   --app-bot-text: #1C0B47;
@@ -231,8 +231,8 @@
 /* Light theme text overrides for Life/Health (matching motor-light approach) */
 .app-light .text-white { color: var(--app-text) !important; }
 .app-light .text-white\/90 { color: var(--app-text) !important; }
-.app-light .text-white\/80 { color: rgba(28,11,71,0.8) !important; }
-.app-light .text-white\/70 { color: rgba(28,11,71,0.7) !important; }
+.app-light .text-white\/80 { color: rgba(17,24,39,0.8) !important; }
+.app-light .text-white\/70 { color: rgba(17,24,39,0.7) !important; }
 .app-light .text-white\/60 { color: var(--app-text-muted) !important; }
 .app-light .text-white\/50 { color: var(--app-text-muted) !important; }
 .app-light .text-white\/45 { color: var(--app-text-subtle) !important; }

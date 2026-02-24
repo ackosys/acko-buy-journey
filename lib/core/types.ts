@@ -2,7 +2,7 @@
    LOB-agnostic types shared across all insurance verticals.
    Each LOB extends BaseJourneyState with its own fields. */
 
-export type Language = 'en' | 'hi' | 'hinglish' | 'kn';
+export type Language = 'en' | 'hi' | 'hinglish' | 'kn' | 'ta' | 'ml';
 export type PaymentFrequency = 'monthly' | 'yearly';
 
 export interface Option {
@@ -89,7 +89,7 @@ export interface BaseJourneyActions<TState extends BaseJourneyState> {
 }
 
 /** LOB identifier for global routing */
-export type LobType = 'health' | 'motor' | 'life' | 'car' | 'bike';
+export type LobType = 'health' | 'motor' | 'life' | 'car' | 'bike' | 'travel';
 
 export interface LobConfig {
   id: LobType;
