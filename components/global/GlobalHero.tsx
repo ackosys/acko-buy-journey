@@ -7,6 +7,8 @@ import { useJourneyStore } from '../../lib/store';
 import { useLanguageStore } from '../../lib/languageStore';
 import { useT } from '../../lib/translations';
 import { Language } from '../../lib/types';
+import { seedRecentVehicles, getBrandLogoUrl } from '../../lib/motorRecentVehicles';
+import { clearSnapshot } from '../../lib/journeyPersist';
 import AckoLogo from '../AckoLogo';
 import Link from 'next/link';
 
@@ -45,9 +47,10 @@ interface UserProfile {
   id: string;
   userName: string;
   isExistingAckoUser: boolean | null;
-  labelKey: 'menuGuest' | 'menuUser1' | 'menuUser2' | 'menuUser3';
-  subKey:   'menuGuestSub' | 'menuUser1Sub' | 'menuUser2Sub' | 'menuUser3Sub';
+  labelKey: 'menuGuest' | 'menuUser1' | 'menuUser2' | 'menuUser3' | 'menuUser4';
+  subKey:   'menuGuestSub' | 'menuUser1Sub' | 'menuUser2Sub' | 'menuUser3Sub' | 'menuUser4Sub';
   initials: string;
+  motorScenario?: 'renewal_pending';
 }
 
 const USER_PROFILES: UserProfile[] = [
@@ -55,6 +58,11 @@ const USER_PROFILES: UserProfile[] = [
   { id: 'u1',    userName: 'Rahul',   isExistingAckoUser: true,  labelKey: 'menuUser1',  subKey: 'menuUser1Sub',  initials: 'RS' },
   { id: 'u2',    userName: 'Priya',   isExistingAckoUser: false, labelKey: 'menuUser2',  subKey: 'menuUser2Sub',  initials: 'PM' },
   { id: 'u3',    userName: 'Arjun',   isExistingAckoUser: true,  labelKey: 'menuUser3',  subKey: 'menuUser3Sub',  initials: 'AN' },
+  {
+    id: 'u4', userName: 'Kiran', isExistingAckoUser: true,
+    labelKey: 'menuUser4', subKey: 'menuUser4Sub', initials: 'KS',
+    motorScenario: 'renewal_pending',
+  },
 ];
 
 export default function GlobalHero({ userName }: GlobalHeroProps) {
@@ -75,6 +83,36 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
 
   const handleProfileSelect = (profile: UserProfile) => {
     updateState({ userName: profile.userName, isExistingAckoUser: profile.isExistingAckoUser });
+
+    if (profile.motorScenario === 'renewal_pending') {
+      const expiryDate = new Date(Date.now() + 24 * 86_400_000).toISOString();
+      seedRecentVehicles([
+        {
+          make: 'Maruti',
+          model: 'Swift',
+          variant: 'VXI',
+          vehicleType: 'car',
+          registrationNumber: 'KA01AB1234',
+          brandLogoUrl: getBrandLogoUrl('maruti'),
+          expiryDate,
+          savedAt: new Date().toISOString(),
+        },
+      ]);
+      clearSnapshot('car');
+    } else {
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('acko_motor_recent_vehicles');
+        if (raw) {
+          try {
+            const vehicles = JSON.parse(raw);
+            if (vehicles.some((v: { registrationNumber?: string }) => v.registrationNumber === 'KA01AB1234')) {
+              localStorage.removeItem('acko_motor_recent_vehicles');
+            }
+          } catch { /* noop */ }
+        }
+      }
+    }
+
     setMenuOpen(false);
   };
 
@@ -318,9 +356,17 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
                             {profile.initials}
                           </div>
                           <div className="text-left flex-1 min-w-0">
-                            <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--app-text)' }}>
-                              {t.global[profile.labelKey]}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--app-text)' }}>
+                                {t.global[profile.labelKey]}
+                              </p>
+                              {profile.motorScenario && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+                                  style={{ background: 'rgba(234,88,12,0.15)', color: '#EA580C' }}>
+                                  test
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--app-text-muted)' }}>
                               {t.global[profile.subKey]}
                             </p>

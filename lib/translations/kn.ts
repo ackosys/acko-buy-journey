@@ -905,5 +905,23 @@ export const kn: T = {
     menuUser2Sub: 'ಹೊಸ ಬಳಕೆದಾರ · ಆರೋಗ್ಯ ಅನ್ವೇಷಣೆ',
     menuUser3: 'ಅರ್ಜುನ್ ನ.',
     menuUser3Sub: 'ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಗ್ರಾಹಕ · ಬೈಕ್ + ಕಾರ್',
+    menuUser4: 'ಕಿರಣ್ ಷ.',
+    menuUser4Sub: 'ನವೀಕರಣ ಬಾಕಿ · ಪರೀಕ್ಷಣ ದೃಶ್ಯ',
+  },
+
+  /* ── Motor Hello Entry ── */
+  motorEntry: {
+    ...en.motorEntry,
+    freshHi: (name: string) => `ನಮಸ್ಕಾರ${name ? ` ${name}` : ''}! ACKO ಗೆ ಸ್ವಾಗತ.`,
+    freshQuestion: 'ಇಂದು ನೀವು ಏನು ಮಾಡಲು ಬಯಸುತ್ತೀರಿ?',
+    freshRenew: 'ವಿಮೆ ನವೀಕರಿಸಿ / ಬದಲಾಯಿಸಿ',
+    freshNewCar: 'ಹೊಸ ಕಾರಿಗೆ ವಿಮೆ ಮಾಡಿ',
+    freshDrive: 'ಕಾರ್ + ವಿಮೆ ಖರೀದಿಸಿ',
+    freshManage: 'ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪಾಲಿಸಿ ನಿರ್ವಹಿಸಿ',
+    renewalCta: 'ಈಗ ನವೀಕರಿಸಿ',
+    lastChecked: 'ಕೊನೆಯದಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ',
+    expiringSoon: (days: number) => `${days} ದಿನಗಳಲ್ಲಿ ಮುಕ್ತಾಯ`,
+    historyHi: (name: string) => `ಹೇ ${name}, ಮತ್ತೆ ಬಂದಿದ್ದೀರಿ!`,
+    historyRecent: 'ಬಿಟ್ಟ ಜಾಗದಿಂದ ಮುಂದುವರಿಸಿ, ಅಥವಾ ಹೊಸದನ್ನು ಪ್ರಾರಂಭಿಸಿ.',
   },
 };

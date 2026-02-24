@@ -1373,6 +1373,59 @@ const completionEnd: MotorConversationStep = {
 };
 
 /* ═══════════════════════════════════════════════
+   MODULE: ACKO DRIVE — Inline car browsing
+   ═══════════════════════════════════════════════ */
+
+const ackoDriveBrowseMake: MotorConversationStep = {
+  id: 'acko_drive.browse_make',
+  module: 'manual_entry',
+  widgetType: 'brand_selector',
+  getScript: (state) => {
+    const t = getT(state.language).motorEntry;
+    return { botMessages: [t.driveIntro, t.drivePickMake] };
+  },
+  processResponse: (response, state) => ({
+    vehicleData: { ...state.vehicleData, make: response as string },
+  }),
+  getNextStep: () => 'acko_drive.browse_model',
+};
+
+const ackoDriveBrowseModel: MotorConversationStep = {
+  id: 'acko_drive.browse_model',
+  module: 'manual_entry',
+  widgetType: 'model_selector',
+  getScript: (state) => {
+    const t = getT(state.language).motorEntry;
+    return { botMessages: [t.drivePickModel(state.vehicleData.make || 'it')] };
+  },
+  processResponse: (response, state) => ({
+    vehicleData: { ...state.vehicleData, model: response as string },
+  }),
+  getNextStep: () => 'acko_drive.browse_variant',
+};
+
+const ackoDriveBrowseVariant: MotorConversationStep = {
+  id: 'acko_drive.browse_variant',
+  module: 'manual_entry',
+  widgetType: 'variant_selector',
+  getScript: (state) => {
+    const t = getT(state.language).motorEntry;
+    return { botMessages: [t.drivePickVariant(state.vehicleData.model || 'it')] };
+  },
+  processResponse: (response, state) => ({
+    vehicleData: { ...state.vehicleData, variant: response as string },
+    vehicleType: 'car',
+    vehicleEntryType: 'brand_new',
+    ackoDriveSelectedCar: {
+      make: state.vehicleData.make,
+      model: state.vehicleData.model,
+      variant: response as string,
+    },
+  }),
+  getNextStep: () => 'brand_new.commercial_check',
+};
+
+/* ═══════════════════════════════════════════════
    STEP REGISTRY
    ═══════════════════════════════════════════════ */
 
@@ -1436,6 +1489,9 @@ const MOTOR_STEPS: Record<string, MotorConversationStep> = {
   'completion.dashboard': completionDashboard,
   'completion.download_confirm': completionDownloadConfirm,
   'completion.end': completionEnd,
+  'acko_drive.browse_make': ackoDriveBrowseMake,
+  'acko_drive.browse_model': ackoDriveBrowseModel,
+  'acko_drive.browse_variant': ackoDriveBrowseVariant,
 };
 
 export function getMotorStep(stepId: string): MotorConversationStep | undefined {

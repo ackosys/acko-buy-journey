@@ -169,5 +169,20 @@ export const ta: T = {
     menuUser2Sub: 'புதிய பயனர் · சுகாதாரம் ஆராய்கிறார்',
     menuUser3: 'அர்ஜுன் ந.',
     menuUser3Sub: 'தற்போதைய வாடிக்கையாளர் · பைக் + கார்',
+    menuUser4: 'கிரண் ஷ.',
+    menuUser4Sub: 'புதுப்பிப்பு நிலுவையில் உள்ளது · சோதனை காட்சி',
+  },
+
+  motorEntry: {
+    ...en.motorEntry,
+    freshHi: (name: string) => `வணக்கம்${name ? ` ${name}` : ''}! ACKO-க்கு வரவேற்கிறோம்.`,
+    freshQuestion: 'இன்று நீங்கள் என்ன செய்ய விரும்புகிறீர்கள்?',
+    freshRenew: 'காப்பீட்டை புதுப்பி / மாற்று',
+    freshNewCar: 'புதிய காரை காப்பிடு',
+    freshDrive: 'கார் + காப்பீடு வாங்கு',
+    freshManage: 'தற்போதைய பாலிசியை நிர்வகி',
+    renewalCta: 'இப்போதே புதுப்பி',
+    lastChecked: 'கடைசியாக சரிபார்க்கப்பட்டது',
+    expiringSoon: (days: number) => `${days} நாளில் காலாவதியாகும்`,
   },
 };
