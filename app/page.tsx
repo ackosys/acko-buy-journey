@@ -119,13 +119,13 @@ export default function GlobalHomepage() {
             {/* Hero Section */}
             <GlobalHero userName={userName || undefined} />
 
+            {/* Drop-off / Continue journey banner — above product cards */}
+            <DropOffBanner />
+
             {/* LOB Selector — product cards with images */}
             <div className="px-5 mb-8">
               <LobSelector lobs={LOBS} onSelect={handleLobSelect} />
             </div>
-
-            {/* Drop-off / Continue journey banner */}
-            <DropOffBanner />
 
             {/* Trust Badges */}
             <div className="px-6 mb-10">

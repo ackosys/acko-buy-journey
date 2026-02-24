@@ -31,6 +31,7 @@ import {
   MotorTextInput,
   DocumentUploadWidget,
   SurveyorDetailsCard,
+  PolicyCardsWidget,
 } from './MotorWidgets';
 import { PremiumBreakdown, DashboardCTA } from './MotorFinalWidgets';
 import { SelfInspectionWidget } from './aura/AuraClaimsWidgets';
@@ -397,6 +398,21 @@ export default function MotorChatContainer() {
       userLabel = '';
     } else if (step.widgetType === 'self_inspection') {
       userLabel = 'Self inspection completed';
+    } else if (step.widgetType === 'policy_cards') {
+      if (response === 'new_policy') {
+        userLabel = 'Insure a new vehicle';
+      } else {
+        const [policyId, action] = String(response).split('::');
+        const policy = currentState.dashboardPolicies.find((p) => p.id === policyId);
+        const vehicle = policy ? `${policy.make} ${policy.model}` : policyId;
+        const actionLabels: Record<string, string> = {
+          manage: 'View & Manage',
+          renew: 'Renew now',
+          claim: 'Raise a Claim',
+          download: 'Download Documents',
+        };
+        userLabel = `${vehicle} — ${actionLabels[action] ?? action}`;
+      }
     }
 
     // Add user message (skip for loading states)
@@ -406,7 +422,8 @@ export default function MotorChatContainer() {
         content: userLabel,
         stepId: currentStepId,
         module: step.module,
-        editable: true,
+        // Policy list is a dashboard entry — editing it mid-journey doesn't make sense
+        editable: step.widgetType !== 'policy_cards',
       });
     }
 
@@ -486,6 +503,8 @@ export default function MotorChatContainer() {
         return <SurveyorDetailsCard onContinue={() => handleResponse('acknowledged')} />;
       case 'self_inspection':
         return <SelfInspectionWidget onComplete={(result) => handleResponse(result)} />;
+      case 'policy_cards':
+        return <PolicyCardsWidget onSelect={handleResponse} />;
       default:
         return null;
     }
@@ -500,7 +519,7 @@ export default function MotorChatContainer() {
       'ncb_reward', 'editable_summary', 'rejection_screen', 'plan_calculator',
       'plan_selector', 'plan_recommendation', 'out_of_pocket_addons', 'protect_everyone_addons',
       'premium_breakdown', 'motor_celebration', 'dashboard_cta', 'document_upload',
-      'surveyor_assigned', 'self_inspection',
+      'surveyor_assigned', 'self_inspection', 'policy_cards',
     ].includes(step.widgetType);
   };
 

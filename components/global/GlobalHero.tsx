@@ -85,19 +85,49 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
     updateState({ userName: profile.userName, isExistingAckoUser: profile.isExistingAckoUser });
 
     if (profile.motorScenario === 'renewal_pending') {
-      const expiryDate = new Date(Date.now() + 24 * 86_400_000).toISOString();
+      // Kiran has 2 policies:
+      // · Swift KA01AB1234 — expiring in 24 days (urgent)
+      // · Honda City MH02EF5678 — renewed 2 months ago, ~10 months left
+      const swiftExpiry = new Date(Date.now() + 24 * 86_400_000).toISOString();
+      const hondaExpiry = new Date(Date.now() + 305 * 86_400_000).toISOString();
+
       seedRecentVehicles([
         {
-          make: 'Maruti',
-          model: 'Swift',
-          variant: 'VXI',
-          vehicleType: 'car',
-          registrationNumber: 'KA01AB1234',
-          brandLogoUrl: getBrandLogoUrl('maruti'),
-          expiryDate,
-          savedAt: new Date().toISOString(),
+          make: 'Maruti', model: 'Swift', variant: 'VXI', vehicleType: 'car',
+          registrationNumber: 'KA01AB1234', brandLogoUrl: getBrandLogoUrl('maruti'),
+          expiryDate: swiftExpiry, savedAt: new Date().toISOString(),
+        },
+        {
+          make: 'Honda', model: 'City', variant: 'ZX CVT', vehicleType: 'car',
+          registrationNumber: 'MH02EF5678', brandLogoUrl: getBrandLogoUrl('honda'),
+          expiryDate: hondaExpiry,
+          savedAt: new Date(Date.now() - 60 * 86_400_000).toISOString(),
         },
       ]);
+
+      // Save full policy data for the in-chat dashboard widget
+      if (typeof window !== 'undefined') {
+        const policies = [
+          {
+            id: 'p1', vehicleType: 'car', make: 'Maruti', model: 'Swift',
+            variant: 'VXI', registrationNumber: 'KA01AB1234',
+            policyNumber: 'ACKO-MV-2024-0091',
+            plan: 'Comprehensive', planType: 'comprehensive',
+            premium: 8499, idv: 520000, expiryDate: swiftExpiry,
+            ncbPercentage: 35, addOns: ['engine_protection', 'zero_dep'],
+          },
+          {
+            id: 'p2', vehicleType: 'car', make: 'Honda', model: 'City',
+            variant: 'ZX CVT', registrationNumber: 'MH02EF5678',
+            policyNumber: 'ACKO-MV-2023-5512',
+            plan: 'Zero Dep Comprehensive', planType: 'zero_dep',
+            premium: 12999, idv: 850000, expiryDate: hondaExpiry,
+            ncbPercentage: 50, addOns: ['engine_protection', 'zero_dep', 'personal_accident'],
+          },
+        ];
+        localStorage.setItem('acko_kiran_policies', JSON.stringify(policies));
+      }
+
       clearSnapshot('car');
     } else {
       if (typeof window !== 'undefined') {
@@ -107,6 +137,7 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
             const vehicles = JSON.parse(raw);
             if (vehicles.some((v: { registrationNumber?: string }) => v.registrationNumber === 'KA01AB1234')) {
               localStorage.removeItem('acko_motor_recent_vehicles');
+              localStorage.removeItem('acko_kiran_policies');
             }
           } catch { /* noop */ }
         }

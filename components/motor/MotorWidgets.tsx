@@ -3183,3 +3183,260 @@ export function SurveyorDetailsCard({ onContinue }: { onContinue: () => void }) 
     </motion.div>
   );
 }
+
+/* ════════════════════════════════════════════════════
+   PolicyCardsWidget — multi-policy dashboard entry
+   ════════════════════════════════════════════════════ */
+
+function daysLeft(iso: string): number {
+  return Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000);
+}
+
+export function PolicyCardsWidget({ onSelect }: { onSelect: (response: string) => void }) {
+  const policies = useMotorStore((s) => s.dashboardPolicies);
+  const vehicleType = useMotorStore((s) => s.vehicleType);
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const selectedPolicy = policies.find((p) => p.id === selected) ?? null;
+
+  function openSheet(id: string) { setSelected(id); }
+  function closeSheet() { setSelected(null); }
+
+  return (
+    <>
+      <div className="w-full space-y-3 max-w-sm">
+        {policies.map((policy, idx) => {
+          const days = daysLeft(policy.expiryDate);
+          const isUrgent = days <= 30 && days > 0;
+          const isExpired = days <= 0;
+
+          return (
+            <motion.button
+              key={policy.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1, duration: 0.3 }}
+              whileTap={{ scale: 0.985 }}
+              onClick={() => openSheet(policy.id)}
+              className="w-full text-left rounded-2xl overflow-hidden transition-all active:opacity-90"
+              style={{
+                background: 'var(--motor-surface)',
+                border: `1.5px solid ${isUrgent ? 'rgba(234,88,12,0.45)' : 'var(--motor-border)'}`,
+              }}
+            >
+              <div className="px-4 pt-4 pb-4">
+                {/* Title row */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-bold leading-tight" style={{ color: 'var(--motor-text)' }}>
+                      {policy.make} {policy.model} {policy.variant}
+                    </p>
+                    <p className="text-[12px] font-mono mt-0.5" style={{ color: 'var(--motor-text-muted)' }}>
+                      {policy.registrationNumber}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isExpired ? (
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444' }}>
+                        Expired
+                      </span>
+                    ) : isUrgent ? (
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full animate-pulse"
+                        style={{ background: 'rgba(234,88,12,0.15)', color: '#EA580C' }}>
+                        {days}d left
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(34,197,94,0.12)', color: '#22C55E' }}>
+                        Active
+                      </span>
+                    )}
+                    <svg className="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Plan + premium */}
+                <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--motor-text-muted)' }}>
+                  <span>{policy.plan}</span>
+                  <span>·</span>
+                  <span>₹{policy.premium.toLocaleString('en-IN')}/yr</span>
+                  <span>·</span>
+                  <span>IDV ₹{(policy.idv / 100000).toFixed(1)}L</span>
+                </div>
+
+                {/* Expiry bar */}
+                {!isExpired && (
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-[11px]" style={{ color: 'var(--motor-text-muted)' }}>Expires</p>
+                      <p className="text-[11px] font-semibold" style={{ color: isUrgent ? '#EA580C' : 'var(--motor-text-muted)' }}>
+                        {new Date(policy.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--motor-border)' }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${Math.max(2, Math.min(100, (days / 365) * 100))}%`,
+                          background: isUrgent ? '#EA580C' : '#22C55E',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.button>
+          );
+        })}
+
+        {/* Persistent new-policy card — always visible, not policy-specific */}
+        <motion.button
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: policies.length * 0.1 + 0.1, duration: 0.28 }}
+          whileTap={{ scale: 0.985 }}
+          onClick={() => onSelect('new_policy')}
+          className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-left transition-all"
+          style={{
+            background: 'var(--motor-surface)',
+            border: '1.5px dashed var(--motor-border)',
+          }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-[18px] font-light"
+            style={{ background: 'rgba(168,85,247,0.12)', color: 'var(--motor-accent, #A78BFA)' }}
+          >
+            +
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-semibold" style={{ color: 'var(--motor-accent, #A78BFA)' }}>
+              Insure a new vehicle
+            </p>
+            <p className="text-[12px] mt-0.5" style={{ color: 'var(--motor-text-muted)' }}>
+              {vehicleType === 'bike' ? 'Another bike or a brand new one' : 'Another car or a brand new one'}
+            </p>
+          </div>
+          <svg className="w-4 h-4 shrink-0 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </motion.button>
+      </div>
+
+      {/* ── Context-aware bottom sheet ── */}
+      <AnimatePresence>
+        {selectedPolicy && (
+          <motion.div
+            key="policy-sheet-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+            onClick={closeSheet}
+          >
+            <motion.div
+              key="policy-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-t-3xl overflow-hidden"
+              style={{
+                background: 'var(--motor-glass-bg, rgba(30,15,70,0.96))',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: '1px solid var(--motor-border-strong)',
+              }}
+            >
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full" style={{ background: 'var(--motor-border-strong)' }} />
+              </div>
+
+              <div className="px-5 pb-8 pt-3">
+                {/* Selected vehicle header */}
+                <div className="mb-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--motor-text-muted)' }}>
+                    Selected policy
+                  </p>
+                  <p className="text-[17px] font-bold" style={{ color: 'var(--motor-text)' }}>
+                    {selectedPolicy.make} {selectedPolicy.model} {selectedPolicy.variant}
+                  </p>
+                  <p className="text-[12px] font-mono mt-0.5" style={{ color: 'var(--motor-text-muted)' }}>
+                    {selectedPolicy.registrationNumber} · {selectedPolicy.plan}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-2">
+                  {(() => {
+                    const days = daysLeft(selectedPolicy.expiryDate);
+                    const isUrgent = days <= 30 && days > 0;
+                    const isExpired = days <= 0;
+
+                    const actions: { id: string; label: string; sub: string; accent?: boolean; warning?: boolean }[] = [];
+
+                    if (isUrgent || isExpired) {
+                      actions.push({ id: 'renew', label: 'Renew now', sub: isExpired ? 'Policy has expired — renew immediately' : `${days} days left — don't let it lapse`, warning: true });
+                    }
+
+                    actions.push(
+                      { id: 'manage', label: 'View & Manage', sub: 'Policy details, add-ons, nominee', accent: !isUrgent && !isExpired },
+                      { id: 'claim', label: 'Raise a Claim', sub: 'Report accident, theft or damage' },
+                      { id: 'download', label: 'Download Documents', sub: 'Policy certificate, tax invoice, RC card' },
+                    );
+
+                    return actions.map((action) => (
+                      <button
+                        key={action.id}
+                        onClick={() => {
+                          closeSheet();
+                          onSelect(`${selectedPolicy.id}::${action.id}`);
+                        }}
+                        className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-left transition-all active:opacity-75"
+                        style={{
+                          background: action.warning
+                            ? 'rgba(234,88,12,0.1)'
+                            : action.accent
+                              ? 'rgba(168,85,247,0.12)'
+                              : 'var(--motor-surface)',
+                          border: `1px solid ${action.warning ? 'rgba(234,88,12,0.3)' : action.accent ? 'rgba(168,85,247,0.3)' : 'var(--motor-border)'}`,
+                        }}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[14px] font-semibold" style={{ color: action.warning ? '#EA580C' : action.accent ? 'var(--motor-accent, #A78BFA)' : 'var(--motor-text)' }}>
+                            {action.label}
+                          </p>
+                          <p className="text-[12px] mt-0.5 truncate" style={{ color: 'var(--motor-text-muted)' }}>
+                            {action.sub}
+                          </p>
+                        </div>
+                        <svg className="w-4 h-4 shrink-0 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </button>
+                    ));
+                  })()}
+
+                </div>
+
+                {/* Cancel */}
+                <button
+                  onClick={closeSheet}
+                  className="w-full mt-4 py-3 text-[13px] transition-colors"
+                  style={{ color: 'var(--motor-text-muted)' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
