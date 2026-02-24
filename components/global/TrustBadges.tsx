@@ -2,31 +2,30 @@
 
 import { motion } from 'framer-motion';
 import { useThemeStore } from '../../lib/themeStore';
-
-const BADGES = [
-  { label: 'IRDAI Licensed', sublabel: 'Reg. No. 157' },
-  { label: '1 Cr+', sublabel: 'Customers' },
-  { label: '97%', sublabel: 'Claims settled' },
-  { label: '14,000+', sublabel: 'Cashless hospitals' },
-  { label: '4.5★', sublabel: 'App rating' },
-  { label: '24/7', sublabel: 'Support' },
-];
+import { useT } from '../../lib/translations';
 
 export default function TrustBadges() {
   const theme = useThemeStore((s) => s.theme);
+  const t = useT();
   const isLight = theme === 'light';
 
-  const bgColor = isLight ? '#FFFFFF' : theme === 'dark' ? '#1E1E22' : 'rgba(255,255,255,0.05)';
+  const BADGES = [
+    { label: t.global.irdai,       sublabel: t.global.irdaiSub       },
+    { label: t.global.customers,   sublabel: t.global.customersSub   },
+    { label: t.global.claimsStat,  sublabel: t.global.claimsStatSub  },
+    { label: t.global.hospitals,   sublabel: t.global.hospitalsSub   },
+    { label: t.global.appRating,   sublabel: t.global.appRatingSub   },
+    { label: t.global.support,     sublabel: t.global.supportSub     },
+  ];
+
+  const bgColor     = isLight ? '#FFFFFF' : theme === 'dark' ? '#1E1E22' : 'rgba(255,255,255,0.05)';
   const borderColor = isLight ? 'rgba(0,0,0,0.06)' : theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.1)';
-  const fadeColor = isLight ? '#F5F3FF' : theme === 'dark' ? '#121214' : '#6C4DE8';
+  const fadeColor   = isLight ? '#F5F3FF' : theme === 'dark' ? '#121214' : '#6C4DE8';
 
   return (
     <div
       className="relative overflow-hidden rounded-2xl py-4"
-      style={{
-        background: bgColor,
-        border: `1px solid ${borderColor}`,
-      }}
+      style={{ background: bgColor, border: `1px solid ${borderColor}` }}
     >
       <div className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style={{ background: `linear-gradient(to right, ${fadeColor}, transparent)` }} />
       <div className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style={{ background: `linear-gradient(to left, ${fadeColor}, transparent)` }} />

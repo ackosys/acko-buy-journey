@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useThemeStore } from '../../lib/themeStore';
+import { useJourneyStore } from '../../lib/store';
+import { useT } from '../../lib/translations';
+import { Language } from '../../lib/types';
 import AckoLogo from '../AckoLogo';
 import Link from 'next/link';
 
@@ -28,14 +31,55 @@ const THEME_ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
+const LANGUAGES: { id: Language; label: string; nativeLabel: string; glyph: string }[] = [
+  { id: 'en',       label: 'English',  nativeLabel: 'English',             glyph: 'A'  },
+  { id: 'hi',       label: 'Hindi',    nativeLabel: 'हिन्दी',              glyph: 'अ' },
+  { id: 'hinglish', label: 'Hinglish', nativeLabel: 'Hinglish',            glyph: 'Hi' },
+  { id: 'kn',       label: 'Kannada',  nativeLabel: 'ಕನ್ನಡ',              glyph: 'ಅ' },
+];
+
+interface UserProfile {
+  id: string;
+  userName: string;
+  isExistingAckoUser: boolean | null;
+  labelKey: 'menuGuest' | 'menuUser1' | 'menuUser2' | 'menuUser3';
+  subKey:   'menuGuestSub' | 'menuUser1Sub' | 'menuUser2Sub' | 'menuUser3Sub';
+  initials: string;
+}
+
+const USER_PROFILES: UserProfile[] = [
+  { id: 'guest', userName: '',        isExistingAckoUser: null,  labelKey: 'menuGuest',  subKey: 'menuGuestSub',  initials: '?' },
+  { id: 'u1',    userName: 'Rahul',   isExistingAckoUser: true,  labelKey: 'menuUser1',  subKey: 'menuUser1Sub',  initials: 'RS' },
+  { id: 'u2',    userName: 'Priya',   isExistingAckoUser: false, labelKey: 'menuUser2',  subKey: 'menuUser2Sub',  initials: 'PM' },
+  { id: 'u3',    userName: 'Arjun',   isExistingAckoUser: true,  labelKey: 'menuUser3',  subKey: 'menuUser3Sub',  initials: 'AN' },
+];
+
 export default function GlobalHero({ userName }: GlobalHeroProps) {
   const { theme, cycleTheme } = useThemeStore();
+  const { language, setLanguage, updateState } = useJourneyStore();
+  const t = useT();
   const isLight = theme === 'light';
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const currentUserId = USER_PROFILES.find(p => p.userName === (userName || ''))?.id ?? 'guest';
+
+  const handleLanguageSelect = (lang: Language) => {
+    setLanguage(lang);
+    localStorage.setItem('acko_lang_chosen', 'true');
+  };
+
+  const handleProfileSelect = (profile: UserProfile) => {
+    updateState({ userName: profile.userName, isExistingAckoUser: profile.isExistingAckoUser });
+    setMenuOpen(false);
+  };
+
+  const menuBg   = isLight ? '#FFFFFF' : theme === 'dark' ? '#18181C' : '#1a0a3e';
+  const menuBorder = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)';
+  const sectionLabel = isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
+
   return (
     <div className="px-5 pt-6 pb-5">
-      {/* Top bar: Logo | theme switcher + hamburger */}
+      {/* Top bar */}
       <motion.div
         initial={{ y: -10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -70,15 +114,20 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
             onClick={() => setMenuOpen((v) => !v)}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
             style={{
-              background: 'var(--app-surface, rgba(255,255,255,0.1))',
+              background: menuOpen
+                ? 'var(--app-accent, #7C3AED)'
+                : 'var(--app-surface, rgba(255,255,255,0.1))',
               border: '1px solid var(--app-border, rgba(255,255,255,0.15))',
-              color: 'var(--app-text)',
+              color: menuOpen ? '#fff' : 'var(--app-text)',
             }}
             aria-label="Menu"
             aria-expanded={menuOpen}
           >
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              {menuOpen
+                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              }
             </svg>
           </button>
         </div>
@@ -93,32 +142,199 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
         {userName ? (
           <>
             <p className="text-sm mb-2" style={{ color: 'var(--app-text-muted)' }}>
-              Welcome back, {userName}
+              {t.global.welcomeBack(userName)}
             </p>
             <h1
-              className="text-[32px] font-black leading-[1.1] tracking-tight mb-3"
+              className="text-[32px] font-black leading-[1.1] tracking-tight mb-3 whitespace-pre-line"
               style={{ color: 'var(--app-text)' }}
             >
-              What would you like<br />to protect today?
+              {t.global.heroTitleUser}
             </h1>
           </>
         ) : (
           <>
             <h1
-              className="text-[32px] font-black leading-[1.1] tracking-tight mb-2"
+              className="text-[32px] font-black leading-[1.1] tracking-tight mb-2 whitespace-pre-line"
               style={{ color: 'var(--app-text)' }}
             >
-              All your insurance one place
+              {t.global.heroTitle}
             </h1>
             <p
               className="text-[15px] leading-[1.5]"
               style={{ color: 'var(--app-text-muted)' }}
             >
-              No Jargon • No Middlemen • Just the right cover for what matters the most.
+              {t.global.heroSubtitle}
             </p>
           </>
         )}
       </motion.div>
+
+      {/* ── Hamburger Drawer ── */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
+              onClick={() => setMenuOpen(false)}
+            />
+
+            {/* Drawer panel */}
+            <motion.div
+              key="drawer"
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-[80vw] max-w-[320px] overflow-y-auto"
+              style={{
+                background: menuBg,
+                borderLeft: `1px solid ${menuBorder}`,
+                boxShadow: '-8px 0 32px rgba(0,0,0,0.25)',
+              }}
+            >
+              {/* Drawer header */}
+              <div
+                className="flex items-center justify-between px-5 py-5 border-b"
+                style={{ borderColor: menuBorder }}
+              >
+                <AckoLogo
+                  variant={isLight ? 'color' : 'white'}
+                  className="h-6"
+                />
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95"
+                  style={{
+                    background: 'var(--app-surface, rgba(0,0,0,0.06))',
+                    color: 'var(--app-text-muted)',
+                  }}
+                  aria-label={t.global.menuClose}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="px-5 py-4 space-y-6">
+                {/* ── Language section ── */}
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: sectionLabel }}>
+                    {t.global.menuLanguage}
+                  </p>
+                  <div className="space-y-2">
+                    {LANGUAGES.map((lang) => {
+                      const active = language === lang.id;
+                      return (
+                        <button
+                          key={lang.id}
+                          onClick={() => handleLanguageSelect(lang.id)}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all active:scale-[0.98]"
+                          style={{
+                            background: active
+                              ? (isLight ? 'rgba(124,58,237,0.1)' : 'rgba(167,139,250,0.15)')
+                              : 'transparent',
+                            border: `1.5px solid ${active
+                              ? (isLight ? '#7C3AED' : '#A78BFA')
+                              : menuBorder}`,
+                          }}
+                        >
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                            style={{
+                              background: active
+                                ? (isLight ? '#7C3AED' : '#A78BFA')
+                                : 'var(--app-surface, rgba(0,0,0,0.06))',
+                              color: active ? '#fff' : 'var(--app-text-muted)',
+                            }}
+                          >
+                            {lang.glyph}
+                          </div>
+                          <div className="text-left flex-1 min-w-0">
+                            <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--app-text)' }}>
+                              {lang.nativeLabel}
+                            </p>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--app-text-muted)' }}>
+                              {lang.label}
+                            </p>
+                          </div>
+                          {active && (
+                            <svg className="w-4 h-4 shrink-0" style={{ color: isLight ? '#7C3AED' : '#A78BFA' }} fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px" style={{ background: menuBorder }} />
+
+                {/* ── Profile section ── */}
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: sectionLabel }}>
+                    {t.global.menuProfile}
+                  </p>
+                  <div className="space-y-2">
+                    {USER_PROFILES.map((profile) => {
+                      const active = currentUserId === profile.id;
+                      return (
+                        <button
+                          key={profile.id}
+                          onClick={() => handleProfileSelect(profile)}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all active:scale-[0.98]"
+                          style={{
+                            background: active
+                              ? (isLight ? 'rgba(124,58,237,0.1)' : 'rgba(167,139,250,0.15)')
+                              : 'transparent',
+                            border: `1.5px solid ${active
+                              ? (isLight ? '#7C3AED' : '#A78BFA')
+                              : menuBorder}`,
+                          }}
+                        >
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                            style={{
+                              background: active
+                                ? (isLight ? '#7C3AED' : '#A78BFA')
+                                : 'var(--app-surface, rgba(0,0,0,0.06))',
+                              color: active ? '#fff' : 'var(--app-text-muted)',
+                            }}
+                          >
+                            {profile.initials}
+                          </div>
+                          <div className="text-left flex-1 min-w-0">
+                            <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--app-text)' }}>
+                              {t.global[profile.labelKey]}
+                            </p>
+                            <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--app-text-muted)' }}>
+                              {t.global[profile.subKey]}
+                            </p>
+                          </div>
+                          {active && (
+                            <svg className="w-4 h-4 shrink-0" style={{ color: isLight ? '#7C3AED' : '#A78BFA' }} fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

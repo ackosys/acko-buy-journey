@@ -2,24 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useThemeStore } from '../../lib/themeStore';
-
-const PROPS = [
-  {
-    icon: 'award',
-    title: "India's #1*",
-    description: 'India\'s #1* insurance app.',
-  },
-  {
-    icon: 'digital',
-    title: '100% Digital',
-    description: 'Buy, claim, and manage — all online.',
-  },
-  {
-    icon: 'claim',
-    title: 'Fast Claims',
-    description: '95% cashless claims approved in 1 hour.',
-  },
-];
+import { useT } from '../../lib/translations';
 
 function PropIcon({ icon }: { icon: string }) {
   const cls = 'w-6 h-6';
@@ -49,29 +32,32 @@ function PropIcon({ icon }: { icon: string }) {
 
 export default function ValueProps() {
   const theme = useThemeStore((s) => s.theme);
+  const t = useT();
   const isLight = theme === 'light';
 
-  const cardBg = isLight ? '#FFFFFF' : theme === 'dark' ? '#1E1E22' : 'rgba(255,255,255,0.03)';
+  const cardBg     = isLight ? '#FFFFFF' : theme === 'dark' ? '#1E1E22' : 'rgba(255,255,255,0.03)';
   const cardBorder = isLight ? 'rgba(0,0,0,0.06)' : theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)';
-  const accentBar = isLight ? '#7C3AED' : theme === 'dark' ? '#A78BFA' : 'rgba(255,255,255,0.2)';
-  const iconBg = isLight ? '#F5F3FF' : theme === 'dark' ? '#2D2D35' : 'rgba(255,255,255,0.06)';
-  const iconColor = isLight ? '#7C3AED' : theme === 'dark' ? '#A78BFA' : 'rgba(255,255,255,0.6)';
+  const accentBar  = isLight ? '#7C3AED' : theme === 'dark' ? '#A78BFA' : 'rgba(255,255,255,0.2)';
+  const iconBg     = isLight ? '#F5F3FF' : theme === 'dark' ? '#2D2D35' : 'rgba(255,255,255,0.06)';
+  const iconColor  = isLight ? '#7C3AED' : theme === 'dark' ? '#A78BFA' : 'rgba(255,255,255,0.6)';
+
+  const PROPS = [
+    { icon: 'award',   title: t.global.prop1Title, description: t.global.prop1Desc },
+    { icon: 'digital', title: t.global.prop2Title, description: t.global.prop2Desc },
+    { icon: 'claim',   title: t.global.prop3Title, description: t.global.prop3Desc },
+  ];
 
   return (
     <div className="space-y-5">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-      >
-        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--app-text)' }}>Why ACKO?</h2>
-        <p className="text-sm" style={{ color: 'var(--app-text-muted)' }}>Insurance that actually makes sense.</p>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--app-text)' }}>{t.global.whyAcko}</h2>
+        <p className="text-sm" style={{ color: 'var(--app-text-muted)' }}>{t.global.whyAckoSub}</p>
       </motion.div>
 
       <div className="space-y-3">
         {PROPS.map((prop, i) => (
           <motion.div
-            key={prop.title}
+            key={prop.icon}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.9 + i * 0.1, type: 'spring', stiffness: 120 }}

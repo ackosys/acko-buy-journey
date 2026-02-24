@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useThemeStore } from '../../lib/themeStore';
+import { useT } from '../../lib/translations';
 import { LobConfig } from '../../lib/core/types';
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
@@ -11,48 +12,12 @@ interface LobSelectorProps {
   onSelect: (lob: LobConfig) => void;
 }
 
-const LOB_META: Record<string, {
-  image: string;
-  label: string;
-  subtitle: string;
-  badge: string | null;
-  imageStyle?: React.CSSProperties;
-}> = {
-  car: {
-    image: `${BASE}/offerings/car.png`,
-    label: 'Car',
-    subtitle: 'Get your policy instantly',
-    badge: 'Zero commission',
-    imageStyle: { objectPosition: 'center center' },
-  },
-  health: {
-    image: `${BASE}/offerings/health.png`,
-    label: 'Health',
-    subtitle: '100% bill coverage',
-    badge: 'Avail 0% GST',
-    imageStyle: { objectPosition: 'center center' },
-  },
-  bike: {
-    image: `${BASE}/offerings/bike.png`,
-    label: 'Bike/scooter',
-    subtitle: 'Insure in 1 min',
-    badge: null,
-    imageStyle: { objectPosition: 'center bottom' },
-  },
-  life: {
-    image: `${BASE}/offerings/life.png`,
-    label: 'Life',
-    subtitle: 'Flexible coverage',
-    badge: null,
-    imageStyle: { objectPosition: 'center center' },
-  },
-  travel: {
-    image: `${BASE}/offerings/travel.png`,
-    label: 'Travel',
-    subtitle: 'Coming soon',
-    badge: null,
-    imageStyle: { objectPosition: 'right center' },
-  },
+const LOB_IMAGE_STYLE: Record<string, React.CSSProperties> = {
+  car:    { objectPosition: 'center center' },
+  health: { objectPosition: 'center center' },
+  bike:   { objectPosition: 'center bottom' },
+  life:   { objectPosition: 'center center' },
+  travel: { objectPosition: 'right center' },
 };
 
 interface CardProps {
@@ -68,8 +33,29 @@ interface CardProps {
 }
 
 function LobCard({ lob, index, cardBg, cardShadow, badgeBg, badgeText, onSelect, height = 200, isFullWidth = false }: CardProps) {
-  const meta = LOB_META[lob.id] || LOB_META.car;
+  const t = useT();
   const isDisabled = !lob.active;
+
+  const lobKey = lob.id as keyof typeof LOB_IMAGE_STYLE;
+  const imageStyle = LOB_IMAGE_STYLE[lobKey] ?? {};
+  const image = `${BASE}/offerings/${lob.id}.png`;
+
+  const labelMap: Record<string, string> = {
+    car: t.global.carLabel, health: t.global.healthLabel,
+    bike: t.global.bikeLabel, life: t.global.lifeLabel, travel: t.global.travelLabel,
+  };
+  const subtitleMap: Record<string, string> = {
+    car: t.global.carSubtitle, health: t.global.healthSubtitle,
+    bike: t.global.bikeSubtitle, life: t.global.lifeSubtitle, travel: t.global.travelSubtitle,
+  };
+  const badgeMap: Record<string, string | null> = {
+    car: t.global.carBadge, health: t.global.healthBadge,
+    bike: null, life: null, travel: null,
+  };
+
+  const label    = labelMap[lob.id]    ?? lob.id;
+  const subtitle = subtitleMap[lob.id] ?? '';
+  const badge    = badgeMap[lob.id]    ?? null;
 
   return (
     <motion.button
@@ -81,40 +67,24 @@ function LobCard({ lob, index, cardBg, cardShadow, badgeBg, badgeText, onSelect,
       className={`relative overflow-hidden rounded-[20px] text-left w-full ${
         isDisabled ? 'cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'
       } transition-transform duration-150`}
-      style={{
-        background: cardBg,
-        boxShadow: cardShadow,
-        height,
-      }}
+      style={{ background: cardBg, boxShadow: cardShadow, height }}
     >
       {/* Text content — top-left */}
       <div className="absolute top-0 left-0 right-0 p-4 z-10">
-        <h3
-          className="text-[17px] font-bold leading-tight mb-1"
-          style={{ color: 'var(--app-text)' }}
-        >
-          {meta.label}
+        <h3 className="text-[17px] font-bold leading-tight mb-1" style={{ color: 'var(--app-text)' }}>
+          {label}
         </h3>
-        <p
-          className="text-[13px] leading-snug mb-2.5"
-          style={{ color: 'var(--app-text-muted)' }}
-        >
-          {meta.subtitle}
+        <p className="text-[13px] leading-snug mb-2.5" style={{ color: 'var(--app-text-muted)' }}>
+          {subtitle}
         </p>
-        {meta.badge && (
-          <span
-            className="inline-block text-[12px] font-semibold px-3 py-1 rounded-full"
-            style={{ background: badgeBg, color: badgeText }}
-          >
-            {meta.badge}
+        {badge && !isDisabled && (
+          <span className="inline-block text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: badgeBg, color: badgeText }}>
+            {badge}
           </span>
         )}
         {isDisabled && (
-          <span
-            className="inline-block text-[12px] font-medium px-3 py-1 rounded-full"
-            style={{ background: badgeBg, color: badgeText }}
-          >
-            Coming soon
+          <span className="inline-block text-[12px] font-medium px-3 py-1 rounded-full" style={{ background: badgeBg, color: badgeText }}>
+            {t.global.comingSoon}
           </span>
         )}
       </div>
@@ -122,16 +92,12 @@ function LobCard({ lob, index, cardBg, cardShadow, badgeBg, badgeText, onSelect,
       {/* Product image — bottom-right */}
       <div
         className="absolute overflow-hidden"
-        style={
-          isFullWidth
-            ? { right: 0, bottom: 0, top: 0, width: '45%' }
-            : { right: 0, bottom: 0, left: 0, height: '55%' }
-        }
+        style={isFullWidth ? { right: 0, bottom: 0, top: 0, width: '45%' } : { right: 0, bottom: 0, left: 0, height: '55%' }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={meta.image}
-          alt={meta.label}
+          src={image}
+          alt={label}
           draggable={false}
           style={{
             position: 'absolute',
@@ -140,7 +106,7 @@ function LobCard({ lob, index, cardBg, cardShadow, badgeBg, badgeText, onSelect,
             width: isFullWidth ? '100%' : 'fit-content',
             height: '100%',
             objectFit: 'cover',
-            ...(meta.imageStyle || {}),
+            ...imageStyle,
           }}
         />
       </div>
