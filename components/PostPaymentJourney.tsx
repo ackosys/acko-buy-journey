@@ -398,8 +398,10 @@ function VoiceCallScreen({ onComplete, onSkip }: { onComplete: () => void; onSki
 /* ═══════════════════════════════════════════════════════
    Schedule Picker Widget (inline in chat)
    ═══════════════════════════════════════════════════════ */
-const LANG_OPTIONS: Language[] = ['en', 'hi', 'hinglish', 'kn'];
-const LANG_LABEL_KEYS: Record<Language, 'english' | 'hindi' | 'hinglish' | 'kannada'> = { en: 'english', hi: 'hindi', hinglish: 'hinglish', kn: 'kannada' };
+const LANG_OPTIONS: Language[] = ['en', 'hi', 'hinglish', 'kn', 'ta', 'ml'];
+const LANG_LABEL_KEYS: Record<Language, 'english' | 'hindi' | 'hinglish' | 'kannada' | 'tamil' | 'malayalam'> = {
+  en: 'english', hi: 'hindi', hinglish: 'hinglish', kn: 'kannada', ta: 'tamil', ml: 'malayalam',
+};
 
 function SchedulePickerWidget({ onSubmit, showLang = true }: { onSubmit: (data: any) => void; showLang?: boolean }) {
   const t = useT();

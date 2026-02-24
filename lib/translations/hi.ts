@@ -532,6 +532,8 @@ export const hi: T = {
     hindi: 'हिन्दी',
     kannada: 'ಕನ್ನಡ',
     hinglish: 'Hinglish',
+    tamil: 'Tamil',
+    malayalam: 'Malayalam',
     confirmSchedule: 'शेड्यूल पुष्टि करें',
     labVisitRequired: 'लैब विज़िट ज़रूरी',
     homeSampleCollection: 'घर पर सैंपल कलेक्शन',

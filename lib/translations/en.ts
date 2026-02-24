@@ -554,6 +554,8 @@ export const en = {
     hindi: 'Hindi',
     kannada: 'Kannada',
     hinglish: 'Hinglish',
+    tamil: 'Tamil',
+    malayalam: 'Malayalam',
     confirmSchedule: 'Confirm schedule',
     labVisitRequired: 'Lab visit required',
     homeSampleCollection: 'Home sample collection',
