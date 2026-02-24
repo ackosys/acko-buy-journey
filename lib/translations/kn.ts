@@ -491,7 +491,7 @@ export const kn: T = {
     speaking: 'ಮಾತನಾಡುತ್ತಿದ್ದಾರೆ...', listening: 'ಆಲಿಸುತ್ತಿದ್ದಾರೆ',
     listeningEllipsis: 'ಆಲಿಸುತ್ತಿದ್ದಾರೆ...',
     langPreference: 'ಭಾಷಾ ಆದ್ಯತೆ',
-    english: 'English', hindi: 'हिन्दी', kannada: 'ಕನ್ನಡ', hinglish: 'Hinglish',
+    english: 'English', hindi: 'हिन्दी', kannada: 'ಕನ್ನಡ', hinglish: 'Hinglish', tamil: 'Tamil', malayalam: 'Malayalam',
     confirmSchedule: 'ವೇಳಾಪಟ್ಟಿ ದೃಢೀಕರಿಸಿ',
     labVisitRequired: 'ಲ್ಯಾಬ್ ಭೇಟಿ ಅಗತ್ಯ', homeSampleCollection: 'ಮನೆ ಮಾದರಿ ಸಂಗ್ರಹ',
     ecgTests: 'ECG, Echo, USG + ರಕ್ತ ಮತ್ತು ಮೂತ್ರ ಪರೀಕ್ಷೆ',

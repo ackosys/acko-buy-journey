@@ -517,6 +517,8 @@ export const hinglish: T = {
     hindi: 'Hindi',
     kannada: 'Kannada',
     hinglish: 'Hinglish',
+    tamil: 'Tamil',
+    malayalam: 'Malayalam',
     confirmSchedule: 'Schedule confirm karein',
     labVisitRequired: 'Lab visit zaroori hai',
     homeSampleCollection: 'Ghar pe sample collection',
