@@ -6,6 +6,7 @@ import { useMotorStore } from '../../lib/motor/store';
 import { getMotorStep } from '../../lib/motor/scripts';
 import { MotorJourneyState } from '../../lib/motor/types';
 import { saveSnapshot, MOTOR_SAVE_STEPS } from '../../lib/journeyPersist';
+import { saveRecentVehicle, getBrandLogoUrl } from '../../lib/motorRecentVehicles';
 import ChatMessage, { TypingIndicator } from '../ChatMessage';
 import { ChatMessage as ChatMessageType } from '@/lib/types';
 import {
@@ -136,6 +137,27 @@ export default function MotorChatContainer() {
       selectedPlanType: s.selectedPlanType,
       ownerName: s.ownerName,
       paymentComplete: s.paymentComplete,
+    });
+  }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist vehicle to recent list once make+model are confirmed
+  useEffect(() => {
+    const s = useMotorStore.getState();
+    if (!s.vehicleData.make || !s.vehicleData.model) return;
+    const confirmationSteps = new Set([
+      'vehicle_fetch.found',
+      'manual_entry.select_year',
+      'brand_new.commercial_check',
+      'acko_drive.browse_variant',
+    ]);
+    if (!confirmationSteps.has(currentStepId)) return;
+    saveRecentVehicle({
+      make: s.vehicleData.make,
+      model: s.vehicleData.model,
+      variant: s.vehicleData.variant || undefined,
+      vehicleType: s.vehicleType ?? 'car',
+      registrationNumber: s.registrationNumber || undefined,
+      brandLogoUrl: getBrandLogoUrl(s.vehicleData.make),
     });
   }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
 

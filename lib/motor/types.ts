@@ -240,7 +240,13 @@ export interface MotorJourneyState extends BaseJourneyState {
   /* ── Dashboard: Edits ── */
   dashboardSubmittedEdits: MotorEditRequest[];
   dashboardEditType: string;
+
+  /* ── Entry Intent ── */
+  motorIntent: MotorIntent | null;
+  ackoDriveSelectedCar: { make: string; model: string; variant: string } | null;
 }
+
+export type MotorIntent = 'renew' | 'new_car' | 'acko_drive' | 'manage';
 
 export interface MotorStepScript {
   botMessages: string[];
@@ -375,4 +381,8 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   dashboardClaimSettlementAmount: 0,
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
+
+  /* Entry intent */
+  motorIntent: null,
+  ackoDriveSelectedCar: null,
 };

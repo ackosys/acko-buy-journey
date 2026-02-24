@@ -11,13 +11,15 @@ import { loadSnapshot } from '../../lib/journeyPersist';
 // import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
 // import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
 import AuraMotorEntryNav from '../../components/motor/aura/AuraMotorEntryNav';
+import MotorHelloEntry from '../../components/motor/MotorHelloEntry';
 import MotorHeader from '../../components/motor/MotorHeader';
 import MotorChatContainer from '../../components/motor/MotorChatContainer';
 import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
 import AckoLogo from '../../components/AckoLogo';
-import { VehicleType, MotorJourneyState } from '../../lib/motor/types';
+import { VehicleType, MotorJourneyState, MotorIntent } from '../../lib/motor/types';
+import { RecentVehicle } from '../../lib/motorRecentVehicles';
 
-type Screen = 'explore' | 'chat';
+type Screen = 'hello' | 'explore' | 'chat';
 
 /* COMMENTED OUT: WelcomeOverlay — temporarily disabled, replaced by explore nav
 function WelcomeOverlay({ onDone }: { onDone: () => void }) {
@@ -169,13 +171,14 @@ function seedDemoState(vehicleType: VehicleType) {
 function MotorJourneyInner() {
   const store = useMotorStore();
   const { updateState, resetJourney, setLanguage } = store;
+  const userName = store.userName;
   const theme = useThemeStore((s) => s.theme);
   const globalLanguage = useLanguageStore((s) => s.language);
   const searchParams = useSearchParams();
 
   const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
   const resumeParam = searchParams.get('resume') === '1';
-  const [screen, setScreen] = useState<Screen>('explore');
+  const [screen, setScreen] = useState<Screen>('hello');
   const [hydrated, setHydrated] = useState(false);
 
   // Keep motor store language in sync with the global language selection
@@ -227,6 +230,39 @@ function MotorJourneyInner() {
     setScreen('chat');
   };
   */
+
+  const handleIntentSelected = useCallback((intent: MotorIntent, vehicle?: RecentVehicle) => {
+    resetJourney();
+    if (intent === 'renew') {
+      if (vehicle?.registrationNumber) {
+        updateState({
+          vehicleType: vehicle.vehicleType,
+          vehicleData: {
+            make: vehicle.make, model: vehicle.model, variant: vehicle.variant ?? '',
+            fuelType: '', registrationYear: null, registrationMonth: '',
+            hasCngKit: null, isCommercialVehicle: null,
+          },
+          registrationNumber: vehicle.registrationNumber,
+          motorIntent: intent,
+          currentStepId: 'registration.enter_number',
+          currentModule: 'registration',
+        } as Partial<MotorJourneyState>);
+      } else {
+        updateState({ vehicleType: 'car', motorIntent: intent, currentStepId: 'vehicle_type.select', currentModule: 'vehicle_type' } as Partial<MotorJourneyState>);
+      }
+      setScreen('chat');
+    } else if (intent === 'new_car') {
+      updateState({ vehicleType: 'car', vehicleEntryType: 'brand_new', motorIntent: intent, currentStepId: 'brand_new.popular_cars', currentModule: 'manual_entry' } as Partial<MotorJourneyState>);
+      setScreen('chat');
+    } else if (intent === 'acko_drive') {
+      updateState({ vehicleType: 'car', vehicleEntryType: 'brand_new', motorIntent: intent, currentStepId: 'acko_drive.browse_make', currentModule: 'manual_entry' } as Partial<MotorJourneyState>);
+      setScreen('chat');
+    } else if (intent === 'manage') {
+      seedDemoState('car');
+      updateState({ motorIntent: intent, currentStepId: 'db.overview', currentModule: 'dashboard' } as Partial<MotorJourneyState>);
+      setScreen('chat');
+    }
+  }, [resetJourney, updateState]);
 
   const handleStartJourney = (vehicleType: VehicleType) => {
     resetJourney();
@@ -290,6 +326,41 @@ function MotorJourneyInner() {
       */}
 
       <AnimatePresence mode="wait">
+        {screen === 'hello' && (
+          <motion.div
+            key="hello"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.28 }}
+            className={`motor-${theme} h-screen flex flex-col overflow-hidden`}
+            style={{ background: 'var(--motor-bg)' }}
+          >
+            <div
+              className="flex items-center justify-between px-5 pt-6 pb-4 shrink-0"
+              style={{ borderBottom: '1px solid var(--app-border, rgba(255,255,255,0.08))' }}
+            >
+              <AckoLogo variant={theme === 'light' ? 'color' : 'full-white'} className="h-7" />
+              <button
+                onClick={() => setScreen('explore')}
+                className="text-xs px-3 py-1.5 rounded-full"
+                style={{
+                  background: 'var(--app-surface, rgba(255,255,255,0.08))',
+                  color: 'var(--app-text-muted)',
+                  border: '1px solid var(--app-border, rgba(255,255,255,0.1))',
+                }}
+              >
+                Classic view
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <MotorHelloEntry
+                userName={userName || undefined}
+                onIntentSelected={handleIntentSelected}
+              />
+            </div>
+          </motion.div>
+        )}
         {screen === 'explore' && (
           <div key="explore" className={`motor-${theme} min-h-screen`} style={{ background: 'var(--motor-bg)' }}>
             <AuraMotorEntryNav

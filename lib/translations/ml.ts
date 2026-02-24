@@ -169,5 +169,20 @@ export const ml: T = {
     menuUser2Sub: 'പുതിയ ഉപയോക്താവ് · ആരോഗ്യം പര്യവേക്ഷണം',
     menuUser3: 'അർജുൻ ന.',
     menuUser3Sub: 'നിലവിലുള്ള ഉപഭോക്താവ് · ബൈക്ക് + കാർ',
+    menuUser4: 'കിരൺ ഷ.',
+    menuUser4Sub: 'പുതുക്കൽ കാത്തിരിക്കുന്നു · ടെസ്റ്റ് സ്ഥലം',
+  },
+
+  motorEntry: {
+    ...en.motorEntry,
+    freshHi: (name: string) => `ഹലോ${name ? ` ${name}` : ''}! ACKO-ലേക്ക് സ്വാഗതം.`,
+    freshQuestion: 'ഇന്ന് നിങ്ങൾ എന്ത് ചെയ്യാൻ ആഗ്രഹിക്കുന്നു?',
+    freshRenew: 'ഇൻഷുറൻസ് പുതുക്കുക / മാറ്റുക',
+    freshNewCar: 'പുതിയ കാർ ഇൻഷ്വർ ചെയ്യുക',
+    freshDrive: 'കാർ + ഇൻഷുറൻസ് വാങ്ങുക',
+    freshManage: 'നിലവിലുള്ള പോളിസി നിയന്ത്രിക്കുക',
+    renewalCta: 'ഇപ്പോൾ പുതുക്കുക',
+    lastChecked: 'അവസാനം പരിശോധിച്ചത്',
+    expiringSoon: (days: number) => `${days} ദിവസത്തിൽ കാലഹരണപ്പെടും`,
   },
 };

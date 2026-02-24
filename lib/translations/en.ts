@@ -1159,5 +1159,47 @@ export const en = {
     menuUser2Sub: 'New user · exploring health',
     menuUser3: 'Arjun N.',
     menuUser3Sub: 'Existing customer · bike + car',
+    menuUser4: 'Kiran S.',
+    menuUser4Sub: 'Renewal due · testing scenario',
+  },
+
+  /* ── Motor Hello Entry ── */
+  motorEntry: {
+    // Script A — renewal_pending
+    renewalHi: (name: string) => `Hey ${name}! Welcome back.`,
+    renewalFound: (make: string, model: string) => `I can see your ${make} ${model}'s insurance is coming up for renewal.`,
+    renewalUrgent: (days: number) => `You have ${days} day${days === 1 ? '' : 's'} left — let\'s get this sorted.`,
+    renewalCta: 'Renew now',
+    renewalSwitch: 'Compare & switch insurer',
+    renewalSeeOptions: 'See all options',
+    // Script B — has_history
+    historyHi: (name: string) => `Hey ${name}, good to see you again!`,
+    historyRecent: 'Pick up where you left off, or start something new.',
+    historyContinueCard: (make: string, model: string) => `Continue with ${make} ${model}`,
+    historyNewSearch: 'Search a different vehicle',
+    historyNewCar: 'Insure a brand-new car',
+    historyAckoDrive: 'Buy a new car (ACKO Drive)',
+    // Script C — fresh
+    freshHi: (name: string) => `Hi${name ? ` ${name}` : ''}! Welcome to ACKO.`,
+    freshQuestion: 'What would you like to do today?',
+    freshRenew: 'Renew / Switch insurance',
+    freshRenewSub: 'I have an existing car',
+    freshNewCar: 'Insure my new car',
+    freshNewCarSub: 'Just bought or about to buy',
+    freshDrive: 'Buy a car + insurance',
+    freshDriveSub: 'Explore ACKO Drive',
+    freshManage: 'Manage my existing policy',
+    freshManageSub: 'View policy, make claims',
+    // Shared
+    lastChecked: 'Last checked',
+    expiringSoon: (days: number) => `Expiring in ${days} day${days === 1 ? '' : 's'}`,
+    regLabel: 'Reg no.',
+    enterReg: 'Enter registration number',
+    // ACKO Drive inline browsing
+    driveIntro: 'Let\'s find your perfect car. I\'ll help you compare models and then get you insured instantly.',
+    drivePickMake: 'Which brand are you interested in?',
+    drivePickModel: (make: string) => `Which ${make} model catches your eye?`,
+    drivePickVariant: (model: string) => `Which variant of the ${model}?`,
+    driveReadyQuote: (make: string, model: string, variant: string) => `Great choice — ${make} ${model} ${variant}. Let me pull up insurance options for you.`,
   },
 };
