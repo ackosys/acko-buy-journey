@@ -1,6 +1,6 @@
 'use client';
 
-import { useJourneyStore } from '../store';
+import { useLanguageStore } from '../languageStore';
 import { Language } from '../types';
 import { en } from './en';
 import { hi } from './hi';
@@ -13,15 +13,20 @@ export type TranslationSet = typeof en;
 
 const translations: Record<Language, TranslationSet> = { en, hi, hinglish, kn, ta, ml };
 
-/** Hook: returns the current translation set based on store language */
+/** Hook: returns the current translation set — reads from the global language store */
 export function useT(): TranslationSet {
-  const lang = useJourneyStore(s => s.language);
+  const lang = useLanguageStore((s) => s.language);
   return translations[lang] || en;
 }
 
 /** Pure function: get translation set by language code */
 export function getT(lang: Language): TranslationSet {
   return translations[lang] || en;
+}
+
+/** Get the current language outside a React component (e.g. in scripts) */
+export function getCurrentLang(): Language {
+  return useLanguageStore.getState().language;
 }
 
 /** Get the BCP-47 locale tag for TTS / STT */

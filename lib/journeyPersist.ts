@@ -4,6 +4,7 @@
  *
  * Only serialisable, meaningful fields are stored (no functions, no history).
  */
+import { getT, getCurrentLang } from './translations';
 
 export type ProductKey = 'health' | 'car' | 'bike' | 'life';
 
@@ -157,6 +158,7 @@ function vehicleLabel(snap: JourneySnapshot): string {
 
 export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null {
   const { product, currentStepId } = snap;
+  const t = getT(getCurrentLang()).dropOff;
 
   /* ── HEALTH ─────────────────────────────────────────────── */
   if (product === 'health') {
@@ -166,12 +168,12 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
 
     if (['recommendation.result', 'review.summary', 'review.consent', 'review.dob_collection', 'review.dob_ack'].includes(currentStepId)) {
       return {
-        title: 'Your health quote is ready',
+        title: t.quoteReady(t.healthLabel),
         subtitle: [premStr, memberStr].filter(Boolean).join(' · '),
-        ctaLabel: 'Complete purchase',
+        ctaLabel: t.completePurchase,
         route: '/health?resume=1',
         urgency: 'high',
-        badge: 'Quote ready',
+        badge: t.quoteReadyBadge,
       };
     }
     if (currentStepId === 'payment.success' || currentStepId === 'health_eval.intro') {
@@ -284,21 +286,22 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     const planStr = snap.selectedPlanType === 'zero_dep' ? 'Zero Dep' : snap.selectedPlanType === 'third_party' ? 'Third Party' : snap.selectedPlanType === 'comprehensive' ? 'Comprehensive' : '';
     const route = `/motor?vehicle=${product}&resume=1`;
 
+    const productLabel = product === 'car' ? t.carLabel : t.bikeLabel;
     if (['quote.plans_ready', 'quote.plan_selection'].includes(currentStepId)) {
       return {
-        title: `Your ${product} insurance quote is ready`,
+        title: t.quoteReady(productLabel),
         subtitle: `${vLabel}${regStr}`,
         ctaLabel: 'View plans',
         route,
         urgency: 'high',
-        badge: 'Quote ready',
+        badge: t.quoteReadyBadge,
       };
     }
     if (['quote.plan_selected', 'addons.out_of_pocket', 'addons.protect_everyone', 'addons.complete', 'review.premium_breakdown'].includes(currentStepId)) {
       return {
-        title: `Complete your ${product} insurance purchase`,
+        title: t.continueJourney,
         subtitle: [planStr, premStr, `${vLabel}${regStr}`].filter(Boolean).join(' · '),
-        ctaLabel: 'Complete purchase',
+        ctaLabel: t.completePurchase,
         route,
         urgency: 'high',
         badge: 'Action needed',
@@ -306,7 +309,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     }
     if (currentStepId === 'payment.success' || currentStepId === 'completion.dashboard') {
       return {
-        title: `Your ${product} policy is active`,
+        title: `Your ${productLabel} policy is active`,
         subtitle: [planStr, `${vLabel}${regStr}`].filter(Boolean).join(' · '),
         ctaLabel: 'View policy',
         route,

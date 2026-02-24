@@ -6,6 +6,7 @@ import AckoLogo from '../../AckoLogo';
 import ThemeToggle from '../../global/ThemeToggle';
 import { VehicleType } from '../../../lib/motor/types';
 import { useThemeStore } from '../../../lib/themeStore';
+import { useT } from '../../../lib/translations';
 
 interface AuraMotorEntryNavProps {
   initialVehicle?: VehicleType;
@@ -16,6 +17,7 @@ interface AuraMotorEntryNavProps {
 export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourney, onJumpTo }: AuraMotorEntryNavProps) {
   const [vehicle, setVehicle] = useState<VehicleType>(initialVehicle);
   const theme = useThemeStore((s) => s.theme);
+  const t = useT();
 
   const jump = (stepId: string) => onJumpTo(stepId, vehicle);
 
@@ -69,7 +71,7 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 6h2l3 8M5.5 17L10 9l3 3h4" />
                   </svg>
                 )}
-                {v === 'car' ? 'Car' : 'Bike'}
+                {v === 'car' ? t.motorScripts.optionCar : t.motorScripts.optionBike}
               </button>
             ))}
           </div>
@@ -79,9 +81,9 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mb-8">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-7 h-7 rounded-full bg-white/15 text-white text-xs font-bold flex items-center justify-center border border-white/20">1</div>
-            <h2 className="text-white text-lg font-semibold">Buy {vehicle === 'car' ? 'Car' : 'Bike'} Insurance</h2>
+            <h2 className="text-white text-lg font-semibold">{vehicle === 'car' ? t.motorScripts.newOption('Car') : t.motorScripts.newOption('Bike')} Insurance</h2>
           </div>
-          <p className="text-purple-300/80 text-sm mb-4 ml-10">Start a conversational journey to get the right plan</p>
+          <p className="text-purple-300/80 text-sm mb-4 ml-10">{t.motorScripts.popularSubText}</p>
           <div className="flex gap-3 ml-10">
             <button
               onClick={() => jump('registration.enter_number')}
@@ -92,8 +94,8 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644V14.652" />
                 </svg>
               </div>
-              <h3 className="text-white text-sm font-semibold mb-0.5">Renew / existing {vehicle}</h3>
-              <p className="text-purple-300/60 text-xs">Have a {vehicle} with an active or expired policy</p>
+              <h3 className="text-white text-sm font-semibold mb-0.5">{t.motorScripts.renewOption}</h3>
+              <p className="text-purple-300/60 text-xs">{t.motorScripts.renewOptionDesc(vehicle)}</p>
             </button>
             <button
               onClick={() => jump('manual_entry.congratulations')}
@@ -104,8 +106,8 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
                 </svg>
               </div>
-              <h3 className="text-white text-sm font-semibold mb-0.5">Brand new {vehicle}</h3>
-              <p className="text-purple-300/60 text-xs">Just bought or buying a new {vehicle}</p>
+              <h3 className="text-white text-sm font-semibold mb-0.5">{t.motorScripts.brandNewExcited(vehicle)}</h3>
+              <p className="text-purple-300/60 text-xs">{t.motorScripts.newOptionDesc(vehicle)}</p>
             </button>
           </div>
         </motion.div>

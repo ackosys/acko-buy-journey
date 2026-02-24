@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import { useThemeStore } from '../../lib/themeStore';
+import { useLanguageStore } from '../../lib/languageStore';
 import { loadSnapshot } from '../../lib/journeyPersist';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
 import LifeEntryScreen from '../../components/life/LifeEntryScreen';
@@ -100,10 +101,14 @@ function LifeJourneyInner() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
 
+  const globalLanguage = useLanguageStore((s) => s.language);
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const searchParams = useSearchParams();
+
+  // Keep life store language in sync with the global language selection
+  useEffect(() => { store.setLanguage(globalLanguage); }, [globalLanguage]);
 
   useEffect(() => {
     const resume = searchParams.get('resume') === '1';

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import AckoLogo from '../AckoLogo';
 import Link from 'next/link';
 import { useThemeStore } from '../../lib/themeStore';
+import { useT } from '../../lib/translations';
 
 interface LifeEntryScreenProps {
   onBuyJourney: () => void;
@@ -47,11 +48,12 @@ export default function LifeEntryScreen({
   onJumpToUnderwriting,
 }: LifeEntryScreenProps) {
   const { theme } = useThemeStore();
+  const t = useT();
   const steps = [
     {
       number: 1,
-      title: 'Buy Life Insurance',
-      desc: 'Start a conversational journey to find the right term plan',
+      title: t.lifeScripts.lifeWelcome,
+      desc: t.lifeScripts.introPassive,
       cards: [
         {
           onClick: onBuyJourney,
@@ -63,8 +65,8 @@ export default function LifeEntryScreen({
               <line x1="12" y1="2" x2="12" y2="4" strokeLinecap="round" />
             </svg>
           ),
-          title: 'Get your term plan quote',
-          subtitle: 'Coverage calculator, plan selection & payment',
+          title: t.lifeScripts.pathDirect,
+          subtitle: t.lifeScripts.pathDirectSub,
         },
       ],
     },

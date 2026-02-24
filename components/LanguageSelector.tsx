@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useJourneyStore } from '../lib/store';
+import { useLanguageStore } from '../lib/languageStore';
 import { Language } from '../lib/types';
 import AckoLogo from './AckoLogo';
 import Link from 'next/link';
@@ -18,10 +19,12 @@ interface LanguageSelectorProps {
 }
 
 export default function LanguageSelector({ onSelect }: LanguageSelectorProps) {
-  const { setLanguage } = useJourneyStore();
+  const { setLanguage: setJourneyLanguage } = useJourneyStore();
+  const { setLanguage } = useLanguageStore();
 
   const handleSelect = (lang: Language) => {
     setLanguage(lang);
+    setJourneyLanguage(lang);
     onSelect();
   };
 

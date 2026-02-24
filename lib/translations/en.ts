@@ -897,6 +897,208 @@ export const en = {
     closing: "Thank you so much for your patience, Rahul. I've recorded all the medical information. Our underwriting team will review this. You'll receive an update within 3-5 business days. Have a wonderful day!",
   },
 
+  /* ── Motor Insurance Scripts ── */
+  motorScripts: {
+    // Vehicle type
+    welcomeHi: 'Hi there, welcome to ACKO.',
+    welcomeQuestion: 'What would you like to insure today?',
+    optionCar: 'Car',
+    optionCarDesc: 'Hatchback, Sedan, SUV, etc.',
+    optionBike: 'Bike',
+    optionBikeDesc: 'Scooter, Motorcycle, etc.',
+    // Registration
+    renewOrNew: (v: string) => `Are you looking to renew insurance for your current ${v}, or insure a brand-new one?`,
+    renewOption: 'Renew / Switch insurance',
+    renewOptionDesc: (v: string) => `I already have a ${v}`,
+    newOption: (v: string) => `Insure my new ${v}`,
+    newOptionDesc: (v: string) => `Just got a brand-new ${v}`,
+    enterReg: (v: string) => `Please enter your ${v}'s registration number.`,
+    enterRegSub: 'We will use this to fetch your vehicle and policy details from the government database.',
+    regPlaceholder: 'e.g. MH 04 EQ 4392',
+    // Vehicle fetch
+    fetchingReg: (reg: string) => `Looking up ${reg}...`,
+    vehicleFound: (v: string) => `We found your ${v}.`,
+    vehicleFoundConfirm: 'Please confirm these details are correct.',
+    // Manual entry
+    brandNewExcited: (v: string) => `A brand new ${v} — that\'s exciting!`,
+    brandNewSaving: (v: string) => `You can save up to Rs. 40,000 on your new ${v}\'s on-road price by insuring with ACKO.`,
+    fetchFailed: (v: string) => `We could not fetch your ${v} details automatically.`,
+    fetchFailedSub: 'No worries — I will help you enter them manually. This should only take a minute.',
+    whichBrand: (v: string) => `Which brand is your ${v}?`,
+    whichBrandSub: (v: string) => `We need your ${v} details to calculate the right premium.`,
+    whichModel: (make: string) => `Which model of ${make}?`,
+    whichFuel: (model: string) => `What fuel type does your ${model} run on?`,
+    whichFuelSub: 'Fuel type affects your premium calculation.',
+    whichVariantNew: (model: string) => `Select your ${model} variant`,
+    whichVariantExisting: (model: string) => `Which ${model} variant do you drive?`,
+    whichYearNew: (v: string) => `What year is your ${v}?`,
+    whichYearExisting: (v: string) => `When was your ${v} registered?`,
+    // Popular vehicles
+    letsStart: 'Let us start with the basics.',
+    whichVehicleBuy: (v: string) => `Which ${v} are you planning to buy?`,
+    popularSubText: 'Select from popular models or search for yours.',
+    otherOption: 'Other — Select make & model',
+    // Commercial check
+    commercialCheck: 'Is this a commercial vehicle?',
+    commercialSub: 'Vehicle used as a taxi, to deliver goods, etc.',
+    personalUse: 'Personal use',
+    commercialUse: 'Commercial / taxi',
+    // Delivery
+    gotIt: 'Got it.',
+    deliveryQuestion: (make: string, model: string) => `When do you expect your ${make} ${model} to be delivered?`,
+    deliverySub: 'This helps us time your policy start date correctly.',
+    todayTomorrow: 'Today or tomorrow',
+    nextWeek: 'In the next 1 week',
+    nextTwoWeeks: 'In the next 2 weeks',
+    notSureYet: 'I am not sure yet',
+    // Contact
+    almostDone: 'Thanks. Just a couple more details before we get your quotes.',
+    mobileQuestion: 'What is your mobile number?',
+    mobileSub: 'We will share your quote and policy documents on this number.',
+    mobilePlaceholder: 'e.g., 9876543210',
+    pincodeQuestion: 'And your current address pincode?',
+    pincodeSub: 'Your pincode determines the Regional Transport Office (RTO) for your vehicle.',
+    pincodePlaceholder: 'e.g., 560099',
+    // Summary
+    summaryIntro: (v: string) => `Here is a summary of your ${v} details.`,
+    summaryConfirm: 'Please review and confirm to see your insurance options.',
+    // Quote
+    fetchingPlans: (make: string, model: string) => `Fetching the best plans for your ${make} ${model}...`,
+    // Policy status
+    policyStatus: (v: string) => `Let me ask a couple of quick questions to get you the best premium for your ${v}.`,
+    currentlyInsured: (v: string) => `Is your ${v} currently insured?`,
+    yes: 'Yes',
+    no: 'No',
+    policyType: 'What type of policy do you currently have?',
+    comprehensive: 'Comprehensive',
+    comprehensiveSub: 'Own damage + third party',
+    thirdParty: 'Third Party Only',
+    thirdPartySub: 'Basic legal cover',
+    policyExpiry: 'When does your current policy expire?',
+    notExpiredYet: 'Not expired yet',
+    expiredRecently: 'Expired in the last 30 days',
+    expiredLonger: 'Expired more than 30 days ago',
+    // NCB
+    ncbQuestion: 'Did you have any claims in the last policy year?',
+    noClaims: 'No claims',
+    hadClaims: 'Had a claim',
+    ncbGreat: (pct: number) => `Great — your No Claim Bonus is ${pct}%. This earns you a discount on your own-damage premium.`,
+    // CNG
+    cngQuestion: 'Does your car have a CNG kit installed?',
+    cngYes: 'Yes, CNG kit installed',
+    cngNo: 'No CNG kit',
+    cngAmount: 'What is the declared value of your CNG kit?',
+    // Quote display
+    quoteReady: (make: string, model: string) => `Here are the best plans for your ${make} ${model}.`,
+    quoteChoose: 'Choose the plan that suits you best.',
+    // Owner details
+    ownerName: 'What is the registered owner\'s name?',
+    ownerNameSub: 'As per your RC (Registration Certificate).',
+    ownerDob: 'Date of birth of the primary owner?',
+    // Addons
+    addonsIntro: 'A few add-ons that protect you beyond the standard policy.',
+    addonsQuestion: 'Would you like to add any of these?',
+    // Payment
+    summaryReview: 'Here\'s your final premium breakdown.',
+    proceedToPayment: 'Tap below to proceed to payment.',
+    paymentSuccess: (v: string) => `Payment successful! Your ${v} insurance policy is being issued.`,
+  },
+
+  /* ── Life Insurance Scripts ── */
+  lifeScripts: {
+    // Intro
+    hiGreeting: 'Hi! 👋',
+    introProtector: 'I\'m here to help you secure maximum protection for your family at the best price.',
+    introProtectorQ: 'Before we start, let me ask: If your income stopped tomorrow, how long would your family manage?',
+    introProtectorSub: 'This helps us understand your protection needs — no pressure, just reflection.',
+    introGrowth: 'I\'m here to help you understand why separating protection from investment gives you better results.',
+    introGrowthQ: 'First, let\'s think: If your income stopped tomorrow, how long would your family manage?',
+    introGrowthSub: 'Then we\'ll show you how term insurance + separate investment works better than mixing both.',
+    introPassive: 'I\'m here to make this simple for you. Will help you figure out the right coverage. No overthinking needed.',
+    // Path choice
+    howProceed: 'How would you like to proceed?',
+    pathDirect: 'I know my coverage needs',
+    pathDirectSub: 'Get a quick quote',
+    pathGuided: 'Help me decide',
+    pathGuidedSub: 'We\'ll calculate the right coverage for you',
+    // Should buy
+    beforeProceed: 'Before we proceed, let\'s check if term insurance makes sense for you.',
+    needInsuranceIf: 'You may need term insurance if:',
+    needsHasDependents: '• You have dependents who rely on your income',
+    needsHasLiabilities: '• You have liabilities (loans, EMIs)',
+    needsSecureFamily: '• You want to financially secure your family\'s future',
+    hasDependentsQ: 'Do you have dependents or financial obligations?',
+    optYesDependents: 'Yes, I have dependents/obligations',
+    optYesDependentsSub: 'Continue with term insurance',
+    optNoDependents: 'No dependents or obligations',
+    optNoDependentsSub: 'You may not need term insurance',
+    optNotSure: 'Not sure',
+    optNotSureSub: 'Let\'s discuss',
+    // Basic info
+    askAge: 'No worries! But before you go — may I know your age?',
+    askAgeSub: 'This will help me give you a better recommendation.',
+    agePlaceholder: 'Your age',
+    youngRecommend: (age: number) => `Here's the thing — at ${age}, this is actually the best time to buy term insurance. Here's why:`,
+    youngBullet1: '• Premiums are significantly cheaper when you\'re young — they only go up with age',
+    youngBullet2: '• As life changes (marriage, kids, home loan), you\'ll already be covered',
+    youngBullet3: '• With our Flexi Cover feature, you can increase your coverage later as dependents are added — without buying a new policy',
+    youngCrore: (age: number) => `A ₹1 Cr cover at ${age} could cost as low as ₹500/month. The same plan at 40 could be 2-3x more.`,
+    youngCallToAction: 'Would you like to see what it costs for you?',
+    optShowQuote: 'Yes, show me my quote',
+    optShowQuoteSub: 'Lock in low premiums now',
+    optLearnFlexi: 'Tell me more about Flexi Cover',
+    optLearnFlexiSub: 'How to increase coverage later',
+    optMaybeLater: 'Maybe later',
+    optMaybeLaterSub: 'Explore other insurance options',
+    // Flexi Cover
+    flexiIntro: 'Flexi Cover is designed for exactly your situation — life changes, and your insurance should too.',
+    flexiBullet1: '• Start with a base cover today at low premiums',
+    flexiBullet2: '• When you get married, have kids, or take a home loan — increase your cover',
+    flexiBullet3: '• No new medical tests, no new policy needed',
+    flexiBullet4: '• Premium for the additional cover is based on your age when you purchased your policy — helps you save money',
+    flexiClose: 'It\'s like future-proofing your finances while locking in today\'s low rates.',
+    optGreatQuote: 'Great, show me my quote',
+    optGreatQuoteSub: 'Let\'s get started',
+    // Gender
+    genderQ: 'What is your gender?',
+    optMale: 'Male',
+    optFemale: 'Female',
+    optOther: 'Other',
+    // DOB
+    dobQ: 'What is your date of birth?',
+    dobSub: 'We use this to calculate your age and premium accurately.',
+    // Smoking
+    smokingQ: 'Do you currently smoke or use tobacco?',
+    smokingYes: 'Yes, I smoke',
+    smokingNo: 'No, I don\'t smoke',
+    smokingNote: 'Smokers typically pay 20–30% higher premiums.',
+    // Income
+    incomeQ: 'What is your approximate annual income?',
+    incomeSub: 'This helps us recommend the right coverage amount — typically 10–15× annual income.',
+    // Coverage recommendation
+    recommendedCover: (crore: string) => `Based on your profile, we recommend a ₹${crore} cover.`,
+    recommendedSub: 'This takes into account your income, liabilities, and family needs.',
+    // Payment
+    lifePaySuccess: 'Payment successful! Your life insurance policy is being processed.',
+    lifeWelcome: 'Welcome to ACKO Life Insurance.',
+  },
+
+  /* ── Drop-off / Journey Persist ── */
+  dropOff: {
+    continueJourney: 'Continue where you left off',
+    quoteReady: (product: string) => `Your ${product} quote is ready`,
+    completePurchase: 'Complete purchase',
+    quoteReadyBadge: 'Quote ready',
+    justNow: 'just now',
+    minsAgo: (n: number) => `${n}m ago`,
+    hoursAgo: (n: number) => `${n}h ago`,
+    daysAgo: (n: number) => `${n}d ago`,
+    healthLabel: 'Health',
+    carLabel: 'Car',
+    bikeLabel: 'Bike',
+    lifeLabel: 'Life',
+  },
+
   /* ── Global Homepage ── */
   global: {
     welcomeBack: (name: string) => `Welcome back, ${name}`,

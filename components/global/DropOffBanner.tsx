@@ -11,6 +11,7 @@ import {
   type JourneySnapshot,
 } from '../../lib/journeyPersist';
 import { useThemeStore } from '../../lib/themeStore';
+import { useT } from '../../lib/translations';
 
 const PRODUCT_CONFIG: Record<ProductKey, {
   label: string;
@@ -84,14 +85,14 @@ const URGENCY_COLORS: Record<string, string> = {
   low:    'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
 };
 
-function relativeTime(iso: string): string {
+function relativeTime(iso: string, t: ReturnType<typeof useT>): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 2) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 2) return t.dropOff.justNow;
+  if (mins < 60) return t.dropOff.minsAgo(mins);
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return t.dropOff.hoursAgo(hours);
+  return t.dropOff.daysAgo(Math.floor(hours / 24));
 }
 
 interface CardProps {
@@ -104,9 +105,16 @@ interface CardProps {
 function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
   const display = getDropOffDisplay(snap);
   const theme = useThemeStore((s) => s.theme);
+  const t = useT();
   if (!display) return null;
 
   const config = PRODUCT_CONFIG[snap.product];
+  const productLabels: Record<ProductKey, string> = {
+    health: t.dropOff.healthLabel,
+    car: t.dropOff.carLabel,
+    bike: t.dropOff.bikeLabel,
+    life: t.dropOff.lifeLabel,
+  };
   const shadow = theme === 'light'
     ? '0 2px 12px rgba(0,0,0,0.08)'
     : '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)';
@@ -143,7 +151,7 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: config.accentColor }}>
-              {config.label}
+              {productLabels[snap.product]}
             </span>
             <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${URGENCY_COLORS[display.urgency]}`}>
               {display.badge}
@@ -175,7 +183,7 @@ function DropOffCard({ snap, onDismiss, onClick, isOnly }: CardProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </div>
-          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{relativeTime(snap.savedAt)}</span>
+          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{relativeTime(snap.savedAt, t)}</span>
         </div>
       </button>
     </motion.div>

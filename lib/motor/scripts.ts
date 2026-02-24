@@ -1,5 +1,6 @@
 import { MotorConversationStep, MotorJourneyState } from './types';
 import { getMotorDashboardStep } from './dashboardScripts';
+import { getT, getCurrentLang } from '../translations';
 
 /* ═══════════════════════════════════════════════════════════════════
    ACKO Motor Insurance — Conversational Scripts
@@ -28,16 +29,16 @@ const vehicleTypeSelect: MotorConversationStep = {
   id: 'vehicle_type.select',
   module: 'vehicle_type',
   widgetType: 'selection_cards',
-  getScript: () => ({
-    botMessages: [
-      `Hi there, welcome to ACKO.`,
-      `What would you like to insure today?`,
-    ],
-    options: [
-      { id: 'car', label: 'Car', description: 'Hatchback, Sedan, SUV, etc.', icon: 'car' },
-      { id: 'bike', label: 'Bike', description: 'Scooter, Motorcycle, etc.', icon: 'scooter' },
-    ],
-  }),
+  getScript: () => {
+    const t = getT(getCurrentLang()).motorScripts;
+    return {
+      botMessages: [t.welcomeHi, t.welcomeQuestion],
+      options: [
+        { id: 'car', label: t.optionCar, description: t.optionCarDesc, icon: 'car' },
+        { id: 'bike', label: t.optionBike, description: t.optionBikeDesc, icon: 'scooter' },
+      ],
+    };
+  },
   processResponse: (response) => ({
     vehicleType: response as 'car' | 'bike',
   }),
@@ -52,16 +53,17 @@ const registrationHasNumber: MotorConversationStep = {
   id: 'registration.has_number',
   module: 'registration',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
-    botMessages: [
-      `Hi there, welcome to ACKO! 😊`,
-      `Are you looking to renew insurance for your current ${vLabel(state)}, or insure a brand-new one?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Renew / Switch insurance', description: `I already have a ${vLabel(state)}`, icon: 'renew' },
-      { id: 'no', label: `Insure my new ${vLabel(state)}`, description: `Just got a brand-new ${vLabel(state)}`, icon: state.vehicleType === 'bike' ? 'new_bike' : 'new_car' },
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    const v = vLabel(state);
+    return {
+      botMessages: [t.welcomeHi, t.renewOrNew(v)],
+      options: [
+        { id: 'yes', label: t.renewOption, description: t.renewOptionDesc(v), icon: 'renew' },
+        { id: 'no', label: t.newOption(v), description: t.newOptionDesc(v), icon: state.vehicleType === 'bike' ? 'new_bike' : 'new_car' },
+      ],
+    };
+  },
   processResponse: (response) => ({
     vehicleEntryType: response === 'yes' ? 'existing' : 'brand_new',
   }),
@@ -77,14 +79,15 @@ const registrationEnterNumber: MotorConversationStep = {
   id: 'registration.enter_number',
   module: 'registration',
   widgetType: 'vehicle_reg_input',
-  getScript: (state) => ({
-    botMessages: [
-      `Please enter your ${vLabel(state)}'s registration number.`,
-    ],
-    subText: `We will use this to fetch your vehicle and policy details from the government database.`,
-    placeholder: 'e.g. MH 04 EQ 4392',
-    inputType: 'text',
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.enterReg(vLabel(state))],
+      subText: t.enterRegSub,
+      placeholder: t.regPlaceholder,
+      inputType: 'text',
+    };
+  },
   processResponse: (response) => ({
     registrationNumber: (response as string).toUpperCase().replace(/\s+/g, ''),
   }),
@@ -100,9 +103,7 @@ const vehicleFetchLoading: MotorConversationStep = {
   module: 'vehicle_fetch',
   widgetType: 'progressive_loader',
   getScript: (state) => ({
-    botMessages: [
-      `Looking up ${state.registrationNumber}...`,
-    ],
+    botMessages: [getT(state.language).motorScripts.fetchingReg(state.registrationNumber)],
   }),
   processResponse: (response) => {
     // response is 'success' or 'failed'
@@ -144,12 +145,12 @@ const vehicleFetchFound: MotorConversationStep = {
   id: 'vehicle_fetch.found',
   module: 'vehicle_fetch',
   widgetType: 'vehicle_details_card',
-  getScript: (state) => ({
-    botMessages: [
-      `We found your ${vLabel(state)}.`,
-      `Please confirm these details are correct.`,
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.vehicleFound(vLabel(state)), t.vehicleFoundConfirm],
+    };
+  },
   processResponse: () => ({}),
   getNextStep: (_, state) => {
     if (state.vehicleType === 'bike') return 'pre_quote.policy_status';
@@ -165,12 +166,12 @@ const manualEntryCongratulations: MotorConversationStep = {
   id: 'manual_entry.congratulations',
   module: 'manual_entry',
   widgetType: 'none',
-  getScript: (state) => ({
-    botMessages: [
-      `A brand new ${vLabel(state)} — that's exciting!`,
-      `You can save up to Rs. 40,000 on your new ${vLabel(state)}'s on-road price by insuring with ACKO.`,
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.brandNewExcited(vLabel(state)), t.brandNewSaving(vLabel(state))],
+    };
+  },
   processResponse: () => ({}),
   getNextStep: () => 'brand_new.popular_cars',
 };
@@ -179,12 +180,12 @@ const manualEntryStart: MotorConversationStep = {
   id: 'manual_entry.start',
   module: 'manual_entry',
   widgetType: 'none',
-  getScript: (state) => ({
-    botMessages: [
-      `We could not fetch your ${vLabel(state)} details automatically.`,
-      `No worries — I will help you enter them manually. This should only take a minute.`,
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.fetchFailed(vLabel(state)), t.fetchFailedSub],
+    };
+  },
   processResponse: () => ({}),
   getNextStep: () => 'manual_entry.select_brand',
 };
@@ -193,12 +194,13 @@ const manualEntrySelectBrand: MotorConversationStep = {
   id: 'manual_entry.select_brand',
   module: 'manual_entry',
   widgetType: 'brand_selector',
-  getScript: (state) => ({
-    botMessages: [
-      `Which brand is your ${vLabel(state)}?`,
-    ],
-    subText: `We need your ${vLabel(state)} details to calculate the right premium.`,
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.whichBrand(vLabel(state))],
+      subText: t.whichBrandSub(vLabel(state)),
+    };
+  },
   processResponse: (response) => ({
     vehicleData: {
       make: response,
@@ -219,9 +221,7 @@ const manualEntrySelectModel: MotorConversationStep = {
   module: 'manual_entry',
   widgetType: 'model_selector',
   getScript: (state) => ({
-    botMessages: [
-      `Which model of ${state.vehicleData.make}?`,
-    ],
+    botMessages: [getT(state.language).motorScripts.whichModel(state.vehicleData.make)],
   }),
   processResponse: (response, state) => ({
     vehicleData: { ...state.vehicleData, model: response },
@@ -234,6 +234,7 @@ const manualEntrySelectFuel: MotorConversationStep = {
   module: 'manual_entry',
   widgetType: 'selection_cards',
   getScript: (state) => {
+    const t = getT(state.language).motorScripts;
     const isBike = state.vehicleType === 'bike';
     const fuelOptions = isBike
       ? [
@@ -247,10 +248,8 @@ const manualEntrySelectFuel: MotorConversationStep = {
           { id: 'cng', label: 'CNG', icon: 'cng' },
         ];
     return {
-      botMessages: [
-        `What fuel type does your ${state.vehicleData.model} run on?`,
-      ],
-      subText: `Fuel type affects your premium calculation.`,
+      botMessages: [t.whichFuel(state.vehicleData.model)],
+      subText: t.whichFuelSub,
       options: fuelOptions,
     };
   },
@@ -271,13 +270,16 @@ const manualEntrySelectVariant: MotorConversationStep = {
   module: 'manual_entry',
   condition: (state) => state.vehicleType !== 'bike',
   widgetType: 'variant_selector',
-  getScript: (state) => ({
-    botMessages: [
-      state.vehicleEntryType === 'brand_new'
-        ? `Select your ${state.vehicleData.model} variant`
-        : `Which ${state.vehicleData.model} variant do you drive?`,
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [
+        state.vehicleEntryType === 'brand_new'
+          ? t.whichVariantNew(state.vehicleData.model)
+          : t.whichVariantExisting(state.vehicleData.model),
+      ],
+    };
+  },
   processResponse: (response, state) => ({
     vehicleData: {
       ...state.vehicleData,
@@ -296,12 +298,12 @@ const manualEntrySelectYear: MotorConversationStep = {
   module: 'manual_entry',
   widgetType: 'year_selector',
   getScript: (state) => {
-    const isBrandNew = state.vehicleEntryType === 'brand_new';
+    const t = getT(state.language).motorScripts;
     return {
       botMessages: [
-        isBrandNew
-          ? `What year is your ${vLabel(state)}?`
-          : `When was your ${vLabel(state)} registered?`,
+        state.vehicleEntryType === 'brand_new'
+          ? t.whichYearNew(vLabel(state))
+          : t.whichYearExisting(vLabel(state)),
       ],
     };
   },
@@ -355,17 +357,15 @@ const brandNewPopularCars: MotorConversationStep = {
   module: 'manual_entry',
   widgetType: 'selection_cards',
   getScript: (state) => {
+    const t = getT(state.language).motorScripts;
     const isBike = state.vehicleType === 'bike';
     const popularList = isBike ? POPULAR_BIKES : POPULAR_CARS;
     return {
-      botMessages: [
-        `Let us start with the basics.`,
-        `Which ${vLabel(state)} are you planning to buy?`,
-      ],
-      subText: `Select from popular models or search for yours.`,
+      botMessages: [t.letsStart, t.whichVehicleBuy(vLabel(state))],
+      subText: t.popularSubText,
       options: [
         ...popularList.map(c => ({ ...c, icon: isBike ? 'bike' : 'car', logoUrl: (c as any).logoUrl })),
-        { id: 'other', label: 'Other — Select make & model', icon: 'search' },
+        { id: 'other', label: t.otherOption, icon: 'search' },
       ],
     };
   },
@@ -401,14 +401,17 @@ const brandNewCommercialCheck: MotorConversationStep = {
   module: 'manual_entry',
   condition: (state) => state.vehicleType !== 'bike',
   widgetType: 'selection_cards',
-  getScript: () => ({
-    botMessages: ['Is this a commercial vehicle?'],
-    subText: 'Vehicle used as a taxi, to deliver goods, etc.',
-    options: [
-      { id: 'no', label: 'Personal use', icon: 'user' },
-      { id: 'yes', label: 'Commercial / taxi', icon: 'commercial_car' },
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.commercialCheck],
+      subText: t.commercialSub,
+      options: [
+        { id: 'no', label: t.personalUse, icon: 'user' },
+        { id: 'yes', label: t.commercialUse, icon: 'commercial_car' },
+      ],
+    };
+  },
   processResponse: (response, state) => ({
     vehicleData: { ...state.vehicleData, isCommercialVehicle: response === 'yes' },
   }),
@@ -423,19 +426,19 @@ const brandNewDeliveryDate: MotorConversationStep = {
   id: 'brand_new.delivery_date',
   module: 'manual_entry',
   widgetType: 'selection_cards',
-  getScript: (state) => ({
-    botMessages: [
-      `Got it.`,
-      `When do you expect your ${state.vehicleData.make} ${state.vehicleData.model} to be delivered?`,
-    ],
-    subText: `This helps us time your policy start date correctly.`,
-    options: [
-      { id: 'today_tomorrow', label: 'Today or tomorrow', icon: 'check' },
-      { id: 'next_1_week', label: 'In the next 1 week', icon: 'clock' },
-      { id: 'next_2_weeks', label: 'In the next 2 weeks', icon: 'clock' },
-      { id: 'not_sure', label: 'I am not sure yet', icon: 'help' },
-    ],
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.gotIt, t.deliveryQuestion(state.vehicleData.make, state.vehicleData.model)],
+      subText: t.deliverySub,
+      options: [
+        { id: 'today_tomorrow', label: t.todayTomorrow, icon: 'check' },
+        { id: 'next_1_week', label: t.nextWeek, icon: 'clock' },
+        { id: 'next_2_weeks', label: t.nextTwoWeeks, icon: 'clock' },
+        { id: 'not_sure', label: t.notSureYet, icon: 'help' },
+      ],
+    };
+  },
   processResponse: (response) => ({ deliveryWindow: response }),
   getNextStep: () => 'brand_new.mobile_pincode',
 };
@@ -445,15 +448,15 @@ const brandNewMobilePincode: MotorConversationStep = {
   id: 'brand_new.mobile_pincode',
   module: 'manual_entry',
   widgetType: 'text_input',
-  getScript: () => ({
-    botMessages: [
-      `Thanks. Just a couple more details before we get your quotes.`,
-      `What is your mobile number?`,
-    ],
-    subText: `We will share your quote and policy documents on this number.`,
-    placeholder: 'e.g., 9876543210',
-    inputType: 'tel' as const,
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.almostDone, t.mobileQuestion],
+      subText: t.mobileSub,
+      placeholder: t.mobilePlaceholder,
+      inputType: 'tel' as const,
+    };
+  },
   processResponse: (response) => ({ ownerMobile: response, phone: response }),
   getNextStep: () => 'brand_new.pincode',
 };
@@ -463,14 +466,15 @@ const brandNewPincode: MotorConversationStep = {
   id: 'brand_new.pincode',
   module: 'manual_entry',
   widgetType: 'text_input',
-  getScript: () => ({
-    botMessages: [
-      `And your current address pincode?`,
-    ],
-    subText: `Your pincode determines the Regional Transport Office (RTO) for your vehicle.`,
-    placeholder: 'e.g., 560099',
-    inputType: 'text' as const,
-  }),
+  getScript: (state) => {
+    const t = getT(state.language).motorScripts;
+    return {
+      botMessages: [t.pincodeQuestion],
+      subText: t.pincodeSub,
+      placeholder: t.pincodePlaceholder,
+      inputType: 'text' as const,
+    };
+  },
   processResponse: (response) => ({ pincode: response }),
   getNextStep: () => 'brand_new.summary',
 };
@@ -481,14 +485,15 @@ const brandNewSummary: MotorConversationStep = {
   module: 'manual_entry',
   widgetType: 'editable_summary',
   getScript: (state) => {
+    const t = getT(state.language).motorScripts;
     const v = state.vehicleData;
     const fuelLabel = v.fuelType ? v.fuelType.charAt(0).toUpperCase() + v.fuelType.slice(1) : '';
     return {
       botMessages: [
-        `Here is a summary of your ${vLabel(state)} details.`,
+        t.summaryIntro(vLabel(state)),
         `${v.make} ${v.model} ${v.variant} — ${fuelLabel}`,
       ],
-      subText: `Please review and confirm to see your insurance options.`,
+      subText: t.summaryConfirm,
     };
   },
   processResponse: () => ({
@@ -505,9 +510,7 @@ const brandNewViewPrices: MotorConversationStep = {
   module: 'pre_quote',
   widgetType: 'none',
   getScript: (state) => ({
-    botMessages: [
-      `Fetching the best plans for your ${state.vehicleData.make} ${state.vehicleData.model}...`,
-    ],
+    botMessages: [getT(state.language).motorScripts.fetchingPlans(state.vehicleData.make, state.vehicleData.model)],
   }),
   processResponse: () => ({}),
   getNextStep: () => 'quote.calculating',

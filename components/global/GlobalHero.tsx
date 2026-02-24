@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useThemeStore } from '../../lib/themeStore';
 import { useJourneyStore } from '../../lib/store';
+import { useLanguageStore } from '../../lib/languageStore';
 import { useT } from '../../lib/translations';
 import { Language } from '../../lib/types';
 import AckoLogo from '../AckoLogo';
@@ -58,7 +59,8 @@ const USER_PROFILES: UserProfile[] = [
 
 export default function GlobalHero({ userName }: GlobalHeroProps) {
   const { theme, cycleTheme } = useThemeStore();
-  const { language, setLanguage, updateState } = useJourneyStore();
+  const { language, setLanguage: setJourneyLanguage, updateState } = useJourneyStore();
+  const { setLanguage } = useLanguageStore();
   const t = useT();
   const isLight = theme === 'light';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -67,6 +69,7 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
 
   const handleLanguageSelect = (lang: Language) => {
     setLanguage(lang);
+    setJourneyLanguage(lang);
     localStorage.setItem('acko_lang_chosen', 'true');
   };
 

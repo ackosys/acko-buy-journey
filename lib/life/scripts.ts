@@ -6,6 +6,7 @@
 import type { ConversationStep, Option } from '../core/types';
 import type { LifeJourneyState, LifeModule, LifePersonaType, LifeRider } from './types';
 import { LIFE_PERSONA_CONFIG } from './personas';
+import { getT } from '../translations';
 
 // Helper to get user name
 function userName(state: LifeJourneyState): string {
@@ -128,28 +129,15 @@ const lifeIntro: ConversationStep<LifeJourneyState> = {
   module: 'basic_info',
   widgetType: 'none',
   getScript: (persona, state) => {
-    const personaConfig = LIFE_PERSONA_CONFIG[persona as LifePersonaType];
-    const messages: string[] = [
-      `Hi! 👋`,
-    ];
+    const t = getT(state.language).lifeScripts;
+    const messages: string[] = [t.hiGreeting];
     
-    // Persona-specific intro messaging with ethical hook
     if (persona === 'protector') {
-      messages.push(
-        `I'm here to help you secure maximum protection for your family at the best price.`,
-        `Before we start, let me ask: If your income stopped tomorrow, how long would your family manage?`,
-        `This helps us understand your protection needs — no pressure, just reflection.`
-      );
+      messages.push(t.introProtector, t.introProtectorQ, t.introProtectorSub);
     } else if (persona === 'growth_seeker') {
-      messages.push(
-        `I'm here to help you understand why separating protection from investment gives you better results.`,
-        `First, let's think: If your income stopped tomorrow, how long would your family manage?`,
-        `Then we'll show you how term insurance + separate investment works better than mixing both.`
-      );
-    } else { // passive_aware
-      messages.push(
-        `I'm here to make this simple for you. Will help you figure out the right coverage. No overthinking needed.`
-      );
+      messages.push(t.introGrowth, t.introGrowthQ, t.introGrowthSub);
+    } else {
+      messages.push(t.introPassive);
     }
     
     return { botMessages: messages };
@@ -163,15 +151,16 @@ const lifePathChoice: ConversationStep<LifeJourneyState> = {
   id: 'life_path_choice',
   module: 'basic_info',
   widgetType: 'selection_cards',
-  getScript: (_persona, _state) => ({
-    botMessages: [
-      `How would you like to proceed?`,
-    ],
-    options: [
-      { id: 'direct', label: 'I know my coverage needs', description: 'Get a quick quote' },
-      { id: 'guided', label: 'Help me decide', description: 'We\'ll calculate the right coverage for you' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [t.howProceed],
+      options: [
+        { id: 'direct', label: t.pathDirect, description: t.pathDirectSub },
+        { id: 'guided', label: t.pathGuided, description: t.pathGuidedSub },
+      ],
+    };
+  },
   processResponse: (response, _state) => ({
     userPath: response as 'direct' | 'guided',
   }),
@@ -188,23 +177,22 @@ const lifeShouldBuyCheck: ConversationStep<LifeJourneyState> = {
   id: 'life_should_buy_check',
   module: 'basic_info',
   widgetType: 'selection_cards',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `Before we proceed, let's check if term insurance makes sense for you.`,
-      ``,
-      `You may need term insurance if:`,
-      `• You have dependents who rely on your income`,
-      `• You have liabilities (loans, EMIs)`,
-      `• You want to financially secure your family's future`,
-      ``,
-      `Do you have dependents or financial obligations?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes, I have dependents/obligations', description: 'Continue with term insurance' },
-      { id: 'no', label: 'No dependents or obligations', description: 'You may not need term insurance' },
-      { id: 'not_sure', label: 'Not sure', description: 'Let\'s discuss' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [
+        t.beforeProceed, ``,
+        t.needInsuranceIf,
+        t.needsHasDependents, t.needsHasLiabilities, t.needsSecureFamily, ``,
+        t.hasDependentsQ,
+      ],
+      options: [
+        { id: 'yes', label: t.optYesDependents, description: t.optYesDependentsSub },
+        { id: 'no', label: t.optNoDependents, description: t.optNoDependentsSub },
+        { id: 'not_sure', label: t.optNotSure, description: t.optNotSureSub },
+      ],
+    };
+  },
   processResponse: (response, state) => {
     if (response === 'no') {
       return { intentSignals: { ...state.intentSignals, mayNotNeedTerm: true } };
@@ -227,18 +215,18 @@ const lifeNoDependentsAgeCheck: ConversationStep<LifeJourneyState> = {
   id: 'life_no_dependents_age_check',
   module: 'basic_info',
   widgetType: 'number_input',
-  getScript: (_persona, _state) => ({
-    botMessages: [
-      `No worries! But before you go — may I know your age?`,
-      `This will help me give you a better recommendation.`,
-    ],
-    inputConfig: {
-      placeholder: 'Your age',
-      min: 18,
-      max: 65,
-      suffix: 'years',
-    },
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [t.askAge, t.askAgeSub],
+      inputConfig: {
+        placeholder: t.agePlaceholder,
+        min: 18,
+        max: 65,
+        suffix: 'years',
+      },
+    };
+  },
   processResponse: (response, _state) => {
     const age = parseInt(response);
     return { age };
@@ -257,24 +245,22 @@ const lifeYoungRecommendation: ConversationStep<LifeJourneyState> = {
   id: 'life_young_recommendation',
   module: 'basic_info',
   widgetType: 'selection_cards',
-  getScript: (_persona, state) => ({
-    botMessages: [
-      `Here's the thing — at ${state.age}, this is actually the best time to buy term insurance. Here's why:`,
-      ``,
-      `• Premiums are significantly cheaper when you're young — they only go up with age`,
-      `• As life changes (marriage, kids, home loan), you'll already be covered`,
-      `• With our Flexi Cover feature, you can increase your coverage later as dependents are added — without buying a new policy`,
-      ``,
-      `A ₹1 Cr cover at ${state.age} could cost as low as ₹500/month. The same plan at 40 could be 2-3x more.`,
-      ``,
-      `Would you like to see what it costs for you?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes, show me my quote', description: 'Lock in low premiums now' },
-      { id: 'learn', label: 'Tell me more about Flexi Cover', description: 'How to increase coverage later' },
-      { id: 'skip', label: 'Maybe later', description: 'Explore other insurance options' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [
+        t.youngRecommend(state.age), ``,
+        t.youngBullet1, t.youngBullet2, t.youngBullet3, ``,
+        t.youngCrore(state.age), ``,
+        t.youngCallToAction,
+      ],
+      options: [
+        { id: 'yes', label: t.optShowQuote, description: t.optShowQuoteSub },
+        { id: 'learn', label: t.optLearnFlexi, description: t.optLearnFlexiSub },
+        { id: 'skip', label: t.optMaybeLater, description: t.optMaybeLaterSub },
+      ],
+    };
+  },
   processResponse: (_response, _state) => ({}),
   getNextStep: (response, _state) => {
     if (response === 'yes') {
@@ -292,23 +278,21 @@ const lifeFlexiCoverExplanation: ConversationStep<LifeJourneyState> = {
   id: 'life_flexi_cover_explanation',
   module: 'basic_info',
   widgetType: 'selection_cards',
-  getScript: (_persona, state) => ({
-    botMessages: [
-      `Flexi Cover is designed for exactly your situation — life changes, and your insurance should too.`,
-      ``,
-      `Here's how it works:`,
-      `• Start with a base cover today at low premiums`,
-      `• When you get married, have kids, or take a home loan — increase your cover`,
-      `• No new medical tests, no new policy needed`,
-      `• Premium for the additional cover is based on your age when you purchased your policy — helps you save money`,
-      ``,
-      `It's like future-proofing your finances while locking in today's low rates.`,
-    ],
-    options: [
-      { id: 'yes', label: 'Great, show me my quote', description: 'Let\'s get started' },
-      { id: 'skip', label: 'Maybe later', description: 'Explore other options' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [
+        t.flexiIntro, ``,
+        'Here\'s how it works:',
+        t.flexiBullet1, t.flexiBullet2, t.flexiBullet3, t.flexiBullet4, ``,
+        t.flexiClose,
+      ],
+      options: [
+        { id: 'yes', label: t.optGreatQuote, description: t.optGreatQuoteSub },
+        { id: 'skip', label: t.optMaybeLater, description: 'Explore other options' },
+      ],
+    };
+  },
   processResponse: (_response, _state) => ({}),
   getNextStep: (response, _state) => {
     if (response === 'yes') {
@@ -509,15 +493,16 @@ const lifeDqGender: ConversationStep<LifeJourneyState> = {
   id: 'life_dq_gender',
   module: 'basic_info',
   widgetType: 'selection_cards',
-  getScript: (_persona, state) => ({
-    botMessages: [
-      `What's your gender?`,
-    ],
-    options: [
-      { id: 'male', label: 'Male' },
-      { id: 'female', label: 'Female' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [t.genderQ],
+      options: [
+        { id: 'male', label: t.optMale },
+        { id: 'female', label: t.optFemale },
+      ],
+    };
+  },
   processResponse: (response, _state) => ({ gender: response as 'male' | 'female' }),
   getNextStep: (_response, _state) => 'life_dq_dob',
 };
@@ -526,10 +511,8 @@ const lifeDqDob: ConversationStep<LifeJourneyState> = {
   id: 'life_dq_dob',
   module: 'basic_info',
   widgetType: 'date_picker',
-  getScript: (_persona, _state) => ({
-    botMessages: [
-      `What's your date of birth?`,
-    ],
+  getScript: (_persona, state) => ({
+    botMessages: [getT(state.language).lifeScripts.dobQ],
     placeholder: 'Select date of birth',
   }),
   processResponse: (response, _state) => {
@@ -563,15 +546,16 @@ const lifeDqSmoking: ConversationStep<LifeJourneyState> = {
   id: 'life_dq_smoking',
   module: 'basic_info',
   widgetType: 'yes_no',
-  getScript: (_persona, _state) => ({
-    botMessages: [
-      `Have you used any tobacco products in the past 12 months?`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes' },
-      { id: 'no', label: 'No' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [t.smokingQ],
+      options: [
+        { id: 'yes', label: t.smokingYes },
+        { id: 'no', label: t.smokingNo },
+      ],
+    };
+  },
   processResponse: (response, _state) => ({
     smokingStatus: response === 'yes' ? 'current' as const : 'never' as const,
   }),
@@ -582,10 +566,8 @@ const lifeDqIncome: ConversationStep<LifeJourneyState> = {
   id: 'life_dq_income',
   module: 'basic_info',
   widgetType: 'number_input',
-  getScript: (_persona, _state) => ({
-    botMessages: [
-      `What's your annual income?`,
-    ],
+  getScript: (_persona, state) => ({
+    botMessages: [getT(state.language).lifeScripts.incomeQ],
     placeholder: 'Enter annual income (₹)',
     inputType: 'number',
     min: 100000,
@@ -660,15 +642,16 @@ const lifeBasicGender: ConversationStep<LifeJourneyState> = {
   id: 'life_basic_gender',
   module: 'basic_info',
   widgetType: 'selection_cards',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `What's your gender? This helps us calculate accurate premiums.`,
-    ],
-    options: [
-      { id: 'male', label: 'Male' },
-      { id: 'female', label: 'Female' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [t.genderQ],
+      options: [
+        { id: 'male', label: t.optMale },
+        { id: 'female', label: t.optFemale },
+      ],
+    };
+  },
   processResponse: (response, _state) => ({ gender: response as 'male' | 'female' }),
   getNextStep: (_response, _state) => 'life_basic_dob',
 };
@@ -677,11 +660,8 @@ const lifeBasicDob: ConversationStep<LifeJourneyState> = {
   id: 'life_basic_dob',
   module: 'basic_info',
   widgetType: 'date_picker',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `What's your date of birth?`,
-      `Your age affects your premium — the younger you are, the lower your premium.`,
-    ],
+  getScript: (_persona, state) => ({
+    botMessages: [getT(state.language).lifeScripts.dobQ],
     placeholder: 'Select date of birth',
   }),
   processResponse: (response, _state) => {
@@ -749,17 +729,16 @@ const lifeBasicSmoking: ConversationStep<LifeJourneyState> = {
   id: 'life_basic_smoking',
   module: 'basic_info',
   widgetType: 'yes_no',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `Have you smoked or used any tobacco products in the past 12 months?`,
-      `This includes cigarettes, cigars, e-cigarettes, chewing tobacco, gutka, or paan masala.`,
-      `Honest disclosure helps us give you accurate premiums.`,
-    ],
-    options: [
-      { id: 'yes', label: 'Yes' },
-      { id: 'no', label: 'No' },
-    ],
-  }),
+  getScript: (_persona, state) => {
+    const t = getT(state.language).lifeScripts;
+    return {
+      botMessages: [t.smokingQ, t.smokingNote],
+      options: [
+        { id: 'yes', label: t.smokingYes },
+        { id: 'no', label: t.smokingNo },
+      ],
+    };
+  },
   processResponse: (response, _state) => ({
     smokingStatus: response === 'yes' ? 'current' : 'never',
   }),
