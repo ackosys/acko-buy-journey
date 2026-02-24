@@ -187,10 +187,16 @@ function MotorJourneyInner() {
   useEffect(() => {
     const product = vehicleParam ?? 'car';
     const snap = resumeParam ? loadSnapshot(product) : null;
+    const screenParam = searchParams.get('screen');
 
     resetJourney();
 
-    if (snap && snap.vehicleType) {
+    if (screenParam === 'dashboard') {
+      const vt: VehicleType = vehicleParam ?? 'car';
+      seedDemoState(vt);
+      updateState({ vehicleType: vt, paymentComplete: true, journeyComplete: false, currentStepId: 'db.welcome', currentModule: 'dashboard' } as Partial<MotorJourneyState>);
+      setScreen('chat');
+    } else if (snap && snap.vehicleType) {
       seedDemoState(snap.vehicleType);
       updateState({
         vehicleType: snap.vehicleType,
