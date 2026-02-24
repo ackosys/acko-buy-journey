@@ -11,10 +11,14 @@ export const en = {
     hindi: 'हिन्दी',
     hinglish: 'Hinglish',
     kannada: 'ಕನ್ನಡ',
+    tamil: 'தமிழ்',
+    malayalam: 'മലയാളം',
     englishSub: 'Continue in English',
     hindiSub: 'हिंदी में जारी रखें',
     hinglishSub: 'Hindi in English script',
     kannadaSub: 'ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ',
+    tamilSub: 'தமிழில் தொடரவும்',
+    malayalamSub: 'മലയാളത്തിൽ തുടരുക',
   },
 
   /* ── Common ── */

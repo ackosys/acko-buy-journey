@@ -6,7 +6,7 @@ import { en } from './en';
 type T = typeof en;
 
 export const hinglish: T = {
-  langSelect: { ...en.langSelect, title: 'Apni language choose karein', subtitle: 'Aap ise kabhi bhi badal sakte hain' },
+  langSelect: { ...en.langSelect, title: 'Apni language choose karein', subtitle: 'Aap ise kabhi bhi badal sakte hain', tamil: 'தமிழ்', malayalam: 'മലയാളം', tamilSub: 'தமிழில் தொடரவும்', malayalamSub: 'മലയാളത്തിൽ തുടരുക' },
 
   common: {
     continue: 'Aage badhein',

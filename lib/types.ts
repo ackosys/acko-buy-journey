@@ -94,7 +94,7 @@ export type WidgetType =
 
 export type PostPaymentScenario = 'all_clear' | 'waiting_period' | 'member_rejected' | 'extra_payment' | 'no_test' | 'home_test_only';
 
-export type Language = 'en' | 'hi' | 'hinglish' | 'kn';
+export type Language = 'en' | 'hi' | 'hinglish' | 'kn' | 'ta' | 'ml';
 
 export interface FamilyMember {
   id: string;

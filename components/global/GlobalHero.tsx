@@ -32,10 +32,12 @@ const THEME_ICONS: Record<string, React.ReactNode> = {
 };
 
 const LANGUAGES: { id: Language; label: string; nativeLabel: string; glyph: string }[] = [
-  { id: 'en',       label: 'English',  nativeLabel: 'English',             glyph: 'A'  },
-  { id: 'hi',       label: 'Hindi',    nativeLabel: 'हिन्दी',              glyph: 'अ' },
-  { id: 'hinglish', label: 'Hinglish', nativeLabel: 'Hinglish',            glyph: 'Hi' },
-  { id: 'kn',       label: 'Kannada',  nativeLabel: 'ಕನ್ನಡ',              glyph: 'ಅ' },
+  { id: 'en',       label: 'English',   nativeLabel: 'English',   glyph: 'A'  },
+  { id: 'hi',       label: 'Hindi',     nativeLabel: 'हिन्दी',    glyph: 'अ' },
+  { id: 'hinglish', label: 'Hinglish',  nativeLabel: 'Hinglish',  glyph: 'Hi' },
+  { id: 'kn',       label: 'Kannada',   nativeLabel: 'ಕನ್ನಡ',    glyph: 'ಅ' },
+  { id: 'ta',       label: 'Tamil',     nativeLabel: 'தமிழ்',     glyph: 'த' },
+  { id: 'ml',       label: 'Malayalam', nativeLabel: 'മലയാളം',   glyph: 'മ' },
 ];
 
 interface UserProfile {
