@@ -4,12 +4,19 @@ import { motion } from 'framer-motion';
 import { useUserProfileStore, type PolicyLob, type UserPolicy } from '../../lib/userProfileStore';
 import { useThemeStore } from '../../lib/themeStore';
 
+export interface PolicyStatusInfo {
+  badge: string;
+  message: string;
+  urgency: 'high' | 'medium' | 'low';
+}
+
 interface PolicyActionScreenProps {
   lobId: string;
   lobLabel: string;
   onBuyNew: () => void;
   onManagePolicy: (policy: UserPolicy) => void;
   onBack: () => void;
+  statusInfo?: PolicyStatusInfo | null;
 }
 
 const LOB_ICONS: Record<string, React.ReactNode> = {
@@ -42,7 +49,13 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManagePolicy, onBack }: PolicyActionScreenProps) {
+const STATUS_COLORS: Record<string, { bg: string; bgLight: string; text: string; textLight: string }> = {
+  high: { bg: 'rgba(248,113,113,0.12)', bgLight: '#FEE2E2', text: '#f87171', textLight: '#DC2626' },
+  medium: { bg: 'rgba(251,191,36,0.12)', bgLight: '#FEF3C7', text: '#fbbf24', textLight: '#D97706' },
+  low: { bg: 'rgba(52,211,153,0.12)', bgLight: '#D1FAE5', text: '#34d399', textLight: '#065F46' },
+};
+
+export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManagePolicy, onBack, statusInfo }: PolicyActionScreenProps) {
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
   const existingPolicies = useUserProfileStore((s) => s.getActivePoliciesForLob(lobId as PolicyLob));
@@ -158,6 +171,29 @@ export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManage
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
+              {statusInfo && (
+                <div
+                  className="mt-3 pt-3 flex items-center gap-2"
+                  style={{ borderTop: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}` }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: isLight ? STATUS_COLORS[statusInfo.urgency].textLight : STATUS_COLORS[statusInfo.urgency].text }}
+                  />
+                  <span
+                    className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                    style={{
+                      background: isLight ? STATUS_COLORS[statusInfo.urgency].bgLight : STATUS_COLORS[statusInfo.urgency].bg,
+                      color: isLight ? STATUS_COLORS[statusInfo.urgency].textLight : STATUS_COLORS[statusInfo.urgency].text,
+                    }}
+                  >
+                    {statusInfo.badge}
+                  </span>
+                  <p className="text-[11px]" style={{ color: 'var(--app-text-muted)' }}>
+                    {statusInfo.message}
+                  </p>
+                </div>
+              )}
             </motion.button>
           ))}
         </div>

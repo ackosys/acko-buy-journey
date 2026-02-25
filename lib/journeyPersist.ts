@@ -110,6 +110,14 @@ export const HEALTH_SAVE_STEPS = new Set([
 ]);
 
 export const LIFE_SAVE_STEPS = new Set([
+  'life_basic_dob',
+  'life_basic_income',
+  'life_basic_summary',
+  'life_lifestyle_summary',
+  'life_dq_habits',
+  'life_basic_habits',
+  'life_dq_income',
+  'life_dq_coverage_input',
   'life_quote_display',
   'life_addons_intro',
   'life_review',
@@ -119,6 +127,9 @@ export const LIFE_SAVE_STEPS = new Set([
   'life_medical_eval',
   'life_underwriting',
   'life_complete',
+  'life_db.personal_submitted',
+  'life_db.nominee_submitted',
+  'life_db.coverage_submitted',
 ]);
 
 export const MOTOR_SAVE_STEPS = new Set([
@@ -216,6 +227,27 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     const coverStr = snap.coverAmount ? `₹${(snap.coverAmount / 10000000).toFixed(0)} Cr cover` : '';
     const premStr = snap.annualPremium ? `₹${snap.annualPremium.toLocaleString('en-IN')}/yr` : (snap.monthlyPremium ? `₹${snap.monthlyPremium.toLocaleString('en-IN')}/mo` : '');
 
+    if (['life_basic_dob', 'life_basic_income', 'life_basic_summary', 'life_basic_habits', 'life_dq_habits', 'life_dq_income', 'life_dq_coverage_input'].includes(currentStepId)) {
+      const nameStr = displayName ? `${displayName}, we're ` : "We're ";
+      return {
+        title: `${nameStr}building your life plan`,
+        subtitle: 'Continue where you left off',
+        ctaLabel: 'Continue journey',
+        route: '/life?resume=1',
+        urgency: 'medium',
+        badge: 'In progress',
+      };
+    }
+    if (currentStepId === 'life_lifestyle_summary') {
+      return {
+        title: displayName ? `${displayName}, your quote is almost ready` : 'Your quote is almost ready',
+        subtitle: 'Just a few more details needed',
+        ctaLabel: 'Get my quote',
+        route: '/life?resume=1',
+        urgency: 'medium',
+        badge: 'Almost there',
+      };
+    }
     if (currentStepId === 'life_quote_display' || currentStepId === 'life_addons_intro') {
       return {
         title: `${displayName ? displayName + ', your' : 'Your'} life quote is ready`,
@@ -266,7 +298,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         badge: 'In progress',
       };
     }
-    if (currentStepId === 'life_underwriting' || currentStepId === 'life_complete') {
+    if (currentStepId === 'life_underwriting') {
       return {
         title: 'Your policy is being processed',
         subtitle: `Underwriting in progress${coverStr ? ' · ' + coverStr : ''}`,
@@ -274,6 +306,50 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         route: '/life?resume=1',
         urgency: 'low',
         badge: 'Processing',
+      };
+    }
+    if (currentStepId === 'life_complete') {
+      const sub = [premStr, coverStr].filter(Boolean).join(' · ') || 'Term Life Plan · Active';
+      return {
+        title: displayName ? `${displayName}, your life policy is active!` : 'Your life policy is active!',
+        subtitle: sub,
+        ctaLabel: 'View policy',
+        route: '/life?screen=dashboard',
+        urgency: 'low',
+        badge: 'Policy active',
+      };
+    }
+    if (currentStepId === 'life_db.personal_submitted') {
+      const sub = [premStr, coverStr].filter(Boolean).join(' · ') || 'Term Life Plan · Active';
+      return {
+        title: displayName ? `${displayName}, personal info update requested` : 'Personal info update requested',
+        subtitle: `Processing in 2-3 days · ${sub}`,
+        ctaLabel: 'View policy',
+        route: '/life?screen=dashboard',
+        urgency: 'low',
+        badge: 'Update in progress',
+      };
+    }
+    if (currentStepId === 'life_db.nominee_submitted') {
+      const sub = [premStr, coverStr].filter(Boolean).join(' · ') || 'Term Life Plan · Active';
+      return {
+        title: displayName ? `${displayName}, nominee update requested` : 'Nominee update requested',
+        subtitle: `Verification in 2-3 days · ${sub}`,
+        ctaLabel: 'View policy',
+        route: '/life?screen=dashboard',
+        urgency: 'low',
+        badge: 'Update in progress',
+      };
+    }
+    if (currentStepId === 'life_db.coverage_submitted') {
+      const sub = [premStr, coverStr].filter(Boolean).join(' · ') || 'Term Life Plan · Active';
+      return {
+        title: displayName ? `${displayName}, coverage update under review` : 'Coverage update under review',
+        subtitle: `Review in 5-7 days · ${sub}`,
+        ctaLabel: 'View policy',
+        route: '/life?screen=dashboard',
+        urgency: 'low',
+        badge: 'Under review',
       };
     }
   }

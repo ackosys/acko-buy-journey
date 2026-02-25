@@ -547,25 +547,28 @@ const lifeDqPincode: ConversationStep<LifeJourneyState> = {
     inputType: 'text',
   }),
   processResponse: (response, _state) => ({ pinCode: String(response) }),
-  getNextStep: (_response, _state) => 'life_dq_smoking',
+  getNextStep: (_response, _state) => 'life_dq_habits',
 };
 
-const lifeDqSmoking: ConversationStep<LifeJourneyState> = {
-  id: 'life_dq_smoking',
+const lifeDqHabits: ConversationStep<LifeJourneyState> = {
+  id: 'life_dq_habits',
   module: 'basic_info',
-  widgetType: 'yes_no',
-  getScript: (_persona, state) => {
-    const t = getT(state.language).lifeScripts;
-    return {
-      botMessages: [t.smokingQ],
-      options: [
-        { id: 'yes', label: t.smokingYes },
-        { id: 'no', label: t.smokingNo },
-      ],
-    };
-  },
+  widgetType: 'selection_cards',
+  getScript: (_persona, _state) => ({
+    botMessages: [
+      `Do you smoke or consume alcohol?`,
+      `This directly impacts your premium calculation.`,
+    ],
+    options: [
+      { id: 'none', label: 'No, neither' },
+      { id: 'smoke_only', label: 'I smoke / use tobacco' },
+      { id: 'drink_only', label: 'I drink alcohol' },
+      { id: 'both', label: 'Both' },
+    ],
+  }),
   processResponse: (response, _state) => ({
-    smokingStatus: response === 'yes' ? 'current' as const : 'never' as const,
+    smokingStatus: (response === 'smoke_only' || response === 'both') ? 'current' as const : 'never' as const,
+    alcoholConsumption: (response === 'drink_only' || response === 'both') ? 'occasional' as const : 'never' as const,
   }),
   getNextStep: (_response, _state) => 'life_dq_income',
 };
@@ -584,24 +587,6 @@ const lifeDqIncome: ConversationStep<LifeJourneyState> = {
   processResponse: (response, _state) => ({
     annualIncome: parseInt(String(response)) || 0,
   }),
-  getNextStep: (_response, _state) => 'life_dq_alcohol',
-};
-
-const lifeDqAlcohol: ConversationStep<LifeJourneyState> = {
-  id: 'life_dq_alcohol',
-  module: 'basic_info',
-  widgetType: 'selection_cards',
-  getScript: (_persona, _state) => ({
-    botMessages: [
-      `Do you consume alcohol?`,
-    ],
-    options: [
-      { id: 'never', label: 'Never' },
-      { id: 'occasional', label: 'Occasionally' },
-      { id: 'regular', label: 'Regularly' },
-    ],
-  }),
-  processResponse: (response, _state) => ({ alcoholConsumption: response as 'never' | 'occasional' | 'regular' }),
   getNextStep: (_response, _state) => 'life_dq_occupation',
 };
 
@@ -730,25 +715,28 @@ const lifeBasicPincode: ConversationStep<LifeJourneyState> = {
     inputType: 'text',
   }),
   processResponse: (response, _state) => ({ pinCode: String(response) }),
-  getNextStep: (_response, _state) => 'life_basic_smoking',
+  getNextStep: (_response, _state) => 'life_basic_habits',
 };
 
-const lifeBasicSmoking: ConversationStep<LifeJourneyState> = {
-  id: 'life_basic_smoking',
+const lifeBasicHabits: ConversationStep<LifeJourneyState> = {
+  id: 'life_basic_habits',
   module: 'basic_info',
-  widgetType: 'yes_no',
-  getScript: (_persona, state) => {
-    const t = getT(state.language).lifeScripts;
-    return {
-      botMessages: [t.smokingQ, t.smokingNote],
-      options: [
-        { id: 'yes', label: t.smokingYes },
-        { id: 'no', label: t.smokingNo },
-      ],
-    };
-  },
+  widgetType: 'selection_cards',
+  getScript: (_persona, _state) => ({
+    botMessages: [
+      `Do you smoke or consume alcohol?`,
+      `This helps us assess risk and calculate accurate premiums.`,
+    ],
+    options: [
+      { id: 'none', label: 'No, neither' },
+      { id: 'smoke_only', label: 'I smoke / use tobacco' },
+      { id: 'drink_only', label: 'I drink alcohol' },
+      { id: 'both', label: 'Both' },
+    ],
+  }),
   processResponse: (response, _state) => ({
-    smokingStatus: response === 'yes' ? 'current' : 'never',
+    smokingStatus: (response === 'smoke_only' || response === 'both') ? 'current' as const : 'never' as const,
+    alcoholConsumption: (response === 'drink_only' || response === 'both') ? 'occasional' as const : 'never' as const,
   }),
   getNextStep: (_response, _state) => 'life_basic_income',
 };
@@ -1043,31 +1031,12 @@ const lifeBasicSummary: ConversationStep<LifeJourneyState> = {
       selectedTerm: policyTerm,
     };
   },
-  getNextStep: (_response, _state) => 'life_lifestyle_alcohol',
+  getNextStep: (_response, _state) => 'life_lifestyle_occupation',
 };
 
 /* ═══════════════════════════════════════════════
-   MODULE: LIFESTYLE — Alcohol, Occupation, Medical History
+   MODULE: LIFESTYLE — Occupation, Medical History
    ═══════════════════════════════════════════════ */
-
-const lifeLifestyleAlcohol: ConversationStep<LifeJourneyState> = {
-  id: 'life_lifestyle_alcohol',
-  module: 'lifestyle',
-  widgetType: 'selection_cards',
-  getScript: (persona, state) => ({
-    botMessages: [
-      `Do you consume alcohol?`,
-      `This helps us assess risk and calculate accurate premiums.`,
-    ],
-    options: [
-      { id: 'never', label: 'Never', description: 'I don\'t drink' },
-      { id: 'occasional', label: 'Occasionally', description: 'Social drinking only' },
-      { id: 'regular', label: 'Regularly', description: 'Weekly or more' },
-    ],
-  }),
-  processResponse: (response, _state) => ({ alcoholConsumption: response as 'never' | 'occasional' | 'regular' }),
-  getNextStep: (_response, _state) => 'life_lifestyle_occupation',
-};
 
 const lifeLifestyleOccupation: ConversationStep<LifeJourneyState> = {
   id: 'life_lifestyle_occupation',
@@ -1525,9 +1494,8 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   lifeDqGender,
   lifeDqDob,
   lifeDqPincode,
-  lifeDqSmoking,
+  lifeDqHabits,
   lifeDqIncome,
-  lifeDqAlcohol,
   lifeDqOccupation,
   lifeDqCoverageInput,
   
@@ -1536,7 +1504,7 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   lifeBasicDob,
   lifeAgeIneligible,
   lifeBasicPincode,
-  lifeBasicSmoking,
+  lifeBasicHabits,
   lifeBasicIncome,
   lifeGrowthSeekerEducation,
   
@@ -1550,7 +1518,6 @@ export const LIFE_STEPS: ConversationStep<LifeJourneyState>[] = [
   lifeBasicSummary,
   
   // Guided path: lifestyle
-  lifeLifestyleAlcohol,
   lifeLifestyleOccupation,
   lifeLifestyleSummary,
   
@@ -1612,11 +1579,11 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['What would you like to do?'],
       options: [
-        { label: '❓  Get answers', value: 'get_answers' },
-        { label: '📄  Download documents', value: 'download_doc' },
-        { label: '👤  Update personal info', value: 'update_personal' },
-        { label: '💛  Update nominee', value: 'update_nominee' },
-        { label: '🛡️  Update policy coverage', value: 'update_coverage' },
+        { label: 'Get answers', id: 'get_answers', icon: 'help' },
+        { label: 'Download documents', id: 'download_doc', icon: 'download' },
+        { label: 'Update personal info', id: 'update_personal', icon: 'user' },
+        { label: 'Update nominee', id: 'update_nominee', icon: 'heart' },
+        { label: 'Update policy coverage', id: 'update_coverage', icon: 'shield' },
       ],
     }),
     processResponse: () => ({}),
@@ -1638,11 +1605,11 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['What would you like to know about your Life policy?'],
       options: [
-        { label: 'What\'s covered?', value: 'covered' },
-        { label: 'What\'s not covered?', value: 'not_covered' },
-        { label: 'How do claims work?', value: 'claims_process' },
-        { label: 'Can I increase coverage?', value: 'increase_cover' },
-        { label: '← Back to menu', value: 'back' },
+        { label: 'What\'s covered?', id: 'covered' },
+        { label: 'What\'s not covered?', id: 'not_covered' },
+        { label: 'How do claims work?', id: 'claims_process' },
+        { label: 'Can I increase coverage?', id: 'increase_cover' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
@@ -1655,18 +1622,19 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     id: 'life_db.answer_detail',
     module: 'dashboard',
     widgetType: 'selection_cards',
-    getScript: (_p, _s, response) => {
+    getScript: (_p, state) => {
       const answers: Record<string, string> = {
         covered: '✅ **What\'s covered:**\n\n• Death due to any cause (after waiting period)\n• Accidental death — immediate coverage\n• Terminal illness — advance payout\n• Critical illness (if rider added)\n• Waiver of premium on disability (if rider added)',
         not_covered: '❌ **What\'s NOT covered:**\n\n• Suicide within first 12 months\n• Death due to self-inflicted injury\n• Misrepresentation of health history\n• Death while engaged in criminal activity\n• War, terrorism, or nuclear hazard (some plans)',
         claims_process: '📋 **How claims work:**\n\n1. Nominee contacts ACKO within 3 months of the event\n2. Submit death certificate + policy documents\n3. ACKO investigates (typically 15-30 days)\n4. Claim approved → payout within 7 working days\n\nAll claims are 100% digital. No physical visits needed.',
         increase_cover: '📈 **Increasing coverage:**\n\nYou can purchase an additional term plan at current rates. Your existing policy remains unchanged.\n\nAlternatively, some riders can be added within the first year.',
       };
+      const lastResponse = (state as any).lastResponse || '';
       return {
-        botMessages: [answers[response as string] || 'Here\'s what you need to know about your policy.'],
+        botMessages: [answers[lastResponse] || 'Here\'s what you need to know about your policy.'],
         options: [
-          { label: 'Ask something else', value: 'more' },
-          { label: '← Back to menu', value: 'back' },
+          { label: 'Ask something else', id: 'more' },
+          { label: '← Back to menu', id: 'back' },
         ],
       };
     },
@@ -1683,11 +1651,11 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['Here are your available documents:'],
       options: [
-        { label: '📄 Policy Document (2.1 MB)', value: 'policy' },
-        { label: '📋 Premium Receipt (156 KB)', value: 'receipt' },
-        { label: '🧾 Tax Certificate 80C (312 KB)', value: 'tax_cert' },
-        { label: '📑 Nominee Declaration (89 KB)', value: 'nominee' },
-        { label: '← Back to menu', value: 'back' },
+        { label: '📄 Policy Document (2.1 MB)', id: 'policy' },
+        { label: '📋 Premium Receipt (156 KB)', id: 'receipt' },
+        { label: '🧾 Tax Certificate 80C (312 KB)', id: 'tax_cert' },
+        { label: '📑 Nominee Declaration (89 KB)', id: 'nominee' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
@@ -1703,8 +1671,8 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['✅ Your document has been sent to your registered email. You can also find it in your ACKO app under "My Documents".'],
       options: [
-        { label: 'Download another', value: 'more' },
-        { label: '← Back to menu', value: 'back' },
+        { label: 'Download another', id: 'more' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
@@ -1721,17 +1689,17 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['What personal information would you like to update?'],
       options: [
-        { label: 'Name', value: 'name' },
-        { label: 'Address', value: 'address' },
-        { label: 'Contact details', value: 'contact' },
-        { label: 'Bank details', value: 'bank' },
-        { label: '← Back to menu', value: 'back' },
+        { label: 'Name', id: 'name' },
+        { label: 'Address', id: 'address' },
+        { label: 'Contact details', id: 'contact' },
+        { label: 'Bank details', id: 'bank' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
     getNextStep: (response) => {
       if (response === 'back') return 'life_db.actions';
-      return 'life_db.update_submitted';
+      return 'life_db.personal_submitted';
     },
   },
 
@@ -1743,17 +1711,17 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['What would you like to do with your nominee details?'],
       options: [
-        { label: 'Change existing nominee', value: 'change' },
-        { label: 'Add a new nominee', value: 'add' },
-        { label: 'Update payout split', value: 'payout' },
-        { label: 'Update appointee (for minor nominee)', value: 'appointee' },
-        { label: '← Back to menu', value: 'back' },
+        { label: 'Change existing nominee', id: 'change' },
+        { label: 'Add a new nominee', id: 'add' },
+        { label: 'Update payout split', id: 'payout' },
+        { label: 'Update appointee (for minor nominee)', id: 'appointee' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
     getNextStep: (response) => {
       if (response === 'back') return 'life_db.actions';
-      return 'life_db.update_submitted';
+      return 'life_db.nominee_submitted';
     },
   },
 
@@ -1765,18 +1733,18 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     getScript: () => ({
       botMessages: ['What coverage change are you looking for?'],
       options: [
-        { label: 'Increase sum assured', value: 'increase_sa' },
-        { label: 'Change policy term', value: 'change_term' },
-        { label: 'Add/modify riders', value: 'riders' },
-        { label: 'View current coverage details', value: 'view' },
-        { label: '← Back to menu', value: 'back' },
+        { label: 'Increase sum assured', id: 'increase_sa' },
+        { label: 'Change policy term', id: 'change_term' },
+        { label: 'Add/modify riders', id: 'riders' },
+        { label: 'View current coverage details', id: 'view' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
     getNextStep: (response) => {
       if (response === 'back') return 'life_db.actions';
       if (response === 'view') return 'life_db.coverage_detail';
-      return 'life_db.update_submitted';
+      return 'life_db.coverage_submitted';
     },
   },
   {
@@ -1785,11 +1753,11 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     widgetType: 'selection_cards',
     getScript: (_p, state) => ({
       botMessages: [
-        `📋 **Your current coverage:**\n\n• Sum Assured: ${(state as any).selectedCoverage ? `₹${((state as any).selectedCoverage / 100000).toFixed(0)}L` : '₹1 Cr'}\n• Policy Term: ${(state as any).selectedTerm || 30} years\n• Premium frequency: ${(state as any).premiumFrequency || 'Monthly'}\n• Riders: ${(state as any).selectedRiders?.length ? (state as any).selectedRiders.join(', ') : 'None'}\n\nUpdates can be made only once a year.`,
+        `Your current coverage:\n\n• Sum Assured: ${(state as any).selectedCoverage ? `₹${((state as any).selectedCoverage / 100000).toFixed(0)}L` : '₹1 Cr'}\n• Policy Term: ${(state as any).selectedTerm || 30} years\n• Premium frequency: ${(state as any).premiumFrequency || 'Monthly'}\n• Riders: ${(state as any).selectedRiders?.length ? (state as any).selectedRiders.join(', ') : 'None'}\n\nUpdates can be made only once a year.`,
       ],
       options: [
-        { label: 'Request a change', value: 'change' },
-        { label: '← Back to menu', value: 'back' },
+        { label: 'Request a change', id: 'change' },
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),
@@ -1799,19 +1767,50 @@ const LIFE_DASHBOARD_STEPS: ConversationStep<LifeJourneyState>[] = [
     },
   },
 
-  /* ═════ GENERIC UPDATE SUBMITTED ═════ */
+  /* ═════ UPDATE SUBMITTED — per update type ═════ */
   {
-    id: 'life_db.update_submitted',
+    id: 'life_db.personal_submitted',
     module: 'dashboard',
     widgetType: 'selection_cards',
     getScript: () => ({
       botMessages: [
-        '✅ Your request has been submitted.',
+        'Your personal info update request has been submitted.',
         'Our team will process this within 2-3 working days. You\'ll receive a confirmation on your registered email and phone.',
-        'ℹ️ Updates can be made only once a year.',
       ],
       options: [
-        { label: '← Back to menu', value: 'back' },
+        { label: '← Back to menu', id: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'life_db.actions',
+  },
+  {
+    id: 'life_db.nominee_submitted',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: [
+        'Your nominee update request has been submitted.',
+        'Our team will verify and update within 2-3 working days. You\'ll receive a confirmation on your registered email and phone.',
+      ],
+      options: [
+        { label: '← Back to menu', id: 'back' },
+      ],
+    }),
+    processResponse: () => ({}),
+    getNextStep: () => 'life_db.actions',
+  },
+  {
+    id: 'life_db.coverage_submitted',
+    module: 'dashboard',
+    widgetType: 'selection_cards',
+    getScript: () => ({
+      botMessages: [
+        'Your coverage update request has been submitted.',
+        'Our underwriting team will review and confirm within 5-7 working days. Premium changes, if any, will be communicated before processing.',
+      ],
+      options: [
+        { label: '← Back to menu', id: 'back' },
       ],
     }),
     processResponse: () => ({}),

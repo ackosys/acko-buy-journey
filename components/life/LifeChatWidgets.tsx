@@ -23,6 +23,8 @@ const LIFE_ICON_PATHS: Record<string, string> = {
   document: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
   family: 'M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z',
   flexi: 'M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75',
+  help: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z',
+  download: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3',
 };
 
 function LifeIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: string }) {
@@ -822,7 +824,7 @@ export function LifeReviewSummary({ onConfirm, onEdit }: { onConfirm: () => void
     { label: 'Gender', value: gender === 'male' ? 'Male' : 'Female', stepId: 'life_basic_gender' },
     { label: 'Phone', value: phone, stepId: 'life_basic_phone' },
     { label: 'Pin Code', value: pinCode, stepId: 'life_basic_pincode' },
-    { label: 'Smoker', value: smokingStatus === 'current' ? 'Yes' : 'No', stepId: 'life_basic_smoking' },
+    { label: 'Smoker', value: smokingStatus === 'current' ? 'Yes' : 'No', stepId: 'life_basic_habits' },
     { label: 'Annual Income', value: `₹${(annualIncome / 100000).toFixed(1)}L`, stepId: 'life_basic_income' },
     { label: 'Occupation', value: occupation, stepId: 'life_lifestyle_occupation' },
     { label: 'Coverage', value: `₹${((recommendedCoverage || 10000000) / 10000000).toFixed(1)} Cr`, stepId: 'life_quote_display' },
@@ -972,6 +974,13 @@ export function LifeCelebration({ onDashboard, onContinue }: { onDashboard?: () 
     }
   }, []);
 
+  useEffect(() => {
+    const cb = onContinue || onDashboard;
+    if (!cb) return;
+    const timer = setTimeout(cb, 3000);
+    return () => clearTimeout(timer);
+  }, [onContinue, onDashboard]);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -979,7 +988,6 @@ export function LifeCelebration({ onDashboard, onContinue }: { onDashboard?: () 
       transition={{ type: 'spring', stiffness: 200, damping: 15 }}
       className="text-center py-8 max-w-md mx-auto"
     >
-      {/* Animated orb */}
       <motion.div
         animate={{ scale: [1, 1.15, 1] }}
         transition={{ repeat: Infinity, duration: 2 }}
@@ -1025,21 +1033,6 @@ export function LifeCelebration({ onDashboard, onContinue }: { onDashboard?: () 
           ))}
         </div>
       </motion.div>
-
-      {(onContinue || onDashboard) && (
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          onClick={onContinue || onDashboard}
-          className="w-full mt-5 py-3.5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-500 active:scale-[0.97] transition-all flex items-center justify-center gap-2"
-        >
-          <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-          </svg>
-          Go to Policy Dashboard
-        </motion.button>
-      )}
     </motion.div>
   );
 }

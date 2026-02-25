@@ -1,31 +1,123 @@
 'use client';
 
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import { useThemeStore } from '../../lib/themeStore';
+import { clearSnapshot } from '../../lib/journeyPersist';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 import AckoLogo from '../AckoLogo';
 import ThemeToggle from '../global/ThemeToggle';
 import { useT } from '../../lib/translations';
 import { assetPath } from '../../lib/assetPath';
-import type { LifeModule } from '../../lib/life/types';
+import { getLifeStep } from '../../lib/life/scripts';
+import type { LifeModule, LifeJourneyState } from '../../lib/life/types';
 import Link from 'next/link';
 
 const LIFE_MODULE_ORDER: LifeModule[] = ['basic_info', 'lifestyle', 'quote', 'addons', 'review'];
 
+const NON_NAVIGABLE_WIDGETS = new Set(['none', 'payment_screen', 'ekyc_screen', 'financial_screen', 'medical_screen', 'underwriting_status', 'celebration']);
+
 export default function LifeHeader() {
   const t = useT();
-  const { currentModule, updateState } = useLifeJourneyStore();
+  const router = useRouter();
+  const store = useLifeJourneyStore();
+  const { currentModule, currentStepId, updateState } = store;
+  const stepHistory: string[] = (store as any).stepHistory ?? [];
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
   const currentIndex = LIFE_MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((currentIndex / (LIFE_MODULE_ORDER.length - 1)) * 100);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const canGoBack = stepHistory.length > 1;
+  const isPostPayment = ['payment', 'ekyc', 'financial', 'medical', 'underwriting', 'dashboard'].includes(currentModule);
+  const currentStep = getLifeStep(currentStepId);
+  const isNonNavigable = currentStep ? NON_NAVIGABLE_WIDGETS.has(currentStep.widgetType) : false;
+  const showBackBtn = canGoBack && !isPostPayment && !isNonNavigable;
+
+  const goBack = useCallback(() => {
+    if (!canGoBack) return;
+    const newHistory = [...stepHistory];
+    newHistory.pop();
+    let prevStepId = newHistory[newHistory.length - 1];
+
+    const prevStep = getLifeStep(prevStepId);
+    if (prevStep && prevStep.widgetType === 'none' && newHistory.length > 1) {
+      newHistory.pop();
+      prevStepId = newHistory[newHistory.length - 1];
+    }
+
+    const history = (store as any).conversationHistory ?? [];
+    const lastBotIdx = [...history].reverse().findIndex((m: any) => m.type === 'bot');
+    const trimmedHistory = lastBotIdx >= 0 ? history.slice(0, history.length - lastBotIdx - 1) : history;
+
+    const step = getLifeStep(prevStepId);
+    updateState({
+      currentStepId: prevStepId,
+      stepHistory: newHistory,
+      conversationHistory: trimmedHistory,
+      currentModule: (step?.module ?? currentModule) as LifeJourneyState['currentModule'],
+    } as any);
+  }, [canGoBack, stepHistory, store, currentModule, updateState]);
+
+  const handleRestart = useCallback(() => {
+    setShowMenu(false);
+    clearSnapshot('life');
+    store.resetJourney();
+    updateState({
+      currentStepId: 'life_intro',
+      conversationHistory: [],
+      stepHistory: [],
+      journeyComplete: false,
+      paymentComplete: false,
+      ekycComplete: false,
+      financialComplete: false,
+      medicalComplete: false,
+      userPath: '',
+      currentModule: 'basic_info',
+    } as any);
+  }, [store, updateState]);
+
+  const handleGoHome = useCallback(() => {
+    setShowMenu(false);
+    router.push('/');
+  }, [router]);
+
+  const hasExistingPolicy = useUserProfileStore((s) => s.hasActivePolicyInLob('life'));
+
+  const handleViewPolicy = useCallback(() => {
+    setShowMenu(false);
+    updateState({
+      currentStepId: 'life_db.welcome',
+      conversationHistory: [],
+      stepHistory: ['life_db.welcome'],
+      currentModule: 'dashboard' as LifeJourneyState['currentModule'],
+      journeyComplete: true,
+      paymentComplete: true,
+    } as any);
+  }, [updateState]);
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--app-header-bg)', borderBottom: '1px solid var(--app-border)' }}>
       <div className="max-w-lg mx-auto px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link href="/">
-            <AckoLogo variant={isLight ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-5" />
-          </Link>
+          {showBackBtn ? (
+            <button
+              onClick={goBack}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
+              style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+              title="Go back"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--app-text)' }}>
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+          ) : (
+            <Link href="/">
+              <AckoLogo variant={isLight ? 'color' : theme === 'dark' ? 'white' : 'full-white'} className="h-5" />
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -53,7 +145,66 @@ export default function LifeHeader() {
             <span className="text-xs font-medium" style={{ color: 'var(--app-text)', opacity: 0.9 }}>Expert</span>
           </button>
 
-          <ThemeToggle />
+          {/* More menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
+              style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+              title="More options"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--app-text)' }}>
+                <circle cx="12" cy="5" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
+
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div
+                  className="absolute right-0 top-full mt-1 z-50 rounded-xl overflow-hidden shadow-lg min-w-[180px]"
+                  style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+                >
+                  <button
+                    onClick={handleRestart}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 4v6h6M23 20v-6h-6" />
+                      <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+                    </svg>
+                    Start over
+                  </button>
+                  {hasExistingPolicy && (
+                    <button
+                      onClick={handleViewPolicy}
+                      className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                      style={{ color: isLight ? '#7C3AED' : '#C4B5FD', borderBottom: '1px solid var(--app-border)' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                      </svg>
+                      View existing policy
+                    </button>
+                  )}
+                  <button
+                    onClick={handleGoHome}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                      <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                    Go to homepage
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
