@@ -156,6 +156,8 @@ export const MOTOR_SAVE_STEPS = new Set([
   'review.premium_breakdown',
   'payment.success',
   'completion.dashboard',
+  'db.claim_submitted',
+  'db.edit_done',
 ]);
 
 // ── Step → DropOff display info ───────────────────────────────────────────────
@@ -486,6 +488,26 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         route,
         urgency: 'low',
         badge: 'Policy active',
+      };
+    }
+    if (currentStepId === 'db.claim_submitted') {
+      return {
+        title: `Your ${productLabel} claim has been submitted`,
+        subtitle: `Processing in 3-5 days · ${vLabel}${regStr}`,
+        ctaLabel: 'Track claim',
+        route: `/motor?vehicle=${product}&screen=dashboard`,
+        urgency: 'low',
+        badge: 'Claim submitted',
+      };
+    }
+    if (currentStepId === 'db.edit_done') {
+      return {
+        title: `${productLabel} policy update in progress`,
+        subtitle: `Changes in 2-3 days · ${vLabel}${regStr}`,
+        ctaLabel: 'View policy',
+        route: `/motor?vehicle=${product}&screen=dashboard`,
+        urgency: 'low',
+        badge: 'Update in progress',
       };
     }
   }
