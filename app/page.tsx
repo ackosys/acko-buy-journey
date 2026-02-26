@@ -5,6 +5,7 @@ import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
 import LanguageSelector from '../components/LanguageSelector';
+import GlobalHero from '../components/global/GlobalHero';
 import AckoLogo from '../components/AckoLogo';
 import PolicyActionScreen, { type PolicyStatusInfo } from '../components/global/PolicyActionScreen';
 import { useUserProfileStore, type PolicyLob } from '../lib/userProfileStore';
@@ -602,82 +603,16 @@ function GlobalHomepageInner() {
             {/* Purple glow at the top */}
             <PurpleGlow />
 
-            {/* More options menu — top right */}
-            <div className="absolute top-4 right-4 z-50">
-              <motion.button
-                onClick={() => setShowMenu(!showMenu)}
-                className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
-                  <circle cx="12" cy="5" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="12" cy="19" r="1.5" />
-                </svg>
-              </motion.button>
-
-              <AnimatePresence>
-                {showMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9, y: -4 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9, y: -4 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-1.5 z-50 rounded-xl overflow-hidden shadow-2xl min-w-[200px]"
-                      style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
-                    >
-                      <button
-                        onClick={() => { cycleTheme(); }}
-                        className="w-full px-4 py-3 text-left text-sm flex items-center gap-2.5 transition-colors hover:bg-white/5"
-                        style={{ color: 'rgba(255,255,255,0.85)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-                      >
-                        {THEME_ICONS[theme]}
-                        Mode: {THEME_LABELS[theme]}
-                      </button>
-                      <button
-                        onClick={handleLanguageCycle}
-                        className="w-full px-4 py-3 text-left text-sm flex items-center gap-2.5 transition-colors hover:bg-white/5"
-                        style={{ color: 'rgba(255,255,255,0.85)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-                        </svg>
-                        Lang: {LANG_LABELS[language as string] || language}
-                      </button>
-                      <button
-                        onClick={handleResetFTU}
-                        className="w-full px-4 py-3 text-left text-sm flex items-center gap-2.5 transition-colors hover:bg-white/5"
-                        style={{ color: '#f87171' }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 4v6h6M23 20v-6h-6" />
-                          <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
-                        </svg>
-                        Reset to FTU
-                      </button>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
+            {/* GlobalHero — ACKO logo, theme switcher, hamburger menu, profile & language drawer */}
+            <div className="w-full shrink-0 z-30">
+              <GlobalHero hideHeadline />
             </div>
 
-            {/* Logo + Title */}
+            {/* Title */}
             <div
               className="flex flex-col items-center w-full gap-[8px] shrink-0"
-              style={{ paddingTop: '66px', paddingLeft: '16px', paddingRight: '16px' }}
+              style={{ paddingLeft: '16px', paddingRight: '16px' }}
             >
-              <motion.div
-                className="flex items-center justify-center w-full"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: EASE_OUT_CUBIC }}
-              >
-                <AckoLogo variant="full-white" className="h-[25px]" />
-              </motion.div>
 
               <motion.div
                 className="w-full text-center"

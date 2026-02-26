@@ -66,6 +66,9 @@ export default function ChatMessage({ message, onEdit, animate = false }: ChatMe
     );
   }
 
+  // Skip rendering if bot message has no content
+  if (!message.content || !message.content.trim()) return null;
+
   // Bot message — word-by-word typewriter when animate=true
   const wordList = useMemo(() => {
     const result: { text: string; para: number }[] = [];

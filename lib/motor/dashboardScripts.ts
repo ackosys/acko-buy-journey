@@ -71,8 +71,102 @@ const DRIVER_RELATIONS = [
   { id: 'other', label: 'Other' },
 ];
 
+/* ── Days until expiry ── */
+function daysUntilExpiry(isoDate: string): number {
+  return Math.ceil((new Date(isoDate).getTime() - Date.now()) / 86_400_000);
+}
+
 /* ── All dashboard conversation steps ── */
 const motorDashboardSteps: MotorConversationStep[] = [
+
+  /* ═════ Policy list — shown when user has multiple policies ═════ */
+  {
+    id: 'db.policy_list',
+    module: 'dashboard',
+    widgetType: 'policy_cards',
+    getScript: (state) => {
+      const name = state.userName ? `, ${state.userName}` : '';
+      const count = state.dashboardPolicies.length;
+      const expiring = state.dashboardPolicies.filter(
+        (p) => daysUntilExpiry(p.expiryDate) <= 30
+      );
+
+      const messages: string[] = [
+        `Welcome back${name}!`,
+        count === 1
+          ? `Here is your active policy.`
+          : `You have ${count} active policies.`,
+      ];
+
+      if (expiring.length) {
+        const v = expiring[0];
+        const days = daysUntilExpiry(v.expiryDate);
+        messages.push(
+          `Your ${v.make} ${v.model} policy expires in ${days} day${days === 1 ? '' : 's'} — don't let it lapse.`
+        );
+      }
+
+      return { botMessages: messages };
+    },
+    processResponse: (response: string, state) => {
+      if (response === 'new_policy') {
+        return {
+          activePolicyId: null,
+          paymentComplete: false,
+          vehicleEntryType: 'existing',
+          registrationNumber: '',
+          vehicleData: {
+            make: '', model: '', variant: '', fuelType: '',
+            registrationYear: null, registrationMonth: '',
+            hasCngKit: null, isCommercialVehicle: null,
+          },
+          selectedPlan: null,
+          selectedPlanType: null,
+          totalPremium: 0,
+          idv: 0,
+        };
+      }
+
+      const [policyId, action] = response.split('::');
+      const policy = state.dashboardPolicies.find((p) => p.id === policyId);
+      if (!policy) return {};
+
+      return {
+        activePolicyId: policyId,
+        vehicleType: policy.vehicleType,
+        registrationNumber: policy.registrationNumber,
+        vehicleData: {
+          make: policy.make,
+          model: policy.model,
+          variant: policy.variant,
+          fuelType: 'petrol',
+          registrationYear: null,
+          registrationMonth: '',
+          hasCngKit: false,
+          isCommercialVehicle: false,
+        },
+        selectedPlanType: policy.planType,
+        selectedPlan: {
+          name: policy.plan,
+          type: policy.planType,
+          totalPrice: policy.premium,
+        },
+        totalPremium: policy.premium,
+        idv: policy.idv,
+        ncbAtRisk: false,
+        paymentComplete: true,
+        vehicleEntryType: 'existing',
+      };
+    },
+    getNextStep: (response: string) => {
+      if (response === 'new_policy') return 'registration.has_number';
+      const [, action] = response.split('::');
+      if (action === 'renew') return 'registration.has_number';
+      if (action === 'claim') return 'db.claim_intro';
+      if (action === 'download') return 'db.docs_list';
+      return 'db.welcome'; // manage
+    },
+  },
 
   /* ═════ Welcome — Policy overview + actions ═════ */
   {

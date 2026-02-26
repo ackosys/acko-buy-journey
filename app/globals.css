@@ -345,7 +345,7 @@
 .motor-midnight,
 .motor-dark,
 .motor-light {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
 }
 
 .motor-midnight {
@@ -588,11 +588,9 @@
    AURA THEME — Glassmorphism + Gradient Accents
    ══════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
 .aura-dark,
 .aura-light {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
 }
 
 .aura-dark {

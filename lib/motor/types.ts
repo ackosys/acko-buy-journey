@@ -74,6 +74,7 @@ export type MotorWidgetType =
   | 'reimbursement_upload'
   | 'claim_heartbeat'
   | 'claim_closure'
+  | 'policy_cards'
   | 'none';
 
 export interface VehicleData {
@@ -241,12 +242,33 @@ export interface MotorJourneyState extends BaseJourneyState {
   dashboardSubmittedEdits: MotorEditRequest[];
   dashboardEditType: string;
 
+  /* ── Multi-policy dashboard ── */
+  dashboardPolicies: DashboardPolicy[];
+  activePolicyId: string | null;
+
   /* ── Entry Intent ── */
   motorIntent: MotorIntent | null;
   ackoDriveSelectedCar: { make: string; model: string; variant: string } | null;
 }
 
 export type MotorIntent = 'renew' | 'new_car' | 'acko_drive' | 'manage';
+
+export interface DashboardPolicy {
+  id: string;
+  vehicleType: 'car' | 'bike';
+  make: string;
+  model: string;
+  variant: string;
+  registrationNumber: string;
+  policyNumber: string;
+  plan: string;
+  planType: 'comprehensive' | 'zero_dep' | 'third_party';
+  premium: number;
+  idv: number;
+  expiryDate: string;   // ISO date string
+  ncbPercentage: NcbPercentage;
+  addOns: string[];
+}
 
 export interface MotorStepScript {
   botMessages: string[];
@@ -271,8 +293,8 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   language: 'en',
   userName: '',
   phone: '',
-  currentStepId: 'vehicle_type.select',
-  currentModule: 'vehicle_type',
+  currentStepId: 'registration.has_number',
+  currentModule: 'registration',
   theme: 'midnight',
   conversationHistory: [],
   isTyping: false,
@@ -381,6 +403,10 @@ export const MOTOR_INITIAL_STATE: MotorJourneyState = {
   dashboardClaimSettlementAmount: 0,
   dashboardSubmittedEdits: [],
   dashboardEditType: '',
+
+  /* Multi-policy dashboard */
+  dashboardPolicies: [],
+  activePolicyId: null,
 
   /* Entry intent */
   motorIntent: null,

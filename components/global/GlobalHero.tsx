@@ -14,6 +14,7 @@ import Link from 'next/link';
 
 interface GlobalHeroProps {
   userName?: string;
+  hideHeadline?: boolean;
 }
 
 const THEME_ICONS: Record<string, React.ReactNode> = {
@@ -65,7 +66,7 @@ const USER_PROFILES: UserProfile[] = [
   },
 ];
 
-export default function GlobalHero({ userName }: GlobalHeroProps) {
+export default function GlobalHero({ userName, hideHeadline }: GlobalHeroProps) {
   const { theme, cycleTheme } = useThemeStore();
   const { language, setLanguage: setJourneyLanguage, updateState } = useJourneyStore();
   const { setLanguage } = useLanguageStore();
@@ -85,19 +86,49 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
     updateState({ userName: profile.userName, isExistingAckoUser: profile.isExistingAckoUser });
 
     if (profile.motorScenario === 'renewal_pending') {
-      const expiryDate = new Date(Date.now() + 24 * 86_400_000).toISOString();
+      // Kiran has 2 policies:
+      // · Swift KA01AB1234 — expiring in 24 days (urgent)
+      // · Honda City MH02EF5678 — renewed 2 months ago, ~10 months left
+      const swiftExpiry = new Date(Date.now() + 24 * 86_400_000).toISOString();
+      const hondaExpiry = new Date(Date.now() + 305 * 86_400_000).toISOString();
+
       seedRecentVehicles([
         {
-          make: 'Maruti',
-          model: 'Swift',
-          variant: 'VXI',
-          vehicleType: 'car',
-          registrationNumber: 'KA01AB1234',
-          brandLogoUrl: getBrandLogoUrl('maruti'),
-          expiryDate,
-          savedAt: new Date().toISOString(),
+          make: 'Maruti', model: 'Swift', variant: 'VXI', vehicleType: 'car',
+          registrationNumber: 'KA01AB1234', brandLogoUrl: getBrandLogoUrl('maruti'),
+          expiryDate: swiftExpiry, savedAt: new Date().toISOString(),
+        },
+        {
+          make: 'Honda', model: 'City', variant: 'ZX CVT', vehicleType: 'car',
+          registrationNumber: 'MH02EF5678', brandLogoUrl: getBrandLogoUrl('honda'),
+          expiryDate: hondaExpiry,
+          savedAt: new Date(Date.now() - 60 * 86_400_000).toISOString(),
         },
       ]);
+
+      // Save full policy data for the in-chat dashboard widget
+      if (typeof window !== 'undefined') {
+        const policies = [
+          {
+            id: 'p1', vehicleType: 'car', make: 'Maruti', model: 'Swift',
+            variant: 'VXI', registrationNumber: 'KA01AB1234',
+            policyNumber: 'ACKO-MV-2024-0091',
+            plan: 'Comprehensive', planType: 'comprehensive',
+            premium: 8499, idv: 520000, expiryDate: swiftExpiry,
+            ncbPercentage: 35, addOns: ['engine_protection', 'zero_dep'],
+          },
+          {
+            id: 'p2', vehicleType: 'car', make: 'Honda', model: 'City',
+            variant: 'ZX CVT', registrationNumber: 'MH02EF5678',
+            policyNumber: 'ACKO-MV-2023-5512',
+            plan: 'Zero Dep Comprehensive', planType: 'zero_dep',
+            premium: 12999, idv: 850000, expiryDate: hondaExpiry,
+            ncbPercentage: 50, addOns: ['engine_protection', 'zero_dep', 'personal_accident'],
+          },
+        ];
+        localStorage.setItem('acko_kiran_policies', JSON.stringify(policies));
+      }
+
       clearSnapshot('car');
     } else {
       if (typeof window !== 'undefined') {
@@ -107,6 +138,7 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
             const vehicles = JSON.parse(raw);
             if (vehicles.some((v: { registrationNumber?: string }) => v.registrationNumber === 'KA01AB1234')) {
               localStorage.removeItem('acko_motor_recent_vehicles');
+              localStorage.removeItem('acko_kiran_policies');
             }
           } catch { /* noop */ }
         }
@@ -121,13 +153,13 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
   const sectionLabel = isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
 
   return (
-    <div className="px-5 pt-6 pb-5">
+    <div className={`px-5 pt-6 ${hideHeadline ? 'pb-2' : 'pb-5'}`}>
       {/* Top bar */}
       <motion.div
         initial={{ y: -10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.05 }}
-        className="flex items-center justify-between mb-8"
+        className={`flex items-center justify-between ${hideHeadline ? 'mb-0' : 'mb-8'}`}
       >
         <Link href="/">
           <AckoLogo
@@ -176,41 +208,43 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
         </div>
       </motion.div>
 
-      {/* Hero headline */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12 }}
-      >
-        {userName ? (
-          <>
-            <p className="text-sm mb-2" style={{ color: 'var(--app-text-muted)' }}>
-              {t.global.welcomeBack(userName)}
-            </p>
-            <h1
-              className="text-[32px] font-black leading-[1.1] tracking-tight mb-3 whitespace-pre-line"
-              style={{ color: 'var(--app-text)' }}
-            >
-              {t.global.heroTitleUser}
-            </h1>
-          </>
-        ) : (
-          <>
-            <h1
-              className="text-[32px] font-black leading-[1.1] tracking-tight mb-2 whitespace-pre-line"
-              style={{ color: 'var(--app-text)' }}
-            >
-              {t.global.heroTitle}
-            </h1>
-            <p
-              className="text-[15px] leading-[1.5]"
-              style={{ color: 'var(--app-text-muted)' }}
-            >
-              {t.global.heroSubtitle}
-            </p>
-          </>
-        )}
-      </motion.div>
+      {/* Hero headline — hidden when embedded in pages with their own title */}
+      {!hideHeadline && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          {userName ? (
+            <>
+              <p className="text-sm mb-2" style={{ color: 'var(--app-text-muted)' }}>
+                {t.global.welcomeBack(userName)}
+              </p>
+              <h1
+                className="text-[32px] font-black leading-[1.1] tracking-tight mb-3 whitespace-pre-line"
+                style={{ color: 'var(--app-text)' }}
+              >
+                {t.global.heroTitleUser}
+              </h1>
+            </>
+          ) : (
+            <>
+              <h1
+                className="text-[32px] font-black leading-[1.1] tracking-tight mb-2 whitespace-pre-line"
+                style={{ color: 'var(--app-text)' }}
+              >
+                {t.global.heroTitle}
+              </h1>
+              <p
+                className="text-[15px] leading-[1.5]"
+                style={{ color: 'var(--app-text-muted)' }}
+              >
+                {t.global.heroSubtitle}
+              </p>
+            </>
+          )}
+        </motion.div>
+      )}
 
       {/* ── Hamburger Drawer ── */}
       <AnimatePresence>
