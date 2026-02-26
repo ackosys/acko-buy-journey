@@ -857,7 +857,8 @@ const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'CNG'];
 export function VariantSelector({ onSelect }: { onSelect: (variant: string) => void }) {
   const vehicleType = useMotorStore((s) => s.vehicleType);
   const vehicleData = useMotorStore((s) => s.vehicleData);
-  const existingFuel = vehicleData.fuelType;
+  const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+  const existingFuel = vehicleData.fuelType ? capitalize(vehicleData.fuelType) : '';
   const existingVariant = vehicleData.variant;
   const [activeFuel, setActiveFuel] = useState<string>(existingFuel || 'Petrol');
   const isBike = vehicleType === 'bike';
