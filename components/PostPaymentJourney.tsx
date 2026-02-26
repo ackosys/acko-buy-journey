@@ -886,6 +886,22 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
       onDashboard();
       return true;
     }
+    // Doctor call done — user is now at scenario select
+    if (stepId === 'pp.voice_call' || stepId === 'pp.schedule_confirm') {
+      const s = useJourneyStore.getState();
+      saveSnapshot({
+        product: 'health',
+        currentStepId: 'health_eval.call_done',
+        savedAt: new Date().toISOString(),
+        userName: s.userName,
+        members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+        pincode: s.pincode,
+        selectedPlan: s.selectedPlan ? { name: s.selectedPlan.name, monthlyPremium: s.selectedPlan.monthlyPremium, yearlyPremium: s.selectedPlan.yearlyPremium, sumInsured: s.selectedPlan.sumInsured, tier: s.selectedPlan.tier } : null,
+        paymentComplete: true,
+        paymentFrequency: s.paymentFrequency,
+        currentPremium: s.currentPremium,
+      });
+    }
     // Policy is genuinely issued at these steps — create the active policy record
     if (stepId === 'pp.health_summary' || stepId === 'pp.policy_issued' || stepId === 'pp.no_test_result') {
       setTimeout(() => {

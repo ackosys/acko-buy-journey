@@ -117,6 +117,7 @@ export const HEALTH_SAVE_STEPS = new Set([
   'review.dob_ack',
   'payment.success',
   'health_eval.intro',
+  'health_eval.call_done',
   'health_eval.lab_schedule',
   'health_eval.schedule',
   'completion.celebration',
@@ -283,9 +284,19 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     }
     if (currentStepId === 'payment.success' || currentStepId === 'health_eval.intro') {
       return {
-        title: 'Schedule your health check-up',
-        subtitle: `Payment done · Doctor call pending`,
+        title: 'Schedule your call with doctor',
+        subtitle: `Payment done · Health evaluation pending`,
         ctaLabel: 'Schedule now',
+        route: '/health?resume=1',
+        urgency: 'high',
+        badge: 'Action needed',
+      };
+    }
+    if (currentStepId === 'health_eval.call_done') {
+      return {
+        title: 'Schedule your medical tests',
+        subtitle: `Doctor call done · Book home or lab test`,
+        ctaLabel: 'Book tests',
         route: '/health?resume=1',
         urgency: 'high',
         badge: 'Action needed',
