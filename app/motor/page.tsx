@@ -16,6 +16,7 @@ import MotorHeader from '../../components/motor/MotorHeader';
 import MotorChatContainer from '../../components/motor/MotorChatContainer';
 import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
 import AckoLogo from '../../components/AckoLogo';
+import Link from 'next/link';
 import { VehicleType, MotorJourneyState, MotorIntent } from '../../lib/motor/types';
 import { RecentVehicle } from '../../lib/motorRecentVehicles';
 
@@ -346,7 +347,9 @@ function MotorJourneyInner() {
               className="flex items-center justify-between px-5 pt-6 pb-4 shrink-0"
               style={{ borderBottom: '1px solid var(--app-border, rgba(255,255,255,0.08))' }}
             >
-              <AckoLogo variant={theme === 'light' ? 'color' : 'full-white'} className="h-7" />
+              <Link href="/">
+                <AckoLogo variant={theme === 'light' ? 'color' : 'full-white'} className="h-7" />
+              </Link>
               <button
                 onClick={() => setScreen('explore')}
                 className="text-xs px-3 py-1.5 rounded-full"

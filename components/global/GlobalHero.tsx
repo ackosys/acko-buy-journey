@@ -247,10 +247,12 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
                 className="flex items-center justify-between px-5 py-5 border-b"
                 style={{ borderColor: menuBorder }}
               >
-                <AckoLogo
-                  variant={isLight ? 'color' : 'white'}
-                  className="h-6"
-                />
+                <Link href="/">
+                  <AckoLogo
+                    variant={isLight ? 'color' : 'white'}
+                    className="h-6"
+                  />
+                </Link>
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95"

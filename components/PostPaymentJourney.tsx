@@ -9,6 +9,7 @@ import { getPostPaymentStep, getScenarioMembers, SCENARIOS } from '../lib/postPa
 import { getT, getLocaleTag, useT } from '../lib/translations';
 import ConversationalFlow from './ConversationalFlow';
 import AckoLogo from './AckoLogo';
+import Link from 'next/link';
 import { saveSnapshot } from '../lib/journeyPersist';
 
 /* ═══════════════════════════════════════════════════════
@@ -900,7 +901,9 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
   const header = (
     <div className="border-b border-white/10 px-5 py-3 flex items-center justify-between shrink-0">
       <div className="flex items-center gap-3">
-        <AckoLogo variant="full-white" className="h-5" />
+        <Link href="/">
+          <AckoLogo variant="full-white" className="h-5" />
+        </Link>
         <span className="text-label-sm text-white/60">{t.postPayment.healthEvaluation}</span>
       </div>
       <div className="flex items-center gap-1.5">
