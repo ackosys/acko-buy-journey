@@ -474,7 +474,7 @@ function GlobalHomepageInner() {
     clearAllSnapshots();
     localStorage.removeItem('acko_user_profile');
     localStorage.removeItem('acko_lang_chosen');
-    window.location.href = '/';
+    window.location.href = BASE || '/';
   }, []);
 
   useEffect(() => {
