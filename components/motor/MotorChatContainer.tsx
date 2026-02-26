@@ -634,7 +634,8 @@ export default function MotorChatContainer() {
                   </button>
                   <button
                     onClick={confirmEdit}
-                    className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl text-[14px] font-medium hover:bg-purple-500 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl text-[14px] font-medium transition-colors"
+                    style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
                   >
                     Edit answer
                   </button>

@@ -379,6 +379,9 @@
   --motor-plan-rec-header-bg: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.06));
   --motor-plan-rec-badge: #C084FC;
   --motor-plan-rec-check: #34D399;
+  --motor-cta-bg: #7C3AED;
+  --motor-cta-hover: #6D28D9;
+  --motor-cta-text: #FFFFFF;
 }
 
 .motor-dark {
@@ -411,6 +414,9 @@
   --motor-plan-rec-header-bg: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.06));
   --motor-plan-rec-badge: #C084FC;
   --motor-plan-rec-check: #34D399;
+  --motor-cta-bg: #7C3AED;
+  --motor-cta-hover: #6D28D9;
+  --motor-cta-text: #FFFFFF;
 }
 
 .motor-light {
@@ -443,6 +449,9 @@
   --motor-plan-rec-header-bg: linear-gradient(135deg, #EDE9FE 0%, #F3E8FF 50%, #F5F3FF 100%);
   --motor-plan-rec-badge: #6D28D9;
   --motor-plan-rec-check: #059669;
+  --motor-cta-bg: #6D28D9;
+  --motor-cta-hover: #5B21B6;
+  --motor-cta-text: #FFFFFF;
 }
 
 /* ══════════════════════════════════════════════════
@@ -633,6 +642,9 @@
   --motor-plan-rec-header-bg: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.06));
   --motor-plan-rec-badge: #C084FC;
   --motor-plan-rec-check: #34D399;
+  --motor-cta-bg: #7C3AED;
+  --motor-cta-hover: #6D28D9;
+  --motor-cta-text: #FFFFFF;
 }
 
 .aura-light {
@@ -674,6 +686,9 @@
   --motor-plan-rec-header-bg: linear-gradient(135deg, #EDE9FE 0%, #F3E8FF 50%, #F5F3FF 100%);
   --motor-plan-rec-badge: #6D28D9;
   --motor-plan-rec-check: #059669;
+  --motor-cta-bg: #6D28D9;
+  --motor-cta-hover: #5B21B6;
+  --motor-cta-text: #FFFFFF;
 }
 
 /* ── Aura light — same Tailwind utility overrides ── */

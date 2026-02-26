@@ -239,7 +239,8 @@ export default function AuraMotorEntryNav({ initialVehicle = 'car', onStartJourn
             onClick={() => onStartJourney(vehicle)}
             className="w-full py-3.5 rounded-2xl text-white font-semibold text-[15px] transition-all active:scale-[0.98]"
             style={{
-              background: 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)',
+              background: 'var(--motor-cta-bg)',
+              color: 'var(--motor-cta-text)',
               boxShadow: theme === 'light'
                 ? '0 4px 16px rgba(124,58,237,0.25)'
                 : '0 8px 32px rgba(168,85,247,0.4)',

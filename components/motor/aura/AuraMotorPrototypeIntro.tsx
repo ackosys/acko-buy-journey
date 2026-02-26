@@ -243,7 +243,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
               <button
                 onClick={() => setSlide(1)}
                 className="w-full py-4 rounded-2xl font-semibold text-[15px] text-white transition-all shadow-lg shadow-black/30 active:scale-[0.98] hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+                style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
               >
                 See what&apos;s inside
               </button>
@@ -425,7 +425,7 @@ export default function AuraMotorPrototypeIntro({ onDone, onJumpTo }: MotorIntro
               <button
                 onClick={onDone}
                 className="w-full py-4 rounded-2xl font-semibold text-[15px] text-white transition-all shadow-lg shadow-black/30 active:scale-[0.98] hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+                style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
               >
                 Start the journey
               </button>

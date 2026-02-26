@@ -96,8 +96,8 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
 
       <button
         onClick={onContinue}
-        className="w-full py-4 rounded-xl text-[15px] font-bold text-white hover:opacity-90 transition-opacity active:scale-[0.98] shadow-lg shadow-black/30"
-        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
+        className="w-full py-4 rounded-xl text-[15px] font-bold hover:opacity-90 transition-opacity active:scale-[0.98] shadow-lg shadow-black/30"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
       >
         Proceed to Payment
       </button>

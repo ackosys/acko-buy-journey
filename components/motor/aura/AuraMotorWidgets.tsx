@@ -319,8 +319,8 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Find my {useMotorStore.getState().vehicleType === 'bike' ? 'bike' : 'car'}
       </button>
@@ -372,8 +372,8 @@ export function MotorTextInput({
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-        className="mt-3 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+        className="mt-3 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Continue
       </button>
@@ -595,8 +595,8 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       <button
         onClick={handleConfirm}
         disabled={confirmed}
-        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97] disabled:opacity-60"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97] disabled:opacity-60"
       >
         {confirmed ? 'Confirmed' : 'Yes, this is correct'}
       </button>
@@ -985,8 +985,8 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={handleSubmit}
-          style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-          className="mt-3 w-full py-3 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
+          style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+          className="mt-3 w-full py-3 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
         >
           Continue with {selectedYear}{selectedMonth ? ` · ${selectedMonth}` : ''}
         </motion.button>
@@ -1092,8 +1092,8 @@ export function NcbReward({ onContinue }: { onContinue: () => void }) {
       </div>
       <button
         onClick={onContinue}
-        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Continue
       </button>
@@ -1213,8 +1213,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 
       <button
         onClick={onConfirm}
-        style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-        className="mt-4 w-full py-3.5 text-white rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         View prices
       </button>
@@ -1902,8 +1902,8 @@ function PlanCard({
               <div className="px-4 pb-4 border-t border-[var(--aura-border)] pt-4">
                 <button
                   onClick={onSelect}
-                  style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }}
-                  className="w-full py-3 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
+                  style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+                  className="w-full py-3 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
                 >
                   Select this plan
                 </button>
@@ -2162,7 +2162,7 @@ export function PlanRecommendation({ onSelect }: { onSelect: (response: any) => 
           <button
             onClick={handleSelect}
             className="w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-all active:scale-[0.97]"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #A855F7)' }}
+            style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
           >
             Select {planLabel} Plan
           </button>
@@ -2321,7 +2321,7 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }} className="flex-1 py-3 px-4 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleContinue} style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
         <p className="text-[11px] text-[var(--aura-text-subtle)] text-center mt-2">Next: Additional covers to reduce medical expenses</p>
       </motion.div>
@@ -2522,7 +2522,7 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #A855F7, #7E22CE)' }} className="flex-1 py-3 px-4 text-white rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleContinue} style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
       </motion.div>
 
@@ -2749,7 +2749,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         <button
           onClick={() => canProceed && onContinue({ rcUploaded, dlUploaded, prevPolicyUploaded })}
           disabled={!canProceed}
-          style={canProceed ? { background: 'linear-gradient(135deg, #A855F7, #7E22CE)' } : {}}
+          style={canProceed ? { background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' } : {}}
           className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
             canProceed
               ? 'text-white hover:opacity-90 active:scale-[0.97]'

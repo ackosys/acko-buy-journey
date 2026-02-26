@@ -336,7 +336,8 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="mt-4 w-full py-3.5 bg-purple-600 text-white rounded-xl text-[15px] font-semibold hover:bg-purple-500 transition-colors active:scale-[0.97]"
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
       >
         Find my {useMotorStore.getState().vehicleType === 'bike' ? 'bike' : 'car'}
       </button>
@@ -390,7 +391,7 @@ export function MotorTextInput({
       <button
         onClick={handleSubmit}
         className="mt-3 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97]"
-        style={{ background: 'linear-gradient(135deg, #7C3AED, #A855F7)', color: '#FFFFFF' }}
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
       >
         Continue
       </button>
@@ -616,7 +617,8 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       <button
         onClick={handleConfirm}
         disabled={confirmed}
-        className="mt-4 w-full py-3.5 bg-purple-700 text-white rounded-xl text-[15px] font-semibold hover:bg-purple-600 transition-colors active:scale-[0.97] disabled:opacity-60"
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97] disabled:opacity-60"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
       >
         {confirmed ? 'Confirmed' : 'Yes, this is correct'}
       </button>
@@ -878,7 +880,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
             onClick={() => { setActiveFuel(fuel); setSelected(null); }}
             className="flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all"
             style={activeFuel === fuel
-              ? { background: 'linear-gradient(135deg, #7C47E1, #A855F7)', color: '#FFFFFF' }
+              ? { background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }
               : { color: 'var(--motor-text-muted)' }
             }
           >
@@ -988,7 +990,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
             onClick={() => handleYearSelect(year)}
             className="py-2.5 rounded-lg text-center transition-all duration-200 active:scale-[0.95]"
             style={selectedYear === year
-              ? { background: 'linear-gradient(135deg, #7C47E1, #A855F7)', color: '#FFFFFF', fontWeight: 700 }
+              ? { background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)', fontWeight: 700 }
               : { background: 'var(--motor-surface)', border: '1px solid var(--motor-border)', color: 'var(--motor-text-muted)' }
             }
           >
@@ -1002,8 +1004,8 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={handleSubmit}
-          className="mt-3 w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-colors active:scale-[0.97]"
-          style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
+          className="mt-3 w-full py-3 rounded-xl text-[14px] font-semibold transition-colors active:scale-[0.97]"
+          style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         >
           Continue with {selectedYear}{selectedMonth ? ` · ${selectedMonth}` : ''}
         </motion.button>
@@ -1107,8 +1109,8 @@ export function NcbReward({ onContinue }: { onContinue: () => void }) {
       </div>
       <button
         onClick={onContinue}
-        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold text-white transition-colors active:scale-[0.97]"
-        style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
       >
         Continue
       </button>
@@ -1232,8 +1234,8 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 
       <button
         onClick={onConfirm}
-        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold text-white transition-colors active:scale-[0.97]"
-        style={{ background: 'linear-gradient(135deg, #7C47E1, #A855F7)' }}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97]"
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
       >
         View prices
       </button>
@@ -1517,7 +1519,8 @@ function IDVSliderSheet({
 
         <button
           onClick={() => onApply(value)}
-          className="w-full py-3.5 bg-purple-700 hover:bg-purple-600 active:scale-[0.98] text-white font-semibold rounded-2xl text-[15px] transition-all"
+          className="w-full py-3.5 active:scale-[0.98] font-semibold rounded-2xl text-[15px] transition-all"
+          style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         >
           Confirm IDV ₹{fmt(value)}
         </button>
@@ -2140,7 +2143,8 @@ function PlanCard({
               <div className="px-4 pb-4 border-t border-white/10 pt-4">
                 <button
                   onClick={onSelect}
-                  className="w-full py-3 bg-purple-700 text-white rounded-xl text-[14px] font-semibold hover:bg-purple-600 transition-colors active:scale-[0.97]"
+                  className="w-full py-3 rounded-xl text-[14px] font-semibold transition-colors active:scale-[0.97]"
+                  style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
                 >
                   Select this plan
                 </button>
@@ -2398,8 +2402,8 @@ export function PlanRecommendation({ onSelect }: { onSelect: (response: any) => 
         <div className="px-4 pb-4 space-y-2">
           <button
             onClick={handleSelect}
-            className="w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-all active:scale-[0.97]"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #A855F7)' }}
+            className="w-full py-3 rounded-xl text-[14px] font-semibold transition-all active:scale-[0.97]"
+            style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
           >
             Select {planLabel} Plan
           </button>
@@ -2562,7 +2566,7 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-xl text-[14px] font-semibold text-white hover:bg-white/15 transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} className="flex-1 py-3 px-4 bg-purple-700 text-white rounded-xl text-[14px] font-semibold hover:bg-purple-600 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleContinue} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold transition-colors active:scale-[0.98]" style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}>Continue</button>
         </div>
         <p className="text-[11px] text-white/40 text-center mt-2">Next: Additional covers to reduce medical expenses</p>
       </motion.div>
@@ -2767,7 +2771,7 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-xl text-[14px] font-semibold text-white hover:bg-white/15 transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} className="flex-1 py-3 px-4 bg-purple-700 text-white rounded-xl text-[14px] font-semibold hover:bg-purple-600 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleContinue} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold transition-colors active:scale-[0.98]" style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}>Continue</button>
         </div>
       </motion.div>
 
@@ -3052,9 +3056,10 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
           disabled={!canProceed}
           className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
             canProceed
-              ? 'bg-purple-700 text-white hover:bg-purple-600 active:scale-[0.97]'
+              ? 'active:scale-[0.97]'
               : 'bg-white/10 text-white/30 cursor-not-allowed'
           }`}
+          style={canProceed ? { background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' } : {}}
         >
           {canProceed ? 'Proceed \u2192' : `Upload ${!rcUploaded ? 'RC' : 'DL'} to continue`}
         </button>

@@ -97,7 +97,7 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
         </div>
       </div>
 
-      <button onClick={onContinue} className="w-full py-4 bg-purple-700 rounded-xl text-[15px] font-semibold text-white hover:bg-purple-600 transition-colors active:scale-[0.97]">
+      <button onClick={onContinue} className="w-full py-4 rounded-xl text-[15px] font-semibold transition-colors active:scale-[0.97]" style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}>
         Proceed to Payment
       </button>
     </motion.div>
