@@ -14,6 +14,7 @@ import Link from 'next/link';
 
 interface GlobalHeroProps {
   userName?: string;
+  hideHeadline?: boolean;
 }
 
 const THEME_ICONS: Record<string, React.ReactNode> = {
@@ -65,7 +66,7 @@ const USER_PROFILES: UserProfile[] = [
   },
 ];
 
-export default function GlobalHero({ userName }: GlobalHeroProps) {
+export default function GlobalHero({ userName, hideHeadline }: GlobalHeroProps) {
   const { theme, cycleTheme } = useThemeStore();
   const { language, setLanguage: setJourneyLanguage, updateState } = useJourneyStore();
   const { setLanguage } = useLanguageStore();
@@ -152,13 +153,13 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
   const sectionLabel = isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
 
   return (
-    <div className="px-5 pt-6 pb-5">
+    <div className={`px-5 pt-6 ${hideHeadline ? 'pb-2' : 'pb-5'}`}>
       {/* Top bar */}
       <motion.div
         initial={{ y: -10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.05 }}
-        className="flex items-center justify-between mb-8"
+        className={`flex items-center justify-between ${hideHeadline ? 'mb-0' : 'mb-8'}`}
       >
         <Link href="/">
           <AckoLogo
@@ -207,41 +208,43 @@ export default function GlobalHero({ userName }: GlobalHeroProps) {
         </div>
       </motion.div>
 
-      {/* Hero headline */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12 }}
-      >
-        {userName ? (
-          <>
-            <p className="text-sm mb-2" style={{ color: 'var(--app-text-muted)' }}>
-              {t.global.welcomeBack(userName)}
-            </p>
-            <h1
-              className="text-[32px] font-black leading-[1.1] tracking-tight mb-3 whitespace-pre-line"
-              style={{ color: 'var(--app-text)' }}
-            >
-              {t.global.heroTitleUser}
-            </h1>
-          </>
-        ) : (
-          <>
-            <h1
-              className="text-[32px] font-black leading-[1.1] tracking-tight mb-2 whitespace-pre-line"
-              style={{ color: 'var(--app-text)' }}
-            >
-              {t.global.heroTitle}
-            </h1>
-            <p
-              className="text-[15px] leading-[1.5]"
-              style={{ color: 'var(--app-text-muted)' }}
-            >
-              {t.global.heroSubtitle}
-            </p>
-          </>
-        )}
-      </motion.div>
+      {/* Hero headline — hidden when embedded in pages with their own title */}
+      {!hideHeadline && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          {userName ? (
+            <>
+              <p className="text-sm mb-2" style={{ color: 'var(--app-text-muted)' }}>
+                {t.global.welcomeBack(userName)}
+              </p>
+              <h1
+                className="text-[32px] font-black leading-[1.1] tracking-tight mb-3 whitespace-pre-line"
+                style={{ color: 'var(--app-text)' }}
+              >
+                {t.global.heroTitleUser}
+              </h1>
+            </>
+          ) : (
+            <>
+              <h1
+                className="text-[32px] font-black leading-[1.1] tracking-tight mb-2 whitespace-pre-line"
+                style={{ color: 'var(--app-text)' }}
+              >
+                {t.global.heroTitle}
+              </h1>
+              <p
+                className="text-[15px] leading-[1.5]"
+                style={{ color: 'var(--app-text-muted)' }}
+              >
+                {t.global.heroSubtitle}
+              </p>
+            </>
+          )}
+        </motion.div>
+      )}
 
       {/* ── Hamburger Drawer ── */}
       <AnimatePresence>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
 import LanguageSelector from '../components/LanguageSelector';
+import GlobalHero from '../components/global/GlobalHero';
 import AckoLogo from '../components/AckoLogo';
 import PolicyActionScreen, { type PolicyStatusInfo } from '../components/global/PolicyActionScreen';
 import { useUserProfileStore, type PolicyLob } from '../lib/userProfileStore';
@@ -540,19 +541,16 @@ export default function GlobalHomepage() {
             {/* Purple glow at the top */}
             <PurpleGlow />
 
-            {/* Logo + Title */}
+            {/* GlobalHero — ACKO logo, theme switcher, hamburger menu, profile & language drawer */}
+            <div className="w-full shrink-0 z-30">
+              <GlobalHero hideHeadline />
+            </div>
+
+            {/* Title */}
             <div
               className="flex flex-col items-center w-full gap-[8px] shrink-0"
-              style={{ paddingTop: '66px', paddingLeft: '16px', paddingRight: '16px' }}
+              style={{ paddingLeft: '16px', paddingRight: '16px' }}
             >
-              <motion.div
-                className="flex items-center justify-center w-full"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: EASE_OUT_CUBIC }}
-              >
-                <AckoLogo variant="full-white" className="h-[25px]" />
-              </motion.div>
 
               <motion.div
                 className="w-full text-center"

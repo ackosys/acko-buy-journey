@@ -2,7 +2,28 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useMotorStore } from '../../lib/motor/store';
+import { assetPath } from '../../lib/assetPath';
+
+const VEHICLE_IMAGES: Record<string, string> = {
+  'Maruti Suzuki': '/car-images/Swift.png',
+  'Hyundai': '/car-images/Venue.png',
+  'Tata': '/car-images/Nexon.png',
+  'Kia': '/car-images/Verna.png',
+  'Mahindra': '/car-images/XUV700.png',
+  'Toyota': '/car-images/Toyota.png',
+  'Honda': '/car-images/Citroen.png',
+  'MG': '/car-images/MG comet.png',
+  'Volkswagen': '/car-images/Citroen.png',
+  'Renault': '/car-images/Citroen.png',
+  'BMW': '/car-images/harrier.png',
+  'Hero': '/car-images/Splendor.png',
+  'Bajaj': '/car-images/Pulsar.png',
+  'TVS': '/car-images/CT 100.png',
+  'Royal Enfield': '/car-images/KTM.png',
+  'Yamaha': '/car-images/Pulsar.png',
+};
 
 // Premium Breakdown Widget
 export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
@@ -19,17 +40,16 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-      <div className="text-center mb-6">
-        <h3 className="text-[18px] font-bold text-white mb-2">Your Final Premium</h3>
-        <p className="text-[13px] text-white/50">Complete breakdown of your {selectedPlan?.name || 'insurance plan'}</p>
-      </div>
-
-      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-2xl p-5">
+      <div className="bg-white/10 border border-purple-400/40 rounded-2xl p-5" style={{ boxShadow: '0 4px 24px rgba(168, 85, 247, 0.12), 0 1px 4px rgba(0,0,0,0.2)' }}>
         <div className="flex items-center gap-3 pb-4 mb-4 border-b border-white/10">
-          <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-9M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-            </svg>
+          <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center overflow-hidden">
+            <Image
+              src={assetPath(VEHICLE_IMAGES[vehicleData.make] || '/car-images/Swift.png')}
+              alt={`${vehicleData.make} ${vehicleData.model}`}
+              width={48}
+              height={48}
+              className="object-contain"
+            />
           </div>
           <div className="flex-1">
             <p className="text-[14px] font-semibold text-white">{vehicleData.make} {vehicleData.model}</p>
@@ -76,24 +96,7 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
         </div>
       </div>
 
-      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-        <p className="text-[12px] font-semibold text-white/70 mb-3">What's included:</p>
-        <div className="space-y-2">
-          {selectedPlan?.features.slice(0, 4).map((feature: string, i: number) => {
-            const [title] = feature.split(' — ');
-            return (
-              <div key={i} className="flex items-start gap-2">
-                <svg className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-                <span className="text-[11px] text-white/70">{title}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <button onClick={onContinue} className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-[15px] font-bold text-white hover:opacity-90 transition-opacity active:scale-[0.98] shadow-lg shadow-purple-500/30">
+      <button onClick={onContinue} className="w-full py-4 bg-purple-700 rounded-xl text-[15px] font-semibold text-white hover:bg-purple-600 transition-colors active:scale-[0.97]">
         Proceed to Payment
       </button>
     </motion.div>

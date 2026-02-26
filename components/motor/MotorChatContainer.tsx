@@ -200,16 +200,19 @@ export default function MotorChatContainer() {
       setShowWidget(false);
       updateState({ isTyping: true } as Partial<MotorJourneyState>);
 
-      const mergedContent = script.botMessages.join('\n\n');
-      const delay = 600 + Math.min(mergedContent.length * 12, 2000);
-      await new Promise(r => setTimeout(r, delay));
+      const mergedContent = script.botMessages.join('\n\n').trim();
 
-      addMessage({
-        type: 'bot',
-        content: mergedContent,
-        stepId: currentStepId,
-        module: step.module,
-      });
+      if (mergedContent) {
+        const delay = 600 + Math.min(mergedContent.length * 12, 2000);
+        await new Promise(r => setTimeout(r, delay));
+
+        addMessage({
+          type: 'bot',
+          content: mergedContent,
+          stepId: currentStepId,
+          module: step.module,
+        });
+      }
       updateState({ isTyping: false } as Partial<MotorJourneyState>);
 
       if (step.widgetType === 'none') {

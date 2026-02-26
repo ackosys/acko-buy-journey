@@ -1278,8 +1278,10 @@ const reviewPremiumBreakdown: MotorConversationStep = {
   id: 'review.premium_breakdown',
   module: 'review',
   widgetType: 'premium_breakdown',
-  getScript: () => ({
-    botMessages: [],
+  getScript: (state) => ({
+    botMessages: [
+      `Here is the complete breakdown of your ${state.selectedPlan?.name || 'insurance plan'}.`,
+    ],
   }),
   processResponse: () => ({}),
   getNextStep: () => 'payment.process',
