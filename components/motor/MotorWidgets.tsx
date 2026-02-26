@@ -2512,7 +2512,6 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-[14px] font-semibold text-white">{addon.name}</h4>
-                    {addon.hasVariants && <span className="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full">2 options</span>}
                     {addon.recommended && <span className="text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">Recommended</span>}
                     {selected && (
                       <motion.span
@@ -2695,7 +2694,6 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h4 className="text-[14px] font-semibold text-white">{addon.name}</h4>
-              {addon.hasVariants && <span className="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full">2 options</span>}
               {addon.mandatory && <span className="text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-full">Mandatory by law</span>}
               {selected && (
                 <motion.span
