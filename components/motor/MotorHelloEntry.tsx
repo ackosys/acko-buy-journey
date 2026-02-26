@@ -25,6 +25,7 @@ import { MotorIntent } from '../../lib/motor/types';
 
 interface MotorHelloEntryProps {
   userName?: string;
+  vehicleType?: 'car' | 'bike';
   onIntentSelected: (intent: MotorIntent, vehicle?: RecentVehicle) => void;
 }
 
@@ -266,7 +267,7 @@ function VehicleCard({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function MotorHelloEntry({ userName, onIntentSelected }: MotorHelloEntryProps) {
+export default function MotorHelloEntry({ userName, vehicleType = 'car', onIntentSelected }: MotorHelloEntryProps) {
   const t = useT();
   const [entryState, setEntryState] = useState<EntryState | null>(null);
   const [visibleMessages, setVisibleMessages] = useState(0);
@@ -408,21 +409,21 @@ export default function MotorHelloEntry({ userName, onIntentSelected }: MotorHel
             >
               <IntentChip
                 label={t.motorEntry.freshRenew}
-                sub={t.motorEntry.freshRenewSub}
+                sub={t.motorEntry.freshRenewSub(vehicleType)}
                 icon="🔄"
                 accent
                 delay={0.05}
                 onClick={() => handleRenew()}
               />
               <IntentChip
-                label={t.motorEntry.freshNewCar}
-                sub={t.motorEntry.freshNewCarSub}
+                label={t.motorEntry.freshNewVehicle(vehicleType)}
+                sub={t.motorEntry.freshNewVehicleSub}
                 icon="✨"
                 delay={0.13}
                 onClick={handleNewCar}
               />
               <IntentChip
-                label={t.motorEntry.freshDrive}
+                label={t.motorEntry.freshDrive(vehicleType)}
                 sub={t.motorEntry.freshDriveSub}
                 icon="🚗"
                 delay={0.21}
