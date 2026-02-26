@@ -132,6 +132,10 @@ function computeSnapshots(): { overrides: Partial<Record<LobId, LobOverride>>; b
       statusInfo = { badge: 'Update in progress', message: 'Nominee update · Verification in 2-3 days', urgency: 'low' };
     } else if (stepId === 'life_db.coverage_submitted') {
       statusInfo = { badge: 'Under review', message: 'Coverage update · Review in 5-7 days', urgency: 'medium' };
+    } else if (stepId === 'db.claim_submitted') {
+      statusInfo = { badge: 'Claim submitted', message: 'Claim request · Processing in 3-5 days', urgency: 'low' };
+    } else if (stepId === 'db.edit_done') {
+      statusInfo = { badge: 'Update in progress', message: 'Policy update · Effective next billing cycle', urgency: 'low' };
     }
     result[lobId] = {
       content: {
@@ -421,7 +425,7 @@ export default function GlobalHomepage() {
   const { setLanguage } = useJourneyStore();
   const [screen, setScreen] = useState<Screen>('language');
   const [hydrated, setHydrated] = useState(false);
-  const [selectedLOB, setSelectedLOB] = useState('Health');
+  const [selectedLOB, setSelectedLOB] = useState('Car');
   const [selectedLob, setSelectedLob] = useState<LobConfig | null>(null);
   const swipeDir = useRef(0);
   const SWIPE_THRESHOLD = 50;
@@ -493,7 +497,7 @@ export default function GlobalHomepage() {
       return;
     }
 
-    if (ps.isLoggedIn && ps.hasActivePolicyInLob(lobKey)) {
+    if (ps.hasActivePolicyInLob(lobKey)) {
       setSelectedLob(lob);
       setScreen('policy_action');
       return;

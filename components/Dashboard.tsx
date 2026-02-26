@@ -1,11 +1,13 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useJourneyStore } from '../lib/store';
 import { getDashboardStep } from '../lib/dashboardScripts';
 import ConversationalFlow from './ConversationalFlow';
 import AckoLogo from './AckoLogo';
 import Link from 'next/link';
 import { useT } from '../lib/translations';
+import { saveSnapshot } from '../lib/journeyPersist';
 
 /* ═══════════════════════════════════════════════════════
    Dashboard — Conversational Post-Policy Home
@@ -15,6 +17,39 @@ import { useT } from '../lib/translations';
 export default function Dashboard({ onTalkToExpert }: { onTalkToExpert?: (context?: string) => void }) {
   const t = useT();
   const updateState = useJourneyStore(s => s.updateState);
+
+  const handleStepResponse = useCallback((stepId: string, _response: any): boolean => {
+    const DASHBOARD_SNAPSHOT_STEPS: Record<string, string> = {
+      'db.claim_review': 'db.claim_submitted',
+      'db.edit_done': 'db.edit_done',
+      'db.si_upgrade_done': 'db.edit_done',
+    };
+
+    const snapshotStepId = DASHBOARD_SNAPSHOT_STEPS[stepId];
+    if (snapshotStepId) {
+      setTimeout(() => {
+        const s = useJourneyStore.getState();
+        saveSnapshot({
+          product: 'health',
+          currentStepId: snapshotStepId,
+          savedAt: new Date().toISOString(),
+          userName: s.userName,
+          members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+          selectedPlan: s.selectedPlan ? {
+            name: s.selectedPlan.name,
+            monthlyPremium: s.selectedPlan.monthlyPremium,
+            yearlyPremium: s.selectedPlan.yearlyPremium,
+            sumInsured: s.selectedPlan.sumInsured,
+          } : null,
+          paymentFrequency: s.paymentFrequency,
+          currentPremium: s.paymentFrequency === 'monthly'
+            ? s.selectedPlan?.monthlyPremium
+            : s.selectedPlan?.yearlyPremium,
+        });
+      }, 100);
+    }
+    return false;
+  }, []);
 
   // Header for the conversational flow
   const header = (
@@ -45,6 +80,7 @@ export default function Dashboard({ onTalkToExpert }: { onTalkToExpert?: (contex
         getStep={getDashboardStep}
         initialStepId="db.welcome"
         header={header}
+        onStepResponse={handleStepResponse}
       />
     </div>
   );

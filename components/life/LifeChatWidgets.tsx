@@ -960,6 +960,9 @@ export function LifeCelebration({ onDashboard, onContinue }: { onDashboard?: () 
     const hasLifePolicy = store.policies.some((p) => p.lob === 'life' && p.active);
     if (!hasLifePolicy) {
       const lifeState = useLifeJourneyStore.getState() as LifeJourneyState;
+      if ((lifeState as any).name) {
+        store.setProfile({ firstName: (lifeState as any).name, isLoggedIn: true });
+      }
       store.addPolicy({
         id: `life_${Date.now()}`,
         lob: 'life',

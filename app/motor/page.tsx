@@ -7,6 +7,7 @@ import { useMotorStore } from '../../lib/motor/store';
 import { useThemeStore } from '../../lib/themeStore';
 import { useLanguageStore } from '../../lib/languageStore';
 import { loadSnapshot } from '../../lib/journeyPersist';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 // COMMENTED OUT: Intro and entry screens — replaced by AuraMotorEntryNav
 // import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
 // import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
@@ -167,6 +168,23 @@ function seedDemoState(vehicleType: VehicleType) {
     paymentComplete: false,
     totalPremium: isCar ? 7500 : 2500,
   } as Partial<MotorJourneyState>);
+
+  const lob = isCar ? 'car' as const : 'bike' as const;
+  const ps = useUserProfileStore.getState();
+  if (!ps.policies.some((p) => p.lob === lob && p.active)) {
+    ps.setProfile({ firstName: 'Rahul', isLoggedIn: true });
+    ps.addPolicy({
+      id: `${lob}_demo_${Date.now()}`,
+      lob,
+      policyNumber: `ACKO-M-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+      label: `Comprehensive ${isCar ? 'Car' : 'Bike'} Insurance`,
+      active: true,
+      purchasedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      premium: isCar ? 7500 : 2500,
+      premiumFrequency: 'yearly',
+      details: `${isCar ? 'Maruti Swift Dzire' : 'Royal Enfield Classic 350'} · ${isCar ? 'DL01XX1234' : 'KA05AB9876'}`,
+    });
+  }
 }
 
 function MotorJourneyInner() {

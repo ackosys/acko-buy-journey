@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useJourneyStore } from '../../lib/store';
 import { useThemeStore } from '../../lib/themeStore';
 import { loadSnapshot, clearSnapshot } from '../../lib/journeyPersist';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 import LandingPage from '../../components/LandingPage';
 import EntryScreen from '../../components/EntryScreen';
 import Header from '../../components/Header';
@@ -98,6 +99,21 @@ function HealthJourneyInner() {
       selectedPlan: { name: 'ACKO Platinum', tier: 'platinum' as const, tagline: 'Complete coverage for your family', sumInsured: 2500000, sumInsuredLabel: '₹25L', monthlyPremium: 1249, yearlyPremium: 12999, features: ['Unlimited restoration', 'No room rent cap', 'Day 1 coverage'], exclusions: [], waitingPeriod: '30 days', healthEval: 'TeleMER', recommended: true },
       paymentFrequency: 'yearly' as const,
     });
+    const ps = useUserProfileStore.getState();
+    if (!ps.policies.some((p) => p.lob === 'health' && p.active)) {
+      ps.setProfile({ firstName: 'Rahul', isLoggedIn: true });
+      ps.addPolicy({
+        id: `health_demo_${Date.now()}`,
+        lob: 'health',
+        policyNumber: `ACKO-H-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+        label: 'ACKO Platinum',
+        active: true,
+        purchasedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+        premium: 12999,
+        premiumFrequency: 'yearly',
+        details: '₹25L cover · 2 members',
+      });
+    }
   };
 
   useEffect(() => {
@@ -139,6 +155,26 @@ function HealthJourneyInner() {
 
   useEffect(() => {
     if (paymentComplete && screen === 'chat') {
+      const s = useJourneyStore.getState();
+      const profileStore = useUserProfileStore.getState();
+      const hasHealthPolicy = profileStore.policies.some((p) => p.lob === 'health' && p.active);
+      if (!hasHealthPolicy) {
+        const plan = s.selectedPlan;
+        if (s.userName) {
+          profileStore.setProfile({ firstName: s.userName, isLoggedIn: true });
+        }
+        profileStore.addPolicy({
+          id: `health_${Date.now()}`,
+          lob: 'health',
+          policyNumber: `ACKO-H-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+          label: plan?.name || 'Health Insurance Plan',
+          active: true,
+          purchasedAt: new Date().toISOString(),
+          premium: s.paymentFrequency === 'monthly' ? plan?.monthlyPremium : plan?.yearlyPremium,
+          premiumFrequency: s.paymentFrequency || 'monthly',
+          details: `${plan?.sumInsuredLabel || ''} cover · ${s.members?.length || 1} member${(s.members?.length || 1) > 1 ? 's' : ''}`,
+        });
+      }
       const timer = setTimeout(() => setScreen('post_payment'), 2500);
       return () => clearTimeout(timer);
     }

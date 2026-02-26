@@ -97,7 +97,19 @@ export function clearAllSnapshots(): void {
 // ── Which steps are "significant" (worth saving) ──────────────────────────────
 
 export const HEALTH_SAVE_STEPS = new Set([
+  'entry.name_ack',
+  'family.who_to_cover',
+  'family.cover_ack',
+  'family.age_ack',
+  'family.pincode_result',
+  'coverage.current_insurance',
+  'health.conditions',
+  'health.healthy_ack',
+  'health.conditions_ack',
+  'customization.si_selection',
+  'recommendation.calculating',
   'recommendation.result',
+  'customization.frequency',
   'review.summary',
   'review.consent',
   'review.dob_collection',
@@ -107,6 +119,8 @@ export const HEALTH_SAVE_STEPS = new Set([
   'health_eval.lab_schedule',
   'health_eval.schedule',
   'completion.celebration',
+  'db.claim_submitted',
+  'db.edit_done',
 ]);
 
 export const LIFE_SAVE_STEPS = new Set([
@@ -176,7 +190,68 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     const memberCount = snap.members?.length ?? 0;
     const memberStr = memberCount > 0 ? `${memberCount} member${memberCount > 1 ? 's' : ''}` : '';
     const premStr = fmt(snap.currentPremium, snap.paymentFrequency);
+    const nameStr = snap.userName || '';
 
+    if (currentStepId === 'entry.name_ack') {
+      return {
+        title: nameStr ? `${nameStr}, let's find your plan` : "Let's find your health plan",
+        subtitle: 'Continue where you left off',
+        ctaLabel: 'Continue journey',
+        route: '/health?resume=1',
+        urgency: 'medium',
+        badge: 'In progress',
+      };
+    }
+    if (['family.who_to_cover', 'family.cover_ack'].includes(currentStepId)) {
+      return {
+        title: nameStr ? `${nameStr}, tell us who to cover` : 'Select members to cover',
+        subtitle: memberStr || 'Continue where you left off',
+        ctaLabel: 'Continue journey',
+        route: '/health?resume=1',
+        urgency: 'medium',
+        badge: 'In progress',
+      };
+    }
+    if (currentStepId === 'family.age_ack') {
+      return {
+        title: nameStr ? `${nameStr}, we're building your plan` : "We're building your health plan",
+        subtitle: memberStr || 'Age details collected',
+        ctaLabel: 'Continue journey',
+        route: '/health?resume=1',
+        urgency: 'medium',
+        badge: 'In progress',
+      };
+    }
+    if (currentStepId === 'family.pincode_result') {
+      return {
+        title: nameStr ? `${nameStr}, almost there` : 'Almost there',
+        subtitle: [memberStr, snap.pincode].filter(Boolean).join(' · '),
+        ctaLabel: 'Continue journey',
+        route: '/health?resume=1',
+        urgency: 'medium',
+        badge: 'In progress',
+      };
+    }
+    if (['coverage.current_insurance', 'health.conditions', 'health.healthy_ack', 'health.conditions_ack'].includes(currentStepId)) {
+      return {
+        title: nameStr ? `${nameStr}, your quote is almost ready` : 'Your quote is almost ready',
+        subtitle: [memberStr, snap.pincode].filter(Boolean).join(' · ') || 'Just a few more details',
+        ctaLabel: 'Get my quote',
+        route: '/health?resume=1',
+        urgency: 'medium',
+        badge: 'Almost there',
+      };
+    }
+    if (['customization.si_selection', 'recommendation.calculating', 'customization.frequency'].includes(currentStepId)) {
+      return {
+        title: nameStr ? `${nameStr}, customize your plan` : 'Customize your health plan',
+        subtitle: [premStr, memberStr].filter(Boolean).join(' · ') || 'Coverage selection in progress',
+        ctaLabel: 'Continue',
+        route: '/health?resume=1',
+        urgency: 'high',
+        badge: 'Customizing',
+      };
+    }
     if (['recommendation.result', 'review.summary', 'review.consent', 'review.dob_collection', 'review.dob_ack'].includes(currentStepId)) {
       return {
         title: t.quoteReady(t.healthLabel),
@@ -217,6 +292,26 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         route: '/health?resume=1',
         urgency: 'low',
         badge: 'Policy active',
+      };
+    }
+    if (currentStepId === 'db.claim_submitted') {
+      return {
+        title: nameStr ? `${nameStr}, your claim has been submitted` : 'Your health claim has been submitted',
+        subtitle: `Processing in 3-5 days${memberStr ? ' · ' + memberStr : ''}`,
+        ctaLabel: 'Track claim',
+        route: '/health?resume=1',
+        urgency: 'low',
+        badge: 'Claim submitted',
+      };
+    }
+    if (currentStepId === 'db.edit_done') {
+      return {
+        title: nameStr ? `${nameStr}, your policy update is in progress` : 'Policy update in progress',
+        subtitle: `Changes effective from next billing cycle${memberStr ? ' · ' + memberStr : ''}`,
+        ctaLabel: 'View policy',
+        route: '/health?resume=1',
+        urgency: 'low',
+        badge: 'Update in progress',
       };
     }
   }

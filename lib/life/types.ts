@@ -146,6 +146,7 @@ export interface LifeJourneyState extends BaseJourneyState {
   // Journey progress
   currentModule: LifeModule;
   moduleOrder: LifeModule[];
+  stepHistory: string[];
   ekycComplete: boolean;
   financialComplete: boolean;
   medicalComplete: boolean;
@@ -239,6 +240,7 @@ export const LIFE_INITIAL_STATE: LifeJourneyState = {
   userPath: '',
   
   moduleOrder: ['basic_info', 'lifestyle', 'quote', 'addons', 'review', 'payment', 'ekyc', 'financial', 'medical', 'underwriting'],
+  stepHistory: [],
   ekycComplete: false,
   financialComplete: false,
   medicalComplete: false,

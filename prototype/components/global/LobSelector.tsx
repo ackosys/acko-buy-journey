@@ -103,7 +103,7 @@ export default function LobSelector({ lobs, onSelect }: LobSelectorProps) {
                 {/* Tagline */}
                 <p className={`${
                   isLarge ? 'text-sm mt-1.5' : 'text-xs mt-1'
-                } text-purple-200`}>
+                }`} style={{ color: 'var(--app-input-text)' }}>
                   {BENEFIT_LABELS[lob.id] || lob.tagline}
                 </p>
               </div>

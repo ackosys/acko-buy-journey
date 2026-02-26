@@ -1,22 +1,56 @@
 'use client';
 
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
 import { useThemeStore } from '../lib/themeStore';
+import { useUserProfileStore } from '../lib/userProfileStore';
+import { clearSnapshot } from '../lib/journeyPersist';
 import AckoLogo from './AckoLogo';
-import ThemeToggle from './global/ThemeToggle';
 import { useT } from '../lib/translations';
 import { assetPath } from '../lib/assetPath';
 import Link from 'next/link';
 
 const MODULE_ORDER = ['entry', 'intent', 'family', 'coverage', 'health', 'customization', 'recommendation', 'review', 'payment', 'health_eval', 'completion'];
 
+const THEME_ICONS: Record<string, React.ReactNode> = {
+  midnight: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" /></svg>,
+  dark: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>,
+  light: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>,
+};
+const THEME_LABELS: Record<string, string> = { midnight: 'Midnight', dark: 'Dark', light: 'Light' };
+
 export default function Header() {
   const t = useT();
-  const { currentModule, updateState } = useJourneyStore();
-  const theme = useThemeStore((s) => s.theme);
+  const router = useRouter();
+  const { currentModule, updateState, resetJourney } = useJourneyStore();
+  const { theme, cycleTheme } = useThemeStore();
   const isLight = theme === 'light';
   const currentIndex = MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((currentIndex / (MODULE_ORDER.length - 1)) * 100);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const hasExistingPolicy = useUserProfileStore((s) => s.hasActivePolicyInLob('health'));
+
+  const handleRestart = useCallback(() => {
+    setShowMenu(false);
+    clearSnapshot('health');
+    resetJourney();
+  }, [resetJourney]);
+
+  const handleViewPolicy = useCallback(() => {
+    setShowMenu(false);
+    router.push('/health?screen=dashboard');
+  }, [router]);
+
+  const handleGoHome = useCallback(() => {
+    setShowMenu(false);
+    router.push('/');
+  }, [router]);
+
+  const handleThemeToggle = useCallback(() => {
+    cycleTheme();
+  }, [cycleTheme]);
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--app-header-bg)', borderBottom: '1px solid var(--app-border)' }}>
@@ -63,7 +97,74 @@ export default function Header() {
             <span className="text-xs font-medium" style={{ color: 'var(--app-text)', opacity: 0.9 }}>{t.header.expert}</span>
           </button>
 
-          <ThemeToggle />
+          {/* More menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
+              style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+              title="More options"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--app-text)' }}>
+                <circle cx="12" cy="5" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
+
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div
+                  className="absolute right-0 top-full mt-1 z-50 rounded-xl overflow-hidden shadow-lg min-w-[180px]"
+                  style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+                >
+                  <button
+                    onClick={handleRestart}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 4v6h6M23 20v-6h-6" />
+                      <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+                    </svg>
+                    Start over
+                  </button>
+                  {hasExistingPolicy && (
+                    <button
+                      onClick={handleViewPolicy}
+                      className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                      style={{ color: isLight ? '#7C3AED' : '#C4B5FD', borderBottom: '1px solid var(--app-border)' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                      </svg>
+                      View existing policy
+                    </button>
+                  )}
+                  <button
+                    onClick={handleGoHome}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                      <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                    Go to homepage
+                  </button>
+                  <button
+                    onClick={handleThemeToggle}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)' }}
+                  >
+                    {THEME_ICONS[theme]}
+                    Mode: {THEME_LABELS[theme]}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
