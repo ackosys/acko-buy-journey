@@ -922,7 +922,7 @@ export const en = {
     vehicleFound: (v: string) => `We found your ${v}.`,
     vehicleFoundConfirm: 'Please confirm these details are correct.',
     // Manual entry
-    brandNewExcited: (v: string) => `Great, let\'s insure your new ${v}.`,
+    brandNewExcited: (v: string) => `Insure your brand new ${v}`,
     brandNewSaving: (v: string) => `You can save up to Rs. 40,000 on your new ${v}\'s on-road price by insuring with ACKO.`,
     fetchFailed: (v: string) => `We could not fetch your ${v} details automatically.`,
     fetchFailedSub: 'No worries — I will help you enter them manually. This should only take a minute.',
