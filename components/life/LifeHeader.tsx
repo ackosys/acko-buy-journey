@@ -6,17 +6,28 @@ import { useLifeJourneyStore } from '../../lib/life/store';
 import { useThemeStore } from '../../lib/themeStore';
 import { clearSnapshot } from '../../lib/journeyPersist';
 import { useUserProfileStore } from '../../lib/userProfileStore';
+import { useLanguageStore } from '../../lib/languageStore';
 import AckoLogo from '../AckoLogo';
-import ThemeToggle from '../global/ThemeToggle';
 import { useT } from '../../lib/translations';
 import { assetPath } from '../../lib/assetPath';
 import { getLifeStep } from '../../lib/life/scripts';
 import type { LifeModule, LifeJourneyState } from '../../lib/life/types';
+import type { Language } from '../../lib/types';
 import Link from 'next/link';
 
 const LIFE_MODULE_ORDER: LifeModule[] = ['basic_info', 'lifestyle', 'quote', 'addons', 'review'];
 
 const NON_NAVIGABLE_WIDGETS = new Set(['none', 'payment_screen', 'ekyc_screen', 'financial_screen', 'medical_screen', 'underwriting_status', 'celebration']);
+
+const THEME_ICONS: Record<string, React.ReactNode> = {
+  midnight: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" /></svg>,
+  dark: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>,
+  light: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>,
+};
+const THEME_LABELS: Record<string, string> = { midnight: 'Midnight', dark: 'Dark', light: 'Light' };
+
+const LANG_ORDER: Language[] = ['en', 'hi', 'hinglish', 'kn'];
+const LANG_LABELS: Record<Language, string> = { en: 'English', hi: 'हिन्दी', hinglish: 'Hinglish', kn: 'ಕನ್ನಡ', ta: 'தமிழ்', ml: 'മലయாളം' };
 
 export default function LifeHeader() {
   const t = useT();
@@ -24,7 +35,8 @@ export default function LifeHeader() {
   const store = useLifeJourneyStore();
   const { currentModule, currentStepId, updateState } = store;
   const stepHistory: string[] = (store as any).stepHistory ?? [];
-  const theme = useThemeStore((s) => s.theme);
+  const { theme, cycleTheme } = useThemeStore();
+  const { language, setLanguage: setGlobalLang } = useLanguageStore();
   const isLight = theme === 'light';
   const currentIndex = LIFE_MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((currentIndex / (LIFE_MODULE_ORDER.length - 1)) * 100);
@@ -88,15 +100,14 @@ export default function LifeHeader() {
 
   const handleViewPolicy = useCallback(() => {
     setShowMenu(false);
-    updateState({
-      currentStepId: 'life_db.welcome',
-      conversationHistory: [],
-      stepHistory: ['life_db.welcome'],
-      currentModule: 'dashboard' as LifeJourneyState['currentModule'],
-      journeyComplete: true,
-      paymentComplete: true,
-    } as any);
-  }, [updateState]);
+    router.push('/?lob=life');
+  }, [router]);
+
+  const handleLanguageCycle = useCallback(() => {
+    const idx = LANG_ORDER.indexOf(language as Language);
+    const next = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    setGlobalLang(next);
+  }, [language, setGlobalLang]);
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--app-header-bg)', borderBottom: '1px solid var(--app-border)' }}>
@@ -193,13 +204,32 @@ export default function LifeHeader() {
                   <button
                     onClick={handleGoHome}
                     className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
-                    style={{ color: 'var(--app-text)' }}
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                       <polyline points="9,22 9,12 15,12 15,22" />
                     </svg>
                     Go to homepage
+                  </button>
+                  <button
+                    onClick={() => cycleTheme()}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
+                  >
+                    {THEME_ICONS[theme]}
+                    Mode: {THEME_LABELS[theme]}
+                  </button>
+                  <button
+                    onClick={handleLanguageCycle}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                    </svg>
+                    Lang: {LANG_LABELS[language as Language] || language}
                   </button>
                 </div>
               </>
