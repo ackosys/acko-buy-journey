@@ -8,12 +8,16 @@ import LanguageSelector from '../components/LanguageSelector';
 import AckoLogo from '../components/AckoLogo';
 import PolicyActionScreen, { type PolicyStatusInfo } from '../components/global/PolicyActionScreen';
 import { useUserProfileStore, type PolicyLob } from '../lib/userProfileStore';
+import { useThemeStore } from '../lib/themeStore';
+import { useLanguageStore } from '../lib/languageStore';
 import { LobConfig } from '../lib/core/types';
 import {
   loadSnapshot,
   getDropOffDisplay,
+  clearAllSnapshots,
   type ProductKey,
 } from '../lib/journeyPersist';
+import type { Language } from '../lib/types';
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -78,6 +82,15 @@ const LOB_LABEL_MAP: Record<string, string> = {
 };
 
 const EASE_OUT_CUBIC = [0.215, 0.61, 0.355, 1] as const;
+
+const THEME_LABELS: Record<string, string> = { midnight: 'Midnight', dark: 'Dark', light: 'Light' };
+const THEME_ICONS: Record<string, React.ReactNode> = {
+  midnight: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" /></svg>,
+  dark: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>,
+  light: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>,
+};
+const LANG_ORDER: Language[] = ['en', 'hi', 'hinglish', 'kn'];
+const LANG_LABELS: Record<string, string> = { en: 'English', hi: 'हिन्दी', hinglish: 'Hinglish', kn: 'ಕನ್ನಡ' };
 
 type Screen = 'language' | 'home' | 'policy_action';
 
@@ -435,16 +448,34 @@ const ID_TO_TAB: Record<string, string> = { car: 'Car', bike: 'Bike', health: 'H
 function GlobalHomepageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setLanguage } = useJourneyStore();
+  const { setLanguage: setJourneyLang } = useJourneyStore();
+  const { theme, cycleTheme } = useThemeStore();
+  const { language, setLanguage: setGlobalLang } = useLanguageStore();
   const [screen, setScreen] = useState<Screen>('language');
   const [hydrated, setHydrated] = useState(false);
   const [selectedLOB, setSelectedLOB] = useState('Car');
   const [selectedLob, setSelectedLob] = useState<LobConfig | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
   const swipeDir = useRef(0);
   const SWIPE_THRESHOLD = 50;
   const initialTabApplied = useRef(false);
 
   const { overrides, initialTab } = useLobSnapshots();
+
+  const handleLanguageCycle = useCallback(() => {
+    const idx = LANG_ORDER.indexOf(language as Language);
+    const next = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    setGlobalLang(next);
+    setJourneyLang(next);
+  }, [language, setGlobalLang, setJourneyLang]);
+
+  const handleResetFTU = useCallback(() => {
+    setShowMenu(false);
+    clearAllSnapshots();
+    localStorage.removeItem('acko_user_profile');
+    localStorage.removeItem('acko_lang_chosen');
+    window.location.href = '/';
+  }, []);
 
   useEffect(() => {
     setHydrated(true);
@@ -570,6 +601,69 @@ function GlobalHomepageInner() {
           >
             {/* Purple glow at the top */}
             <PurpleGlow />
+
+            {/* More options menu — top right */}
+            <div className="absolute top-4 right-4 z-50">
+              <motion.button
+                onClick={() => setShowMenu(!showMenu)}
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                  <circle cx="12" cy="5" r="1.5" />
+                  <circle cx="12" cy="12" r="1.5" />
+                  <circle cx="12" cy="19" r="1.5" />
+                </svg>
+              </motion.button>
+
+              <AnimatePresence>
+                {showMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-1.5 z-50 rounded-xl overflow-hidden shadow-2xl min-w-[200px]"
+                      style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
+                    >
+                      <button
+                        onClick={() => { cycleTheme(); }}
+                        className="w-full px-4 py-3 text-left text-sm flex items-center gap-2.5 transition-colors hover:bg-white/5"
+                        style={{ color: 'rgba(255,255,255,0.85)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                      >
+                        {THEME_ICONS[theme]}
+                        Mode: {THEME_LABELS[theme]}
+                      </button>
+                      <button
+                        onClick={handleLanguageCycle}
+                        className="w-full px-4 py-3 text-left text-sm flex items-center gap-2.5 transition-colors hover:bg-white/5"
+                        style={{ color: 'rgba(255,255,255,0.85)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                        </svg>
+                        Lang: {LANG_LABELS[language as string] || language}
+                      </button>
+                      <button
+                        onClick={handleResetFTU}
+                        className="w-full px-4 py-3 text-left text-sm flex items-center gap-2.5 transition-colors hover:bg-white/5"
+                        style={{ color: '#f87171' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 4v6h6M23 20v-6h-6" />
+                          <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+                        </svg>
+                        Reset to FTU
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Logo + Title */}
             <div
