@@ -99,6 +99,9 @@ function HealthJourneyInner() {
       selectedPlan: { name: 'ACKO Platinum', tier: 'platinum' as const, tagline: 'Complete coverage for your family', sumInsured: 2500000, sumInsuredLabel: '₹25L', monthlyPremium: 1249, yearlyPremium: 12999, features: ['Unlimited restoration', 'No room rent cap', 'Day 1 coverage'], exclusions: [], waitingPeriod: '30 days', healthEval: 'TeleMER', recommended: true },
       paymentFrequency: 'yearly' as const,
     });
+  };
+
+  const seedDemoPolicy = () => {
     const ps = useUserProfileStore.getState();
     if (!ps.policies.some((p) => p.lob === 'health' && p.active)) {
       ps.setProfile({ firstName: 'Rahul', isLoggedIn: true });
@@ -126,6 +129,7 @@ function HealthJourneyInner() {
 
     if (screenParam === 'dashboard') {
       seedDemoState();
+      seedDemoPolicy();
       setScreen('dashboard');
       setShowWelcome(false);
     } else if (snap) {
@@ -145,8 +149,28 @@ function HealthJourneyInner() {
         currentPremium: snap.currentPremium ?? 0,
         currentStepId: snap.currentStepId,
         isExistingAckoUser: true,
+        ...(snap.testScheduledDate ? { testScheduledDate: snap.testScheduledDate } : {}),
+        ...(snap.testScheduledLab ? { testScheduledLab: snap.testScheduledLab } : {}),
+        ...(snap.callScheduledDate ? { callScheduledDate: snap.callScheduledDate } : {}),
+        ...(snap.postPaymentScenario ? { postPaymentScenario: snap.postPaymentScenario } : {}),
       });
-      setScreen(snap.paymentComplete ? 'post_payment' : 'chat');
+      if (snap.paymentComplete) {
+        if (snap.currentStepId === 'completion.celebration') {
+          seedDemoPolicy();
+          setScreen('dashboard');
+        } else {
+          const stepMap: Record<string, string> = {
+            'health_eval.schedule': 'resume_call_scheduled',
+            'health_eval.lab_schedule': 'resume_test_results',
+            'health_eval.intro': 'scenario_select',
+            'payment.success': 'voice_call',
+          };
+          setPostPaymentInitialPhase((stepMap[snap.currentStepId] || 'scenario_select') as any);
+          setScreen('post_payment');
+        }
+      } else {
+        setScreen('chat');
+      }
       setShowWelcome(false);
     }
 
@@ -155,26 +179,6 @@ function HealthJourneyInner() {
 
   useEffect(() => {
     if (paymentComplete && screen === 'chat') {
-      const s = useJourneyStore.getState();
-      const profileStore = useUserProfileStore.getState();
-      const hasHealthPolicy = profileStore.policies.some((p) => p.lob === 'health' && p.active);
-      if (!hasHealthPolicy) {
-        const plan = s.selectedPlan;
-        if (s.userName) {
-          profileStore.setProfile({ firstName: s.userName, isLoggedIn: true });
-        }
-        profileStore.addPolicy({
-          id: `health_${Date.now()}`,
-          lob: 'health',
-          policyNumber: `ACKO-H-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
-          label: plan?.name || 'Health Insurance Plan',
-          active: true,
-          purchasedAt: new Date().toISOString(),
-          premium: s.paymentFrequency === 'monthly' ? plan?.monthlyPremium : plan?.yearlyPremium,
-          premiumFrequency: s.paymentFrequency || 'monthly',
-          details: `${plan?.sumInsuredLabel || ''} cover · ${s.members?.length || 1} member${(s.members?.length || 1) > 1 ? 's' : ''}`,
-        });
-      }
       const timer = setTimeout(() => setScreen('post_payment'), 2500);
       return () => clearTimeout(timer);
     }
@@ -197,7 +201,7 @@ function HealthJourneyInner() {
   const handleJumpToCall = () => { seedDemoState(); setPostPaymentInitialPhase('voice_call'); setScreen('post_payment'); };
   const handleJumpToPostCallScenarios = () => { seedDemoState(); setPostPaymentInitialPhase('scenario_select'); setScreen('post_payment'); };
   const handleJumpToPostPayment = () => { seedDemoState(); setPostPaymentInitialPhase(undefined); setScreen('post_payment'); };
-  const handleJumpToDashboard = () => { seedDemoState(); setScreen('dashboard'); };
+  const handleJumpToDashboard = () => { seedDemoState(); seedDemoPolicy(); setScreen('dashboard'); };
 
   const dismissWelcome = useCallback(() => setShowWelcome(false), []);
 

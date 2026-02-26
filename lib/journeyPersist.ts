@@ -27,6 +27,7 @@ export interface JourneySnapshot {
   testScheduledDate?: string;
   testScheduledLab?: string;
   postPaymentPhase?: string | null;
+  postPaymentScenario?: string;
 
   /* Life */
   name?: string;           // life store uses `name` not `userName`

@@ -169,6 +169,10 @@ function seedDemoState(vehicleType: VehicleType) {
     totalPremium: isCar ? 7500 : 2500,
   } as Partial<MotorJourneyState>);
 
+}
+
+function seedDemoPolicy(vehicleType: VehicleType) {
+  const isCar = vehicleType === 'car';
   const lob = isCar ? 'car' as const : 'bike' as const;
   const ps = useUserProfileStore.getState();
   if (!ps.policies.some((p) => p.lob === lob && p.active)) {
@@ -213,6 +217,7 @@ function MotorJourneyInner() {
     if (screenParam === 'dashboard') {
       const vt: VehicleType = vehicleParam ?? 'car';
       seedDemoState(vt);
+      seedDemoPolicy(vt);
       updateState({ vehicleType: vt, paymentComplete: true, journeyComplete: false, currentStepId: 'db.welcome', currentModule: 'dashboard' } as Partial<MotorJourneyState>);
       setScreen('chat');
     } else if (snap && snap.vehicleType) {
@@ -284,6 +289,7 @@ function MotorJourneyInner() {
       setScreen('chat');
     } else if (intent === 'manage') {
       seedDemoState('car');
+      seedDemoPolicy('car');
       updateState({ motorIntent: intent, currentStepId: 'db.overview', currentModule: 'dashboard' } as Partial<MotorJourneyState>);
       setScreen('chat');
     }
@@ -305,6 +311,7 @@ function MotorJourneyInner() {
     const needsDemoState = stepId !== 'vehicle_type.select';
     if (needsDemoState) seedDemoState(vehicleType);
     if (isDashboardStep) {
+      seedDemoPolicy(vehicleType);
       updateState({ vehicleType, paymentComplete: true, journeyComplete: false, currentStepId: stepId, currentModule: 'dashboard' } as Partial<MotorJourneyState>);
     } else {
       const moduleMap: Record<string, string> = {

@@ -11,6 +11,7 @@ import ConversationalFlow from './ConversationalFlow';
 import AckoLogo from './AckoLogo';
 import Link from 'next/link';
 import { saveSnapshot } from '../lib/journeyPersist';
+import { useUserProfileStore } from '../lib/userProfileStore';
 
 /* ═══════════════════════════════════════════════════════
    Post-Payment Journey — Conversational P2I Experience
@@ -771,6 +772,7 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
       callScheduledDate,
       testScheduledDate: s.testScheduledDate,
       testScheduledLab: s.testScheduledLab,
+      postPaymentScenario: s.postPaymentScenario,
     });
   }, [callScheduledDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -788,13 +790,15 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
       callScheduledDate: s.callScheduledDate,
       testScheduledDate,
       testScheduledLab,
+      postPaymentScenario: s.postPaymentScenario,
     });
   }, [testScheduledDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Determine initial step based on initialPhase
   const getInitialStep = () => {
     if (initialPhase === 'voice_call') return 'pp.voice_call';
     if (initialPhase === 'scenario_select') return 'pp.call_complete';
+    if (initialPhase === 'resume_test_results') return 'pp.test_complete';
+    if (initialPhase === 'resume_call_scheduled') return 'pp.voice_call';
     return 'pp.welcome';
   };
 
@@ -863,10 +867,29 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
       onDashboard();
       return true;
     }
-    // Save "policy active" snapshot when health summary or policy issued is reached
+    // Policy is genuinely issued at these steps — create the active policy record
     if (stepId === 'pp.health_summary' || stepId === 'pp.policy_issued' || stepId === 'pp.no_test_result') {
       setTimeout(() => {
         const s = useJourneyStore.getState();
+        const profileStore = useUserProfileStore.getState();
+        const hasHealthPolicy = profileStore.policies.some((p) => p.lob === 'health' && p.active);
+        if (!hasHealthPolicy) {
+          const plan = s.selectedPlan;
+          if (s.userName) {
+            profileStore.setProfile({ firstName: s.userName, isLoggedIn: true });
+          }
+          profileStore.addPolicy({
+            id: `health_${Date.now()}`,
+            lob: 'health',
+            policyNumber: `ACKO-H-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+            label: plan?.name || 'Health Insurance Plan',
+            active: true,
+            purchasedAt: new Date().toISOString(),
+            premium: s.paymentFrequency === 'monthly' ? plan?.monthlyPremium : plan?.yearlyPremium,
+            premiumFrequency: s.paymentFrequency || 'monthly',
+            details: `${plan?.sumInsuredLabel || ''} cover · ${s.members?.length || 1} member${(s.members?.length || 1) > 1 ? 's' : ''}`,
+          });
+        }
         saveSnapshot({
           product: 'health',
           currentStepId: 'completion.celebration',
