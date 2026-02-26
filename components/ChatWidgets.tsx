@@ -1475,42 +1475,77 @@ export function ReviewSummary({ onConfirm, onEditField }: { onConfirm: () => voi
   ];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="max-w-md bg-white border-2 border-onyx-200 rounded-2xl overflow-hidden shadow-sm">
-      <div className="px-5 pt-5 pb-2">
-        <h4 className="text-label-md font-semibold text-onyx-800 mb-3 flex items-center gap-2">
-          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V19.5a2.25 2.25 0 002.25 2.25h.75" /></svg>
-          {t.widgets.yourPlanSummary}
-        </h4>
-      </div>
-      <div className="px-5 space-y-0">
-        {rows.map((row, i) => (
-          <div key={i} className="flex items-center justify-between py-3 border-b border-onyx-100 last:border-b-0">
-            <span className="text-body-sm text-onyx-500">{row.label}</span>
-            <div className="flex items-center gap-2">
-              <span className="text-body-sm text-onyx-800 font-medium">{row.value}</span>
-              {onEditField && row.stepId && (
-                <button
-                  onClick={() => onEditField(row.stepId!)}
-                  className="text-purple-500 hover:text-purple-700 hover:bg-purple-50 p-1 rounded-md transition-colors"
-                  title={t.widgets.editLabel(row.label)}
-                >
-                  {editIcon}
-                </button>
-              )}
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-md">
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: 'var(--app-plan-card-bg, rgba(255,255,255,0.08))',
+          border: '1px solid var(--app-plan-card-border, rgba(168,85,247,0.35))',
+          boxShadow: 'var(--app-plan-card-shadow, 0 4px 24px rgba(168,85,247,0.12))',
+        }}
+      >
+        {/* Header strip */}
+        <div
+          className="px-5 py-3 flex items-center gap-2"
+          style={{
+            background: 'var(--app-surface-2, rgba(255,255,255,0.1))',
+            borderBottom: '1px solid var(--app-divider, rgba(255,255,255,0.08))',
+          }}
+        >
+          <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--app-accent, #7C3AED)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V19.5a2.25 2.25 0 002.25 2.25h.75" />
+          </svg>
+          <h4 className="text-[14px] font-semibold" style={{ color: 'var(--app-text, #FFFFFF)' }}>
+            {t.widgets.yourPlanSummary}
+          </h4>
+        </div>
+
+        {/* Rows */}
+        <div className="px-5 py-2">
+          {rows.map((row, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between py-3"
+              style={{ borderBottom: i < rows.length - 1 ? '1px solid var(--app-divider, rgba(255,255,255,0.08))' : 'none' }}
+            >
+              <span className="text-[12px]" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.45))' }}>{row.label}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-medium" style={{ color: 'var(--app-text, #FFFFFF)' }}>{row.value}</span>
+                {onEditField && row.stepId && (
+                  <button
+                    onClick={() => onEditField(row.stepId!)}
+                    className="p-1 rounded-md transition-colors"
+                    style={{ color: 'var(--app-link, #C4B5FD)' }}
+                    title={t.widgets.editLabel(row.label)}
+                  >
+                    {editIcon}
+                  </button>
+                )}
+              </div>
             </div>
+          ))}
+        </div>
+
+        {/* Premium row */}
+        <div
+          className="px-5 py-3 flex justify-between items-baseline"
+          style={{ borderTop: '1px solid var(--app-divider, rgba(255,255,255,0.08))', background: 'var(--app-surface-2, rgba(255,255,255,0.06))' }}
+        >
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.6))' }}>Premium</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-[20px] font-bold" style={{ color: 'var(--app-accent, #7C3AED)' }}>{formatCurrency(premium)}</span>
+            <span className="text-[12px]" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.4))' }}>{freq}</span>
           </div>
-        ))}
-        <div className="pt-3 pb-1 flex justify-between items-baseline">
-          <span className="text-body-md font-semibold text-onyx-800">Premium</span>
-          <span className="text-heading-md text-purple-700">{formatCurrency(premium)}<span className="text-body-sm text-onyx-500">{freq}</span></span>
         </div>
       </div>
-      <div className="p-4 border-t border-onyx-200">
-        <button onClick={onConfirm} className="w-full py-3.5 bg-purple-600 text-white rounded-xl text-label-lg font-semibold hover:bg-purple-700 transition-colors active:scale-[0.97]">
-          {t.widgets.looksGood}
-        </button>
-      </div>
+
+      <button
+        onClick={onConfirm}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-all active:scale-[0.97]"
+        style={{ background: 'var(--app-accent, #7C3AED)', color: '#FFFFFF' }}
+      >
+        {t.widgets.looksGood}
+      </button>
     </motion.div>
   );
 }
