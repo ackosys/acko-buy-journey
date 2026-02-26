@@ -176,7 +176,7 @@ const manualEntryCongratulations: MotorConversationStep = {
       botMessages: [t.brandNewExcited(vLabel(state)), t.brandNewSaving(vLabel(state))],
     };
   },
-  processResponse: () => ({}),
+  processResponse: () => ({ vehicleEntryType: 'brand_new' as const }),
   getNextStep: () => 'brand_new.popular_cars',
 };
 
@@ -205,7 +205,8 @@ const manualEntrySelectBrand: MotorConversationStep = {
       subText: t.whichBrandSub(vLabel(state)),
     };
   },
-  processResponse: (response) => ({
+  processResponse: (response, state) => ({
+    vehicleEntryType: state.vehicleEntryType,
     vehicleData: {
       make: response,
       model: '',
@@ -228,6 +229,7 @@ const manualEntrySelectModel: MotorConversationStep = {
     botMessages: [getT(state.language).motorScripts.whichModel(state.vehicleData.make)],
   }),
   processResponse: (response, state) => ({
+    vehicleEntryType: state.vehicleEntryType,
     vehicleData: { ...state.vehicleData, model: response },
   }),
   getNextStep: () => 'manual_entry.select_fuel',
@@ -258,12 +260,13 @@ const manualEntrySelectFuel: MotorConversationStep = {
     };
   },
   processResponse: (response, state) => ({
+    vehicleEntryType: state.vehicleEntryType,
     vehicleData: { ...state.vehicleData, fuelType: response },
   }),
   getNextStep: (_, state) => {
+    const isBrandNew = state.vehicleEntryType === 'brand_new';
     if (state.vehicleType === 'bike') {
-      if (state.vehicleEntryType === 'brand_new') return 'brand_new.pincode';
-      return 'manual_entry.select_year';
+      return isBrandNew ? 'brand_new.pincode' : 'manual_entry.select_year';
     }
     return 'manual_entry.select_variant';
   },
@@ -285,6 +288,7 @@ const manualEntrySelectVariant: MotorConversationStep = {
     };
   },
   processResponse: (response, state) => ({
+    vehicleEntryType: state.vehicleEntryType,
     vehicleData: {
       ...state.vehicleData,
       variant: response,
@@ -375,13 +379,14 @@ const brandNewPopularCars: MotorConversationStep = {
     };
   },
   processResponse: (response, state) => {
-    if (response === 'other') return {};
+    if (response === 'other') return { vehicleEntryType: 'brand_new' as const };
     const isBike = state.vehicleType === 'bike';
     const popularList = isBike ? POPULAR_BIKES : POPULAR_CARS;
     const vehicle = popularList.find(c => c.id === response);
-    if (!vehicle) return {};
+    if (!vehicle) return { vehicleEntryType: 'brand_new' as const };
     const [make, ...modelParts] = vehicle.label.split(' ');
     return {
+      vehicleEntryType: 'brand_new' as const,
       vehicleData: {
         make: make,
         model: modelParts.join(' '),
