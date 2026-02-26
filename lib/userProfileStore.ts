@@ -90,10 +90,10 @@ const DEMO_POLICIES: UserPolicy[] = [
 ];
 
 const INITIAL_PROFILE: UserProfile = {
-  firstName: 'Chirag',
+  firstName: '',
   phone: '',
-  isLoggedIn: true,
-  policies: DEMO_POLICIES,
+  isLoggedIn: false,
+  policies: [],
 };
 
 export const useUserProfileStore = create<UserProfileStore>((set, get) => {

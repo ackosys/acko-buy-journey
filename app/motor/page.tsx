@@ -178,7 +178,7 @@ function MotorJourneyInner() {
 
   const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
   const resumeParam = searchParams.get('resume') === '1';
-  const [screen, setScreen] = useState<Screen>('hello');
+  const [screen, setScreen] = useState<Screen>('explore');
   const [hydrated, setHydrated] = useState(false);
 
   // Keep motor store language in sync with the global language selection
