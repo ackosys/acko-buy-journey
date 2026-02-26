@@ -330,7 +330,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         title: 'Your health policy is active!',
         subtitle: `${premStr ? premStr + ' · ' : ''}${memberStr}`,
         ctaLabel: 'View dashboard',
-        route: '/health?resume=1',
+        route: '/health?screen=dashboard',
         urgency: 'low',
         badge: 'Policy active',
       };
@@ -340,7 +340,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         title: nameStr ? `${nameStr}, claim submitted` : 'Health claim submitted',
         subtitle: `Processing in 3-5 days`,
         ctaLabel: 'Track claim',
-        route: '/health?resume=1',
+        route: '/health?screen=dashboard',
         urgency: 'low',
         badge: 'Claim submitted',
       };
@@ -350,7 +350,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         title: nameStr ? `${nameStr}, policy update requested` : 'Policy update requested',
         subtitle: `Effective from next billing cycle`,
         ctaLabel: 'View policy',
-        route: '/health?resume=1',
+        route: '/health?screen=dashboard',
         urgency: 'low',
         badge: 'Update in progress',
       };
@@ -575,7 +575,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         title: `Your ${productLabel} policy is active`,
         subtitle: [planStr, `${vLabel}${regStr}`].filter(Boolean).join(' · '),
         ctaLabel: 'View policy',
-        route,
+        route: `/motor?vehicle=${product}&screen=dashboard`,
         urgency: 'low',
         badge: 'Policy active',
       };
