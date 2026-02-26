@@ -204,7 +204,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     if (currentStepId === 'entry.name_ack') {
       return {
         title: nameStr ? `${nameStr}, let's find your plan` : "Let's find your health plan",
-        subtitle: 'Continue where you left off',
+        subtitle: 'Plans starting at ₹399/mo',
         ctaLabel: 'Continue journey',
         route: '/health?resume=1',
         urgency: 'medium',
@@ -214,7 +214,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     if (['family.who_to_cover', 'family.cover_ack'].includes(currentStepId)) {
       return {
         title: nameStr ? `${nameStr}, tell us who to cover` : 'Select members to cover',
-        subtitle: memberStr || 'Continue where you left off',
+        subtitle: memberStr ? `${memberStr} added so far` : 'Add family members to get covered',
         ctaLabel: 'Continue journey',
         route: '/health?resume=1',
         urgency: 'medium',
@@ -224,7 +224,7 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     if (currentStepId === 'family.age_ack') {
       return {
         title: nameStr ? `${nameStr}, we're building your plan` : "We're building your health plan",
-        subtitle: memberStr || 'Age details collected',
+        subtitle: `${memberStr} · Age details collected`,
         ctaLabel: 'Continue journey',
         route: '/health?resume=1',
         urgency: 'medium',
@@ -234,17 +234,17 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     if (currentStepId === 'family.pincode_result') {
       return {
         title: nameStr ? `${nameStr}, almost there` : 'Almost there',
-        subtitle: [memberStr, snap.pincode].filter(Boolean).join(' · '),
+        subtitle: `${memberStr} · Quote almost ready`,
         ctaLabel: 'Continue journey',
         route: '/health?resume=1',
         urgency: 'medium',
-        badge: 'In progress',
+        badge: 'Almost there',
       };
     }
     if (['coverage.current_insurance', 'health.conditions', 'health.healthy_ack', 'health.conditions_ack'].includes(currentStepId)) {
       return {
         title: nameStr ? `${nameStr}, your quote is almost ready` : 'Your quote is almost ready',
-        subtitle: [memberStr, snap.pincode].filter(Boolean).join(' · ') || 'Just a few more details',
+        subtitle: 'Just a few health details needed',
         ctaLabel: 'Get my quote',
         route: '/health?resume=1',
         urgency: 'medium',
@@ -254,43 +254,64 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     if (['customization.si_selection', 'recommendation.calculating', 'customization.frequency'].includes(currentStepId)) {
       return {
         title: nameStr ? `${nameStr}, customize your plan` : 'Customize your health plan',
-        subtitle: [premStr, memberStr].filter(Boolean).join(' · ') || 'Coverage selection in progress',
+        subtitle: `Choose sum insured & payment frequency`,
         ctaLabel: 'Continue',
         route: '/health?resume=1',
         urgency: 'high',
         badge: 'Customizing',
       };
     }
-    if (['recommendation.result', 'review.summary', 'review.consent', 'review.dob_collection', 'review.dob_ack'].includes(currentStepId)) {
+    if (currentStepId === 'recommendation.result') {
       return {
         title: t.quoteReady(t.healthLabel),
-        subtitle: [premStr, memberStr].filter(Boolean).join(' · '),
-        ctaLabel: t.completePurchase,
+        subtitle: `${memberStr} · Compare plans & pick the best fit`,
+        ctaLabel: 'View plans',
         route: '/health?resume=1',
         urgency: 'high',
         badge: t.quoteReadyBadge,
       };
     }
+    if (['review.summary', 'review.consent', 'review.dob_collection', 'review.dob_ack'].includes(currentStepId)) {
+      return {
+        title: 'Complete your health insurance',
+        subtitle: premStr ? `${premStr} · ${memberStr}` : memberStr,
+        ctaLabel: t.completePurchase,
+        route: '/health?resume=1',
+        urgency: 'high',
+        badge: 'Action needed',
+      };
+    }
     if (currentStepId === 'payment.success' || currentStepId === 'health_eval.intro') {
       return {
         title: 'Schedule your health check-up',
-        subtitle: `Policy active · Tests pending${memberStr ? ' · ' + memberStr : ''}`,
+        subtitle: `Payment done · Doctor call pending`,
         ctaLabel: 'Schedule now',
         route: '/health?resume=1',
         urgency: 'high',
         badge: 'Action needed',
       };
     }
-    if (currentStepId === 'health_eval.lab_schedule' || currentStepId === 'health_eval.schedule') {
-      const labStr = snap.testScheduledLab ? ` · ${snap.testScheduledLab}` : '';
-      const dateStr = snap.testScheduledDate ? ` on ${snap.testScheduledDate}` : '';
+    if (currentStepId === 'health_eval.schedule') {
+      const dateStr = snap.callScheduledDate || '';
       return {
-        title: 'Your health tests are scheduled',
-        subtitle: `Tests booked${dateStr}${labStr}`,
+        title: 'Doctor call scheduled',
+        subtitle: dateStr ? `Call on ${dateStr}` : 'Awaiting doctor call',
         ctaLabel: 'View details',
         route: '/health?resume=1',
         urgency: 'medium',
-        badge: 'In progress',
+        badge: 'Scheduled',
+      };
+    }
+    if (currentStepId === 'health_eval.lab_schedule') {
+      const labStr = snap.testScheduledLab || '';
+      const dateStr = snap.testScheduledDate || '';
+      return {
+        title: 'Your health tests are scheduled',
+        subtitle: [dateStr, labStr].filter(Boolean).join(' · ') || 'Tests booked',
+        ctaLabel: 'View details',
+        route: '/health?resume=1',
+        urgency: 'medium',
+        badge: 'Tests booked',
       };
     }
     if (currentStepId === 'completion.celebration') {
@@ -305,8 +326,8 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     }
     if (currentStepId === 'db.claim_submitted') {
       return {
-        title: nameStr ? `${nameStr}, your claim has been submitted` : 'Your health claim has been submitted',
-        subtitle: `Processing in 3-5 days${memberStr ? ' · ' + memberStr : ''}`,
+        title: nameStr ? `${nameStr}, claim submitted` : 'Health claim submitted',
+        subtitle: `Processing in 3-5 days`,
         ctaLabel: 'Track claim',
         route: '/health?resume=1',
         urgency: 'low',
@@ -315,8 +336,8 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     }
     if (currentStepId === 'db.edit_done') {
       return {
-        title: nameStr ? `${nameStr}, your policy update is in progress` : 'Policy update in progress',
-        subtitle: `Changes effective from next billing cycle${memberStr ? ' · ' + memberStr : ''}`,
+        title: nameStr ? `${nameStr}, policy update requested` : 'Policy update requested',
+        subtitle: `Effective from next billing cycle`,
         ctaLabel: 'View policy',
         route: '/health?resume=1',
         urgency: 'low',
@@ -498,14 +519,44 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
         badge: t.quoteReadyBadge,
       };
     }
-    if (['quote.plan_selected', 'addons.out_of_pocket', 'addons.protect_everyone', 'addons.complete', 'review.premium_breakdown'].includes(currentStepId)) {
+    if (currentStepId === 'quote.plan_selected') {
       return {
-        title: t.continueJourney,
-        subtitle: [planStr, premStr, `${vLabel}${regStr}`].filter(Boolean).join(' · '),
-        ctaLabel: t.completePurchase,
+        title: `${planStr} selected, customize add-ons`,
+        subtitle: `${vLabel}${regStr}`,
+        ctaLabel: 'Add protections',
         route,
         urgency: 'high',
-        badge: 'Action needed',
+        badge: 'Plan selected',
+      };
+    }
+    if (currentStepId === 'addons.out_of_pocket' || currentStepId === 'addons.protect_everyone') {
+      return {
+        title: `Finish selecting add-ons`,
+        subtitle: `Starting at ₹300/yr`,
+        ctaLabel: 'Pick add-ons',
+        route,
+        urgency: 'high',
+        badge: 'Customizing',
+      };
+    }
+    if (currentStepId === 'addons.complete') {
+      return {
+        title: `Review your ${vLabel} plan`,
+        subtitle: `${planStr} · Add-ons done${premStr ? ' · ' + premStr : ''}`,
+        ctaLabel: 'Review & pay',
+        route,
+        urgency: 'high',
+        badge: 'Almost done',
+      };
+    }
+    if (currentStepId === 'review.premium_breakdown') {
+      return {
+        title: `Complete payment for ${vLabel}`,
+        subtitle: `${planStr}${premStr ? ' · ' + premStr : ''}`,
+        ctaLabel: 'Pay now',
+        route,
+        urgency: 'high',
+        badge: 'Payment pending',
       };
     }
     if (currentStepId === 'payment.success' || currentStepId === 'completion.dashboard') {

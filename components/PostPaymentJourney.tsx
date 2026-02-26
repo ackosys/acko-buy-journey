@@ -750,6 +750,24 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
   const [showVoiceCall, setShowVoiceCall] = useState(false);
   const [voiceCallResolve, setVoiceCallResolve] = useState<((v: any) => void) | null>(null);
 
+  // ── Save an initial snapshot on mount so early drop-offs are captured ────
+  useEffect(() => {
+    const s = useJourneyStore.getState();
+    if (!s.paymentComplete) return;
+    saveSnapshot({
+      product: 'health',
+      currentStepId: 'health_eval.intro',
+      savedAt: new Date().toISOString(),
+      userName: s.userName,
+      members: s.members.map(m => ({ relation: m.relation, age: m.age, name: m.name })),
+      pincode: s.pincode,
+      selectedPlan: s.selectedPlan ? { name: s.selectedPlan.name, monthlyPremium: s.selectedPlan.monthlyPremium, yearlyPremium: s.selectedPlan.yearlyPremium, sumInsured: s.selectedPlan.sumInsured, tier: s.selectedPlan.tier } : null,
+      paymentComplete: true,
+      paymentFrequency: s.paymentFrequency,
+      currentPremium: s.currentPremium,
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Snapshot saving: watch key post-payment state changes ────────────────
   const callScheduledDate = useJourneyStore(s => s.callScheduledDate);
   const testScheduledDate  = useJourneyStore(s => s.testScheduledDate);
@@ -799,6 +817,7 @@ export default function PostPaymentJourney({ onDashboard, initialPhase, onTalkTo
     if (initialPhase === 'scenario_select') return 'pp.call_complete';
     if (initialPhase === 'resume_test_results') return 'pp.test_complete';
     if (initialPhase === 'resume_call_scheduled') return 'pp.voice_call';
+    if (initialPhase === 'full_flow') return 'pp.welcome';
     return 'pp.welcome';
   };
 

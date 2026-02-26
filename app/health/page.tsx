@@ -162,10 +162,10 @@ function HealthJourneyInner() {
           const stepMap: Record<string, string> = {
             'health_eval.schedule': 'resume_call_scheduled',
             'health_eval.lab_schedule': 'resume_test_results',
-            'health_eval.intro': 'scenario_select',
-            'payment.success': 'voice_call',
+            'health_eval.intro': 'full_flow',
+            'payment.success': 'full_flow',
           };
-          setPostPaymentInitialPhase((stepMap[snap.currentStepId] || 'scenario_select') as any);
+          setPostPaymentInitialPhase((stepMap[snap.currentStepId] || 'full_flow') as any);
           setScreen('post_payment');
         }
       } else {
