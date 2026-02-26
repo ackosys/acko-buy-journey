@@ -84,7 +84,7 @@ function HealthJourneyInner() {
   const paymentComplete = useJourneyStore(s => s.paymentComplete);
   const isExistingUser = useJourneyStore(s => s.isExistingAckoUser);
   const [screen, setScreen] = useState<Screen>('entry');
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const searchParams = useSearchParams();
 

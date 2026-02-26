@@ -130,7 +130,7 @@ function LifeJourneyInner() {
   const globalLanguage = useLanguageStore((s) => s.language);
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const searchParams = useSearchParams();
 
   // Keep life store language in sync with the global language selection
@@ -238,6 +238,17 @@ function LifeJourneyInner() {
             onJumpToFinancial={() => jumpToStep('life_financial')}
             onJumpToMedical={() => jumpToStep('life_medical_eval')}
             onJumpToUnderwriting={() => jumpToStep('life_underwriting')}
+            onJumpToDashboard={() => {
+              store.updateState({
+                currentStepId: 'life_db.welcome',
+                conversationHistory: [],
+                stepHistory: ['life_db.welcome'],
+                currentModule: 'dashboard',
+                journeyComplete: true,
+                paymentComplete: true,
+              } as any);
+              setScreen('chat');
+            }}
           />
         )}
 
