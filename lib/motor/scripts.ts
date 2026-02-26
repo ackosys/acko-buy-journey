@@ -1431,7 +1431,7 @@ const ackoDriveBrowseVariant: MotorConversationStep = {
       variant: response as string,
     },
   }),
-  getNextStep: () => 'brand_new.commercial_check',
+  getNextStep: () => 'brand_new.pincode',
 };
 
 /* ═══════════════════════════════════════════════
