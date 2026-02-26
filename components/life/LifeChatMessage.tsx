@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 /* ── Umbrella Avatar — Life Insurance identity ── */
 function UmbrellaAvatar() {
@@ -34,9 +34,10 @@ interface LifeChatMessageProps {
     stepId?: string;
   };
   onEdit?: (stepId: string) => void;
+  animate?: boolean;
 }
 
-export default function LifeChatMessage({ message, onEdit }: LifeChatMessageProps) {
+export default function LifeChatMessage({ message, onEdit, animate = false }: LifeChatMessageProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   if (message.type === 'system') {
@@ -85,7 +86,35 @@ export default function LifeChatMessage({ message, onEdit }: LifeChatMessageProp
     );
   }
 
-  // Bot message — glass card on dark with umbrella avatar
+  // Bot message — glass card on dark with umbrella avatar, word-by-word typewriter
+  const wordList = useMemo(() => {
+    const result: { text: string; para: number }[] = [];
+    message.content.split('\n\n').forEach((para, pi) => {
+      para.split(' ').forEach(word => {
+        if (word) result.push({ text: word, para: pi });
+      });
+    });
+    return result;
+  }, [message.content]);
+
+  const [visibleCount, setVisibleCount] = useState(animate ? 0 : wordList.length);
+
+  useEffect(() => {
+    if (!animate || visibleCount >= wordList.length) return;
+    const t = setTimeout(() => setVisibleCount(c => c + 1), 55);
+    return () => clearTimeout(t);
+  }, [animate, visibleCount, wordList.length]);
+
+  useEffect(() => {
+    if (!animate) setVisibleCount(wordList.length);
+  }, [animate, wordList.length]);
+
+  const paragraphCount = message.content.split('\n\n').length;
+  const visibleByPara: string[][] = Array.from({ length: paragraphCount }, () => []);
+  wordList.slice(0, visibleCount).forEach(w => visibleByPara[w.para].push(w.text));
+  const visibleParagraphs = visibleByPara.filter(p => p.length > 0);
+  const isTypingOut = animate && visibleCount < wordList.length;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -99,9 +128,12 @@ export default function LifeChatMessage({ message, onEdit }: LifeChatMessageProp
 
       <div className="max-w-[85%]">
         <div className="backdrop-blur-sm px-4 py-3 chat-bubble-bot" style={{ background: 'var(--app-surface, var(--motor-surface))', border: '1px solid var(--app-border, var(--motor-border))' }}>
-          {message.content.split('\n\n').map((paragraph, i) => (
+          {visibleParagraphs.map((words, i) => (
             <p key={i} className={`text-body-md text-white/90 ${i > 0 ? 'mt-2' : ''}`} style={{ color: 'var(--app-bot-text, var(--motor-bot-text))' }}>
-              {paragraph}
+              {words.join(' ')}
+              {isTypingOut && i === visibleParagraphs.length - 1 && (
+                <span className="inline-block w-[2px] h-[1em] align-middle ml-[2px] rounded-full bg-purple-400 animate-pulse" />
+              )}
             </p>
           ))}
         </div>

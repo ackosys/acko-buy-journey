@@ -375,9 +375,14 @@ export default function LifeChatContainer() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-lg mx-auto">
           <AnimatePresence initial={false}>
-            {conversationHistory.map((msg) => (
-              <LifeChatMessage key={msg.id} message={msg} onEdit={handleEditRequest} />
-            ))}
+            {conversationHistory.map((msg, index) => {
+              const isLatestBot = msg.type === 'bot' &&
+                index === conversationHistory.length - 1 &&
+                !isTyping;
+              return (
+                <LifeChatMessage key={msg.id} message={msg} onEdit={handleEditRequest} animate={isLatestBot} />
+              );
+            })}
           </AnimatePresence>
 
           {isTyping && (

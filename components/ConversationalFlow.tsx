@@ -327,9 +327,14 @@ export default function ConversationalFlow({
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-lg mx-auto">
           <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} onEdit={handleEditRequest} />
-            ))}
+            {messages.map((msg, index) => {
+              const isLatestBot = msg.type === 'bot' &&
+                index === messages.length - 1 &&
+                !isTyping;
+              return (
+                <ChatMessage key={msg.id} message={msg} onEdit={handleEditRequest} animate={isLatestBot} />
+              );
+            })}
           </AnimatePresence>
 
           {isTyping && (
