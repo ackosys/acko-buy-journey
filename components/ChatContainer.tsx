@@ -341,7 +341,7 @@ export default function ChatContainer() {
   const isLargeWidget = () => {
     const step = getStep(currentStepId);
     if (!step) return false;
-    return ['plan_switcher', 'review_summary', 'payment_widget', 'lab_schedule_widget', 'celebration', 'calculation', 'pdf_upload', 'gap_results', 'confirm_details', 'dob_collection', 'usp_cards'].includes(step.widgetType);
+    return ['plan_switcher', 'review_summary', 'payment_widget', 'lab_schedule_widget', 'celebration', 'calculation', 'pdf_upload', 'gap_results', 'confirm_details', 'usp_cards'].includes(step.widgetType);
   };
 
   return (
@@ -369,7 +369,7 @@ export default function ChatContainer() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="mt-2 mb-4 ml-11"
+                className="mt-2 mb-4"
               >
                 {renderWidget()}
               </motion.div>

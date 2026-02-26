@@ -1155,81 +1155,116 @@ export function PlanSwitcher({ onSelect }: { onSelect: (tier: string) => void })
   return (
     <div className="max-w-md">
       {/* Tier tabs */}
-      <div className="flex gap-1 bg-onyx-100 p-1 rounded-xl mb-4">
-        {tiers.map(tier => (
-          <button key={tier} onClick={() => { setActiveTier(tier); setExpanded(false); }}
-            className={`flex-1 py-2.5 px-2 rounded-lg text-label-md font-medium transition-all ${
-              activeTier === tier ? 'bg-white text-purple-700 shadow-sm' : 'text-onyx-500 hover:text-onyx-700'
-            }`}>
-            {tierLabels[tier]}
-          </button>
-        ))}
+      <div className="flex gap-1 p-1 rounded-xl mb-4" style={{ background: 'var(--app-tab-bg, rgba(255,255,255,0.06))' }}>
+        {tiers.map(tier => {
+          const isActive = activeTier === tier;
+          return (
+            <button
+              key={tier}
+              onClick={() => { setActiveTier(tier); setExpanded(false); }}
+              className="flex-1 py-2.5 px-2 rounded-lg text-[13px] font-semibold transition-all duration-200"
+              style={isActive ? {
+                background: 'var(--app-accent, #7C3AED)',
+                color: '#FFFFFF',
+                boxShadow: '0 2px 8px rgba(124,58,237,0.35)',
+              } : {
+                background: 'transparent',
+                color: 'var(--app-tab-inactive, rgba(255,255,255,0.45))',
+              }}
+            >
+              {tierLabels[tier]}
+            </button>
+          );
+        })}
       </div>
 
       {/* Plan card */}
-      <motion.div key={activeTier} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white border-2 border-purple-200 rounded-2xl overflow-hidden shadow-sm">
+      <motion.div
+        key={activeTier}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: 'var(--app-plan-card-bg, rgba(255,255,255,0.08))',
+          border: '1px solid var(--app-plan-card-border, rgba(168,85,247,0.35))',
+          boxShadow: 'var(--app-plan-card-shadow, 0 4px 24px rgba(168,85,247,0.12))',
+        }}
+      >
         {/* Header */}
-        <div className="p-5 bg-gradient-to-r from-purple-50 to-white">
-          <div className="flex items-start justify-between">
+        <div className="p-4">
+          <div className="flex items-start justify-between mb-2">
             <div>
-              <h3 className="text-heading-sm text-onyx-800">{plan.name}</h3>
-              <p className="text-body-sm text-onyx-500 mt-0.5">{plan.tagline}</p>
+              <h3 className="text-[15px] font-semibold" style={{ color: 'var(--app-text, #FFFFFF)' }}>{plan.name}</h3>
+              <p className="text-[12px] mt-0.5" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.45))' }}>{plan.tagline}</p>
             </div>
-            {plan.badge && <span className="text-label-sm bg-purple-600 text-white px-2.5 py-1 rounded-full whitespace-nowrap">{plan.badge}</span>}
-          </div>
-          <div className="mt-3">
-            <span className="text-heading-lg text-purple-700">{formatCurrency(plan.monthlyPremium)}</span>
-            <span className="text-body-sm text-onyx-500">/month</span>
-          </div>
-          <p className="text-caption text-onyx-400">or {formatCurrency(plan.yearlyPremium)}/year (save 8%)</p>
-        </div>
-
-        {/* Collapsed features */}
-        <div className="px-5 py-4">
-          <div className="flex flex-wrap gap-2 mb-3">
-            {plan.features.slice(0, 4).map((f, i) => (
-              <span key={i} className="text-caption bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-100 flex items-center gap-1"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>{f.length > 30 ? f.slice(0, 30) + '...' : f}</span>
-            ))}
-            {plan.features.length > 4 && !expanded && (
-              <span className="text-caption bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full border border-purple-100">+{plan.features.length - 4} more</span>
+            {plan.badge && (
+              <span
+                className="text-[10px] px-2 py-0.5 rounded-full border whitespace-nowrap"
+                style={{
+                  background: 'var(--app-badge-bg, rgba(124,58,237,0.25))',
+                  color: 'var(--app-badge-text, #C4B5FD)',
+                  borderColor: 'var(--app-badge-border, rgba(168,85,247,0.35))',
+                }}
+              >
+                {plan.badge}
+              </span>
             )}
           </div>
+          <div className="flex items-baseline gap-1.5 mb-0.5">
+            <span className="text-[22px] font-bold" style={{ color: 'var(--app-text, #FFFFFF)' }}>{formatCurrency(plan.monthlyPremium)}</span>
+            <span className="text-[13px]" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.45))' }}>/month</span>
+          </div>
+          <p className="text-[11px]" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.35))' }}>
+            or {formatCurrency(plan.yearlyPremium)}/year (save 8%)
+          </p>
+        </div>
 
-          {/* Expand/Collapse */}
-          <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-label-md text-purple-600 font-medium hover:text-purple-700">
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid var(--app-divider, rgba(255,255,255,0.08))' }} />
+
+        {/* Features */}
+        <div className="px-4 py-3">
+          <div className="space-y-2 mb-3">
+            {plan.features.slice(0, expanded ? plan.features.length : 3).map((f: string, i: number) => (
+              <div key={i} className="flex items-start gap-2">
+                <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: 'var(--app-feature-check, #4ADE80)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-[12px]" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.7))' }}>
+                  {f.length > 45 ? f.slice(0, 45) + '…' : f}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-1 text-[12px] font-medium transition-colors"
+            style={{ color: 'var(--app-link, #C4B5FD)' }}
+          >
             {expanded ? t.widgets.showLess : t.widgets.seeAllBenefits}
-            <svg className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           {expanded && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3 space-y-0">
-              {/* Features with accordion explanations */}
-              <div className="mb-3">
-                <h4 className="text-label-md text-onyx-800 font-semibold mb-2">{t.widgets.whatsCovered}</h4>
-                <div className="bg-onyx-100/50 rounded-xl px-3 py-1">
-                  {plan.features.map((f, i) => (
-                    <FeatureAccordionItem key={i} feature={f} />
-                  ))}
-                </div>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3 space-y-3">
+              <div style={{ borderTop: '1px solid var(--app-divider, rgba(255,255,255,0.08))', paddingTop: '12px' }}>
+                <h4 className="text-[12px] font-semibold mb-2" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.6))' }}>{t.widgets.waitingPeriod}</h4>
+                <p className="text-[12px]" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.5))' }}>{plan.waitingPeriod}</p>
               </div>
-
-              <div className="pt-3 border-t border-onyx-100">
-                <h4 className="text-label-md text-onyx-800 font-semibold mb-2">{t.widgets.waitingPeriod}</h4>
-                <p className="text-body-sm text-onyx-600">{plan.waitingPeriod}</p>
+              <div style={{ borderTop: '1px solid var(--app-divider, rgba(255,255,255,0.08))', paddingTop: '12px' }}>
+                <h4 className="text-[12px] font-semibold mb-2" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.6))' }}>{t.widgets.healthEvaluation}</h4>
+                <p className="text-[12px]" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.5))' }}>{plan.healthEval}</p>
               </div>
-              <div className="pt-3 border-t border-onyx-100">
-                <h4 className="text-label-md text-onyx-800 font-semibold mb-2">{t.widgets.healthEvaluation}</h4>
-                <p className="text-body-sm text-onyx-600">{plan.healthEval}</p>
-              </div>
-              <div className="pt-3 border-t border-onyx-100">
-                <h4 className="text-label-md text-onyx-800 font-semibold mb-2">{t.widgets.notCovered}</h4>
-                <ul className="space-y-1">
-                  {plan.exclusions.map((e, i) => (
-                    <li key={i} className="flex items-start gap-2 text-body-sm text-onyx-500">
-                      <svg className="w-3.5 h-3.5 text-onyx-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> {e}
+              <div style={{ borderTop: '1px solid var(--app-divider, rgba(255,255,255,0.08))', paddingTop: '12px' }}>
+                <h4 className="text-[12px] font-semibold mb-2" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.6))' }}>{t.widgets.notCovered}</h4>
+                <ul className="space-y-1.5">
+                  {plan.exclusions.map((e: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2 text-[12px]" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.4))' }}>
+                      <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: 'var(--app-text-subtle, rgba(255,255,255,0.3))' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                      {e}
                     </li>
                   ))}
                 </ul>
@@ -1239,8 +1274,11 @@ export function PlanSwitcher({ onSelect }: { onSelect: (tier: string) => void })
         </div>
       </motion.div>
 
-      <button onClick={handleSelect}
-        className="mt-4 w-full py-3.5 bg-purple-600 text-white rounded-xl text-label-lg font-semibold hover:bg-purple-700 transition-colors active:scale-[0.97]">
+      <button
+        onClick={handleSelect}
+        className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold transition-all active:scale-[0.97]"
+        style={{ background: 'var(--app-accent, #7C3AED)', color: '#FFFFFF' }}
+      >
         {t.widgets.continueWith(plan.name)}
       </button>
     </div>
@@ -1518,163 +1556,242 @@ const RELATION_LABEL_KEYS: Record<string, string> = {
 export function DobCollectionWidget({ onConfirm }: { onConfirm: (response: string) => void }) {
   const t = useT();
   const members = useJourneyStore(s => s.members);
-  const userName = useJourneyStore(s => s.userName);
+  const journeyUserName = useJourneyStore(s => s.userName);
   const updateState = useJourneyStore(s => s.updateState);
 
-  const [dobs, setDobs] = useState<Record<string, { day: string; month: string; year: string }>>(() => {
-    const initial: Record<string, { day: string; month: string; year: string }> = {};
+  // Accumulated data keyed by member id
+  const [collected, setCollected] = useState<Record<string, { name: string; day: string; month: string; year: string }>>(() => {
+    const init: Record<string, { name: string; day: string; month: string; year: string }> = {};
     members.forEach(m => {
       const estimatedYear = m.age ? String(new Date().getFullYear() - m.age) : '';
-      initial[m.id] = { day: '01', month: '01', year: estimatedYear };
+      const prefillName = m.name && m.name !== 'You' ? m.name : (m.relation === 'self' && journeyUserName ? journeyUserName : '');
+      init[m.id] = { name: prefillName, day: '01', month: '01', year: estimatedYear };
     });
-    return initial;
+    return init;
   });
 
-  const [names, setNames] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {};
-    members.forEach(m => {
-      // Pre-fill with existing name; for 'self' also try the journey userName
-      initial[m.id] = m.name && m.name !== 'You' ? m.name : (m.relation === 'self' && userName ? userName : '');
-    });
-    return initial;
-  });
+  const [step, setStep] = useState(0); // which member index we're on
+  const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
 
-  const allFilled = members.every(m => {
-    const d = dobs[m.id];
-    const n = (names[m.id] || '').trim();
-    return n.length > 0 && d && d.day && d.month && d.year && d.day.length <= 2 && d.month.length <= 2 && d.year.length === 4;
-  });
+  const member = members[step];
+  const total = members.length;
+  const isLast = step === total - 1;
 
-  const handleSubmit = () => {
-    if (!allFilled) return;
-    const updatedMembers = members.map(m => {
-      const d = dobs[m.id];
-      const dobStr = `${d.day.padStart(2, '0')}/${d.month.padStart(2, '0')}/${d.year}`;
-      const birthDate = new Date(parseInt(d.year), parseInt(d.month) - 1, parseInt(d.day));
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-      return { ...m, name: (names[m.id] || '').trim() || m.name, dob: dobStr, age };
-    });
-    updateState({ members: updatedMembers });
-    onConfirm('dob_submitted');
+  const relationLabel = (rel: string) => {
+    const key = RELATION_LABEL_KEYS[rel];
+    if (!key) return rel;
+    const val = (t.widgets as Record<string, unknown>)[key];
+    return typeof val === 'string' ? val : rel;
   };
 
-  const relationLabel = (member: { relation: string }) => {
-    const key = RELATION_LABEL_KEYS[member.relation];
-    if (!key) return member.relation;
-    const val = (t.widgets as Record<string, unknown>)[key];
-    return typeof val === 'string' ? val : member.relation;
+  const label = member ? relationLabel(member.relation) : '';
+  const data = member ? (collected[member.id] ?? { name: '', day: '', month: '', year: '' }) : { name: '', day: '', month: '', year: '' };
+
+  const setField = (field: 'name' | 'day' | 'month' | 'year', val: string) => {
+    if (!member) return;
+    setCollected(prev => ({ ...prev, [member.id]: { ...prev[member.id], [field]: val } }));
+  };
+
+  const currentValid =
+    (data.name || '').trim().length > 0 &&
+    data.day.length > 0 && data.day.length <= 2 &&
+    data.month.length > 0 && data.month.length <= 2 &&
+    data.year.length === 4;
+
+  const handleNext = () => {
+    if (!currentValid) return;
+    if (isLast) {
+      // All done — compute ages and save
+      const updatedMembers = members.map(m => {
+        const d = collected[m.id];
+        const dobStr = `${d.day.padStart(2, '0')}/${d.month.padStart(2, '0')}/${d.year}`;
+        const birthDate = new Date(parseInt(d.year), parseInt(d.month) - 1, parseInt(d.day));
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const diff = today.getMonth() - birthDate.getMonth();
+        if (diff < 0 || (diff === 0 && today.getDate() < birthDate.getDate())) age--;
+        return { ...m, name: d.name.trim() || m.name, dob: dobStr, age };
+      });
+      updateState({ members: updatedMembers });
+      onConfirm('dob_submitted');
+    } else {
+      setDirection(1);
+      setStep(s => s + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (step === 0) return;
+    setDirection(-1);
+    setStep(s => s - 1);
+  };
+
+  const conversationalHeader = () => {
+    if (step === 0) return member?.relation === 'self' ? "Let's start with you" : `First, tell me about your ${label.toLowerCase()}`;
+    if (isLast) return `Last one — your ${label.toLowerCase()}`;
+    return `Now your ${label.toLowerCase()}`;
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full">
-      <div className="bg-white border-2 border-onyx-200 rounded-2xl p-5 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-          </svg>
-          <span className="text-label-md font-semibold text-onyx-800">{t.widgets.dobTitle}</span>
+    <div className="max-w-md w-full">
+      {/* Progress stepper */}
+      {total > 1 && (
+        <div className="flex items-center gap-1.5 mb-4">
+          {members.map((_, i) => (
+            <div
+              key={i}
+              className="h-1 rounded-full flex-1 transition-all duration-300"
+              style={{ background: i < step ? 'var(--app-accent, #7C3AED)' : i === step ? 'var(--app-accent, #7C3AED)' : 'rgba(255,255,255,0.12)' }}
+            />
+          ))}
+          <span className="text-[11px] ml-1 flex-shrink-0" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.4))' }}>
+            {step + 1}/{total}
+          </span>
         </div>
+      )}
 
-        {members.map(member => {
-          const d = dobs[member.id] || { day: '', month: '', year: '' };
-          const n = names[member.id] ?? '';
-          const label = relationLabel(member);
-          return (
-            <div key={member.id} className="border border-onyx-100 rounded-xl p-4 bg-onyx-50/30 space-y-3">
-              {/* Relation label + estimated age */}
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-purple-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-                <span className="text-label-sm font-semibold text-onyx-700">{label}</span>
-                {member.age > 0 && <span className="text-body-xs text-onyx-400 ml-auto">~{member.age} yrs</span>}
-              </div>
-
-              {/* Name field */}
+      <AnimatePresence mode="wait" custom={direction}>
+        {member && (
+          <motion.div
+            key={member.id}
+            custom={direction}
+            initial={{ opacity: 0, x: direction * 32 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -32 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="space-y-3"
+          >
+            {/* Conversational header */}
+            <div className="flex items-center justify-between">
               <div>
-                <label className="text-body-xs text-onyx-500 mb-1 block">
-                  Full name{member.relation === 'self' ? ' (yours)' : ` (${label.toLowerCase()})`}
-                </label>
-                <input
-                  type="text"
-                  placeholder={member.relation === 'self' ? 'Your full name' : `${label}'s full name`}
-                  value={n}
-                  onChange={e => setNames(prev => ({ ...prev, [member.id]: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-onyx-200 rounded-lg text-body-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
-                />
+                <p className="text-[15px] font-semibold" style={{ color: 'var(--app-text, #FFFFFF)' }}>
+                  {conversationalHeader()}
+                </p>
+                {member.age > 0 && (
+                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.45))' }}>
+                    Estimated age ~{member.age} yrs
+                  </p>
+                )}
               </div>
+              {step > 0 && (
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-1 text-[12px] px-2.5 py-1 rounded-lg transition-all"
+                  style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.45))', background: 'rgba(255,255,255,0.06)' }}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                  Back
+                </button>
+              )}
+            </div>
 
-              {/* DOB row */}
+            {/* Name input */}
+            <div>
+              <label className="text-[11px] font-medium mb-1 block" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.5))' }}>
+                {member.relation === 'self' ? 'Your full name' : `${label}'s full name`}
+              </label>
+              <input
+                type="text"
+                placeholder={member.relation === 'self' ? 'Enter your name' : `Enter ${label.toLowerCase()}'s name`}
+                value={data.name}
+                onChange={e => setField('name', e.target.value)}
+                className="w-full px-3.5 py-3 rounded-xl text-[14px] outline-none transition-all"
+                style={{
+                  background: 'var(--app-input-bg, rgba(255,255,255,0.08))',
+                  border: '1.5px solid var(--app-input-border, rgba(255,255,255,0.12))',
+                  color: 'var(--app-text, #FFFFFF)',
+                }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--app-accent, #7C3AED)'; }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--app-input-border, rgba(255,255,255,0.12))'; }}
+              />
+            </div>
+
+            {/* DOB row */}
+            <div>
+              <label className="text-[11px] font-medium mb-1 block" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.5))' }}>
+                Date of birth
+              </label>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="text-body-xs text-onyx-500 mb-1 block">{t.widgets.day}</label>
                   <input
                     type="text"
                     inputMode="numeric"
                     maxLength={2}
                     placeholder="DD"
-                    value={d.day}
-                    onChange={e => {
-                      const val = e.target.value.replace(/\D/g, '').slice(0, 2);
-                      setDobs(prev => ({ ...prev, [member.id]: { ...prev[member.id], day: val } }));
+                    value={data.day}
+                    onChange={e => setField('day', e.target.value.replace(/\D/g, '').slice(0, 2))}
+                    className="w-full px-3 py-3 rounded-xl text-[14px] text-center outline-none transition-all"
+                    style={{
+                      background: 'var(--app-input-bg, rgba(255,255,255,0.08))',
+                      border: '1.5px solid var(--app-input-border, rgba(255,255,255,0.12))',
+                      color: 'var(--app-text, #FFFFFF)',
                     }}
-                    className="w-full px-3 py-2.5 border border-onyx-200 rounded-lg text-center text-body-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--app-accent, #7C3AED)'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--app-input-border, rgba(255,255,255,0.12))'; }}
                   />
+                  <p className="text-[10px] text-center mt-1" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.35))' }}>Day</p>
                 </div>
                 <div className="flex-1">
-                  <label className="text-body-xs text-onyx-500 mb-1 block">{t.widgets.month}</label>
                   <input
                     type="text"
                     inputMode="numeric"
                     maxLength={2}
                     placeholder="MM"
-                    value={d.month}
-                    onChange={e => {
-                      const val = e.target.value.replace(/\D/g, '').slice(0, 2);
-                      setDobs(prev => ({ ...prev, [member.id]: { ...prev[member.id], month: val } }));
+                    value={data.month}
+                    onChange={e => setField('month', e.target.value.replace(/\D/g, '').slice(0, 2))}
+                    className="w-full px-3 py-3 rounded-xl text-[14px] text-center outline-none transition-all"
+                    style={{
+                      background: 'var(--app-input-bg, rgba(255,255,255,0.08))',
+                      border: '1.5px solid var(--app-input-border, rgba(255,255,255,0.12))',
+                      color: 'var(--app-text, #FFFFFF)',
                     }}
-                    className="w-full px-3 py-2.5 border border-onyx-200 rounded-lg text-center text-body-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--app-accent, #7C3AED)'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--app-input-border, rgba(255,255,255,0.12))'; }}
                   />
+                  <p className="text-[10px] text-center mt-1" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.35))' }}>Month</p>
                 </div>
                 <div className="flex-[1.5]">
-                  <label className="text-body-xs text-onyx-500 mb-1 block">{t.widgets.year}</label>
                   <input
                     type="text"
                     inputMode="numeric"
                     maxLength={4}
                     placeholder="YYYY"
-                    value={d.year}
-                    onChange={e => {
-                      const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                      setDobs(prev => ({ ...prev, [member.id]: { ...prev[member.id], year: val } }));
+                    value={data.year}
+                    onChange={e => setField('year', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    className="w-full px-3 py-3 rounded-xl text-[14px] text-center outline-none transition-all"
+                    style={{
+                      background: 'var(--app-input-bg, rgba(255,255,255,0.08))',
+                      border: '1.5px solid var(--app-input-border, rgba(255,255,255,0.12))',
+                      color: 'var(--app-text, #FFFFFF)',
                     }}
-                    className="w-full px-3 py-2.5 border border-onyx-200 rounded-lg text-center text-body-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--app-accent, #7C3AED)'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--app-input-border, rgba(255,255,255,0.12))'; }}
                   />
+                  <p className="text-[10px] text-center mt-1" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.35))' }}>Year</p>
                 </div>
               </div>
             </div>
-          );
-        })}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <p className="text-body-xs text-onyx-400 flex items-start gap-1.5 pt-1">
-          <svg className="w-3.5 h-3.5 text-onyx-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-          </svg>
-          {t.widgets.dobHelp}
-        </p>
+      {/* CTA */}
+      <button
+        onClick={handleNext}
+        disabled={!currentValid}
+        className="mt-4 w-full py-3 rounded-xl text-[15px] font-semibold disabled:opacity-40 transition-all active:scale-[0.97]"
+        style={{ background: 'var(--app-accent, #7C3AED)', color: '#FFFFFF' }}
+      >
+        {isLast ? t.widgets.calculatePremium : t.common.continue}
+      </button>
 
-        <button
-          onClick={handleSubmit}
-          disabled={!allFilled}
-          className="w-full py-3 bg-purple-600 text-white rounded-xl text-label-lg font-semibold disabled:opacity-40 hover:bg-purple-700 transition-all active:scale-[0.97]"
-        >
-          {t.widgets.calculatePremium}
-        </button>
-      </div>
-    </motion.div>
+      {/* IRDAI note */}
+      <p className="text-[11px] text-center mt-3" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.3))' }}>
+        {t.widgets.dobHelp}
+      </p>
+    </div>
   );
 }
 

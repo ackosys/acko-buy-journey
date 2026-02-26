@@ -173,6 +173,18 @@
   --app-input-placeholder: rgba(255,255,255,0.3);
   --app-progress-gradient: linear-gradient(90deg, #A855F7, #C084FC);
   --app-logo-variant: white;
+  --app-accent: #7C3AED;
+  --app-plan-card-bg: rgba(255,255,255,0.08);
+  --app-plan-card-border: rgba(168,85,247,0.35);
+  --app-plan-card-shadow: 0 4px 24px rgba(168,85,247,0.12), 0 1px 4px rgba(0,0,0,0.2);
+  --app-badge-bg: rgba(124,58,237,0.25);
+  --app-badge-text: #C4B5FD;
+  --app-badge-border: rgba(168,85,247,0.35);
+  --app-feature-check: #4ADE80;
+  --app-link: #C4B5FD;
+  --app-tab-bg: rgba(255,255,255,0.06);
+  --app-tab-inactive: rgba(255,255,255,0.4);
+  --app-divider: rgba(255,255,255,0.08);
 }
 
 .app-dark {
@@ -200,6 +212,18 @@
   --app-input-placeholder: rgba(255,255,255,0.3);
   --app-progress-gradient: linear-gradient(90deg, #A855F7, #C084FC);
   --app-logo-variant: white;
+  --app-accent: #7C3AED;
+  --app-plan-card-bg: rgba(255,255,255,0.08);
+  --app-plan-card-border: rgba(168,85,247,0.3);
+  --app-plan-card-shadow: 0 4px 24px rgba(168,85,247,0.1), 0 1px 4px rgba(0,0,0,0.2);
+  --app-badge-bg: rgba(124,58,237,0.2);
+  --app-badge-text: #C4B5FD;
+  --app-badge-border: rgba(168,85,247,0.3);
+  --app-feature-check: #4ADE80;
+  --app-link: #C4B5FD;
+  --app-tab-bg: rgba(255,255,255,0.06);
+  --app-tab-inactive: rgba(255,255,255,0.4);
+  --app-divider: rgba(255,255,255,0.08);
 }
 
 .app-light {
@@ -227,6 +251,18 @@
   --app-input-placeholder: rgba(0,0,0,0.3);
   --app-progress-gradient: linear-gradient(90deg, #7C3AED, #A855F7);
   --app-logo-variant: color;
+  --app-accent: #6D28D9;
+  --app-plan-card-bg: #FFFFFF;
+  --app-plan-card-border: rgba(109,40,217,0.2);
+  --app-plan-card-shadow: 0 4px 24px rgba(109,40,217,0.08), 0 1px 4px rgba(0,0,0,0.06);
+  --app-badge-bg: rgba(109,40,217,0.08);
+  --app-badge-text: #5B21B6;
+  --app-badge-border: rgba(109,40,217,0.2);
+  --app-feature-check: #059669;
+  --app-link: #6D28D9;
+  --app-tab-bg: rgba(0,0,0,0.04);
+  --app-tab-inactive: rgba(0,0,0,0.4);
+  --app-divider: rgba(0,0,0,0.06);
 }
 
 /* Light theme text overrides for Life/Health (matching motor-light approach) */
