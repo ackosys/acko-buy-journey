@@ -300,6 +300,7 @@ const manualEntrySelectVariant: MotorConversationStep = {
 const manualEntrySelectYear: MotorConversationStep = {
   id: 'manual_entry.select_year',
   module: 'manual_entry',
+  condition: (state) => state.vehicleEntryType !== 'brand_new',
   widgetType: 'year_selector',
   getScript: (state) => {
     const t = getT(state.language).motorScripts;
@@ -674,7 +675,7 @@ const ownerDetailsLoanProvider: MotorConversationStep = {
 const preQuoteCngCheck: MotorConversationStep = {
   id: 'pre_quote.cng_check',
   module: 'pre_quote',
-  condition: (state) => state.vehicleType !== 'bike',
+  condition: (state) => state.vehicleType !== 'bike' && state.vehicleEntryType !== 'brand_new',
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
@@ -691,6 +692,9 @@ const preQuoteCngCheck: MotorConversationStep = {
     vehicleData: { ...state.vehicleData, hasCngKit: response === 'yes' },
   }),
   getNextStep: (_, state) => {
+    if (state.vehicleEntryType === 'brand_new') {
+      return state.vehicleType === 'bike' ? 'brand_new.delivery_date' : 'brand_new.commercial_check';
+    }
     return 'pre_quote.commercial_check';
   },
 };
@@ -698,7 +702,7 @@ const preQuoteCngCheck: MotorConversationStep = {
 const preQuoteCommercialCheck: MotorConversationStep = {
   id: 'pre_quote.commercial_check',
   module: 'pre_quote',
-  condition: (state) => state.vehicleType !== 'bike',
+  condition: (state) => state.vehicleType !== 'bike' && state.vehicleEntryType !== 'brand_new',
   widgetType: 'selection_cards',
   getScript: (state) => ({
     botMessages: [
@@ -713,7 +717,10 @@ const preQuoteCommercialCheck: MotorConversationStep = {
   processResponse: (response, state) => ({
     vehicleData: { ...state.vehicleData, isCommercialVehicle: response === 'yes' },
   }),
-  getNextStep: (response) => {
+  getNextStep: (response, state) => {
+    if (state.vehicleEntryType === 'brand_new') {
+      return state.vehicleType === 'bike' ? 'brand_new.delivery_date' : 'brand_new.commercial_check';
+    }
     if (response === 'yes') return 'pre_quote.commercial_rejection';
     return 'pre_quote.policy_status';
   },
