@@ -235,24 +235,22 @@ export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManage
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--app-text)' }}>
-                    {dropOffInfo!.title || `New ${lobLabel} purchase`}
-                  </p>
-                  <span
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                    style={{
-                      background: isLight ? '#FEF3C7' : 'rgba(251,191,36,0.15)',
-                      color: isLight ? '#D97706' : '#FBBF24',
-                    }}
-                  >
-                    {dropOffInfo!.badge}
-                  </span>
-                </div>
+                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--app-text)' }}>
+                  {dropOffInfo!.title || `New ${lobLabel} purchase`}
+                </p>
                 <p className="text-xs" style={{ color: 'var(--app-text-muted)' }}>
-                  Continue where you left off
+                  {dropOffInfo!.subtitle || 'Continue where you left off'}
                 </p>
               </div>
+              <span
+                className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap self-center"
+                style={{
+                  background: isLight ? '#FEF3C7' : 'rgba(251,191,36,0.15)',
+                  color: isLight ? '#D97706' : '#FBBF24',
+                }}
+              >
+                {dropOffInfo!.badge}
+              </span>
               <svg className="w-5 h-5 shrink-0 mt-2" style={{ color: 'var(--app-text-subtle)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>

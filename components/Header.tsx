@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
 import { useThemeStore } from '../lib/themeStore';
 import { useUserProfileStore } from '../lib/userProfileStore';
+import { useLanguageStore } from '../lib/languageStore';
 import { clearSnapshot } from '../lib/journeyPersist';
 import AckoLogo from './AckoLogo';
 import { useT } from '../lib/translations';
 import { assetPath } from '../lib/assetPath';
 import Link from 'next/link';
+import type { Language } from '../lib/types';
 
 const MODULE_ORDER = ['entry', 'intent', 'family', 'coverage', 'health', 'customization', 'recommendation', 'review', 'payment', 'health_eval', 'completion'];
 
@@ -20,11 +22,16 @@ const THEME_ICONS: Record<string, React.ReactNode> = {
 };
 const THEME_LABELS: Record<string, string> = { midnight: 'Midnight', dark: 'Dark', light: 'Light' };
 
+const LANG_ORDER: Language[] = ['en', 'hi', 'hinglish', 'kn'];
+const LANG_LABELS: Record<Language, string> = { en: 'English', hi: 'हिन्दी', hinglish: 'Hinglish', kn: 'ಕನ್ನಡ', ta: 'தமிழ்', ml: 'മലയാളം' };
+
 export default function Header() {
   const t = useT();
   const router = useRouter();
   const { currentModule, updateState, resetJourney } = useJourneyStore();
   const { theme, cycleTheme } = useThemeStore();
+  const { language, setLanguage: setGlobalLang } = useLanguageStore();
+  const { setLanguage: setJourneyLang } = useJourneyStore();
   const isLight = theme === 'light';
   const currentIndex = MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((currentIndex / (MODULE_ORDER.length - 1)) * 100);
@@ -51,6 +58,13 @@ export default function Header() {
   const handleThemeToggle = useCallback(() => {
     cycleTheme();
   }, [cycleTheme]);
+
+  const handleLanguageCycle = useCallback(() => {
+    const idx = LANG_ORDER.indexOf(language as Language);
+    const next = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    setGlobalLang(next);
+    setJourneyLang(next);
+  }, [language, setGlobalLang, setJourneyLang]);
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--app-header-bg)', borderBottom: '1px solid var(--app-border)' }}>
@@ -156,10 +170,21 @@ export default function Header() {
                   <button
                     onClick={handleThemeToggle}
                     className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
-                    style={{ color: 'var(--app-text)' }}
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
                   >
                     {THEME_ICONS[theme]}
                     Mode: {THEME_LABELS[theme]}
+                  </button>
+                  <button
+                    onClick={handleLanguageCycle}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                    </svg>
+                    Lang: {LANG_LABELS[language as Language] || language}
                   </button>
                 </div>
               </>

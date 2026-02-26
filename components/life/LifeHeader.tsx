@@ -6,11 +6,13 @@ import { useLifeJourneyStore } from '../../lib/life/store';
 import { useThemeStore } from '../../lib/themeStore';
 import { clearSnapshot } from '../../lib/journeyPersist';
 import { useUserProfileStore } from '../../lib/userProfileStore';
+import { useLanguageStore } from '../../lib/languageStore';
 import AckoLogo from '../AckoLogo';
 import { useT } from '../../lib/translations';
 import { assetPath } from '../../lib/assetPath';
 import { getLifeStep } from '../../lib/life/scripts';
 import type { LifeModule, LifeJourneyState } from '../../lib/life/types';
+import type { Language } from '../../lib/types';
 import Link from 'next/link';
 
 const LIFE_MODULE_ORDER: LifeModule[] = ['basic_info', 'lifestyle', 'quote', 'addons', 'review'];
@@ -24,6 +26,9 @@ const THEME_ICONS: Record<string, React.ReactNode> = {
 };
 const THEME_LABELS: Record<string, string> = { midnight: 'Midnight', dark: 'Dark', light: 'Light' };
 
+const LANG_ORDER: Language[] = ['en', 'hi', 'hinglish', 'kn'];
+const LANG_LABELS: Record<Language, string> = { en: 'English', hi: 'हिन्दी', hinglish: 'Hinglish', kn: 'ಕನ್ನಡ', ta: 'தமிழ்', ml: 'മലయாളം' };
+
 export default function LifeHeader() {
   const t = useT();
   const router = useRouter();
@@ -31,6 +36,7 @@ export default function LifeHeader() {
   const { currentModule, currentStepId, updateState } = store;
   const stepHistory: string[] = (store as any).stepHistory ?? [];
   const { theme, cycleTheme } = useThemeStore();
+  const { language, setLanguage: setGlobalLang } = useLanguageStore();
   const isLight = theme === 'light';
   const currentIndex = LIFE_MODULE_ORDER.indexOf(currentModule);
   const progress = Math.round((currentIndex / (LIFE_MODULE_ORDER.length - 1)) * 100);
@@ -96,6 +102,12 @@ export default function LifeHeader() {
     setShowMenu(false);
     router.push('/?lob=life');
   }, [router]);
+
+  const handleLanguageCycle = useCallback(() => {
+    const idx = LANG_ORDER.indexOf(language as Language);
+    const next = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    setGlobalLang(next);
+  }, [language, setGlobalLang]);
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--app-header-bg)', borderBottom: '1px solid var(--app-border)' }}>
@@ -203,10 +215,21 @@ export default function LifeHeader() {
                   <button
                     onClick={() => cycleTheme()}
                     className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
-                    style={{ color: 'var(--app-text)' }}
+                    style={{ color: 'var(--app-text)', borderBottom: '1px solid var(--app-border)' }}
                   >
                     {THEME_ICONS[theme]}
                     Mode: {THEME_LABELS[theme]}
+                  </button>
+                  <button
+                    onClick={handleLanguageCycle}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-colors hover:opacity-80"
+                    style={{ color: 'var(--app-text)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                    </svg>
+                    Lang: {LANG_LABELS[language as Language] || language}
                   </button>
                 </div>
               </>

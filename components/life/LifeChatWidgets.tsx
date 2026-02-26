@@ -1249,26 +1249,26 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md"
     >
-      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-5">
+      <div className="rounded-2xl overflow-hidden border border-white/10 backdrop-blur-sm bg-gradient-to-br from-white/10 to-white/5">
+        <div className="bg-gradient-to-r from-purple-600/80 to-indigo-700/80 px-5 py-5">
           <p className="text-white/60 text-caption uppercase tracking-wider">Your Coverage</p>
           <p className="text-white text-2xl font-bold mt-1">{formatAmt(state.selectedCoverage)}</p>
           <p className="text-white/50 text-caption mt-1">{state.selectedTerm} years &middot; till age {state.age + state.selectedTerm}</p>
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          <div className="flex justify-between items-center py-2 border-b border-gray-50">
-            <span className="text-body-sm text-gray-500">Annual Premium</span>
-            <span className="text-label-md font-bold text-gray-900">₹{yearlyPremium.toLocaleString('en-IN')}</span>
+          <div className="flex justify-between items-center py-2 border-b border-white/8">
+            <span className="text-body-sm text-white/50">Annual Premium</span>
+            <span className="text-label-md font-bold text-white">₹{yearlyPremium.toLocaleString('en-IN')}</span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-gray-50">
-            <span className="text-body-sm text-gray-500">Monthly</span>
-            <span className="text-label-md text-gray-700">₹{monthlyPremium.toLocaleString('en-IN')}/mo</span>
+          <div className="flex justify-between items-center py-2 border-b border-white/8">
+            <span className="text-body-sm text-white/50">Monthly</span>
+            <span className="text-label-md text-white/80">₹{monthlyPremium.toLocaleString('en-IN')}/mo</span>
           </div>
           {state.selectedRiders.length > 0 && (
             <div className="flex justify-between items-center py-2">
-              <span className="text-body-sm text-gray-500">Riders</span>
-              <span className="text-body-sm text-gray-600">{state.selectedRiders.map(r => r.name).join(', ')}</span>
+              <span className="text-body-sm text-white/50">Riders</span>
+              <span className="text-body-sm text-white/70">{state.selectedRiders.map(r => r.name).join(', ')}</span>
             </div>
           )}
         </div>
@@ -1277,7 +1277,7 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
           <button
             onClick={handlePay}
             disabled={processing}
-            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 disabled:opacity-70"
+            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 hover:bg-purple-500 disabled:opacity-70"
           >
             {processing ? (
               <span className="flex items-center justify-center gap-2">
@@ -1288,7 +1288,7 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
               `Pay ₹${yearlyPremium.toLocaleString('en-IN')}`
             )}
           </button>
-          <p className="text-[11px] text-gray-400 text-center mt-2">
+          <p className="text-[11px] text-white/30 text-center mt-2">
             Secure payment &middot; 100% refund if not approved
           </p>
         </div>
