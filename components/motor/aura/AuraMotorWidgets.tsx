@@ -7,6 +7,28 @@ import { assetPath } from '../../../lib/assetPath';
 import { useMotorStore } from '../../../lib/motor/store';
 import { MotorJourneyState, NcbPercentage } from '../../../lib/motor/types';
 import { getMotorAddOns } from '../../../lib/motor/plans';
+import Image from 'next/image';
+
+const ADDON_ICONS: Record<string, string> = {
+  engine_protection:     'Engine_protect.svg',
+  extra_car_protection:  'Extra_car_protect.svg',
+  consumables_cover:     'Consumables_cover.svg',
+  ncb_protect:           'Discount.svg',
+  return_to_invoice:     'Invoice.svg',
+  personal_accident:     'Car Accident Cover.svg',
+  passenger_protection:  'Passenger_cover.svg',
+  paid_driver:           'Driver_Cover_Paid.svg',
+  pillion_protection:    'pillon_bike_cover.svg',
+  zero_dep:              'Zero Dep Car.svg',
+  key_replacement:       'Key.svg',
+  tyre_protection:       'Rotation-360.svg',
+  rim_damage:            'Rotation-360.svg',
+  roadside_assistance:   'Tools.svg',
+  calamity_cover:        'calamities_cover.svg',
+  war_terrorism:         'war_terrorism_cover.svg',
+  rat_bite:              '24px Rat_Bite_Cover.svg',
+  helmet_cover:          '24px Helemet_cover.svg',
+};
 
 /* ═══════════════════════════════════════════════
    SVG Icons for Motor
@@ -2266,6 +2288,16 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
+                    {ADDON_ICONS[addon.id] && (
+                      <Image
+                        src={assetPath(`/icons/${encodeURIComponent(ADDON_ICONS[addon.id])}`)}
+                        alt=""
+                        width={20}
+                        height={20}
+                        className="opacity-80 shrink-0"
+                        style={{ filter: 'var(--aura-icon-filter)', opacity: 'var(--aura-icon-opacity)' } as React.CSSProperties}
+                      />
+                    )}
                     <h4 className="text-[14px] font-semibold text-[var(--aura-text)]">{addon.name}</h4>
                     {addon.recommended && <span className="text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">Recommended</span>}
                     {selected && (
@@ -2444,6 +2476,16 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
+              {ADDON_ICONS[addon.id] && (
+                <Image
+                  src={assetPath(`/icons/${encodeURIComponent(ADDON_ICONS[addon.id])}`)}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="opacity-80 shrink-0"
+                  style={{ filter: 'var(--aura-icon-filter)', opacity: 'var(--aura-icon-opacity)' } as React.CSSProperties}
+                />
+              )}
               <h4 className="text-[14px] font-semibold text-[var(--aura-text)]">{addon.name}</h4>
               {addon.mandatory && <span className="text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-full">Mandatory by law</span>}
               {selected && (
