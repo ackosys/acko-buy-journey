@@ -147,6 +147,12 @@ export const LIFE_SAVE_STEPS = new Set([
 ]);
 
 export const MOTOR_SAVE_STEPS = new Set([
+  'vehicle_fetch.found',
+  'manual_entry.select_brand',
+  'brand_new.popular_cars',
+  'owner_details.name',
+  'pre_quote.summary',
+  'pre_quote.view_prices',
   'quote.plans_ready',
   'quote.plan_selection',
   'quote.plan_selected',
@@ -460,6 +466,27 @@ export function getDropOffDisplay(snap: JourneySnapshot): DropOffDisplay | null 
     const route = `/motor?vehicle=${product}&resume=1`;
 
     const productLabel = product === 'car' ? t.carLabel : t.bikeLabel;
+
+    if (['vehicle_fetch.found', 'manual_entry.select_brand', 'brand_new.popular_cars'].includes(currentStepId)) {
+      return {
+        title: `Let's insure your ${productLabel.toLowerCase()}`,
+        subtitle: vLabel !== productLabel ? `${vLabel}${regStr}` : `Vehicle details in progress`,
+        ctaLabel: 'Continue',
+        route,
+        urgency: 'medium',
+        badge: 'In progress',
+      };
+    }
+    if (['owner_details.name', 'pre_quote.summary', 'pre_quote.view_prices'].includes(currentStepId)) {
+      return {
+        title: `Almost there, ${productLabel.toLowerCase()} details ready`,
+        subtitle: `${vLabel}${regStr}`,
+        ctaLabel: 'Get quote',
+        route,
+        urgency: 'high',
+        badge: 'Details ready',
+      };
+    }
     if (['quote.plans_ready', 'quote.plan_selection'].includes(currentStepId)) {
       return {
         title: t.quoteReady(productLabel),

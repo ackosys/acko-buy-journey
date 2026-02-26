@@ -40,7 +40,7 @@ export default function Header() {
 
   const handleViewPolicy = useCallback(() => {
     setShowMenu(false);
-    router.push('/health?screen=dashboard');
+    router.push('/?lob=health');
   }, [router]);
 
   const handleGoHome = useCallback(() => {

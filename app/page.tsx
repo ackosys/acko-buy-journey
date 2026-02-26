@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
 import LanguageSelector from '../components/LanguageSelector';
 import AckoLogo from '../components/AckoLogo';
@@ -133,10 +133,10 @@ function computeSnapshots(): { overrides: Partial<Record<LobId, LobOverride>>; b
     } else if (stepId === 'life_db.coverage_submitted') {
       statusInfo = { badge: 'Under review', message: 'Coverage update · Review in 5-7 days', urgency: 'medium' };
     } else if (stepId === 'db.claim_submitted') {
-      const lobLabel = lobId === 'car' ? 'Car' : lobId === 'bike' ? 'Bike' : 'Health';
+      const lobLabel = LOB_LABEL_MAP[lobId]?.replace(' Insurance', '') || lobId;
       statusInfo = { badge: 'Claim submitted', message: `${lobLabel} claim request · Processing in 3-5 days`, urgency: 'low' };
     } else if (stepId === 'db.edit_done') {
-      const lobLabel = lobId === 'car' ? 'Car' : lobId === 'bike' ? 'Bike' : 'Health';
+      const lobLabel = LOB_LABEL_MAP[lobId]?.replace(' Insurance', '') || lobId;
       statusInfo = { badge: 'Update in progress', message: `${lobLabel} policy update · Effective next billing cycle`, urgency: 'low' };
     }
     result[lobId] = {
@@ -423,7 +423,18 @@ function CTAButton({ label, onClick }: { label: string; onClick: () => void }) {
 }
 
 export default function GlobalHomepage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--app-chat-gradient)' }} />}>
+      <GlobalHomepageInner />
+    </Suspense>
+  );
+}
+
+const ID_TO_TAB: Record<string, string> = { car: 'Car', bike: 'Bike', health: 'Health', life: 'Life' };
+
+function GlobalHomepageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setLanguage } = useJourneyStore();
   const [screen, setScreen] = useState<Screen>('language');
   const [hydrated, setHydrated] = useState(false);
@@ -437,8 +448,27 @@ export default function GlobalHomepage() {
 
   useEffect(() => {
     setHydrated(true);
-    if (localStorage.getItem('acko_lang_chosen')) setScreen('home');
-  }, []);
+    const langChosen = !!localStorage.getItem('acko_lang_chosen');
+
+    const lobParam = searchParams.get('lob');
+    if (lobParam && ID_TO_TAB[lobParam] && langChosen) {
+      const tab = ID_TO_TAB[lobParam];
+      setSelectedLOB(tab);
+      const profileStore = useUserProfileStore.getState();
+      if (profileStore.hasActivePolicyInLob(lobParam as any)) {
+        const lob = LOBS.find(l => l.id === lobParam);
+        if (lob) {
+          setSelectedLob(lob);
+          setScreen('policy_action');
+          return;
+        }
+      }
+      setScreen('home');
+      return;
+    }
+
+    if (langChosen) setScreen('home');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (initialTab && !initialTabApplied.current) {
@@ -493,11 +523,6 @@ export default function GlobalHomepage() {
     if (!lob) return;
     const lobKey = lob.id as PolicyLob;
     const ps = useUserProfileStore.getState();
-
-    if (override && override.urgency !== 'low') {
-      router.push(override.route);
-      return;
-    }
 
     if (ps.hasActivePolicyInLob(lobKey)) {
       setSelectedLob(lob);
@@ -633,23 +658,35 @@ export default function GlobalHomepage() {
         </motion.div>
       )}
 
-      {screen === 'policy_action' && selectedLob && (
-        <PolicyActionScreen
-          key="policy_action"
-          lobId={selectedLob.id}
-          lobLabel={LOB_LABEL_MAP[selectedLob.id] || selectedLob.label}
-          statusInfo={overrides[selectedLob.id as LobId]?.statusInfo}
-          onBuyNew={() => router.push(selectedLob.route)}
-          onManagePolicy={() => {
-            const routes: Record<string, string> = {
-              health: '/health?screen=dashboard', car: '/motor?vehicle=car&screen=dashboard',
-              bike: '/motor?vehicle=bike&screen=dashboard', life: '/life?screen=dashboard',
-            };
-            router.push(routes[selectedLob.id] || selectedLob.route);
-          }}
-          onBack={() => { setSelectedLob(null); setScreen('home'); }}
-        />
-      )}
+      {screen === 'policy_action' && selectedLob && (() => {
+        const ov = overrides[selectedLob.id as LobId];
+        const dropOff = ov && ov.urgency !== 'low' ? {
+          badge: ov.content.tagline,
+          title: ov.content.headline.join(' '),
+          subtitle: ov.content.highlight,
+          urgency: ov.urgency,
+          route: ov.route,
+        } : null;
+        return (
+          <PolicyActionScreen
+            key="policy_action"
+            lobId={selectedLob.id}
+            lobLabel={LOB_LABEL_MAP[selectedLob.id] || selectedLob.label}
+            statusInfo={ov?.statusInfo}
+            dropOffInfo={dropOff}
+            onContinueJourney={dropOff ? () => router.push(dropOff.route) : undefined}
+            onBuyNew={() => router.push(selectedLob.route)}
+            onManagePolicy={() => {
+              const routes: Record<string, string> = {
+                health: '/health?screen=dashboard', car: '/motor?vehicle=car&screen=dashboard',
+                bike: '/motor?vehicle=bike&screen=dashboard', life: '/life?screen=dashboard',
+              };
+              router.push(routes[selectedLob.id] || selectedLob.route);
+            }}
+            onBack={() => { setSelectedLob(null); setScreen('home'); }}
+          />
+        );
+      })()}
     </AnimatePresence>
   );
 }

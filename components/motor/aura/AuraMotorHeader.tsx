@@ -40,7 +40,7 @@ export default function AuraMotorHeader() {
 
   const handleViewPolicy = useCallback(() => {
     setShowMenu(false);
-    router.push(`/motor?vehicle=${lobKey}&screen=dashboard`);
+    router.push(`/?lob=${lobKey}`);
   }, [router, lobKey]);
 
   const handleGoHome = useCallback(() => {

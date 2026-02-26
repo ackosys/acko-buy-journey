@@ -67,8 +67,8 @@ export default function LifeEntryScreen({
               <line x1="12" y1="2" x2="12" y2="4" strokeLinecap="round" />
             </svg>
           ),
-          title: t.lifeScripts.pathDirect,
-          subtitle: t.lifeScripts.pathDirectSub,
+          title: 'Buy pure term life insurance',
+          subtitle: 'Get covered in under 5 minutes',
         },
       ],
     },

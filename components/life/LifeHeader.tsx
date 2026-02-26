@@ -94,15 +94,8 @@ export default function LifeHeader() {
 
   const handleViewPolicy = useCallback(() => {
     setShowMenu(false);
-    updateState({
-      currentStepId: 'life_db.welcome',
-      conversationHistory: [],
-      stepHistory: ['life_db.welcome'],
-      currentModule: 'dashboard' as LifeJourneyState['currentModule'],
-      journeyComplete: true,
-      paymentComplete: true,
-    } as any);
-  }, [updateState]);
+    router.push('/?lob=life');
+  }, [router]);
 
   return (
     <header className="sticky top-0 z-30" style={{ background: 'var(--app-header-bg)', borderBottom: '1px solid var(--app-border)' }}>
