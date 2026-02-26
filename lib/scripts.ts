@@ -438,10 +438,17 @@ const familyWhoToCover: ConversationStep = {
       ],
     };
   },
-  processResponse: (response) => ({
-    coverageFor: response,
-    buyingForParents: (response.includes('father') || response.includes('mother')) && !response.includes('self'),
-  }),
+  processResponse: (response: string[]) => {
+    // Decode children count encoded as 'children:N'
+    const childrenEntry = response.find((r: string) => r.startsWith('children'));
+    const numChildren = childrenEntry?.includes(':') ? parseInt(childrenEntry.split(':')[1]) || 1 : childrenEntry ? 1 : 0;
+    const coverageFor = response.map((r: string) => r.startsWith('children:') ? 'children' : r);
+    return {
+      coverageFor,
+      numChildren,
+      buyingForParents: (coverageFor.includes('father') || coverageFor.includes('mother')) && !coverageFor.includes('self'),
+    };
+  },
   getNextStep: () => 'family.cover_ack',
 };
 

@@ -181,6 +181,7 @@ export interface JourneyState {
 
   /* ── Family ── */
   coverageFor: string[];
+  numChildren: number;
   members: FamilyMember[];
   hasMinor: boolean;
   hasSenior: boolean;
@@ -300,6 +301,7 @@ export const INITIAL_STATE: JourneyState = {
   resolvedPersona: 'first_timer',
   intent: null,
   coverageFor: [],
+  numChildren: 0,
   members: [],
   hasMinor: false,
   hasSenior: false,

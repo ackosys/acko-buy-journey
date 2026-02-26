@@ -185,22 +185,91 @@ export function SelectionCards({ options, onSelect }: { options: Option[]; onSel
 export function MultiSelect({ options, onSelect }: { options: Option[]; onSelect: (ids: string[]) => void }) {
   const t = useT();
   const [selected, setSelected] = useState<string[]>([]);
+  const [showChildrenPicker, setShowChildrenPicker] = useState(false);
+  const [numChildren, setNumChildren] = useState<number | null>(null);
+  // ≤6 options with icons → 2-col icon grid (family member style)
+  // >6 options → 3-col compact grid (motor car-selection style)
   const useGrid = options.length <= 6 && options.every(o => o.icon);
+  const use3ColGrid = options.length > 6;
+  const hasChildrenOption = options.some(o => o.id === 'children');
 
   const toggle = (id: string) => {
     if (id === 'none') { setSelected(['none']); return; }
+    if (id === 'children' && hasChildrenOption) {
+      const isCurrentlySelected = selected.some(s => s.startsWith('children'));
+      if (isCurrentlySelected) {
+        // Deselect: remove children entry and collapse picker
+        setSelected(prev => prev.filter(s => !s.startsWith('children')));
+        setNumChildren(null);
+        setShowChildrenPicker(false);
+      } else {
+        // Select: mark as selected (pending count) and expand picker
+        setSelected(prev => [...prev.filter(s => s !== 'none' && !s.startsWith('children')), 'children']);
+        setShowChildrenPicker(true);
+      }
+      return;
+    }
     setSelected(prev => {
       const without = prev.filter(s => s !== 'none');
       return without.includes(id) ? without.filter(s => s !== id) : [...without, id];
     });
   };
 
+  const confirmChildren = (count: number) => {
+    setNumChildren(count);
+    setShowChildrenPicker(false);
+    // Replace placeholder 'children' with encoded 'children:N'
+    setSelected(prev => [...prev.filter(s => !s.startsWith('children')), `children:${count}`]);
+  };
+
+  // True whether we have a placeholder 'children' (picker open) or a confirmed 'children:N'
+  const isChildrenSelected = selected.some(s => s === 'children' || s.startsWith('children:'));
+
   return (
     <div className="max-w-md">
-      <div className={useGrid ? 'grid grid-cols-2 gap-2.5' : 'grid grid-cols-2 gap-2'}>
+      <div className={use3ColGrid ? 'grid grid-cols-3 gap-2' : useGrid ? 'grid grid-cols-2 gap-2.5' : 'grid grid-cols-2 gap-2'}>
         {options.map((opt, i) => {
           const diseaseIcon = getDiseaseIcon(opt.id);
-          const isSelected = selected.includes(opt.id);
+          const isSelected = opt.id === 'children' ? isChildrenSelected : selected.includes(opt.id);
+
+          if (use3ColGrid) {
+            return (
+              <motion.button
+                key={opt.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.025 }}
+                onClick={() => toggle(opt.id)}
+                className={`
+                  relative flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border transition-all duration-150 active:scale-[0.95]
+                  ${isSelected ? 'border-purple-400' : 'border-white/10'}
+                `}
+                style={{ background: isSelected ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.05)' }}
+              >
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isSelected ? 'bg-purple-500/30' : 'bg-white/8'}`}>
+                  {diseaseIcon
+                    ? <div className="text-purple-300">{diseaseIcon}</div>
+                    : opt.icon
+                      ? <OptionIcon icon={opt.icon} className="w-5 h-5 !text-purple-300" />
+                      : <svg className="w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                  }
+                </div>
+                <span className="text-[11px] font-medium text-center leading-tight text-white/90">{opt.label}</span>
+                {isSelected && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center"
+                  >
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </motion.div>
+                )}
+              </motion.button>
+            );
+          }
+
           return (
             <motion.button
               key={opt.id}
@@ -228,6 +297,9 @@ export function MultiSelect({ options, onSelect }: { options: Option[]; onSelect
                 </div>
               )}
               <span className="text-body-sm text-white/90 font-medium">{opt.label}</span>
+              {opt.id === 'children' && isChildrenSelected && numChildren ? (
+                <span className="text-[11px] text-purple-300 mt-0.5">{numChildren} {numChildren === 1 ? 'child' : 'children'}</span>
+              ) : null}
               {isSelected && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-auto w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -237,9 +309,47 @@ export function MultiSelect({ options, onSelect }: { options: Option[]; onSelect
           );
         })}
       </div>
+
+      {/* Inline children count picker — slides in below the grid, no overlay */}
+      <AnimatePresence>
+        {showChildrenPicker && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-4 pb-1">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-[14px] font-semibold text-white">How many children?</p>
+                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--app-text-muted, rgba(255,255,255,0.45))' }}>Each one will be covered</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2.5">
+                {[1, 2, 3, 4].map(count => (
+                  <motion.button
+                    key={count}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: count * 0.04 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => confirmChildren(count)}
+                    className="py-3.5 rounded-xl text-[20px] font-bold transition-all border border-white/10 bg-white/6 hover:bg-white/12 text-white"
+                  >
+                    {count}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <button
         onClick={() => selected.length > 0 && onSelect(selected)}
-        disabled={selected.length === 0}
+        disabled={selected.length === 0 || showChildrenPicker}
         className="mt-4 w-full py-3 bg-purple-700 text-white hover:bg-purple-600 rounded-xl text-label-lg font-semibold disabled:opacity-40 transition-all active:scale-[0.97]"
       >
         {t.common.continue}
@@ -1408,20 +1518,31 @@ const RELATION_LABEL_KEYS: Record<string, string> = {
 export function DobCollectionWidget({ onConfirm }: { onConfirm: (response: string) => void }) {
   const t = useT();
   const members = useJourneyStore(s => s.members);
+  const userName = useJourneyStore(s => s.userName);
   const updateState = useJourneyStore(s => s.updateState);
+
   const [dobs, setDobs] = useState<Record<string, { day: string; month: string; year: string }>>(() => {
     const initial: Record<string, { day: string; month: string; year: string }> = {};
     members.forEach(m => {
-      // Pre-fill year from age
       const estimatedYear = m.age ? String(new Date().getFullYear() - m.age) : '';
       initial[m.id] = { day: '01', month: '01', year: estimatedYear };
     });
     return initial;
   });
 
+  const [names, setNames] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    members.forEach(m => {
+      // Pre-fill with existing name; for 'self' also try the journey userName
+      initial[m.id] = m.name && m.name !== 'You' ? m.name : (m.relation === 'self' && userName ? userName : '');
+    });
+    return initial;
+  });
+
   const allFilled = members.every(m => {
     const d = dobs[m.id];
-    return d && d.day && d.month && d.year && d.day.length <= 2 && d.month.length <= 2 && d.year.length === 4;
+    const n = (names[m.id] || '').trim();
+    return n.length > 0 && d && d.day && d.month && d.year && d.day.length <= 2 && d.month.length <= 2 && d.year.length === 4;
   });
 
   const handleSubmit = () => {
@@ -1429,16 +1550,22 @@ export function DobCollectionWidget({ onConfirm }: { onConfirm: (response: strin
     const updatedMembers = members.map(m => {
       const d = dobs[m.id];
       const dobStr = `${d.day.padStart(2, '0')}/${d.month.padStart(2, '0')}/${d.year}`;
-      // Recalculate age from DOB
       const birthDate = new Date(parseInt(d.year), parseInt(d.month) - 1, parseInt(d.day));
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-      return { ...m, dob: dobStr, age };
+      return { ...m, name: (names[m.id] || '').trim() || m.name, dob: dobStr, age };
     });
     updateState({ members: updatedMembers });
     onConfirm('dob_submitted');
+  };
+
+  const relationLabel = (member: { relation: string }) => {
+    const key = RELATION_LABEL_KEYS[member.relation];
+    if (!key) return member.relation;
+    const val = (t.widgets as Record<string, unknown>)[key];
+    return typeof val === 'string' ? val : member.relation;
   };
 
   return (
@@ -1453,15 +1580,34 @@ export function DobCollectionWidget({ onConfirm }: { onConfirm: (response: strin
 
         {members.map(member => {
           const d = dobs[member.id] || { day: '', month: '', year: '' };
+          const n = names[member.id] ?? '';
+          const label = relationLabel(member);
           return (
-            <div key={member.id} className="border border-onyx-100 rounded-xl p-4 bg-onyx-50/30">
-              <div className="flex items-center gap-2 mb-3">
-                <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+            <div key={member.id} className="border border-onyx-100 rounded-xl p-4 bg-onyx-50/30 space-y-3">
+              {/* Relation label + estimated age */}
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-purple-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
-                <span className="text-label-sm font-semibold text-onyx-700">{(() => { const key = RELATION_LABEL_KEYS[member.relation]; if (!key) return member.relation; const val = (t.widgets as Record<string, unknown>)[key]; return typeof val === 'string' ? val : member.relation; })()}</span>
+                <span className="text-label-sm font-semibold text-onyx-700">{label}</span>
                 {member.age > 0 && <span className="text-body-xs text-onyx-400 ml-auto">~{member.age} yrs</span>}
               </div>
+
+              {/* Name field */}
+              <div>
+                <label className="text-body-xs text-onyx-500 mb-1 block">
+                  Full name{member.relation === 'self' ? ' (yours)' : ` (${label.toLowerCase()})`}
+                </label>
+                <input
+                  type="text"
+                  placeholder={member.relation === 'self' ? 'Your full name' : `${label}'s full name`}
+                  value={n}
+                  onChange={e => setNames(prev => ({ ...prev, [member.id]: e.target.value }))}
+                  className="w-full px-3 py-2.5 border border-onyx-200 rounded-lg text-body-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                />
+              </div>
+
+              {/* DOB row */}
               <div className="flex gap-2">
                 <div className="flex-1">
                   <label className="text-body-xs text-onyx-500 mb-1 block">{t.widgets.day}</label>
