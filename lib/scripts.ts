@@ -1,6 +1,7 @@
 import { ConversationStep, PersonaType, JourneyState, StepScript, Option } from './types';
 import { getConditionsList, getSiOptions, formatSI } from './plans';
 import { getT } from './translations';
+import { useUserProfileStore } from './userProfileStore';
 
 /* ═══════════════════════════════════════════════════════════════════
    ACKO Health Insurance — Persona-Driven Conversation Scripts
@@ -47,29 +48,30 @@ const entryWelcome: ConversationStep = {
   getScript: (persona, state) => {
     const t = getT(state.language);
     const name = state.userName || 'Rahul';
-    // If coming from "Check my gaps" on landing page
-    if (state.intent === 'check_gaps') {
-      return {
-        botMessages: [t.scripts.welcomeGapCheck],
-      };
+
+    // Cross-LOB personalized greeting
+    const crossLobGreeting = useUserProfileStore.getState().getCrossLobGreeting('health');
+    if (crossLobGreeting) {
+      return { botMessages: [crossLobGreeting] };
     }
-    // If coming from "Switch" on landing page
+
+    if (state.intent === 'check_gaps') {
+      return { botMessages: [t.scripts.welcomeGapCheck] };
+    }
     if (state.intent === 'switch') {
-      return {
-        botMessages: [t.scripts.welcomeSwitch],
-      };
+      return { botMessages: [t.scripts.welcomeSwitch] };
     }
     if (state.isExistingAckoUser) {
-      return {
-        botMessages: [t.scripts.welcomeExisting(name)],
-      };
+      return { botMessages: [t.scripts.welcomeExisting(name)] };
     }
-    return {
-      botMessages: [t.scripts.welcomeNew],
-    };
+    return { botMessages: [t.scripts.welcomeNew] };
   },
   processResponse: () => ({}),
-  getNextStep: (_, state) => state.isExistingAckoUser ? 'intent.readiness' : 'entry.ask_name',
+  getNextStep: (_, state) => {
+    const hasCrossLob = useUserProfileStore.getState().getOtherActiveLobs('health').length > 0;
+    if (hasCrossLob) return 'entry.ask_name';
+    return state.isExistingAckoUser ? 'intent.readiness' : 'entry.ask_name';
+  },
 };
 
 const entryAskName: ConversationStep = {

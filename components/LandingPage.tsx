@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import AckoLogo from './AckoLogo';
+import Link from 'next/link';
 import { useT } from '../lib/translations';
 import { assetPath } from '../lib/assetPath';
 
@@ -127,7 +128,9 @@ export default function LandingPage({ onGetStarted, onChat, onCall, isExistingUs
       {/* Top bar with chat/call */}
       <div className="sticky top-0 z-20 border-b border-white/10" style={{ background: 'var(--app-glass-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <AckoLogo variant="full-white" className="h-6" />
+          <Link href="/">
+            <AckoLogo variant="full-white" className="h-6" />
+          </Link>
           <div className="flex items-center gap-2">
             <button
               onClick={onChat}

@@ -4,6 +4,7 @@ import { useJourneyStore } from '../lib/store';
 import { getDashboardStep } from '../lib/dashboardScripts';
 import ConversationalFlow from './ConversationalFlow';
 import AckoLogo from './AckoLogo';
+import Link from 'next/link';
 import { useT } from '../lib/translations';
 
 /* ═══════════════════════════════════════════════════════
@@ -19,7 +20,9 @@ export default function Dashboard({ onTalkToExpert }: { onTalkToExpert?: (contex
   const header = (
     <div className="border-b border-white/10 px-5 py-3 flex items-center justify-between shrink-0">
       <div className="flex items-center gap-3">
-        <AckoLogo variant="full-white" className="h-5" />
+        <Link href="/">
+          <AckoLogo variant="full-white" className="h-5" />
+        </Link>
         <span className="text-label-sm text-white/60">{t.dashboard.title}</span>
       </div>
       <div className="flex items-center gap-1.5">

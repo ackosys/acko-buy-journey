@@ -87,14 +87,32 @@ function HealthJourneyInner() {
   const [hydrated, setHydrated] = useState(false);
   const searchParams = useSearchParams();
 
+  const seedDemoState = () => {
+    updateState({
+      userName: 'Rahul', paymentComplete: true,
+      members: [
+        { id: 'self-1', name: 'Rahul', age: 32, relation: 'self' as const, conditions: [] },
+        { id: 'spouse-1', name: 'Priya', age: 29, relation: 'spouse' as const, conditions: [] },
+      ],
+      hasConditions: false,
+      selectedPlan: { name: 'ACKO Platinum', tier: 'platinum' as const, tagline: 'Complete coverage for your family', sumInsured: 2500000, sumInsuredLabel: '₹25L', monthlyPremium: 1249, yearlyPremium: 12999, features: ['Unlimited restoration', 'No room rent cap', 'Day 1 coverage'], exclusions: [], waitingPeriod: '30 days', healthEval: 'TeleMER', recommended: true },
+      paymentFrequency: 'yearly' as const,
+    });
+  };
+
   useEffect(() => {
     const resume = searchParams.get('resume') === '1';
     const snap = resume ? loadSnapshot('health') : null;
 
     resetJourney();
 
-    if (snap) {
-      // Restore saved state fields and jump directly to chat
+    const screenParam = searchParams.get('screen');
+
+    if (screenParam === 'dashboard') {
+      seedDemoState();
+      setScreen('dashboard');
+      setShowWelcome(false);
+    } else if (snap) {
       updateState({
         userName: snap.userName ?? '',
         members: (snap.members ?? []).map((m, i) => ({
@@ -136,19 +154,6 @@ function HealthJourneyInner() {
   const openExpertPanel = (module?: string) => {
     if (module) updateState({ currentModule: module as never });
     updateState({ showExpertPanel: true });
-  };
-
-  const seedDemoState = () => {
-    updateState({
-      userName: 'Rahul', paymentComplete: true,
-      members: [
-        { id: 'self-1', name: 'Rahul', age: 32, relation: 'self' as const, conditions: [] },
-        { id: 'spouse-1', name: 'Priya', age: 29, relation: 'spouse' as const, conditions: [] },
-      ],
-      hasConditions: false,
-      selectedPlan: { name: 'ACKO Platinum', tier: 'platinum' as const, tagline: 'Complete coverage for your family', sumInsured: 2500000, sumInsuredLabel: '₹25L', monthlyPremium: 1249, yearlyPremium: 12999, features: ['Unlimited restoration', 'No room rent cap', 'Day 1 coverage'], exclusions: [], waitingPeriod: '30 days', healthEval: 'TeleMER', recommended: true },
-      paymentFrequency: 'yearly' as const,
-    });
   };
 
   const [postPaymentInitialPhase, setPostPaymentInitialPhase] = useState<'voice_call' | 'scenario_select' | undefined>(undefined);
