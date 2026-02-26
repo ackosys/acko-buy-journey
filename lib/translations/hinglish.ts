@@ -664,9 +664,9 @@ export const hinglish: T = {
 
   scripts: {
     welcomeExisting: (name: string) => `Welcome back, ${name}! Aap apni car ke liye hum pe trust karte hain — ab aapki health bhi cover karte hain.\n\nIse form nahi, baat-cheet samjhiye. Best plan dhoondhne ke liye kuch sawaal poochunga.`,
-    welcomeNew: `Hi there! Main Maya hoon, aapki ACKO health insurance guide.\n\nMain ek simple baat-cheet ke zariye aapke liye sahi health plan dhoondhne mein madad karungi. Har sawaal ka ek maqsad hai — main bataungi kyun, taaki koi surprise na ho.\n\nKoi jargon nahi, koi pressure nahi — sirf honest recommendations.`,
-    welcomeGapCheck: `Hi there! Main Maya hoon, aapki ACKO health insurance guide.\n\nAap jaanna chahte hain ki aapka current coverage kaafi hai ya nahi. Bohot achha sawaal — zyada log tab jaante hain ki unka cover kam hai jab bohot late ho jaata hai.\n\nChaliye aapke gaps samajhte hain. Pehle apna naam bataiye.`,
-    welcomeSwitch: `Hi there! Main Maya hoon, aapki ACKO health insurance guide.\n\nACKO pe switch karna chahte hain? Smart move. Main aapka current plan ACKO se compare karne mein madad karungi — waiting period credits aur no-claim bonus safe rahenge.\n\nPehle apna naam bataiye.`,
+    welcomeNew: `Hi! 👋\n\nMain aapko ek simple baat-cheet ke zariye sahi health plan dhoondhne mein madad karunga. Har sawaal ka ek maqsad hai — koi jargon nahi, koi pressure nahi.\n\nSirf honest recommendations.`,
+    welcomeGapCheck: `Hi! 👋\n\nAapka current coverage kaafi hai ya nahi — chaliye check karte hain. Zyada log tab jaante hain ki unka cover kam hai jab bahut late ho jaata hai.\n\nPehle apna naam bataiye.`,
+    welcomeSwitch: `Hi! 👋\n\nACKO pe switch karna chahte hain? Main aapka current plan ACKO se compare karne mein madad karunga — waiting period credits aur no-claim bonus safe rahenge.\n\nPehle apna naam bataiye.`,
     askName: 'Shuru karne se pehle, main aapko kya bulaun?',
     namePlaceholder: 'Aapka first name',
     nameAck: (name: string) => `${name}, aapse milke achha laga! Chaliye aapke liye sahi health cover dhoondhte hain.`,

@@ -724,9 +724,9 @@ export const en = {
   scripts: {
     // Entry
     welcomeExisting: (name: string) => `Welcome back, ${name}! You trust us with your car — now let's make sure your health is covered too.\n\nThink of this as a conversation, not a form. I'll ask you a few things to find the best plan for your family.`,
-    welcomeNew: `Hi there! I'm Maya, your ACKO health insurance guide.\n\nI'm going to help you find the right health plan through a simple conversation. Every question I ask has a purpose — I'll tell you why, so there are no surprises.\n\nNo jargon, no pressure — just honest recommendations.`,
-    welcomeGapCheck: `Hi there! I'm Maya, your ACKO health insurance guide.\n\nI see you want to check if your current coverage is enough. Great question — most people find out they're underinsured only when it's too late.\n\nLet me help you understand your gaps. First, let me know your name.`,
-    welcomeSwitch: `Hi there! I'm Maya, your ACKO health insurance guide.\n\nLooking to switch to ACKO? Smart move. I'll help you compare what you currently have with what ACKO offers — including preserving your waiting period credits and no-claim bonus.\n\nFirst, let me know your name.`,
+    welcomeNew: `Hi! 👋\n\nI'll help you find the right health plan through a simple conversation. Every question has a purpose — no jargon, no pressure.\n\nJust honest recommendations.`,
+    welcomeGapCheck: `Hi! 👋\n\nLet's check if your current coverage is truly enough. Most people find out they're underinsured only when it's too late.\n\nFirst, let me know your name.`,
+    welcomeSwitch: `Hi! 👋\n\nLooking to switch to ACKO? I'll help you compare what you currently have with what ACKO offers — including preserving your waiting period credits and no-claim bonus.\n\nFirst, let me know your name.`,
     askName: 'Before we begin, what should I call you?',
     namePlaceholder: 'Your first name',
     nameAck: (name: string) => `Nice to meet you, ${name}! Let's find the right health cover for you.`,
