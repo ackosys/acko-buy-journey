@@ -5,12 +5,12 @@ export type AppTheme = 'midnight' | 'dark' | 'light';
 const STORAGE_KEY = 'acko_app_theme';
 
 function loadPersistedTheme(): AppTheme {
-  if (typeof window === 'undefined') return 'midnight';
+  if (typeof window === 'undefined') return 'dark';
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'midnight' || saved === 'dark' || saved === 'light') return saved;
   } catch { /* noop */ }
-  return 'midnight';
+  return 'dark';
 }
 
 interface ThemeStore {
@@ -22,7 +22,7 @@ interface ThemeStore {
 const THEMES: AppTheme[] = ['midnight', 'dark', 'light'];
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
-  theme: 'midnight',
+  theme: 'dark',
   setTheme: (theme) => {
     set({ theme });
     if (typeof window !== 'undefined') {
