@@ -879,14 +879,20 @@ const FUEL_VARIANTS: Record<string, string[]> = {
 const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'CNG'];
 
 export function VariantSelector({ onSelect }: { onSelect: (variant: string) => void }) {
-  const state = useMotorStore.getState() as MotorJourneyState;
-  const existingFuel = state.vehicleData.fuelType;
+  const vehicleType = useMotorStore((s) => s.vehicleType);
+  const vehicleData = useMotorStore((s) => s.vehicleData);
+  const existingFuel = vehicleData.fuelType;
+  const existingVariant = vehicleData.variant;
   const [activeFuel, setActiveFuel] = useState<string>(existingFuel || 'Petrol');
-  const [selected, setSelected] = useState<string | null>(null);
-  const isBike = state.vehicleType === 'bike';
+  const isBike = vehicleType === 'bike';
 
   const fuelTypes = isBike ? ['Petrol', 'Electric'] : FUEL_TYPES;
   const variants = FUEL_VARIANTS[activeFuel] || FUEL_VARIANTS['Petrol'];
+
+  // Pre-select the previously chosen variant if it exists in the current fuel list
+  const [selected, setSelected] = useState<string | null>(
+    existingVariant && variants.includes(existingVariant) ? existingVariant : null
+  );
 
   const handleSelect = (variant: string) => {
     setSelected(variant);
@@ -899,7 +905,12 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
         {fuelTypes.map(fuel => (
           <button
             key={fuel}
-            onClick={() => { setActiveFuel(fuel); setSelected(null); }}
+            onClick={() => {
+              setActiveFuel(fuel);
+              // Re-apply pre-selection if the existing variant exists in the new fuel list
+              const newVariants = FUEL_VARIANTS[fuel] || [];
+              setSelected(existingVariant && newVariants.includes(existingVariant) ? existingVariant : null);
+            }}
             className="flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all"
             style={activeFuel === fuel
               ? { background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }
