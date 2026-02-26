@@ -897,7 +897,7 @@ export function VariantSelector({ onSelect }: { onSelect: (variant: string) => v
         ))}
       </div>
       {!selected && (
-        <p className="text-[11px] text-[var(--aura-text-subtle)] mb-2 px-1">Select your {state.vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
+        <p className="text-[11px] text-[var(--aura-text-subtle)] mb-2 px-1">Select your {vehicleData.model || 'car'}&apos;s fuel type to see variants</p>
       )}
       <div className="space-y-1">
         {variants.map((variant, i) => (

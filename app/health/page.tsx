@@ -16,6 +16,7 @@ import PostPaymentJourney from '../../components/PostPaymentJourney';
 import Dashboard from '../../components/Dashboard';
 import AckoLogo from '../../components/AckoLogo';
 import { useT } from '../../lib/translations';
+import type { PostPaymentScenario } from '../../lib/types';
 
 type Screen = 'entry' | 'landing' | 'chat' | 'post_payment' | 'dashboard';
 
@@ -152,7 +153,7 @@ function HealthJourneyInner() {
         ...(snap.testScheduledDate ? { testScheduledDate: snap.testScheduledDate } : {}),
         ...(snap.testScheduledLab ? { testScheduledLab: snap.testScheduledLab } : {}),
         ...(snap.callScheduledDate ? { callScheduledDate: snap.callScheduledDate } : {}),
-        ...(snap.postPaymentScenario ? { postPaymentScenario: snap.postPaymentScenario } : {}),
+        ...(snap.postPaymentScenario ? { postPaymentScenario: snap.postPaymentScenario as PostPaymentScenario } : {}),
       });
       if (snap.paymentComplete) {
         if (snap.currentStepId === 'completion.celebration') {
