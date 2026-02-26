@@ -107,7 +107,7 @@ export default function ChatContainer() {
       updateState({ isTyping: true });
 
       const mergedContent = script.botMessages.join('\n\n');
-      const delay = 400 + Math.min(mergedContent.length * 8, 1800);
+      const delay = 600 + Math.min(mergedContent.length * 12, 2000);
       await new Promise(r => setTimeout(r, delay));
 
       addMessage({
