@@ -555,7 +555,33 @@ function GlobalHomepageInner() {
     const lobKey = lob.id as PolicyLob;
     const ps = useUserProfileStore.getState();
 
-    if (ps.hasActivePolicyInLob(lobKey)) {
+    const policyActive = ps.hasActivePolicyInLob(lobKey);
+    const snapshotActive = override && override.urgency === 'low';
+
+    if (policyActive || snapshotActive) {
+      if (snapshotActive && !policyActive) {
+        const snap = loadSnapshot(LOB_TO_PRODUCT[lobKey]);
+        if (snap) {
+          ps.setProfile({ firstName: snap.name || snap.userName || 'Rahul', isLoggedIn: true });
+          if (!ps.policies.some(p => p.lob === lobKey && p.active)) {
+            const detailParts = [
+              snap.vehicleData?.model || snap.vehicleData?.make,
+              snap.registrationNumber?.toUpperCase(),
+            ].filter(Boolean);
+            ps.addPolicy({
+              id: `${lobKey}_snap_${Date.now()}`,
+              lob: lobKey,
+              policyNumber: `ACKO-M-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+              label: `${snap.selectedPlanType === 'zero_dep' ? 'Zero Dep' : snap.selectedPlanType === 'third_party' ? 'Third Party' : 'Comprehensive'} ${LOB_LABEL_MAP[lobKey] || lobKey}`,
+              active: true,
+              purchasedAt: snap.savedAt || new Date().toISOString(),
+              premium: snap.totalPremium || 0,
+              premiumFrequency: 'yearly',
+              details: detailParts.length ? detailParts.join(' · ') : undefined,
+            });
+          }
+        }
+      }
       setSelectedLob(lob);
       setScreen('policy_action');
       return;
