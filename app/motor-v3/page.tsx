@@ -214,7 +214,13 @@ function MotorV3JourneyInner() {
         'addons.out_of_pocket': 'addons',
         'review.premium_breakdown': 'review',
       };
-      updateState({ vehicleType, currentStepId: stepId, currentModule: moduleMap[stepId] || 'vehicle_type' } as Partial<MotorJourneyState>);
+      const isBrandNewEntry = stepId === 'manual_entry.congratulations';
+      updateState({
+        vehicleType,
+        currentStepId: stepId,
+        currentModule: moduleMap[stepId] || 'vehicle_type',
+        ...(isBrandNewEntry ? { vehicleEntryType: 'brand_new' } : {}),
+      } as Partial<MotorJourneyState>);
     }
     setScreen('chat');
   };
