@@ -64,31 +64,6 @@ const NEW_LOB_LABELS: Record<PolicyLob, string> = {
   life: 'Life',
 };
 
-const DEMO_POLICIES: UserPolicy[] = [
-  {
-    id: 'demo_health_1',
-    lob: 'health',
-    policyNumber: 'ACKO-H-2025-78432',
-    label: 'Platinum Health Plan',
-    active: true,
-    purchasedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-    premium: 890,
-    premiumFrequency: 'monthly',
-    details: '₹10L cover · 2 members',
-  },
-  {
-    id: 'demo_car_1',
-    lob: 'car',
-    policyNumber: 'ACKO-M-2025-56210',
-    label: 'Comprehensive Car Insurance',
-    active: true,
-    purchasedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-    premium: 12500,
-    premiumFrequency: 'yearly',
-    details: 'Hyundai Venue · KA01AB1234',
-  },
-];
-
 const INITIAL_PROFILE: UserProfile = {
   firstName: '',
   phone: '',

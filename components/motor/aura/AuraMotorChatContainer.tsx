@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMotorStore } from '../../../lib/motor/store';
 import { getMotorStep } from '../../../lib/motor/scripts';
 import { MotorJourneyState } from '../../../lib/motor/types';
+import { saveSnapshot, MOTOR_SAVE_STEPS } from '../../../lib/journeyPersist';
 import AuraChatMessage, { AuraTypingIndicator } from './AuraChatMessage';
 import { ChatMessage as ChatMessageType } from '@/lib/types';
 import {
@@ -131,6 +132,29 @@ export default function AuraMotorChatContainer() {
       scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }, 100);
   }, [conversationHistory, isTyping, showWidget]);
+
+  useEffect(() => {
+    if (!MOTOR_SAVE_STEPS.has(currentStepId)) return;
+    const s = useMotorStore.getState();
+    saveSnapshot({
+      product: s.vehicleType ?? 'car',
+      currentStepId,
+      savedAt: new Date().toISOString(),
+      vehicleType: s.vehicleType,
+      vehicleData: {
+        make: s.vehicleData.make,
+        model: s.vehicleData.model,
+        variant: s.vehicleData.variant,
+        fuelType: s.vehicleData.fuelType,
+        registrationYear: s.vehicleData.registrationYear,
+      },
+      registrationNumber: s.registrationNumber,
+      totalPremium: s.totalPremium,
+      selectedPlanType: s.selectedPlanType,
+      ownerName: s.ownerName,
+      paymentComplete: s.paymentComplete,
+    });
+  }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const step = getMotorStep(currentStepId);

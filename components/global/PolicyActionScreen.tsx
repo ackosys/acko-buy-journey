@@ -10,6 +10,14 @@ export interface PolicyStatusInfo {
   urgency: 'high' | 'medium' | 'low';
 }
 
+export interface DropOffInfo {
+  badge: string;
+  title: string;
+  subtitle: string;
+  urgency: 'high' | 'medium' | 'low';
+  route: string;
+}
+
 interface PolicyActionScreenProps {
   lobId: string;
   lobLabel: string;
@@ -17,6 +25,8 @@ interface PolicyActionScreenProps {
   onManagePolicy: (policy: UserPolicy) => void;
   onBack: () => void;
   statusInfo?: PolicyStatusInfo | null;
+  dropOffInfo?: DropOffInfo | null;
+  onContinueJourney?: () => void;
 }
 
 const LOB_ICONS: Record<string, React.ReactNode> = {
@@ -55,11 +65,12 @@ const STATUS_COLORS: Record<string, { bg: string; bgLight: string; text: string;
   low: { bg: 'rgba(52,211,153,0.12)', bgLight: '#D1FAE5', text: '#34d399', textLight: '#065F46' },
 };
 
-export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManagePolicy, onBack, statusInfo }: PolicyActionScreenProps) {
+export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManagePolicy, onBack, statusInfo, dropOffInfo, onContinueJourney }: PolicyActionScreenProps) {
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
   const existingPolicies = useUserProfileStore((s) => s.getActivePoliciesForLob(lobId as PolicyLob));
   const firstName = useUserProfileStore((s) => s.firstName);
+  const hasInProgressJourney = !!dropOffInfo && dropOffInfo.urgency !== 'low';
 
   return (
     <motion.div
@@ -115,8 +126,8 @@ export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManage
           </p>
         </motion.div>
 
-        {/* Existing policies */}
-        <div className="space-y-3 mb-6">
+        {/* All cards */}
+        <div className="space-y-3">
           {existingPolicies.map((policy, i) => (
             <motion.button
               key={policy.id}
@@ -196,47 +207,97 @@ export default function PolicyActionScreen({ lobId, lobLabel, onBuyNew, onManage
               )}
             </motion.button>
           ))}
-        </div>
 
-        {/* Buy new policy */}
-        <motion.button
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 + existingPolicies.length * 0.06 }}
-          onClick={onBuyNew}
-          className="w-full text-left rounded-2xl p-4 transition-all active:scale-[0.98]"
-          style={{
-            background: isLight
-              ? 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)'
-              : 'linear-gradient(135deg, rgba(124,58,237,0.2) 0%, rgba(168,85,247,0.15) 100%)',
-            border: `1px solid ${isLight ? 'transparent' : 'rgba(168,85,247,0.3)'}`,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                background: isLight ? 'rgba(255,255,255,0.2)' : 'rgba(168,85,247,0.2)',
-                color: isLight ? '#FFFFFF' : '#C4B5FD',
-              }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          {/* In-progress journey card */}
+          {hasInProgressJourney && (
+          <motion.button
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 + existingPolicies.length * 0.06 }}
+            onClick={onContinueJourney || onBuyNew}
+            className="w-full text-left rounded-2xl p-4 transition-all active:scale-[0.98]"
+            style={{
+              background: 'var(--app-surface)',
+              border: `1px solid ${isLight ? 'rgba(251,191,36,0.3)' : 'rgba(251,191,36,0.25)'}`,
+              boxShadow: isLight ? '0 1px 4px rgba(0,0,0,0.04)' : 'none',
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                style={{
+                  background: isLight ? '#FEF3C7' : 'rgba(251,191,36,0.15)',
+                  color: isLight ? '#D97706' : '#FBBF24',
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--app-text)' }}>
+                  {dropOffInfo!.title || `New ${lobLabel} purchase`}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--app-text-muted)' }}>
+                  {dropOffInfo!.subtitle || 'Continue where you left off'}
+                </p>
+              </div>
+              <span
+                className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap self-center"
+                style={{
+                  background: isLight ? '#FEF3C7' : 'rgba(251,191,36,0.15)',
+                  color: isLight ? '#D97706' : '#FBBF24',
+                }}
+              >
+                {dropOffInfo!.badge}
+              </span>
+              <svg className="w-5 h-5 shrink-0 mt-2" style={{ color: 'var(--app-text-subtle)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold" style={{ color: isLight ? '#FFFFFF' : 'var(--app-text)' }}>
-                Buy another {lobLabel} policy
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: isLight ? 'rgba(255,255,255,0.7)' : 'var(--app-text-muted)' }}>
-                Start a new purchase journey
-              </p>
+          </motion.button>
+          )}
+
+          {/* Buy new policy */}
+          <motion.button
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 + existingPolicies.length * 0.06 + (hasInProgressJourney ? 0.06 : 0) }}
+            onClick={onBuyNew}
+            className="w-full text-left rounded-2xl p-4 transition-all active:scale-[0.98]"
+            style={{
+              background: isLight
+                ? 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)'
+                : 'linear-gradient(135deg, rgba(124,58,237,0.2) 0%, rgba(168,85,247,0.15) 100%)',
+              border: `1px solid ${isLight ? 'transparent' : 'rgba(168,85,247,0.3)'}`,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background: isLight ? 'rgba(255,255,255,0.2)' : 'rgba(168,85,247,0.2)',
+                  color: isLight ? '#FFFFFF' : '#C4B5FD',
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: isLight ? '#FFFFFF' : 'var(--app-text)' }}>
+                  Buy another {lobLabel} policy
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: isLight ? 'rgba(255,255,255,0.7)' : 'var(--app-text-muted)' }}>
+                  Start a new purchase journey
+                </p>
+              </div>
+              <svg className="w-5 h-5 shrink-0" style={{ color: isLight ? 'rgba(255,255,255,0.6)' : 'var(--app-text-subtle)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </div>
-            <svg className="w-5 h-5 shrink-0" style={{ color: isLight ? 'rgba(255,255,255,0.6)' : 'var(--app-text-subtle)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </motion.button>
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );

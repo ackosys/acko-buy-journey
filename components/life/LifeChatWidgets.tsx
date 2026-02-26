@@ -673,9 +673,9 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md"
     >
-      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
+      <div className="rounded-2xl overflow-hidden border border-white/10 backdrop-blur-sm bg-gradient-to-br from-white/10 to-white/5">
         {/* Header with premium */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-5">
+        <div className="bg-gradient-to-r from-purple-600/80 to-indigo-700/80 px-5 py-5">
           <p className="text-white/60 text-caption uppercase tracking-wider">Annual Premium</p>
           <p className="text-white text-3xl font-bold mt-1">₹{premium.totalPremium.toLocaleString('en-IN')}<span className="text-lg font-normal text-white/60">/yr</span></p>
           <p className="text-white/50 text-caption mt-1">₹{monthly.toLocaleString('en-IN')}/mo &middot; ₹{daily}/day</p>
@@ -685,8 +685,8 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
           {/* Coverage slider */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-body-sm text-gray-500">Coverage</span>
-              <span className="text-label-md font-bold text-gray-900">{formatCoverage(coverage)}</span>
+              <span className="text-body-sm text-white/60">Coverage</span>
+              <span className="text-label-md font-bold text-white">{formatCoverage(coverage)}</span>
             </div>
             <div className="relative h-6 flex items-center">
               <input
@@ -697,24 +697,24 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
                 value={coverage}
                 onChange={(e) => setCoverage(Number(e.target.value))}
                 style={{
-                  background: `linear-gradient(to right, #9333ea ${getProgress(coverage, minCoverage, maxCoverage)}%, #e5e7eb ${getProgress(coverage, minCoverage, maxCoverage)}%)`
+                  background: `linear-gradient(to right, #a78bfa ${getProgress(coverage, minCoverage, maxCoverage)}%, rgba(255,255,255,0.15) ${getProgress(coverage, minCoverage, maxCoverage)}%)`
                 }}
                 className="absolute w-full h-1.5 rounded-full appearance-none cursor-pointer
-                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-600 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-400 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white/30
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-400 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white/30 [&::-moz-range-thumb]:cursor-pointer"
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-[10px] text-gray-400">{formatCoverage(minCoverage)}</span>
-              <span className="text-[10px] text-gray-400">{formatCoverage(maxCoverage)}</span>
+              <span className="text-[10px] text-white/40">{formatCoverage(minCoverage)}</span>
+              <span className="text-[10px] text-white/40">{formatCoverage(maxCoverage)}</span>
             </div>
           </div>
 
           {/* Tenure slider */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-body-sm text-gray-500">Policy Term</span>
-              <span className="text-label-md font-bold text-gray-900">{term} years <span className="font-normal text-gray-400">(till age {age + term})</span></span>
+              <span className="text-body-sm text-white/60">Policy Term</span>
+              <span className="text-label-md font-bold text-white">{term} years <span className="font-normal text-white/40">(till age {age + term})</span></span>
             </div>
             <div className="relative h-6 flex items-center">
               <input
@@ -725,36 +725,36 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
                 value={term}
                 onChange={(e) => setTerm(Number(e.target.value))}
                 style={{
-                  background: `linear-gradient(to right, #9333ea ${getProgress(term, minTerm, maxTerm)}%, #e5e7eb ${getProgress(term, minTerm, maxTerm)}%)`
+                  background: `linear-gradient(to right, #a78bfa ${getProgress(term, minTerm, maxTerm)}%, rgba(255,255,255,0.15) ${getProgress(term, minTerm, maxTerm)}%)`
                 }}
                 className="absolute w-full h-1.5 rounded-full appearance-none cursor-pointer
-                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-600 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-400 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white/30
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-400 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white/30 [&::-moz-range-thumb]:cursor-pointer"
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-[10px] text-gray-400">{minTerm} yrs</span>
-              <span className="text-[10px] text-gray-400">{maxTerm} yrs</span>
+              <span className="text-[10px] text-white/40">{minTerm} yrs</span>
+              <span className="text-[10px] text-white/40">{maxTerm} yrs</span>
             </div>
           </div>
         </div>
 
         <div className="px-5 pb-2">
-          <div className="bg-purple-50 rounded-xl overflow-hidden border border-purple-100 transition-all duration-300">
+          <div className="bg-white/8 rounded-xl overflow-hidden border border-white/10 transition-all duration-300">
             <button 
               onClick={() => setShowFlexiDetails(!showFlexiDetails)}
               className="w-full text-left p-3.5 flex gap-3"
             >
               <div className="mt-0.5 flex-shrink-0">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={LIFE_ICON_PATHS.flexi} />
                 </svg>
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-label-sm font-bold text-purple-900">ACKO Flexi Benefit included</p>
+                  <p className="text-label-sm font-bold text-white">ACKO Flexi Benefit included</p>
                   <svg 
-                    className={`w-4 h-4 text-purple-500 transition-transform duration-200 ${showFlexiDetails ? 'rotate-180' : ''}`} 
+                    className={`w-4 h-4 text-purple-400 transition-transform duration-200 ${showFlexiDetails ? 'rotate-180' : ''}`} 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -762,7 +762,7 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <p className="text-caption text-purple-700 mt-0.5 leading-snug">
+                <p className="text-caption text-white/50 mt-0.5 leading-snug">
                   You can increase or decrease your coverage anytime later.
                 </p>
               </div>
@@ -776,16 +776,16 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
                   exit={{ height: 0, opacity: 0 }}
                   className="px-3.5 pb-3.5 pt-0"
                 >
-                  <div className="h-px bg-purple-200/50 mb-3" />
-                  <p className="text-caption font-semibold text-purple-900 mb-2">Why Flexi matters:</p>
+                  <div className="h-px bg-white/10 mb-3" />
+                  <p className="text-caption font-semibold text-white/80 mb-2">Why Flexi matters:</p>
                   <ul className="space-y-1.5">
                     {[
                       'Your income grows over time',
                       'Your loans change',
                       'Your family size changes'
                     ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-caption text-purple-800">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 flex-shrink-0" />
+                      <li key={i} className="flex items-start gap-2 text-caption text-white/60">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-purple-400 flex-shrink-0" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -800,7 +800,7 @@ export function LifePremiumSummary({ onContinue }: { onContinue: () => void }) {
         <div className="px-5 pb-5">
           <button
             onClick={handleContinue}
-            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30"
+            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 hover:bg-purple-500"
           >
             Continue with this plan
           </button>
@@ -960,6 +960,9 @@ export function LifeCelebration({ onDashboard, onContinue }: { onDashboard?: () 
     const hasLifePolicy = store.policies.some((p) => p.lob === 'life' && p.active);
     if (!hasLifePolicy) {
       const lifeState = useLifeJourneyStore.getState() as LifeJourneyState;
+      if ((lifeState as any).name) {
+        store.setProfile({ firstName: (lifeState as any).name, isLoggedIn: true });
+      }
       store.addPolicy({
         id: `life_${Date.now()}`,
         lob: 'life',
@@ -1246,26 +1249,26 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md"
     >
-      <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20">
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-5">
+      <div className="rounded-2xl overflow-hidden border border-white/10 backdrop-blur-sm bg-gradient-to-br from-white/10 to-white/5">
+        <div className="bg-gradient-to-r from-purple-600/80 to-indigo-700/80 px-5 py-5">
           <p className="text-white/60 text-caption uppercase tracking-wider">Your Coverage</p>
           <p className="text-white text-2xl font-bold mt-1">{formatAmt(state.selectedCoverage)}</p>
           <p className="text-white/50 text-caption mt-1">{state.selectedTerm} years &middot; till age {state.age + state.selectedTerm}</p>
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          <div className="flex justify-between items-center py-2 border-b border-gray-50">
-            <span className="text-body-sm text-gray-500">Annual Premium</span>
-            <span className="text-label-md font-bold text-gray-900">₹{yearlyPremium.toLocaleString('en-IN')}</span>
+          <div className="flex justify-between items-center py-2 border-b border-white/8">
+            <span className="text-body-sm text-white/50">Annual Premium</span>
+            <span className="text-label-md font-bold text-white">₹{yearlyPremium.toLocaleString('en-IN')}</span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-gray-50">
-            <span className="text-body-sm text-gray-500">Monthly</span>
-            <span className="text-label-md text-gray-700">₹{monthlyPremium.toLocaleString('en-IN')}/mo</span>
+          <div className="flex justify-between items-center py-2 border-b border-white/8">
+            <span className="text-body-sm text-white/50">Monthly</span>
+            <span className="text-label-md text-white/80">₹{monthlyPremium.toLocaleString('en-IN')}/mo</span>
           </div>
           {state.selectedRiders.length > 0 && (
             <div className="flex justify-between items-center py-2">
-              <span className="text-body-sm text-gray-500">Riders</span>
-              <span className="text-body-sm text-gray-600">{state.selectedRiders.map(r => r.name).join(', ')}</span>
+              <span className="text-body-sm text-white/50">Riders</span>
+              <span className="text-body-sm text-white/70">{state.selectedRiders.map(r => r.name).join(', ')}</span>
             </div>
           )}
         </div>
@@ -1274,7 +1277,7 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
           <button
             onClick={handlePay}
             disabled={processing}
-            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 disabled:opacity-70"
+            className="w-full py-3.5 rounded-xl bg-purple-600 text-white text-label-lg font-semibold active:scale-[0.97] transition-transform shadow-lg shadow-purple-600/30 hover:bg-purple-500 disabled:opacity-70"
           >
             {processing ? (
               <span className="flex items-center justify-center gap-2">
@@ -1285,7 +1288,7 @@ export function LifePaymentScreen({ onContinue }: { onContinue: () => void }) {
               `Pay ₹${yearlyPremium.toLocaleString('en-IN')}`
             )}
           </button>
-          <p className="text-[11px] text-gray-400 text-center mt-2">
+          <p className="text-[11px] text-white/30 text-center mt-2">
             Secure payment &middot; 100% refund if not approved
           </p>
         </div>

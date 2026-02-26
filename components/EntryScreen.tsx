@@ -45,20 +45,16 @@ export default function EntryScreen({ onSelect, onJumpToPostPayment, onJumpToDas
             <h2 className="text-white text-lg font-semibold">{t.entry.buyHealth}</h2>
           </div>
           <p className="text-purple-300/80 text-sm mb-4 ml-10">{t.entry.buyHealthSub}</p>
-          <div className="flex gap-3 ml-10">
-            <button onClick={() => onSelect(true)} className="flex-1 group bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-4 text-left transition-all active:scale-[0.97]">
-              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center mb-2.5">
-                <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+          <div className="ml-10">
+            <button onClick={() => onSelect(false)} className="w-full group bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-4 flex items-center gap-3 transition-all active:scale-[0.97] text-left">
+              <div className="w-9 h-9 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
               </div>
-              <h3 className="text-white text-sm font-semibold mb-0.5">{t.entry.ackoCustomer}</h3>
-              <p className="text-purple-300/60 text-xs">{t.entry.ackoCustomerSub}</p>
-            </button>
-            <button onClick={() => onSelect(false)} className="flex-1 group bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-white/30 rounded-xl p-4 text-left transition-all active:scale-[0.97]">
-              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center mb-2.5">
-                <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" /></svg>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white text-sm font-semibold">Buy health policy</h3>
+                <p className="text-purple-300/60 text-xs">Get covered in under 5 minutes</p>
               </div>
-              <h3 className="text-white text-sm font-semibold mb-0.5">{t.entry.newToAcko}</h3>
-              <p className="text-purple-300/60 text-xs">{t.entry.newToAckoSub}</p>
+              <svg className="w-4 h-4 text-purple-400/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </button>
           </div>
         </motion.div>

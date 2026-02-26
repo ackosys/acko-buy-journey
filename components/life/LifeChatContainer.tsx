@@ -52,20 +52,30 @@ export default function LifeChatContainer() {
   const processedRef = useRef<Set<string>>(new Set());
   const [showWidget, setShowWidget] = useState(false);
 
+  // Track step history for back navigation
+  useEffect(() => {
+    const s = useLifeJourneyStore.getState() as any;
+    const history: string[] = s.stepHistory ?? [];
+    if (history[history.length - 1] !== currentStepId) {
+      updateState({ stepHistory: [...history, currentStepId] } as any);
+    }
+  }, [currentStepId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Save drop-off snapshot at key steps
   useEffect(() => {
     if (!LIFE_SAVE_STEPS.has(currentStepId)) return;
     const s = useLifeJourneyStore.getState();
+    const quote = (s as any).quote;
     saveSnapshot({
       product: 'life',
       currentStepId,
       savedAt: new Date().toISOString(),
       name: (s as any).name ?? '',
       gender: (s as any).gender ?? '',
-      dob: (s as any).dob ?? '',
-      coverAmount: (s as any).coverAmount ?? 0,
-      annualPremium: (s as any).annualPremium ?? 0,
-      monthlyPremium: (s as any).monthlyPremium ?? 0,
+      dob: (s as any).dateOfBirth ?? (s as any).dob ?? '',
+      coverAmount: (s as any).selectedCoverage || (s as any).recommendedCoverage || 0,
+      annualPremium: quote?.yearlyPremium || quote?.totalPremium || 0,
+      monthlyPremium: quote?.monthlyPremium || 0,
       paymentComplete: s.paymentComplete,
       ekycComplete: (s as any).ekycComplete ?? false,
       financialComplete: (s as any).financialComplete ?? false,

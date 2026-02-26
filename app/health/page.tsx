@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useJourneyStore } from '../../lib/store';
 import { useThemeStore } from '../../lib/themeStore';
 import { loadSnapshot, clearSnapshot } from '../../lib/journeyPersist';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 import LandingPage from '../../components/LandingPage';
 import EntryScreen from '../../components/EntryScreen';
 import Header from '../../components/Header';
@@ -83,7 +84,7 @@ function HealthJourneyInner() {
   const paymentComplete = useJourneyStore(s => s.paymentComplete);
   const isExistingUser = useJourneyStore(s => s.isExistingAckoUser);
   const [screen, setScreen] = useState<Screen>('entry');
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const searchParams = useSearchParams();
 
@@ -100,6 +101,24 @@ function HealthJourneyInner() {
     });
   };
 
+  const seedDemoPolicy = () => {
+    const ps = useUserProfileStore.getState();
+    if (!ps.policies.some((p) => p.lob === 'health' && p.active)) {
+      ps.setProfile({ firstName: 'Rahul', isLoggedIn: true });
+      ps.addPolicy({
+        id: `health_demo_${Date.now()}`,
+        lob: 'health',
+        policyNumber: `ACKO-H-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+        label: 'ACKO Platinum',
+        active: true,
+        purchasedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+        premium: 12999,
+        premiumFrequency: 'yearly',
+        details: '₹25L cover · 2 members',
+      });
+    }
+  };
+
   useEffect(() => {
     const resume = searchParams.get('resume') === '1';
     const snap = resume ? loadSnapshot('health') : null;
@@ -110,6 +129,7 @@ function HealthJourneyInner() {
 
     if (screenParam === 'dashboard') {
       seedDemoState();
+      seedDemoPolicy();
       setScreen('dashboard');
       setShowWelcome(false);
     } else if (snap) {
@@ -129,8 +149,28 @@ function HealthJourneyInner() {
         currentPremium: snap.currentPremium ?? 0,
         currentStepId: snap.currentStepId,
         isExistingAckoUser: true,
+        ...(snap.testScheduledDate ? { testScheduledDate: snap.testScheduledDate } : {}),
+        ...(snap.testScheduledLab ? { testScheduledLab: snap.testScheduledLab } : {}),
+        ...(snap.callScheduledDate ? { callScheduledDate: snap.callScheduledDate } : {}),
+        ...(snap.postPaymentScenario ? { postPaymentScenario: snap.postPaymentScenario } : {}),
       });
-      setScreen(snap.paymentComplete ? 'post_payment' : 'chat');
+      if (snap.paymentComplete) {
+        if (snap.currentStepId === 'completion.celebration') {
+          seedDemoPolicy();
+          setScreen('dashboard');
+        } else {
+          const stepMap: Record<string, string> = {
+            'health_eval.schedule': 'resume_call_scheduled',
+            'health_eval.lab_schedule': 'resume_test_results',
+            'health_eval.intro': 'scenario_select',
+            'payment.success': 'voice_call',
+          };
+          setPostPaymentInitialPhase((stepMap[snap.currentStepId] || 'scenario_select') as any);
+          setScreen('post_payment');
+        }
+      } else {
+        setScreen('chat');
+      }
       setShowWelcome(false);
     }
 
@@ -161,7 +201,7 @@ function HealthJourneyInner() {
   const handleJumpToCall = () => { seedDemoState(); setPostPaymentInitialPhase('voice_call'); setScreen('post_payment'); };
   const handleJumpToPostCallScenarios = () => { seedDemoState(); setPostPaymentInitialPhase('scenario_select'); setScreen('post_payment'); };
   const handleJumpToPostPayment = () => { seedDemoState(); setPostPaymentInitialPhase(undefined); setScreen('post_payment'); };
-  const handleJumpToDashboard = () => { seedDemoState(); setScreen('dashboard'); };
+  const handleJumpToDashboard = () => { seedDemoState(); seedDemoPolicy(); setScreen('dashboard'); };
 
   const dismissWelcome = useCallback(() => setShowWelcome(false), []);
 

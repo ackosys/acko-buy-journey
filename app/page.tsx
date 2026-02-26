@@ -1,20 +1,24 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useJourneyStore } from '../lib/store';
 import LanguageSelector from '../components/LanguageSelector';
 import GlobalHero from '../components/global/GlobalHero';
 import AckoLogo from '../components/AckoLogo';
 import PolicyActionScreen, { type PolicyStatusInfo } from '../components/global/PolicyActionScreen';
 import { useUserProfileStore, type PolicyLob } from '../lib/userProfileStore';
+import { useThemeStore } from '../lib/themeStore';
+import { useLanguageStore } from '../lib/languageStore';
 import { LobConfig } from '../lib/core/types';
 import {
   loadSnapshot,
   getDropOffDisplay,
+  clearAllSnapshots,
   type ProductKey,
 } from '../lib/journeyPersist';
+import type { Language } from '../lib/types';
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -80,6 +84,15 @@ const LOB_LABEL_MAP: Record<string, string> = {
 
 const EASE_OUT_CUBIC = [0.215, 0.61, 0.355, 1] as const;
 
+const THEME_LABELS: Record<string, string> = { midnight: 'Midnight', dark: 'Dark', light: 'Light' };
+const THEME_ICONS: Record<string, React.ReactNode> = {
+  midnight: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" /></svg>,
+  dark: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>,
+  light: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>,
+};
+const LANG_ORDER: Language[] = ['en', 'hi', 'hinglish', 'kn'];
+const LANG_LABELS: Record<string, string> = { en: 'English', hi: 'हिन्दी', hinglish: 'Hinglish', kn: 'ಕನ್ನಡ' };
+
 type Screen = 'language' | 'home' | 'policy_action';
 
 const URGENCY_COLORS: Record<string, string> = {
@@ -133,6 +146,12 @@ function computeSnapshots(): { overrides: Partial<Record<LobId, LobOverride>>; b
       statusInfo = { badge: 'Update in progress', message: 'Nominee update · Verification in 2-3 days', urgency: 'low' };
     } else if (stepId === 'life_db.coverage_submitted') {
       statusInfo = { badge: 'Under review', message: 'Coverage update · Review in 5-7 days', urgency: 'medium' };
+    } else if (stepId === 'db.claim_submitted') {
+      const lobLabel = LOB_LABEL_MAP[lobId]?.replace(' Insurance', '') || lobId;
+      statusInfo = { badge: 'Claim submitted', message: `${lobLabel} claim request · Processing in 3-5 days`, urgency: 'low' };
+    } else if (stepId === 'db.edit_done') {
+      const lobLabel = LOB_LABEL_MAP[lobId]?.replace(' Insurance', '') || lobId;
+      statusInfo = { badge: 'Update in progress', message: `${lobLabel} policy update · Effective next billing cycle`, urgency: 'low' };
     }
     result[lobId] = {
       content: {
@@ -418,22 +437,70 @@ function CTAButton({ label, onClick }: { label: string; onClick: () => void }) {
 }
 
 export default function GlobalHomepage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--app-chat-gradient)' }} />}>
+      <GlobalHomepageInner />
+    </Suspense>
+  );
+}
+
+const ID_TO_TAB: Record<string, string> = { car: 'Car', bike: 'Bike', health: 'Health', life: 'Life' };
+
+function GlobalHomepageInner() {
   const router = useRouter();
-  const { setLanguage } = useJourneyStore();
+  const searchParams = useSearchParams();
+  const { setLanguage: setJourneyLang } = useJourneyStore();
+  const { theme, cycleTheme } = useThemeStore();
+  const { language, setLanguage: setGlobalLang } = useLanguageStore();
   const [screen, setScreen] = useState<Screen>('language');
   const [hydrated, setHydrated] = useState(false);
-  const [selectedLOB, setSelectedLOB] = useState('Health');
+  const [selectedLOB, setSelectedLOB] = useState('Car');
   const [selectedLob, setSelectedLob] = useState<LobConfig | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
   const swipeDir = useRef(0);
   const SWIPE_THRESHOLD = 50;
   const initialTabApplied = useRef(false);
 
   const { overrides, initialTab } = useLobSnapshots();
 
+  const handleLanguageCycle = useCallback(() => {
+    const idx = LANG_ORDER.indexOf(language as Language);
+    const next = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    setGlobalLang(next);
+    setJourneyLang(next);
+  }, [language, setGlobalLang, setJourneyLang]);
+
+  const handleResetFTU = useCallback(() => {
+    setShowMenu(false);
+    clearAllSnapshots();
+    localStorage.removeItem('acko_user_profile');
+    localStorage.removeItem('acko_lang_chosen');
+    window.location.href = '/';
+  }, []);
+
   useEffect(() => {
     setHydrated(true);
-    if (localStorage.getItem('acko_lang_chosen')) setScreen('home');
-  }, []);
+    const langChosen = !!localStorage.getItem('acko_lang_chosen');
+
+    const lobParam = searchParams.get('lob');
+    if (lobParam && ID_TO_TAB[lobParam] && langChosen) {
+      const tab = ID_TO_TAB[lobParam];
+      setSelectedLOB(tab);
+      const profileStore = useUserProfileStore.getState();
+      if (profileStore.hasActivePolicyInLob(lobParam as any)) {
+        const lob = LOBS.find(l => l.id === lobParam);
+        if (lob) {
+          setSelectedLob(lob);
+          setScreen('policy_action');
+          return;
+        }
+      }
+      setScreen('home');
+      return;
+    }
+
+    if (langChosen) setScreen('home');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (initialTab && !initialTabApplied.current) {
@@ -489,12 +556,7 @@ export default function GlobalHomepage() {
     const lobKey = lob.id as PolicyLob;
     const ps = useUserProfileStore.getState();
 
-    if (override && override.urgency !== 'low') {
-      router.push(override.route);
-      return;
-    }
-
-    if (ps.isLoggedIn && ps.hasActivePolicyInLob(lobKey)) {
+    if (ps.hasActivePolicyInLob(lobKey)) {
       setSelectedLob(lob);
       setScreen('policy_action');
       return;
@@ -625,23 +687,35 @@ export default function GlobalHomepage() {
         </motion.div>
       )}
 
-      {screen === 'policy_action' && selectedLob && (
-        <PolicyActionScreen
-          key="policy_action"
-          lobId={selectedLob.id}
-          lobLabel={LOB_LABEL_MAP[selectedLob.id] || selectedLob.label}
-          statusInfo={overrides[selectedLob.id as LobId]?.statusInfo}
-          onBuyNew={() => router.push(selectedLob.route)}
-          onManagePolicy={() => {
-            const routes: Record<string, string> = {
-              health: '/health?screen=dashboard', car: '/motor?vehicle=car&screen=dashboard',
-              bike: '/motor?vehicle=bike&screen=dashboard', life: '/life?screen=dashboard',
-            };
-            router.push(routes[selectedLob.id] || selectedLob.route);
-          }}
-          onBack={() => { setSelectedLob(null); setScreen('home'); }}
-        />
-      )}
+      {screen === 'policy_action' && selectedLob && (() => {
+        const ov = overrides[selectedLob.id as LobId];
+        const dropOff = ov && ov.urgency !== 'low' ? {
+          badge: ov.content.tagline,
+          title: ov.content.headline.join(' '),
+          subtitle: ov.content.highlight,
+          urgency: ov.urgency,
+          route: ov.route,
+        } : null;
+        return (
+          <PolicyActionScreen
+            key="policy_action"
+            lobId={selectedLob.id}
+            lobLabel={LOB_LABEL_MAP[selectedLob.id] || selectedLob.label}
+            statusInfo={ov?.statusInfo}
+            dropOffInfo={dropOff}
+            onContinueJourney={dropOff ? () => router.push(dropOff.route) : undefined}
+            onBuyNew={() => router.push(selectedLob.route)}
+            onManagePolicy={() => {
+              const routes: Record<string, string> = {
+                health: '/health?screen=dashboard', car: '/motor?vehicle=car&screen=dashboard',
+                bike: '/motor?vehicle=bike&screen=dashboard', life: '/life?screen=dashboard',
+              };
+              router.push(routes[selectedLob.id] || selectedLob.route);
+            }}
+            onBack={() => { setSelectedLob(null); setScreen('home'); }}
+          />
+        );
+      })()}
     </AnimatePresence>
   );
 }

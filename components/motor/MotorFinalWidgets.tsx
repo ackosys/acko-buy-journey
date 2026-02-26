@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useMotorStore } from '../../lib/motor/store';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 import { assetPath } from '../../lib/assetPath';
 
 const VEHICLE_IMAGES: Record<string, string> = {
@@ -106,6 +107,32 @@ export function PremiumBreakdown({ onContinue }: { onContinue: () => void }) {
 // Motor Celebration Widget
 export function MotorCelebration({ onContinue }: { onContinue?: () => void }) {
   const [confetti, setConfetti] = useState(true);
+
+  useEffect(() => {
+    const motorState = useMotorStore.getState();
+    const profileStore = useUserProfileStore.getState();
+    const lob = motorState.vehicleType === 'bike' ? 'bike' as const : 'car' as const;
+    const hasPolicy = profileStore.policies.some((p) => p.lob === lob && p.active);
+    if (!hasPolicy) {
+      const name = motorState.ownerName || (motorState as any).userName;
+      if (name) {
+        profileStore.setProfile({ firstName: name, isLoggedIn: true });
+      }
+      const vehicleName = `${motorState.vehicleData?.make || ''} ${motorState.vehicleData?.model || ''}`.trim();
+      const planLabel = motorState.selectedPlanType === 'zero_dep' ? 'Zero Dep' : motorState.selectedPlanType === 'third_party' ? 'Third Party' : 'Comprehensive';
+      profileStore.addPolicy({
+        id: `${lob}_${Date.now()}`,
+        lob,
+        policyNumber: `ACKO-M-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+        label: `${planLabel} ${lob === 'bike' ? 'Bike' : 'Car'} Insurance`,
+        active: true,
+        purchasedAt: new Date().toISOString(),
+        premium: motorState.totalPremium || 0,
+        premiumFrequency: 'yearly',
+        details: `${vehicleName}${motorState.registrationNumber ? ' · ' + motorState.registrationNumber.toUpperCase() : ''}`,
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setConfetti(false), 3000);

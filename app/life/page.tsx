@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLifeJourneyStore } from '../../lib/life/store';
 import { useThemeStore } from '../../lib/themeStore';
 import { useLanguageStore } from '../../lib/languageStore';
-import { loadSnapshot } from '../../lib/journeyPersist';
+import { loadSnapshot, type JourneySnapshot } from '../../lib/journeyPersist';
 import LifeChatContainer from '../../components/life/LifeChatContainer';
 import LifeEntryScreen from '../../components/life/LifeEntryScreen';
 import LifeLandingPage from '../../components/life/LifeLandingPage';
@@ -98,6 +98,31 @@ function LifeSplashScreen({ onDone }: { onDone: () => void }) {
   );
 }
 
+function buildResumeMessages(snap: JourneySnapshot) {
+  const name = snap.name || '';
+  const parts: string[] = [];
+
+  if (name) parts.push(`Name: ${name}`);
+  if (snap.gender) parts.push(`Gender: ${snap.gender === 'male' ? 'Male' : 'Female'}`);
+  if (snap.dob) parts.push(`Date of birth: ${snap.dob}`);
+  if (snap.coverAmount) parts.push(`Coverage: ₹${(snap.coverAmount / 100000).toFixed(0)}L`);
+  if (snap.annualPremium) parts.push(`Premium: ₹${snap.annualPremium.toLocaleString('en-IN')}/yr`);
+
+  const greeting = name ? `Welcome back, ${name}!` : 'Welcome back!';
+  const summary = parts.length > 0
+    ? `${greeting} Here's what we have so far:\n\n${parts.map(p => `• ${p}`).join('\n')}\n\nLet's continue where you left off.`
+    : `${greeting} Let's continue where you left off.`;
+
+  return [
+    {
+      type: 'bot' as const,
+      content: summary,
+      stepId: 'resume_summary',
+      module: 'basic_info',
+    },
+  ];
+}
+
 function LifeJourneyInner() {
   const store = useLifeJourneyStore();
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
@@ -105,7 +130,7 @@ function LifeJourneyInner() {
   const globalLanguage = useLanguageStore((s) => s.language);
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const searchParams = useSearchParams();
 
   // Keep life store language in sync with the global language selection
@@ -120,6 +145,7 @@ function LifeJourneyInner() {
       store.updateState({
         currentStepId: 'life_db.welcome',
         conversationHistory: [],
+        stepHistory: ['life_db.welcome'],
         currentModule: 'dashboard',
         journeyComplete: true,
         paymentComplete: true,
@@ -127,14 +153,20 @@ function LifeJourneyInner() {
       setScreen('chat');
       setShowSplash(false);
     } else if (snap) {
+      const resumeMessages = buildResumeMessages(snap);
+      const initialHistory = resumeMessages.map((m, i) => ({
+        ...m,
+        id: `resume-${i}`,
+        timestamp: Date.now(),
+      }));
       store.updateState({
         currentStepId: snap.currentStepId,
-        conversationHistory: [],
+        conversationHistory: initialHistory,
+        stepHistory: [snap.currentStepId],
         paymentComplete: snap.paymentComplete ?? false,
         ekycComplete: snap.ekycComplete ?? false,
         financialComplete: snap.financialComplete ?? false,
         medicalComplete: snap.medicalComplete ?? false,
-        // Life-specific fields stored as `any` since LifeJourneyState has them
         ...(snap.name ? { name: snap.name } : {}),
         ...(snap.gender ? { gender: snap.gender } : {}),
         ...(snap.dob ? { dob: snap.dob } : {}),
@@ -150,6 +182,7 @@ function LifeJourneyInner() {
       store.updateState({
         currentStepId: 'life_intro',
         conversationHistory: [],
+        stepHistory: [],
         journeyComplete: false,
         paymentComplete: false,
         ekycComplete: false,
@@ -157,7 +190,7 @@ function LifeJourneyInner() {
         medicalComplete: false,
         userPath: '',
         currentModule: 'basic_info',
-      });
+      } as any);
     }
 
     setHydrated(true);
@@ -205,6 +238,17 @@ function LifeJourneyInner() {
             onJumpToFinancial={() => jumpToStep('life_financial')}
             onJumpToMedical={() => jumpToStep('life_medical_eval')}
             onJumpToUnderwriting={() => jumpToStep('life_underwriting')}
+            onJumpToDashboard={() => {
+              store.updateState({
+                currentStepId: 'life_db.welcome',
+                conversationHistory: [],
+                stepHistory: ['life_db.welcome'],
+                currentModule: 'dashboard',
+                journeyComplete: true,
+                paymentComplete: true,
+              } as any);
+              setScreen('chat');
+            }}
           />
         )}
 
