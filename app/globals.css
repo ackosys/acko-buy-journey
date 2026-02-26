@@ -6,41 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&family=Noto+Sans+Kannada:wght@300;400;500;600;700&display=swap');
 
 /* ── ACKO Font: Euclid Circular B ── */
-@font-face {
-  font-family: 'Euclid Circular B';
-  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Light.otf') format('opentype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Euclid Circular B';
-  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Regular.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Euclid Circular B';
-  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Medium.otf') format('opentype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Euclid Circular B';
-  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Semibold.otf') format('opentype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Euclid Circular B';
-  src: url('https://pub-c050457d48794d5bb9ffc2b4649de2c1.r2.dev/Euclid%20Font/EuclidCircularB-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Loaded via next/font/local in layout.tsx (--font-euclid CSS variable) */
 
 /* ── Base Styles ── */
 @layer base {
@@ -48,7 +14,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-euclid), 'Euclid Circular B', system-ui, -apple-system, sans-serif;
   }
 
   html {
@@ -57,7 +23,7 @@
   }
 
   body {
-    font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-euclid), 'Euclid Circular B', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #0A0A0A;
@@ -382,7 +348,7 @@
 .motor-midnight,
 .motor-dark,
 .motor-light {
-  font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-euclid), 'Euclid Circular B', system-ui, -apple-system, sans-serif;
 }
 
 .motor-midnight {
@@ -636,7 +602,7 @@
 
 .aura-dark,
 .aura-light {
-  font-family: 'Euclid Circular B', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-euclid), 'Euclid Circular B', system-ui, -apple-system, sans-serif;
 }
 
 .aura-dark {

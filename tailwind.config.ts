@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Euclid Circular B', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-euclid)', 'Euclid Circular B', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'system-ui', 'sans-serif'],
       },
       colors: {
         purple: {
