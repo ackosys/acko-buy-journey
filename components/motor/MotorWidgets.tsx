@@ -2,9 +2,11 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Option } from '../../lib/core/types';
 import { assetPath } from '../../lib/assetPath';
 import { useMotorStore } from '../../lib/motor/store';
+import { useThemeStore } from '../../lib/themeStore';
 import { MotorJourneyState, NcbPercentage } from '../../lib/motor/types';
 import { getMotorAddOns } from '../../lib/motor/plans';
 import Image from 'next/image';
@@ -130,12 +132,28 @@ function MotorIcon({ icon, className = 'w-6 h-6' }: { icon: string; className?: 
 
 export function MotorSelectionCards({ options, onSelect }: { options: Option[]; onSelect: (id: string) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [showKycSheet, setShowKycSheet] = useState(false);
+  const theme = useThemeStore((s) => s.theme);
   const useGrid = options.length <= 4 && options.every(o => o.icon);
   const useLogoGrid = options.filter(o => o.logoUrl).length >= 3;
 
   const handleSelect = (id: string) => {
     setSelected(id);
+    if (id === 'start_kyc') {
+      setShowKycSheet(true);
+      return;
+    }
     setTimeout(() => onSelect(id), 250);
+  };
+
+  const [kycStage, setKycStage] = useState<'info' | 'verify'>('info');
+  const [kycIframeLoading, setKycIframeLoading] = useState(true);
+
+  const handleKycComplete = () => {
+    setShowKycSheet(false);
+    setKycStage('info');
+    setKycIframeLoading(true);
+    onSelect('start_kyc');
   };
 
   if (useGrid) {
@@ -258,44 +276,179 @@ export function MotorSelectionCards({ options, onSelect }: { options: Option[]; 
   }
 
   return (
-    <div className="grid grid-cols-1 gap-2.5 max-w-md">
-      {options.map((opt, i) => (
-        <motion.button
-          key={opt.id}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.04 }}
-          onClick={() => handleSelect(opt.id)}
-          className={`
-            text-left px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
-            ${selected === opt.id
-              ? 'border-purple-400 shadow-md shadow-purple-900/20'
-              : ''
-            }
-          `}
-          style={{
-            background: selected === opt.id ? 'var(--motor-selected-bg)' : 'var(--motor-surface)',
-            borderColor: selected === opt.id ? undefined : 'var(--motor-border)',
-          }}
-        >
-          <div className="flex items-center gap-3">
-            {(opt.logoUrl || opt.icon) && (
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
-                {opt.logoUrl ? (
-                  <img src={assetPath(opt.logoUrl)} alt={opt.label} className="w-6 h-6 object-contain" />
-                ) : (
-                  <MotorIcon icon={opt.icon!} className="w-4.5 h-4.5 text-purple-300" />
-                )}
+    <>
+      <div className="grid grid-cols-1 gap-2.5 max-w-md">
+        {options.map((opt, i) => (
+          <motion.button
+            key={opt.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04 }}
+            onClick={() => handleSelect(opt.id)}
+            className={`
+              text-left px-4 py-3.5 rounded-xl border transition-all duration-200 active:scale-[0.97]
+              ${selected === opt.id
+                ? 'border-purple-400 shadow-md shadow-purple-900/20'
+                : ''
+              }
+            `}
+            style={{
+              background: selected === opt.id ? 'var(--motor-selected-bg)' : 'var(--motor-surface)',
+              borderColor: selected === opt.id ? undefined : 'var(--motor-border)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              {(opt.logoUrl || opt.icon) && (
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--motor-surface-2)' }}>
+                  {opt.logoUrl ? (
+                    <img src={assetPath(opt.logoUrl)} alt={opt.label} className="w-6 h-6 object-contain" />
+                  ) : (
+                    <MotorIcon icon={opt.icon!} className="w-4.5 h-4.5 text-purple-300" />
+                  )}
+                </div>
+              )}
+              <div className="flex-1">
+                <span className="text-[15px] font-medium" style={{ color: 'var(--motor-text)' }}>{opt.label}</span>
+                {opt.description && <p className="text-[12px] mt-0.5" style={{ color: 'var(--motor-text-subtle)' }}>{opt.description}</p>}
               </div>
-            )}
-            <div className="flex-1">
-              <span className="text-[15px] font-medium" style={{ color: 'var(--motor-text)' }}>{opt.label}</span>
-              {opt.description && <p className="text-[12px] mt-0.5" style={{ color: 'var(--motor-text-subtle)' }}>{opt.description}</p>}
             </div>
-          </div>
-        </motion.button>
-      ))}
-    </div>
+          </motion.button>
+        ))}
+      </div>
+
+      {typeof document !== 'undefined' && createPortal(
+        <div className={`motor-${theme}`}>
+        <AnimatePresence>
+          {showKycSheet && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowKycSheet(false)}
+            >
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md rounded-t-3xl flex flex-col"
+                style={{
+                  height: '95vh',
+                  background: 'var(--motor-glass-bg)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  border: '1px solid var(--motor-border-strong)',
+                  borderBottom: 'none',
+                }}
+              >
+                {/* Header — same for both stages */}
+                <div className="px-5 pt-5 pb-4 flex-shrink-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <p className="text-[22px] font-bold leading-tight" style={{ color: 'var(--motor-text)' }}>
+                        Complete KYC
+                      </p>
+                      <p className="text-[13px] mt-1.5 leading-snug" style={{ color: 'var(--motor-text-muted)' }}>
+                        {kycStage === 'info'
+                          ? 'HyperVerge, our reliable partner, will handle the KYC process for you with 100% security'
+                          : 'Complete the steps below to verify your identity and activate your policy'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => kycStage === 'verify' ? setKycStage('info') : setShowKycSheet(false)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"
+                      style={{ background: 'var(--motor-surface-2, var(--motor-surface))' }}
+                    >
+                      <svg className="w-4 h-4" style={{ color: 'var(--motor-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {kycStage === 'info' ? (
+                  <>
+                    {/* Steps */}
+                    <div className="flex-1 overflow-y-auto px-5 pb-2 space-y-2">
+                      {[
+                        { step: '1', title: 'Verify your identity', desc: 'Upload PAN card or Aadhaar' },
+                        { step: '2', title: 'Take a quick selfie', desc: 'Face match for security' },
+                        { step: '3', title: 'Instant confirmation', desc: 'Approved in most cases' },
+                      ].map((item) => (
+                        <div key={item.step} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl" style={{ background: 'var(--motor-surface)', border: '1px solid var(--motor-border)' }}>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-purple-500/20 border border-purple-400/30">
+                            <span className="text-[12px] font-bold text-purple-300">{item.step}</span>
+                          </div>
+                          <div>
+                            <p className="text-[14px] font-medium" style={{ color: 'var(--motor-text)' }}>{item.title}</p>
+                            <p className="text-[12px] mt-0.5" style={{ color: 'var(--motor-text-muted)' }}>{item.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* CTAs */}
+                    <div className="px-5 py-4 flex-shrink-0 space-y-2">
+                      <button
+                        onClick={() => { setKycStage('verify'); setKycIframeLoading(true); }}
+                        className="w-full py-3.5 rounded-xl text-[15px] font-semibold transition-all active:scale-[0.97] flex items-center justify-center gap-2"
+                        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+                      >
+                        Start Verification
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setShowKycSheet(false)}
+                        className="w-full py-2.5 text-[13px] transition-colors"
+                        style={{ color: 'var(--motor-text-muted)' }}
+                      >
+                        I&apos;ll do this later
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* iframe fills remaining space */}
+                    <div className="flex-1 relative overflow-hidden mx-4 rounded-2xl" style={{ border: '1px solid var(--motor-border)' }}>
+                      {kycIframeLoading && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3" style={{ background: 'var(--motor-glass-bg)' }}>
+                          <div className="w-7 h-7 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--motor-border-strong)', borderTopColor: 'transparent' }} />
+                          <p className="text-[12px]" style={{ color: 'var(--motor-text-muted)' }}>Loading…</p>
+                        </div>
+                      )}
+                      <iframe
+                        src="https://example.com"
+                        className="w-full h-full border-0"
+                        allow="camera; microphone; geolocation"
+                        title="KYC Verification"
+                        onLoad={() => setKycIframeLoading(false)}
+                      />
+                    </div>
+
+                    {/* Done CTA */}
+                    <div className="px-5 py-4 flex-shrink-0">
+                      <button
+                        onClick={handleKycComplete}
+                        className="w-full py-3.5 rounded-xl text-[15px] font-semibold transition-all active:scale-[0.97]"
+                        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
+                      >
+                        I&apos;ve Completed Verification
+                      </button>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 
@@ -1947,7 +2100,7 @@ function PlanCard({
                 {subtitle && <p className="text-[11px] text-white/40 mt-0.5">{subtitle}</p>}
               </div>
               {badge && (
-                <span className="text-[10px] bg-purple-500/30 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/30 whitespace-nowrap">
+                <span className="text-[10px] bg-purple-500/30 text-violet-700 px-2 py-0.5 rounded-full border border-purple-400/30 whitespace-nowrap">
                   {badge}
                 </span>
               )}
