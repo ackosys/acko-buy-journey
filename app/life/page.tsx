@@ -18,9 +18,10 @@ import LifeLandingPage from '../../components/life/LifeLandingPage';
 import LifeHeader from '../../components/life/LifeHeader';
 import { LifeExpertPanel, LifeAIChatPanel } from '../../components/life/LifePanels';
 import AckoLogo from '../../components/AckoLogo';
+import LoginChatFlow from '../../components/LoginChatFlow';
+import { useUserProfileStore } from '../../lib/userProfileStore';
 
-
-type Screen = 'entry' | 'landing' | 'chat';
+type Screen = 'login' | 'entry' | 'landing' | 'chat';
 
 /* ═══════════════════════════════════════════════
    Splash Screen — Auto-dismiss on entry
@@ -128,6 +129,7 @@ function LifeJourneyInner() {
   const { showExpertPanel, showAIChat, journeyComplete, paymentComplete, ekycComplete, financialComplete, medicalComplete } = store as unknown as { showExpertPanel: boolean; showAIChat: boolean; journeyComplete: boolean; paymentComplete: boolean; ekycComplete: boolean; financialComplete: boolean; medicalComplete: boolean };
 
   const globalLanguage = useLanguageStore((s) => s.language);
+  const { isLoggedIn } = useUserProfileStore();
   const [screen, setScreen] = useState<Screen>('entry');
   const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
@@ -194,6 +196,9 @@ function LifeJourneyInner() {
     }
 
     setHydrated(true);
+
+    // Gate: show login flow first if not logged in
+    if (!isLoggedIn) setScreen('login');
   }, []);
 
   const dismissSplash = useCallback(() => setShowSplash(false), []);
@@ -229,6 +234,14 @@ function LifeJourneyInner() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
+        {screen === 'login' && (
+          <div key="login" className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--app-bg)' }}>
+            <LoginChatFlow
+              onSuccess={() => setScreen('entry')}
+              onBack={() => window.history.back()}
+            />
+          </div>
+        )}
         {/* Entry Screen — stepper journey overview */}
         {screen === 'entry' && !showSplash && (
           <LifeEntryScreen
