@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, newhomepage]
 
 permissions:
   contents: write
@@ -27,9 +27,12 @@ jobs:
         run: npm run build
         env:
           GITHUB_PAGES: 'true'
+          GH_PAGES_SUBPATH: ${{ github.ref_name != 'main' && format('/{0}', github.ref_name) || '' }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
+          destination_dir: ${{ github.ref_name != 'main' && github.ref_name || '.' }}
+          keep_files: ${{ github.ref_name != 'main' }}
