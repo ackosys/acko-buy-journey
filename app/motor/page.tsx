@@ -8,14 +8,16 @@ import { useThemeStore } from '../../lib/themeStore';
 import { useLanguageStore } from '../../lib/languageStore';
 import { loadSnapshot } from '../../lib/journeyPersist';
 import { useUserProfileStore } from '../../lib/userProfileStore';
-import MotorHelloEntry from '../../components/motor/MotorHelloEntry';
+// COMMENTED OUT: Intro and entry screens — replaced by AuraMotorEntryNav
+// import MotorEntryScreen from '../../components/motor/MotorEntryScreen';
+// import MotorPrototypeIntro from '../../components/motor/MotorPrototypeIntro';
+import AuraMotorEntryNav from '../../components/motor/aura/AuraMotorEntryNav';
 import MotorHeader from '../../components/motor/MotorHeader';
 import MotorChatContainer from '../../components/motor/MotorChatContainer';
 import { MotorExpertPanel, MotorAIChatPanel } from '../../components/motor/MotorPanels';
-import { VehicleType, MotorJourneyState, DashboardPolicy, MotorIntent } from '../../lib/motor/types';
-import LoginChatFlow from '../../components/LoginChatFlow';
+import { VehicleType, MotorJourneyState, DashboardPolicy } from '../../lib/motor/types';
 
-type Screen = 'login' | 'explore' | 'chat';
+type Screen = 'explore' | 'chat';
 
 /* COMMENTED OUT: WelcomeOverlay — temporarily disabled, replaced by explore nav
 function WelcomeOverlay({ onDone }: { onDone: () => void }) {
@@ -192,11 +194,10 @@ function MotorJourneyInner() {
   const theme = useThemeStore((s) => s.theme);
   const globalLanguage = useLanguageStore((s) => s.language);
   const searchParams = useSearchParams();
-  const { isLoggedIn } = useUserProfileStore();
 
   const vehicleParam = searchParams.get('vehicle') as VehicleType | null;
   const resumeParam = searchParams.get('resume') === '1';
-  const [screen, setScreen] = useState<Screen>('login');
+  const [screen, setScreen] = useState<Screen>('explore');
   const [hydrated, setHydrated] = useState(false);
 
   // Keep motor store language in sync with the global language selection
@@ -208,9 +209,6 @@ function MotorJourneyInner() {
     const screenParam = searchParams.get('screen');
 
     resetJourney();
-
-    // Set vehicleType from URL param immediately so MotorHeader shows the badge
-    updateState({ vehicleType: product as VehicleType } as Partial<MotorJourneyState>);
 
     if (screenParam === 'dashboard') {
       const vt: VehicleType = vehicleParam ?? 'car';
@@ -266,14 +264,6 @@ function MotorJourneyInner() {
     }
 
     setHydrated(true);
-
-    // Already logged in with no specific journey state → jump to registration chat
-    if (isLoggedIn && screen === 'login') {
-      const vt: VehicleType = vehicleParam ?? 'car';
-      seedDemoState(vt);
-      updateState({ vehicleType: vt, currentStepId: 'registration.has_number', currentModule: 'registration' } as Partial<MotorJourneyState>);
-      setScreen('chat');
-    }
   }, []);
 
   /* COMMENTED OUT: handleVehicleSelect — was used by MotorEntryScreen
@@ -320,22 +310,6 @@ function MotorJourneyInner() {
     setScreen('chat');
   };
 
-  const handleIntentSelected = (intent: MotorIntent) => {
-    const vt: VehicleType = (vehicleParam === 'bike' ? 'bike' : 'car');
-    if (intent === 'renew') {
-      handleJumpTo('registration.enter_number', vt);
-    } else if (intent === 'new_car') {
-      handleJumpTo('manual_entry.congratulations', vt);
-    } else if (intent === 'acko_drive') {
-      handleJumpTo('registration.has_number', vt);
-    } else if (intent === 'manage') {
-      seedDemoState(vt);
-      seedDemoPolicy(vt);
-      updateState({ vehicleType: vt, paymentComplete: true, journeyComplete: false, currentStepId: 'db.welcome', currentModule: 'dashboard' } as Partial<MotorJourneyState>);
-      setScreen('chat');
-    }
-  };
-
   if (!hydrated) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -366,22 +340,12 @@ function MotorJourneyInner() {
       */}
 
       <AnimatePresence mode="wait">
-        {screen === 'login' && (
-          <div key="login" className={`motor-${theme} h-screen flex flex-col overflow-hidden`} style={{ background: 'var(--motor-bg)' }}>
-            <MotorHeader />
-            <LoginChatFlow
-              onSuccess={(intent) => {
-                const vt: VehicleType = vehicleParam === 'bike' ? 'bike' : 'car';
-                if (intent === 'insure_new') {
-                  handleJumpTo('manual_entry.congratulations', vt);
-                } else if (intent === 'continue_quote') {
-                  handleJumpTo('quote.plan_selection', vt);
-                } else {
-                  handleJumpTo('registration.has_number', vt);
-                }
-              }}
-              onBack={() => window.history.back()}
-              hideHeader
+        {screen === 'explore' && (
+          <div key="explore" className={`motor-${theme} min-h-screen`} style={{ background: 'var(--motor-bg)' }}>
+            <AuraMotorEntryNav
+              initialVehicle={vehicleParam === 'bike' ? 'bike' : 'car'}
+              onStartJourney={handleStartJourney}
+              onJumpTo={handleJumpTo}
             />
           </div>
         )}

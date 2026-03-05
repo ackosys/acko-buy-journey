@@ -341,7 +341,7 @@ export function VehicleRegInput({ placeholder, onSubmit }: { placeholder?: strin
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Find my {useMotorStore.getState().vehicleType === 'bike' ? 'bike' : 'car'}
@@ -394,7 +394,7 @@ export function MotorTextInput({
       {error && <p className="text-[12px] text-red-400 mt-1.5">{error}</p>}
       <button
         onClick={handleSubmit}
-        style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         className="mt-3 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Continue
@@ -617,7 +617,7 @@ export function VehicleDetailsCard({ onConfirm }: { onConfirm: () => void }) {
       <button
         onClick={handleConfirm}
         disabled={confirmed}
-        style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97] disabled:opacity-60"
       >
         {confirmed ? 'Confirmed' : 'Yes, this is correct'}
@@ -1017,7 +1017,7 @@ export function YearSelector({ onSelect }: { onSelect: (year: string) => void })
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={handleSubmit}
-          style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+          style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
           className="mt-3 w-full py-3 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
         >
           Continue with {selectedYear}{selectedMonth ? ` · ${selectedMonth}` : ''}
@@ -1124,7 +1124,7 @@ export function NcbReward({ onContinue }: { onContinue: () => void }) {
       </div>
       <button
         onClick={onContinue}
-        style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         Continue
@@ -1245,7 +1245,7 @@ export function EditableSummary({ onConfirm }: { onConfirm: () => void }) {
 
       <button
         onClick={onConfirm}
-        style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+        style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
         className="mt-4 w-full py-3.5 rounded-xl text-[15px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
       >
         View prices
@@ -1542,7 +1542,7 @@ export function PlanSelector({ onSelect }: { onSelect: (selection: any) => void 
       <button
         onClick={() => onSelect('help_choose')}
         className="w-full py-3 rounded-xl text-[14px] font-medium transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2"
-        style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)', boxShadow: 'var(--btn-secondary-shadow)' }}
+        style={{ background: 'var(--aura-surface)', border: '1px solid var(--aura-border)', color: 'var(--aura-text-muted)' }}
       >
         <svg className="w-4 h-4" style={{ color: '#A855F7' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -1755,13 +1755,7 @@ function PlanCard({
           {!expanded && (
             <button
               onClick={onSelect}
-              className="w-full py-2.5 rounded-lg text-[13px] font-semibold transition-all active:scale-[0.98]"
-              style={{
-                background: 'var(--motor-bg)',
-                color: 'var(--motor-text)',
-                border: '1px solid var(--motor-border-strong)',
-                boxShadow: 'inset 0px 2px 4px rgba(255,255,255,0.04)',
-              }}
+              className="w-full py-2.5 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[13px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors"
             >
               {isComprehensive ? 'Explore plan' : 'Select this plan'}
             </button>
@@ -1940,7 +1934,7 @@ function PlanCard({
               <div className="px-4 pb-4 border-t border-[var(--aura-border)] pt-4">
                 <button
                   onClick={onSelect}
-                  style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+                  style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
                   className="w-full py-3 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.97]"
                 >
                   Select this plan
@@ -2200,7 +2194,7 @@ export function PlanRecommendation({ onSelect }: { onSelect: (response: any) => 
           <button
             onClick={handleSelect}
             className="w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-all active:scale-[0.97]"
-            style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}
+            style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }}
           >
             Select {planLabel} Plan
           </button>
@@ -2368,7 +2362,7 @@ export function OutOfPocketAddons({ onContinue }: { onContinue: (addons: any[]) 
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleContinue} style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
         <p className="text-[11px] text-[var(--aura-text-subtle)] text-center mt-2">Next: Additional covers to reduce medical expenses</p>
       </motion.div>
@@ -2578,7 +2572,7 @@ export function ProtectEveryoneAddons({ onContinue }: { onContinue: (addons: any
 
         <div className="flex gap-3 mt-4">
           <button onClick={handleSkip} className="flex-1 py-3 px-4 bg-[var(--aura-surface-2)] border border-[var(--aura-border)] rounded-xl text-[14px] font-semibold text-[var(--aura-text)] hover:bg-[var(--aura-surface-2)] transition-colors">Continue without add-ons</button>
-          <button onClick={handleContinue} style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
+          <button onClick={handleContinue} style={{ background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' }} className="flex-1 py-3 px-4 rounded-xl text-[14px] font-semibold hover:opacity-90 transition-colors active:scale-[0.98]">Continue</button>
         </div>
       </motion.div>
 
@@ -2805,7 +2799,7 @@ export function DocumentUploadWidget({ onContinue }: { onContinue: (result: DocU
         <button
           onClick={() => canProceed && onContinue({ rcUploaded, dlUploaded, prevPolicyUploaded })}
           disabled={!canProceed}
-          style={canProceed ? { background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' } : {}}
+          style={canProceed ? { background: 'var(--motor-cta-bg)', color: 'var(--motor-cta-text)' } : {}}
           className={`w-full py-4 rounded-xl text-[15px] font-bold transition-all ${
             canProceed
               ? 'text-white hover:opacity-90 active:scale-[0.97]'

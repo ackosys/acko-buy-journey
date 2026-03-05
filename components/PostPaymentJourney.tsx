@@ -733,7 +733,7 @@ function PolicyCelebrationWidget({ onResponse }: { onResponse: (r: any) => void 
         </div>
       </motion.div>
 
-      <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} onClick={() => onResponse('continue')} className="relative z-10 w-full py-3.5 rounded-xl text-label-md font-semibold text-white shadow-lg shadow-purple-900/40" style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}>
+      <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} onClick={() => onResponse('continue')} className="relative z-10 w-full py-3.5 rounded-xl text-label-md font-semibold text-white shadow-lg shadow-purple-900/40" style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)' }}>
         {t.common.continue}
       </motion.button>
     </div>
